@@ -6,7 +6,7 @@ const cheerio = require("cheerio");
 const isDelete = false;
 
 module.exports = async (client) => {
-  console.log(`${client.user.tag} is online`);
+  console.log(`server: ${process.env.NODE_ENV}, ${client.user.tag} is online!`);
 
   if(isDelete){
     const fetchSlash = await client.application.commands.fetch();
@@ -29,7 +29,7 @@ module.exports = async (client) => {
   testJob.start();
   */
 
-  const channelId = process.env.CHANNEL_ID;
+  const channelId = process.env.NODE_ENV === "development" ? process.env.OTHER_CHANNEL_ID : process.env.CHANNEL_ID;
   const otherChannelId = process.env.OTHER_CHANNEL_ID;
   const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
   let eachHoursJob = new cron.CronJob("0 * * * *", function() {
@@ -45,8 +45,9 @@ module.exports = async (client) => {
   console.log("eachHoursJob start!")
   eachHoursJob.start();
 
-  // 매일 아침 8시에 그날 정보들을 가져와 채널로 전송
-  let dailyJob = new cron.CronJob("* 08 * * *", async function(){
+  // 매일 아침 8시에 필요한 정보들을 가져와 채널로 전송
+  let cronSchedule = process.env.NODE_ENV === "development" ? "0 * * * *" : "* 08 * * *";
+  let dailyJob = new cron.CronJob(cronSchedule, async function(){
 
     const channel = client.channels.cache.get(channelId);
     try {
@@ -58,8 +59,10 @@ module.exports = async (client) => {
     } catch(error){
       channel.send(basicErrorMessage);
 
-      const otherChannel = client.channels.cache.get(otherChannelId);
-      otherChannel.send(basicErrorMessage + "\n" + error);
+      if(process.env.NODE_ENV === "production") {
+        const otherChannel = client.channels.cache.get(otherChannelId);
+        otherChannel.send(basicErrorMessage + "\n" + error);
+      }
     }
 
   });

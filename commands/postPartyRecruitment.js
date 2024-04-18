@@ -146,19 +146,20 @@ module.exports = {
       }
     }
 
+    console.log(interaction.user);
     let tagDungeon = channel.availableTags.find(({name}) => name === dungeonName);
     let tagDungeonDifficult = channel.availableTags.find(({name}) => name === dungeonDifficult);
 
     let title = dungeonName + " " + dungeonDifficult + " - " + dungeonStartDate + "요일 " + dungeonStartTime + "시 " + (dungeonHeadcount === 0 ? "모이면 바로 출발" : "인원수(" + dungeonHeadcount + "명) 채워지면 출발!");
     await channel.threads.create({
       name: title,
-      message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) Starline / 다크메이지'},
+      message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n' + `<@${interaction.member.id}>`},
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     });
 
     await otherChannel.threads.create({
       name: title,
-      message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) Starline / 다크메이지'},
+      message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n작성자: ' + interaction.user.globalName + " / " + interaction.user.username},
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     })
 

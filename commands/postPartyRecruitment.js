@@ -121,6 +121,7 @@ module.exports = {
       )
   )
   , run: async ({interaction}) => {
+    const otherChannel = interaction.client.channels.cache.get(process.env.OTHER_PARTY_RECRUITMENT);
     const channel = interaction.client.channels.cache.get(process.env.PARTY_RECRUITMENT);
 
     let dungeonName = interaction.options._subcommand;
@@ -154,6 +155,12 @@ module.exports = {
       message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) Starline / 다크메이지'},
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     });
+
+    await otherChannel.threads.create({
+      name: title,
+      message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) Starline / 다크메이지'},
+      appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
+    })
 
     interaction.reply("파티모집에 해당 내용으로 작성했어~😎 확인해봐!");
   }

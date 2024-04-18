@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require("discord.js");
+const {SlashCommandBuilder, EmbedBuilder} = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,6 +14,15 @@ module.exports = {
   , run: async ({interaction}) => {
     const totalPrice = interaction.options.get("total_price").value;
     const headcount = interaction.options.get("headcount").value;
-    interaction.reply(`계산결과를 알려줄게!\n\n각 1명당 분배금 : ${Math.floor(totalPrice / headcount)}숲, 총금액 : ${totalPrice}숲, 인원수 : ${headcount}명`);
+
+    const embed = new EmbedBuilder()
+    .setTitle("분배할 금액은~?")
+    .setColor(0x0099ff)
+    .addFields(
+        {name: "1명당 분배금", value: `${Math.floor(totalPrice / headcount)}숲`}
+        , {name: "입력한 총금액", value: `${totalPrice}숲`}
+        , {name: "입력한 인원수", value: `${headcount}명`}
+    );
+    interaction.reply({content: "계산된 금액을 알려줄게~ 소수점은 버렸으니 분배자 수고비로 하자~", embeds: [embed]});
   }
 }

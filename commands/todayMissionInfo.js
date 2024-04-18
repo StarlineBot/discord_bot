@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require("discord.js");
+const {SlashCommandBuilder, EmbedBuilder} = require("discord.js");
 const axios = require("axios");
 const {DateTime} = require("luxon");
 const otherChannelId = process.env.OTHER_CHANNEL_ID;
@@ -30,7 +30,15 @@ module.exports = {
       const todayMission = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().toISOString());
       const mission = todayMission.data.missions[0];
 
-      interaction.reply(`오늘 베테랑 던전은 ${todayVeteran.dungeon}던전이야!\n\n오늘의 미션은~\n\n탈틴\n${mission.Taillteann.Normal}, (PC방) ${mission.Taillteann.VIP}\n\n타라\n${mission.Tara.Normal}, (PC방) ${mission.Tara.VIP}\n\n그럼 오늘도 화이팅!🤩`);
+      const embed = new EmbedBuilder()
+      .setTitle("오늘의 미션&베테랑")
+      .setColor(0x0099ff)
+      .addFields(
+          {name: "베테랑 던전", value: `- ${todayVeteran.dungeon}`}
+          , {name: "탈틴", value: `- ${mission.Taillteann.Normal}\n* (PC방) ${mission.Taillteann.VIP}`}
+          , {name: "타라", value: `- ${mission.Tara.Normal}\n* (PC방) ${mission.Tara.VIP}`}
+      );
+      interaction.reply({content: "오미를 안내 해줄게~ 그럼 오늘도 화이팅!🤩", embeds: [embed]});
     } catch(error) {
       interaction.reply(basicErrorMessage)
       interaction.client.channels.cache.get(otherChannelId).send("오미 에러" + error);

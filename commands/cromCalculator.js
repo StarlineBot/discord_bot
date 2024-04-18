@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require("discord.js");
+const {SlashCommandBuilder, EmbedBuilder} = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -34,6 +34,22 @@ module.exports = {
     result += "*- : " + (num1 * num2 - num3);
     result += "\n";
     result += "바스, 벨테인, 루나사, 삼하인, 임볼릭";
-    interaction.reply(result);
+    // interaction.reply(result);
+
+    const embed = new EmbedBuilder()
+    .setTitle(`${num1}, ${num2}, ${num3}로 계산했어~`)
+    .setColor(0x0099ff)
+    .addFields(
+        {name: "++", value: `${(num1 + num2 + num3)}`}
+        , {name: "+-", value: `${(num1 + num2 - num3)}`}
+        , {name: "-+", value: `${(num1 - num2 + num3)}`}
+        , {name: "--", value: `${(num1 - num2 - num3)}`}
+        , {name: "**", value: `${(num1 * num2 * num3)}`}
+        , {name: "*+", value: `${(num1 * num2 + num3)}`}
+        , {name: "*-", value: `${(num1 * num2 - num3)}`}
+    )
+    .setFooter({text: "바스, 벨테인, 루나사, 삼하인, 임볼릭"});
+    interaction.reply({embeds: [embed]});
+
   }
 }

@@ -171,6 +171,6 @@ module.exports = {
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     });
 
-    interaction.reply("파티모집에 해당 내용으로 작성했어~😎 확인해봐!");
+    interaction.reply("파티모집에 해당 내용으로 작성했어~😎 확인해줘~");
   }
 }

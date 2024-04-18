@@ -2,6 +2,7 @@ const cron = require("cron");
 const {DateTime} = require("luxon");
 const axios = require("axios");
 const cheerio = require("cheerio");
+const {EmbedBuilder} = require("discord.js");
 const week = ["일", "월", "화", "수", "목", "금", "토"];
 const veteran = ["알비", "키아", "라비", "마스", "피오드", "바리", "코일", "룬다", "페카"];
 
@@ -67,7 +68,15 @@ module.exports = async (client) => {
       const todayMission = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().toISOString());
       const mission = todayMission.data.missions[0];
 
-      channel.send(`오늘 베테랑 던전은 ${todayVeteran.dungeon}던전이야!\n\n오늘의 미션은~\n\n탈틴\n${mission.Taillteann.Normal}, (PC방) ${mission.Taillteann.VIP}\n\n타라\n${mission.Tara.Normal}, (PC방) ${mission.Tara.VIP}\n\n그럼 오늘도 화이팅!🤩`);
+      const embed = new EmbedBuilder()
+      .setTitle("오늘의 미션&베테랑")
+      .setColor(0x0099ff)
+      .addFields(
+          {name: "베테랑 던전", value: `- ${todayVeteran.dungeon}`}
+          , {name: "탈틴", value: `- ${mission.Taillteann.Normal}\n* (PC방) ${mission.Taillteann.VIP}`}
+          , {name: "타라", value: `- ${mission.Tara.Normal}\n* (PC방) ${mission.Tara.VIP}`}
+      );
+      channel.send({content: "오늘도 화이팅!🤩", embeds: [embed]});
 
       channel.send("\n\n=====================================\n아래는 https://quicknews.co.kr/ 에서 가져오는 간추린아침뉴스야!\n\n")
 

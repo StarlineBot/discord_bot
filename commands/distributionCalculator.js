@@ -14,6 +14,6 @@ module.exports = {
   , run: async ({interaction}) => {
     const totalPrice = interaction.options.get("total_price").value;
     const headcount = interaction.options.get("headcount").value;
-    interaction.reply(`계산결과를 알려줄게!\n\n각 1명당 분배금 : ${totalPrice / headcount}숲, 총금액 : ${totalPrice}숲, 인원수 : ${headcount}명`);
+    interaction.reply(`계산결과를 알려줄게!\n\n각 1명당 분배금 : ${Math.round(totalPrice / headcount)}숲, 총금액 : ${totalPrice}숲, 인원수 : ${headcount}명`);
   }
 }

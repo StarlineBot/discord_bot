@@ -29,10 +29,25 @@ module.exports = async (client) => {
   testJob.start();
   */
 
+  const channelId = process.env.CHANNEL_ID;
+  const otherChannelId = process.env.OTHER_CHANNEL_ID;
+  const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
+  let eachHoursJob = new cron.CronJob("0 * * * *", function() {
+    const channel = client.channels.cache.get(otherChannelId);
+    try {
+      let now = new Date();
+      channel.send(now.getHours() + " / " + now.getMinutes())
+    } catch (error) {
+      channel.send(basicErrorMessage);
+    }
+  });
+
+  console.log("eachHoursJob start!")
+  eachHoursJob.start();
+
   // 매일 아침 8시에 그날 정보들을 가져와 채널로 전송
   let dailyJob = new cron.CronJob("* 08 * * *", async function(){
 
-    const channelId = process.env.CHANNEL_ID;
     const channel = client.channels.cache.get(channelId);
     try {
       const getBody = await axios.get("https://quicknews.co.kr/");
@@ -41,11 +56,10 @@ module.exports = async (client) => {
 
       channel.send(content);
     } catch(error){
-      const errorMessage = "오늘은 섯다라인 휴업중 🫥";
-      channel.send(errorMessage);
+      channel.send(basicErrorMessage);
 
-      const otherChannel = client.channels.cache.get(process.env.ADMIN_CHANNEL_ID);
-      otherChannel.send(errorMessage + "\n" + error);
+      const otherChannel = client.channels.cache.get(otherChannelId);
+      otherChannel.send(basicErrorMessage + "\n" + error);
     }
 
   });

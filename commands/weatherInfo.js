@@ -82,16 +82,16 @@ module.exports = {
         i++;
       }
 
-      console.log(`https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}&next=rain&for=each&in=m`);
-      const upcomingWeatherObject = await axios.get(`https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}&next=rain&for=each&in=m`);
-
+      const upcomingThunderWeatherObject = await axios.get(`https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}&next=thunder&for=each&in=m`);
       let afterDateOfType7 = now.plus(
-          {"minute": upcomingWeatherObject.data.next.for.type7});
+          {"minute": upcomingThunderWeatherObject.data.next.for.type7});
+      const upcomingRainyWeatherObject = await axios.get(`https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}&next=rain&for=each&in=m`);
+
       let afterDateOfType10 = now.plus(
-          {"minute": upcomingWeatherObject.data.next.for.type10});
+          {"minute": upcomingRainyWeatherObject.data.next.for.type10});
 
       const embed = new EmbedBuilder()
-      .setTitle("오늘의 에린날씨~🌈(BETA)")
+      .setTitle("오늘의 에린날씨~🌈")
       .setColor("#FFE400")
       .addFields(
           {
@@ -103,7 +103,7 @@ module.exports = {
             value: `${afterDateOfType10.toFormat("yyyy-MM-dd HH:mm")}`
           }
           , {
-            name: `가장 빠른 ${local.find(({type}) => type === "type7").names.join(", ")}의 비오는 날(쌍검전사)🌧️`,
+            name: `가장 빠른 ${local.find(({type}) => type === "type7").names.join(", ")}의 천둥치는 날(쌍검전사)⛈️`,
             value: `${afterDateOfType7.toFormat("yyyy-MM-dd HH:mm")}`
           }
       );

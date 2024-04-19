@@ -52,7 +52,7 @@ module.exports = async (client) => {
   eachHoursJob.start();
 
   // 매일 아침 8시에 필요한 정보들을 가져와 채널로 전송
-  let cronSchedule = process.env.NODE_ENV === "development" ? "0 * * * *" : "* 08 * * *";
+  let cronSchedule = process.env.NODE_ENV === "development" ? "0 * * * *" : "0 08 * * *";
   let dailyJob = new cron.CronJob(cronSchedule, async function(){
 
     const channel = client.channels.cache.get(channelId);

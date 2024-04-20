@@ -6,12 +6,18 @@ const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
 const veteran = ["알비", "키아", "라비", "마스", "피오드", "바리", "코일", "룬다", "페카"];
 
 const now = DateTime.now();
-const startDate = DateTime.local(2024, 4, 18, 0, 0);
+const startDate = DateTime.local(2024, 4, 20, 0, 0);
 
-let veteranIndex = 3;
-let dungeonList = [{date: startDate, dungeon: veteran[veteranIndex++]}];
+let veteranStartIndex = 5;
+let veteranIndex = 0;
+let dungeonList = [{date: startDate, dungeon: veteran[veteranStartIndex++]}];
 for(let i = 1; i < 731; i++) {
-  veteranIndex = veteranIndex > 8 ? 0 : veteranIndex;
+  if(i === 1) {
+    veteranIndex = veteranStartIndex;
+  }
+  if(i > 1) {
+    veteranIndex = veteranIndex > 8 ? 0 : veteranIndex;
+  }
   let date = startDate.plus({days: i});
   dungeonList.push({
     date: date, dungeon: veteran[veteranIndex]

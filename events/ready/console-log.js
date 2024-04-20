@@ -6,13 +6,26 @@ const {EmbedBuilder} = require("discord.js");
 const week = ["일", "월", "화", "수", "목", "금", "토"];
 const veteran = ["알비", "키아", "라비", "마스", "피오드", "바리", "코일", "룬다", "페카"];
 
-const now = DateTime.now();
-const startDate = DateTime.local(2024, 4, 18, 0, 0);
+Date.prototype.addDays = function(days) {
+  let date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+}
 
-let veteranIndex = 3;
-let dungeonList = [{date: startDate, dungeon: veteran[veteranIndex++]}];
+const now = DateTime.now();
+const tomorrow = now.plus({days: 1});
+const startDate = DateTime.local(2024, 4, 20, 0, 0);
+
+let veteranStartIndex = 5;
+let veteranIndex = 0;
+let dungeonList = [{date: startDate, dungeon: veteran[veteranStartIndex++]}];
 for(let i = 1; i < 731; i++) {
-  veteranIndex = veteranIndex > 8 ? 0 : veteranIndex;
+  if(i === 1) {
+    veteranIndex = veteranStartIndex;
+  }
+  if(i > 1) {
+    veteranIndex = veteranIndex > 8 ? 0 : veteranIndex;
+  }
   let date = startDate.plus({days: i});
   dungeonList.push({
     date: date, dungeon: veteran[veteranIndex]
@@ -65,18 +78,31 @@ module.exports = async (client) => {
 
       channel.send("오늘은 " + year + "년 " + month + "월 " + day + "일 " + getWeekDay + "요일, 오늘의 미션과 간추린뉴스 전달해줄게~!😎");
       const todayVeteran = dungeonList.find(({date}) => date.hasSame(now, "day") && date.hasSame(now, "year") && date.hasSame(now, "month"));
-      const todayMission = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().toISOString());
-      const mission = todayMission.data.missions[0];
+      const todayMissionObject = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().toISOString());
+      const todayMission = todayMissionObject.data.missions[0];
 
-      const embed = new EmbedBuilder()
+      const tomorrowVeteran = dungeonList.find(({date}) => date.hasSame(tomorrow, "day") && date.hasSame(tomorrow, "year") && date.hasSame(tomorrow, "month"));
+      const tomorrowMissionObject = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().addDays(1).toISOString());
+      const tomorrowMission = tomorrowMissionObject.data.missions[0];
+
+      const todayEmbed = new EmbedBuilder()
       .setTitle("오늘의 미션&베테랑")
-      .setColor(0x0099ff)
+      .setColor("#86E57F")
       .addFields(
           {name: "베테랑 던전", value: `- ${todayVeteran.dungeon}`}
-          , {name: "탈틴", value: `- ${mission.Taillteann.Normal}\n* (PC방) ${mission.Taillteann.VIP}`}
-          , {name: "타라", value: `- ${mission.Tara.Normal}\n* (PC방) ${mission.Tara.VIP}`}
+          , {name: "탈틴", value: `- ${todayMission.Taillteann.Normal}\n* (PC방) ${todayMission.Taillteann.VIP}`}
+          , {name: "타라", value: `- ${todayMission.Tara.Normal}\n* (PC방) ${todayMission.Tara.VIP}`}
       );
-      channel.send({content: "오늘도 화이팅!🤩", embeds: [embed]});
+
+      const tomorrowEmbed = new EmbedBuilder()
+      .setTitle("내일의 미션&베테랑")
+      .setColor("#FFBB00")
+      .addFields(
+          {name: "베테랑 던전", value: `- ${tomorrowVeteran.dungeon}`}
+          , {name: "탈틴", value: `- ${tomorrowMission.Taillteann.Normal}\n* (PC방) ${tomorrowMission.Taillteann.VIP}`}
+          , {name: "타라", value: `- ${tomorrowMission.Tara.Normal}\n* (PC방) ${tomorrowMission.Tara.VIP}`}
+      );
+      channel.send({ embeds: [todayEmbed, tomorrowEmbed]});
 
       channel.send("\n\n=====================================\n아래는 https://quicknews.co.kr/ 에서 가져오는 간추린아침뉴스야!\n\n")
 
@@ -85,6 +111,7 @@ module.exports = async (client) => {
       const content = $("#news_0").text();
 
       channel.send(content);
+      channel.send("오늘도 화이팅!🤩");
     } catch(error){
       channel.send(basicErrorMessage);
       channel.send(error);

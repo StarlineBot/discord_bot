@@ -6,7 +6,14 @@ const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
 const veteran = ["알비", "키아", "라비", "마스", "피오드", "바리", "코일", "룬다", "페카"];
 
 const now = DateTime.now();
+const tomorrow = now.plus({days: 1});
 const startDate = DateTime.local(2024, 4, 20, 0, 0);
+
+Date.prototype.addDays = function(days) {
+  let date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+}
 
 let veteranStartIndex = 5;
 let veteranIndex = 0;
@@ -33,18 +40,31 @@ module.exports = {
 
     try {
       const todayVeteran = dungeonList.find(({date}) => date.hasSame(now, "day") && date.hasSame(now, "year") && date.hasSame(now, "month"));
-      const todayMission = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().toISOString());
-      const mission = todayMission.data.missions[0];
+      const todayMissionObject = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().toISOString());
+      const todayMission = todayMissionObject.data.missions[0];
 
-      const embed = new EmbedBuilder()
+      const tomorrowVeteran = dungeonList.find(({date}) => date.hasSame(tomorrow, "day") && date.hasSame(tomorrow, "year") && date.hasSame(tomorrow, "month"));
+      const tomorrowMissionObject = await axios.get("https://mabi.world/missions.php?server=korea&locale=korea&from=" + new Date().addDays(1).toISOString());
+      const tomorrowMission = tomorrowMissionObject.data.missions[0];
+
+      const todayEmbed = new EmbedBuilder()
       .setTitle("오늘의 미션&베테랑")
-      .setColor(0x0099ff)
+      .setColor("#86E57F")
       .addFields(
           {name: "베테랑 던전", value: `- ${todayVeteran.dungeon}`}
-          , {name: "탈틴", value: `- ${mission.Taillteann.Normal}\n* (PC방) ${mission.Taillteann.VIP}`}
-          , {name: "타라", value: `- ${mission.Tara.Normal}\n* (PC방) ${mission.Tara.VIP}`}
+          , {name: "탈틴", value: `- ${todayMission.Taillteann.Normal}\n* (PC방) ${todayMission.Taillteann.VIP}`}
+          , {name: "타라", value: `- ${todayMission.Tara.Normal}\n* (PC방) ${todayMission.Tara.VIP}`}
       );
-      interaction.reply({content: "오미를 안내 해줄게~ 그럼 오늘도 화이팅!🤩", embeds: [embed]});
+
+      const tomorrowEmbed = new EmbedBuilder()
+      .setTitle("내일의 미션&베테랑")
+      .setColor("#FFBB00")
+      .addFields(
+          {name: "베테랑 던전", value: `- ${tomorrowVeteran.dungeon}`}
+          , {name: "탈틴", value: `- ${tomorrowMission.Taillteann.Normal}\n* (PC방) ${tomorrowMission.Taillteann.VIP}`}
+          , {name: "타라", value: `- ${tomorrowMission.Tara.Normal}\n* (PC방) ${tomorrowMission.Tara.VIP}`}
+      );
+      interaction.reply({content: "오미를 안내 해줄게~ 그럼 오늘도 화이팅!🤩", embeds: [todayEmbed, tomorrowEmbed]});
     } catch(error) {
       interaction.reply(basicErrorMessage)
       interaction.client.channels.cache.get(otherChannelId).send("오미 에러" + error);

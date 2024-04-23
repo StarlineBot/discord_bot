@@ -35,9 +35,13 @@ for(let i = 1; i < 731; i++) {
 
 // 슬래시커맨드를 삭제하고 다시 시작해야 할때
 const isDelete = false;
-
+const channelId = process.env.NODE_ENV === "development" ? process.env.OTHER_CHANNEL_ID : process.env.CHANNEL_ID;
+const otherChannelId = process.env.OTHER_CHANNEL_ID;
+const fetchChannelId = process.env.NODE_ENV === "development" ? process.env.OTHER_FETCH_CHANNEL_ID : process.env.FETCH_CHANNEL_ID;
+const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
 module.exports = async (client) => {
   console.log(`server: ${process.env.NODE_ENV}, ${client.user.tag} is online!`);
+  client.channels.cache.get(fetchChannelId).send("섯다라인 일어남!😎");
 
   if(isDelete){
     const fetchSlash = await client.application.commands.fetch();
@@ -48,9 +52,6 @@ module.exports = async (client) => {
     }));
   }
 
-  const channelId = process.env.NODE_ENV === "development" ? process.env.OTHER_CHANNEL_ID : process.env.CHANNEL_ID;
-  const otherChannelId = process.env.OTHER_CHANNEL_ID;
-  const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
   let eachHoursJob = new cron.CronJob("0 * * * *", function() {
     const channel = client.channels.cache.get(otherChannelId);
     try {

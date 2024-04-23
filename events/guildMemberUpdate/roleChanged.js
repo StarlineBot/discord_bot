@@ -13,14 +13,14 @@ module.exports = (oldMember, newMember) => {
   if(oldMember.roles.cache.size < newMember.roles.cache.size) {
     newMember.roles.cache.forEach(role => {
       if (!oldMember.roles.cache.has(role.id)) {
-        embed.setDescription(`<@${newMember.user.id}>${role.name} 권한이 부여 됨`);
+        embed.setDescription(`<@${newMember.user.id}> \`${role.name}\` 권한이 부여 됨`);
       }
     });
   }
   if(oldMember.roles.cache.size > newMember.roles.cache.size) {
     oldMember.roles.cache.forEach(role => {
       if (!newMember.roles.cache.has(role.id)) {
-        embed.setDescription(`<@${newMember.user.id}>${role.name} 권한이 삭제 됨`);
+        embed.setDescription(`<@${newMember.user.id}> \`${role.name}\` 권한이 삭제 됨`);
       }
     });
   }

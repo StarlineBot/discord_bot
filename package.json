@@ -13,9 +13,9 @@
     "n": "^9.2.1",
     "node": "^18.20.2"
   },
-  "main": "hello.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node hello.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "starline_bot",

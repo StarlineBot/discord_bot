@@ -23,7 +23,7 @@ module.exports = (member) => {
   })
   .setTitle(`${member.user.username}`)
   .setDescription(
-      `<@${member.user.id}> 님이 서버에서 입장 했어요\n\n\`${member.guild}\`의 길드원이 맞다면 아래 버튼을 눌러 \`${guildRole.name}\` 권한을 부여하세요.`)
+      `<@${member.user.id}> 님이 서버에 입장 했어요.\n\n\`${member.guild}\`의 길드원이 맞다면 아래 버튼을 눌러 \`${guildRole.name}\` 권한을 부여하세요.`)
   .setFooter(
       {text: `ID: ${member.user.id} ${now.toFormat("yyyy-MM-dd HH:mm cccc")}`});
 

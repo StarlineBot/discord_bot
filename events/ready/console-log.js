@@ -41,7 +41,9 @@ const fetchChannelId = process.env.NODE_ENV === "development" ? process.env.OTHE
 const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
 module.exports = async (client) => {
   console.log(`server: ${process.env.NODE_ENV}, ${client.user.tag} is online!`);
-  client.channels.cache.get(fetchChannelId).send("섯다라인 일어남!😎");
+  await client.guilds.cache.forEach(guild => {
+    guild.members.fetch();
+  });
 
   if(isDelete){
     const fetchSlash = await client.application.commands.fetch();
@@ -122,7 +124,6 @@ module.exports = async (client) => {
         otherChannel.send(basicErrorMessage + "\n" + error);
       }
     }
-
   });
 
   console.log("dailyJob start!")

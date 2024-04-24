@@ -13,9 +13,10 @@ module.exports = {
       const $ = cheerio.load(getBody.data);
       const content = $("#news_0").text();
       interaction.reply(content);
-    } catch(error) {
+    } catch (error) {
       interaction.reply("오늘은 섯다라인 휴업중 🫥");
-      interaction.client.channels.cache.get(otherChannelId).send("매일뉴스 에러" + error);
+      interaction.client.channels.cache.get(otherChannelId).send(
+          "매일뉴스 에러" + error);
     }
   }
 }

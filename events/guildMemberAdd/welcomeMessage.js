@@ -35,7 +35,8 @@ module.exports = (member) => {
           type: 2,
           style: 3,
           label: `\`${guildRole.name}\` 부여하기`,
-          customId: JSON.stringify({memberId: `${member.user.id}`, action: "doAddRole"})
+          customId: JSON.stringify(
+              {memberId: `${member.user.id}`, action: "doAddRole"})
         }
       ]
     }

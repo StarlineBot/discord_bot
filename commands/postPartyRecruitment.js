@@ -1,13 +1,14 @@
 const {SlashCommandBuilder} = require("discord.js");
 const week = ["일", "월", "화", "수", "목", "금", "토"];
 let weekOption = [];
-for(let weekDay of week){
+for (let weekDay of week) {
   weekOption.push({
     name: weekDay, value: weekDay
   });
 }
 
-const channelId = process.env.NODE_ENV === "development" ? process.env.OTHER_PARTY_RECRUITMENT : process.env.PARTY_RECRUITMENT;
+const channelId = process.env.NODE_ENV === "development"
+    ? process.env.OTHER_PARTY_RECRUITMENT : process.env.PARTY_RECRUITMENT;
 const otherChannelId = process.env.OTHER_PARTY_RECRUITMENT;
 
 module.exports = {
@@ -19,30 +20,34 @@ module.exports = {
       .setName('글렌베르나')
       .setDescription('글렌베르나 파티모집을 시작해~')
       .addStringOption((option) =>
-          option.setName("dungeon_start_date").setDescription("먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!").setRequired(true)
+          option.setName("dungeon_start_date").setDescription(
+              "먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!").setRequired(true)
           .addChoices(
-              { name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' }
+              {name: '일', value: '일'},
+              {name: '월', value: '월'},
+              {name: '화', value: '화'},
+              {name: '수', value: '수'},
+              {name: '목', value: '목'},
+              {name: '금', value: '금'},
+              {name: '토', value: '토'}
           )
       )
       .addIntegerOption((option) =>
-          option.setName("dungeon_start_time").setDescription("출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시").setRequired(true)
+          option.setName("dungeon_start_time").setDescription(
+              "출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시").setRequired(true)
           .setMaxValue(24).setMinValue(1)
       )
       .addStringOption((option) =>
-          option.setName("dungeon_difficult").setDescription("다 왔다! 난이도를 골라줘~").setRequired(true)
+          option.setName("dungeon_difficult").setDescription(
+              "다 왔다! 난이도를 골라줘~").setRequired(true)
           .addChoices(
-               {name: "어려움", value: "어려움"}
+              {name: "어려움", value: "어려움"}
               , {name: "쉬움", value: "쉬움"}
           )
       )
       .addIntegerOption((option) =>
-          option.setName("dungeon_headcount").setDescription("마지막으로 최소 출발 인원수를 적어줘!").setRequired(true)
+          option.setName("dungeon_headcount").setDescription(
+              "마지막으로 최소 출발 인원수를 적어줘!").setRequired(true)
           .addChoices(
               {name: "모바출", value: 0}
               , {name: "4명", value: 4}
@@ -56,23 +61,26 @@ module.exports = {
       .setName('크롬바스')
       .setDescription('크롬바스 파티모집을 시작해~')
       .addStringOption((option) =>
-          option.setName("dungeon_start_date").setDescription("먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!").setRequired(true)
+          option.setName("dungeon_start_date").setDescription(
+              "먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!").setRequired(true)
           .addChoices(
-              { name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' }
+              {name: '일', value: '일'},
+              {name: '월', value: '월'},
+              {name: '화', value: '화'},
+              {name: '수', value: '수'},
+              {name: '목', value: '목'},
+              {name: '금', value: '금'},
+              {name: '토', value: '토'}
           )
       )
       .addIntegerOption((option) =>
-          option.setName("dungeon_start_time").setDescription("출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시").setRequired(true)
+          option.setName("dungeon_start_time").setDescription(
+              "출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시").setRequired(true)
           .setMaxValue(24).setMinValue(1)
       )
       .addStringOption((option) =>
-          option.setName("dungeon_difficult").setDescription("다 왔다! 난이도를 골라줘~").setRequired(true)
+          option.setName("dungeon_difficult").setDescription(
+              "다 왔다! 난이도를 골라줘~").setRequired(true)
           .addChoices(
               {name: "100", value: "100"}
               , {name: "50", value: "50"}
@@ -80,7 +88,8 @@ module.exports = {
           )
       )
       .addIntegerOption((option) =>
-          option.setName("dungeon_headcount").setDescription("마지막으로 최소 출발 인원수를 적어줘!").setRequired(true)
+          option.setName("dungeon_headcount").setDescription(
+              "마지막으로 최소 출발 인원수를 적어줘!").setRequired(true)
           .addChoices(
               {name: "모바출", value: 0}
               , {name: "4명", value: 4}
@@ -93,30 +102,34 @@ module.exports = {
       .setName('테흐두인')
       .setDescription('테흐두인 파티모집을 시작해~')
       .addStringOption((option) =>
-          option.setName("dungeon_start_date").setDescription("먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!").setRequired(true)
+          option.setName("dungeon_start_date").setDescription(
+              "먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!").setRequired(true)
           .addChoices(
-              { name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' }
+              {name: '일', value: '일'},
+              {name: '월', value: '월'},
+              {name: '화', value: '화'},
+              {name: '수', value: '수'},
+              {name: '목', value: '목'},
+              {name: '금', value: '금'},
+              {name: '토', value: '토'}
           )
       )
       .addIntegerOption((option) =>
-          option.setName("dungeon_start_time").setDescription("출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시").setRequired(true)
+          option.setName("dungeon_start_time").setDescription(
+              "출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시").setRequired(true)
           .setMaxValue(24).setMinValue(1)
       )
       .addStringOption((option) =>
-          option.setName("dungeon_difficult").setDescription("다 왔다! 난이도를 골라줘~").setRequired(true)
+          option.setName("dungeon_difficult").setDescription(
+              "다 왔다! 난이도를 골라줘~").setRequired(true)
           .addChoices(
               {name: "어려움", value: "어려움"}
               , {name: "쉬움", value: "쉬움"}
           )
       )
       .addIntegerOption((option) =>
-          option.setName("dungeon_headcount").setDescription("마지막으로 최소 출발 인원수를 적어줘!").setRequired(true)
+          option.setName("dungeon_headcount").setDescription(
+              "마지막으로 최소 출발 인원수를 적어줘!").setRequired(true)
           .addChoices(
               {name: "모바출", value: 0}
               , {name: "4명", value: 4}
@@ -133,8 +146,8 @@ module.exports = {
     let dungeonDifficult;
     let dungeonStartTime;
     let dungeonHeadcount;
-    for(let option of interaction.options._hoistedOptions) {
-      switch(option.name) {
+    for (let option of interaction.options._hoistedOptions) {
+      switch (option.name) {
         case "dungeon_start_date":
           dungeonStartDate = option.value;
           break;
@@ -150,16 +163,24 @@ module.exports = {
       }
     }
 
-    let tagDungeon = channel.availableTags.find(({name}) => name === dungeonName);
-    let tagDungeonDifficult = channel.availableTags.find(({name}) => name === dungeonDifficult);
+    let tagDungeon = channel.availableTags.find(
+        ({name}) => name === dungeonName);
+    let tagDungeonDifficult = channel.availableTags.find(
+        ({name}) => name === dungeonDifficult);
 
-    let title = dungeonName + " " + dungeonDifficult + " - " + dungeonStartDate + "요일 " + dungeonStartTime + "시 " + (dungeonHeadcount === 0 ? "모이면 바로 출발" : "인원수(" + dungeonHeadcount + "명) 채워지면 출발!");
+    let title = dungeonName + " " + dungeonDifficult + " - " + dungeonStartDate
+        + "요일 " + dungeonStartTime + "시 " + (dungeonHeadcount === 0
+            ? "모이면 바로 출발" : "인원수(" + dungeonHeadcount + "명) 채워지면 출발!");
 
-    if(process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === "production") {
       // production 일때만 실제 디코에 발행
       await channel.threads.create({
         name: title,
-        message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n' + `<@${interaction.member.id}>`},
+        message: {
+          content: '<@everyone>'
+              + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n'
+              + `<@${interaction.member.id}>`
+        },
         appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
       });
     }
@@ -167,7 +188,11 @@ module.exports = {
     // 누가 어떤내용을 작성했는지 확인용 발행
     await otherChannel.threads.create({
       name: title,
-      message: {content: '<@everyone>' + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n작성자: ' + interaction.user.globalName + " / " + interaction.user.username},
+      message: {
+        content: '<@everyone>'
+            + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n작성자: '
+            + interaction.user.globalName + " / " + interaction.user.username
+      },
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     });
 

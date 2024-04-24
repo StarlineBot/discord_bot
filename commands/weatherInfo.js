@@ -61,7 +61,8 @@ module.exports = {
     try {
       let now = DateTime.now();
 
-      const forecastWeatherObject = await axios.get(`https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}`);
+      const forecastWeatherObject = await axios.get(
+          `https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}`);
       let forecastResult = "";
       let i = 0;
       let separator = " - ";
@@ -69,7 +70,7 @@ module.exports = {
         if (getType === "type13") {
           continue;
         }
-        if(i > 0){
+        if (i > 0) {
           forecastResult += "\n";
           separator = "* "
         }
@@ -78,14 +79,19 @@ module.exports = {
         let icon = weathers.find(({key}) => key === weatherCode).icon;
         let localNames = local.find(({type}) => type === getType).names;
 
-        forecastResult += `${separator} ${localNames.join(", ")} - ${icon}${weather}`;
+        forecastResult += `${separator} ${localNames.join(
+            ", ")} - ${icon}${weather}`;
         i++;
       }
 
-      const upcomingThunderWeatherObject = await axios.get(`https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}&next=thunder&for=each&in=m`);
+      const upcomingThunderWeatherObject = await axios.get(
+          `https://mabi.world/api/forecast/?from=${now.toISO().split(
+              ".")[0]}&next=thunder&for=each&in=m`);
       let afterDateOfType7 = now.plus(
           {"minute": upcomingThunderWeatherObject.data.next.for.type7});
-      const upcomingRainyWeatherObject = await axios.get(`https://mabi.world/api/forecast/?from=${now.toISO().split(".")[0]}&next=rain&for=each&in=m`);
+      const upcomingRainyWeatherObject = await axios.get(
+          `https://mabi.world/api/forecast/?from=${now.toISO().split(
+              ".")[0]}&next=rain&for=each&in=m`);
 
       let afterDateOfType10 = now.plus(
           {"minute": upcomingRainyWeatherObject.data.next.for.type10});
@@ -99,11 +105,13 @@ module.exports = {
             value: `${forecastResult}`
           }
           , {
-            name: `가장 빠른 ${local.find(({type}) => type === "type10").names.join(", ")}의 비오는 날(발화석)🌧️`,
+            name: `가장 빠른 ${local.find(({type}) => type === "type10").names.join(
+                ", ")}의 비오는 날(발화석)🌧️`,
             value: `${afterDateOfType10.toFormat("yyyy-MM-dd HH:mm")}`
           }
           , {
-            name: `가장 빠른 ${local.find(({type}) => type === "type7").names.join(", ")}의 천둥치는 날(쌍검전사)⛈️`,
+            name: `가장 빠른 ${local.find(({type}) => type === "type7").names.join(
+                ", ")}의 천둥치는 날(쌍검전사)⛈️`,
             value: `${afterDateOfType7.toFormat("yyyy-MM-dd HH:mm")}`
           }
       );

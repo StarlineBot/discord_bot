@@ -27,11 +27,15 @@ module.exports = {
   , run: ({interaction}) => {
     const now = new Date();
     let year = now.getFullYear();
-    let month = now.getMonth()+1;
+    let month = now.getMonth() + 1;
     let day = now.getDate();
     let getWeekDay = week[now.getDay()];
-    let isOdd = month%2;
-    let getObj = isOdd ? oddMonth.find(({weekDay}) => weekDay === getWeekDay) : evenMonth.find(({weekDay}) => weekDay === getWeekDay);
-    interaction.reply("오늘 " + year + "년 " + month + "월 " + day + "일 " + getWeekDay + "요일, 스튜어트에게 교환할 수 있는 있챈트는 다음과 같아!\n\n" + getObj.enchants.join(", ") + "\n인챈트 버리지 말고 복원의 가루로 꼭 교환해!😎");
+    let isOdd = month % 2;
+    let getObj = isOdd ? oddMonth.find(({weekDay}) => weekDay === getWeekDay)
+        : evenMonth.find(({weekDay}) => weekDay === getWeekDay);
+    interaction.reply(
+        "오늘 " + year + "년 " + month + "월 " + day + "일 " + getWeekDay
+        + "요일, 스튜어트에게 교환할 수 있는 있챈트는 다음과 같아!\n\n" + getObj.enchants.join(", ")
+        + "\n인챈트 버리지 말고 복원의 가루로 꼭 교환해!😎");
   }
 }

@@ -58,7 +58,7 @@ module.exports = async (client) => {
     const channel = client.channels.cache.get(otherChannelId);
     try {
       let now = new Date();
-      channel.send(now.getHours() + " / " + now.getMinutes())
+      channel.send(`현재 ${now.getHours()}시 ${now.getMinutes()}분 아직 살아있음...`)
     } catch (error) {
       channel.send(basicErrorMessage);
     }

@@ -12,7 +12,7 @@ module.exports = async (message, client) => {
     const embed = new EmbedBuilder()
     .setColor("#FF0000")
     .setTitle("🚨메세지삭제")
-    .setDescription("메세지를 100건씩 삭제합니다.\n\n14일 이후의 메세지도 삭제되니 정말로 삭제하실거면 아래 메세지삭제 버튼을 눌러주세요.");
+    .setDescription("메세지를 100건씩 삭제합니다.\n\n14일 이후의 메세지도 삭제되니 정말로 삭제하실거면 아래 \`메세지삭제\` 버튼을 눌러주세요.");
     let components = [
       {
         type: 1,

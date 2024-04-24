@@ -98,7 +98,7 @@ module.exports = {
 
       const embed = new EmbedBuilder()
       .setTitle("오늘의 에린날씨~🌈")
-      .setColor("#FFE400")
+      .setColor("#FFD9EC")
       .addFields(
           {
             name: `현재 시간(리얼타임)기준 날씨`,

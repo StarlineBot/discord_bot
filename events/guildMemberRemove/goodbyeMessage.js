@@ -6,7 +6,7 @@ const channelId = process.env.NODE_ENV === "development"
 const now = DateTime.now().setLocale("ko");
 module.exports = (member) => {
   const embed = new EmbedBuilder()
-  .setColor("#86E57F")
+  .setColor("#FF0000")
   .setAuthor({
     name: `${member.user.globalName}`,
     iconURL: member.user.displayAvatarURL()

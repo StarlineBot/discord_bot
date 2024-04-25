@@ -1,10 +1,10 @@
 const {EmbedBuilder} = require("discord.js");
 const {DateTime} = require("luxon");
-const channelId = process.env.NODE_ENV === "development"
-    ? process.env.OTHER_ROLE_AUDITING_CHANNEL_ID
-    : process.env.ROLE_AUDITING_CHANNEL_ID;
+const guildModule = require("../../modules/getGuildInfo");
 const now = DateTime.now().setLocale("ko");
 module.exports = (oldMember, newMember) => {
+  const guildId = newMember.guild.id;
+  const guildInfo = guildModule.getGuildInfo(guildId);
   const embed = new EmbedBuilder()
   .setColor("#86E57F")
   .setAuthor({
@@ -33,6 +33,6 @@ module.exports = (oldMember, newMember) => {
     text: `ID: ${newMember.user.id} ${now.toFormat("yyyy-MM-dd HH:mm cccc")}`
   });
 
-  newMember.guild.channels.cache.find(channel => channel.id === channelId).send(
+  newMember.guild.channels.cache.find(channel => channel.id === guildInfo.roleAuditingChannelId).send(
       {embeds: [embed]});
 }

@@ -1,7 +1,7 @@
 const {SlashCommandBuilder} = require("discord.js");
 const axios = require("axios");
 const cheerio = require("cheerio");
-const otherChannelId = process.env.OTHER_CHANNEL_ID;
+const otherChannelId = process.env.DEV_CHANNEL_ID;
 
 module.exports = {
   data: new SlashCommandBuilder()

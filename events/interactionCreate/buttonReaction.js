@@ -1,10 +1,9 @@
-const roleId = process.env.NODE_ENV === "development"
-    ? process.env.OTHER_GUILD_ROLE : process.env.GUILD_ROLE;
-const guildAdminRoleId = process.env.NODE_ENV === "development"
-    ? process.env.OTHER_GUILD_ADMIN_ROLE_ID : process.env.GUILD_ADMIN_ROLE_ID;
+const guildModule = require("../../modules/getGuildInfo");
 const timeout = 3000;
 module.exports = async (interaction, client) => {
   if (interaction.isButton()) {
+    const guildId = interaction.member.guild.id;
+    const guildInfo = guildModule.getGuildInfo(guildId);
     const buttonInfo = JSON.parse(interaction.customId);
     const action = buttonInfo.action;
     const memberId = buttonInfo.memberId;
@@ -14,7 +13,7 @@ module.exports = async (interaction, client) => {
     switch (buttonInfo.action) {
       case "bulkDelete":
         const isAllowed = !!clickMember.roles.cache.find(
-            role => role.id === guildAdminRoleId);
+            role => role.id === guildInfo.adminRole);
         if (!isAllowed) {
           message = `권한이 없는 사용자 입니다.\n\n이 메세지는 ${timeout / 1000}초 후 삭제됩니다.`;
           break;
@@ -28,9 +27,9 @@ module.exports = async (interaction, client) => {
       default:
 
         const guildRole = clickMember.guild.roles.cache.find(
-            role => role.id === roleId);
+            role => role.id === guildInfo.guildMemberRole);
         const guild = client.guilds.cache.find(
-            guild => guild.id === clickMember.guild.id);
+            guild => guild.id === guildId);
         const targetMember = guild.members.cache.find(
             member => member.id === memberId);
         const roles = targetMember.roles;

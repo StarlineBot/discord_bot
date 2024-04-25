@@ -1,9 +1,11 @@
 const {EmbedBuilder} = require("discord.js");
-const guildId = process.env.NODE_ENV === "development" ? process.env.OTHER_GUILD_ID : process.env.GUILD_ID;
-const guildAdminRoleId = process.env.NODE_ENV === "development" ? process.env.OTHER_GUILD_ADMIN_ROLE_ID : process.env.GUILD_ADMIN_ROLE_ID;
+const guildModule = require("../../modules/getGuildInfo");
 const prefix = "!";
 module.exports = async (message, client) => {
 
+  const guildId = message.guildId;
+  const guildInfo = guildModule.getGuildInfo(guildId);
+  const guildAdminRoleId = guildInfo.adminRole;
   const guild = client.guilds.cache.find(guild => guild.id === guildId);
   const allowedRole = guild.roles.cache.find(role => role.id === guildAdminRoleId);
   const member = guild.members.cache.find(member => member.id === message.author.id);

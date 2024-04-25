@@ -1,7 +1,7 @@
 const {SlashCommandBuilder, EmbedBuilder} = require("discord.js");
 const axios = require("axios");
 const {DateTime} = require("luxon");
-const otherChannelId = process.env.OTHER_CHANNEL_ID;
+const devChannelId = process.env.DEV_CHANNEL_ID;
 const basicErrorMessage = "오늘은 섯다라인 휴업중 🫥";
 const local = [
   {type: "type1", names: ["티르코네일", "두갈드 아일", "두갈드 아일 거주지 + 성터"]}
@@ -118,7 +118,7 @@ module.exports = {
       interaction.reply({embeds: [embed]});
     } catch (error) {
       interaction.reply(basicErrorMessage)
-      interaction.client.channels.cache.get(otherChannelId).send(
+      interaction.client.channels.cache.get(devChannelId).send(
           "날씨 에러" + error);
     }
 

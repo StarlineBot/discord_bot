@@ -1,5 +1,7 @@
 const {SlashCommandBuilder} = require("discord.js");
 const {DateTime} = require("luxon");
+const guildModule = require("../modules/getGuildInfo");
+
 const week = ["일", "월", "화", "수", "목", "금", "토"];
 let weekOption = [];
 for (let weekDay of week) {
@@ -8,10 +10,7 @@ for (let weekDay of week) {
   });
 }
 
-const channelId = process.env.NODE_ENV === "development"
-    ? process.env.OTHER_PARTY_RECRUITMENT : process.env.PARTY_RECRUITMENT;
-const otherChannelId = process.env.OTHER_PARTY_RECRUITMENT;
-
+const devPartyChannelId = process.env.DEV_PARTY_RECRUITMENT;
 module.exports = {
   data: new SlashCommandBuilder()
   .setName('파티모집')
@@ -139,8 +138,10 @@ module.exports = {
       )
   )
   , run: async ({interaction}) => {
-    const channel = interaction.client.channels.cache.get(channelId);
-    const otherChannel = interaction.client.channels.cache.get(otherChannelId);
+    const guildId = interaction.member.guild.id;
+    const guildInfo = guildModule.getGuildInfo(guildId);
+    const partyChannel = interaction.client.channels.cache.get(guildInfo.partyChannelId);
+    const devPartyChannel = interaction.client.channels.cache.get(devPartyChannelId);
 
     let dungeonName = interaction.options._subcommand;
     let dungeonStartDate;
@@ -164,9 +165,9 @@ module.exports = {
       }
     }
 
-    let tagDungeon = channel.availableTags.find(
+    let tagDungeon = partyChannel.availableTags.find(
         ({name}) => name === dungeonName);
-    let tagDungeonDifficult = channel.availableTags.find(
+    let tagDungeonDifficult = partyChannel.availableTags.find(
         ({name}) => name === dungeonDifficult);
 
     let dungeonStartDatetime;
@@ -181,29 +182,28 @@ module.exports = {
     const title = `${dungeonStartDatetime.toFormat(`yy년 MM월 dd일 cccc`)} ${dungeonStartTime}시 [${dungeonName} ${dungeonDifficult}] ${(dungeonHeadcount === 0
         ? "모이면 바로 출발" : "인원수(" + dungeonHeadcount + "명) 채워지면 출발!")}`;
 
-    if (process.env.NODE_ENV === "production") {
-      // production 일때만 실제 디코에 발행
-      await channel.threads.create({
+    await partyChannel.threads.create({
+      name: title,
+      message: {
+        content: '<@everyone>'
+            + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n'
+            + `<@${interaction.member.id}>`
+      },
+      appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
+    });
+
+    if(guildInfo.partyChannelId !== devPartyChannelId){
+      // 누가 어떤내용을 작성했는지 확인용 발행
+      await devPartyChannel.threads.create({
         name: title,
         message: {
           content: '<@everyone>'
-              + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n'
-              + `<@${interaction.member.id}>`
+              + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n작성자: '
+              + interaction.user.globalName + " / " + interaction.user.username
         },
         appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
       });
     }
-
-    // 누가 어떤내용을 작성했는지 확인용 발행
-    await otherChannel.threads.create({
-      name: title,
-      message: {
-        content: '<@everyone>'
-            + '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n작성자: '
-            + interaction.user.globalName + " / " + interaction.user.username
-      },
-      appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
-    });
 
     interaction.reply("파티모집에 해당 내용으로 작성했어~😎 확인해줘~");
   }

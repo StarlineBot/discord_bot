@@ -1,4 +1,5 @@
 const {SlashCommandBuilder} = require("discord.js");
+const {DateTime} = require("luxon");
 const week = ["일", "월", "화", "수", "목", "금", "토"];
 let weekOption = [];
 for (let weekDay of week) {
@@ -168,9 +169,17 @@ module.exports = {
     let tagDungeonDifficult = channel.availableTags.find(
         ({name}) => name === dungeonDifficult);
 
-    let title = dungeonName + " " + dungeonDifficult + " - " + dungeonStartDate
-        + "요일 " + dungeonStartTime + "시 " + (dungeonHeadcount === 0
-            ? "모이면 바로 출발" : "인원수(" + dungeonHeadcount + "명) 채워지면 출발!");
+    let dungeonStartDatetime;
+    const now = DateTime.now().setLocale("ko").startOf("day");
+    for(let i = 1; i < 10; i++) {
+      if (now.plus({days: i}).toFormat("ccc") === dungeonStartDate) {
+        dungeonStartDatetime = now.plus({days: i});
+        break;
+      }
+    }
+
+    const title = `${dungeonStartDatetime.toFormat(`yy년 MM월 dd일 cccc`)} ${dungeonStartTime}시 [${dungeonName} ${dungeonDifficult}] ${(dungeonHeadcount === 0
+        ? "모이면 바로 출발" : "인원수(" + dungeonHeadcount + "명) 채워지면 출발!")}`;
 
     if (process.env.NODE_ENV === "production") {
       // production 일때만 실제 디코에 발행

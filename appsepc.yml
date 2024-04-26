@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ubuntu/project/discord_bot
+    destination: /home/ubuntu/build
     overwrite: yes
 
 permissions:
@@ -12,10 +12,6 @@ permissions:
     group: ubuntu
 
 hooks:
-  ApplicationStart:
-    - location: scripts/before-deploy.sh
-      timeout: 300
-      runas: ubuntu
   AfterInstall:
     - location: scripts/after-deploy.sh
       timeout: 300

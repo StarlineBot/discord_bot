@@ -1,4 +1,4 @@
-REPOSITORY=/home/ubuntu/project/discord_bot
+REPOSITORY=/home/ubuntu/build
 
 cd $REPOSITORY
 

@@ -1,6 +1,6 @@
-REPOSITORY=/home/ubuntu/project/discord_bot
+REPOSITORY=/home/ubuntu/build
 
 cd $REPOSITORY
 
 sudo npm install
-sudo pm2 start ecosystem.config.js
+sudo pm2 restart ecosystem.config.js

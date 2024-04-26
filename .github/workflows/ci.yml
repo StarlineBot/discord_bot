@@ -17,7 +17,50 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{matrix.node-version}}
+      - name: create env file
+        working-directory: ./
+        run: |
+          pwd
+          touch .env
+          echo NODE_ENV=${{ secrets.NODE_ENV }} >> .env
+          echo TOKEN=${{ secrets.TOKEN }} >> .env
+          echo CHANNEL_ID=${{ secrets.CHANNEL_ID }} >> .env
+          echo DEV_CHANNEL_ID=${{ secrets.DEV_CHANNEL_ID }} >> .env
+          echo PARTY_RECRUITMENT=${{ secrets.PARTY_RECRUITMENT }} >> .env
+          echo DEV_PARTY_RECRUITMENT=${{ secrets.DEV_PARTY_RECRUITMENT }} >> .env
+          echo ROLE_AUDITING_CHANNEL_ID=${{ secrets.ROLE_AUDITING_CHANNEL_ID }} >> .env
+          echo DEV_ROLE_AUDITING_CHANNEL_ID=${{ secrets.DEV_ROLE_AUDITING_CHANNEL_ID }} >> .env
+          echo GUILD_ROLE=${{ secrets.GUILD_ROLE }} >> .env
+          echo DEV_GUILD_ROLE=${{ secrets.DEV_GUILD_ROLE }} >> .env
+          echo GUILD_ID=${{ secrets.GUILD_ID }} >> .env
+          echo DEV_GUILD_ID=${{ secrets.DEV_GUILD_ID }} >> .env
+          echo GUILD_ADMIN_ROLE_ID=${{ secrets.GUILD_ADMIN_ROLE_ID }} >> .env
+          echo DEV_GUILD_ADMIN_ROLE_ID=${{ secrets.DEV_GUILD_ADMIN_ROLE_ID }} >> .env
+          echo GUILD_GUEST_ROLE_ID=${{ secrets.GUILD_GUEST_ROLE_ID }} >> .env
+          echo DEV_GUILD_GUEST_ROLE_ID=${{ secrets.DEV_GUILD_GUEST_ROLE_ID }} >> .env
+          cat .env
+
       - run: npm ci
       - run: npm run build --if-present
       - run: npm run lint
       - run: npm run test
+
+      - name: zip file
+        run: zip -r discord_bot.zip ./scripts ./appsepc.yml ./.env ./package.json
+
+      - name: AWS configure credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY_ID}}
+          aws-region: ap-northeast-2
+
+      - name: upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./discord_bot.zip s3://discord-bot-build/deploy
+
+      - name: deploy with AWS codeDeploy
+        run: aws deploy create-deployment
+          --application-name StarlineBot-CodeDeploy
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name group
+          --s3-location bucket=discord-bot-build,bundleType=zip,key=deploy/discord_bot.zip

@@ -1,8 +1,8 @@
-require("dotenv").config();
-const path = require("path");
-const {CommandHandler} = require("djs-commander");
+require('dotenv').config()
+const path = require('path')
+const { CommandHandler } = require('djs-commander')
 
-const {Client, GatewayIntentBits} = require("discord.js");
+const { Client, GatewayIntentBits } = require('discord.js')
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -10,13 +10,13 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.MessageContent
-  ],
-});
+  ]
+})
 
 new CommandHandler({
   client,
-  commandsPath: path.join(__dirname, "commands"),
-  eventsPath: path.join(__dirname, "events")
-});
+  commandsPath: path.join(__dirname, 'commands'),
+  eventsPath: path.join(__dirname, 'events')
+})
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN)

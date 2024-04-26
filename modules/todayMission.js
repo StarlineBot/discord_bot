@@ -54,6 +54,6 @@ const getTomorrowMission = async () => {
       + now.addDays(1).toISOString());
 }
 
-return module.exports = {
+module.exports = {
   todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission
 }

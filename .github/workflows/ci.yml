@@ -56,11 +56,11 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./discord_bot.zip s3://discord-bot-build/deploy
+        run: aws s3 cp --region ap-northeast-2 ./discord_bot.zip s3://discord-bot-build
 
       - name: deploy with AWS codeDeploy
         run: aws deploy create-deployment
           --application-name StarlineBot-CodeDeploy
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name group
-          --s3-location bucket=discord-bot-build,bundleType=zip,key=deploy/discord_bot.zip
+          --s3-location bucket=discord-bot-build,bundleType=zip,key=discord_bot.zip

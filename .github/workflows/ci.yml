@@ -46,7 +46,7 @@ jobs:
       - run: npm run test
 
       - name: zip file
-        run: zip -r discord_bot.zip ./scripts ./appsepc.yml ./.env ./package.json
+        run: zip -r discord_bot.zip ./ -x '*node_modules*'
 
       - name: AWS configure credentials
         uses: aws-actions/configure-aws-credentials@v1

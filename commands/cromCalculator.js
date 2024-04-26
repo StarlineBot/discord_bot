@@ -20,23 +20,6 @@ module.exports = {
     const num1 = interaction.options.get('number-1').value
     const num2 = interaction.options.get('number-2').value
     const num3 = interaction.options.get('number-3').value
-    let result = num1 + ', ' + num2 + ', ' + num3
-    result += '\n'
-    result += '++ : ' + (num1 + num2 + num3)
-    result += '\n'
-    result += '+- : ' + (num1 + num2 - num3)
-    result += '\n'
-    result += '-+ : ' + (num1 - num2 + num3)
-    result += '\n'
-    result += '-- : ' + (num1 - num2 - num3)
-    result += '\n'
-    result += '** : ' + (num1 * num2 * num3)
-    result += '\n'
-    result += '*+ : ' + (num1 * num2 + num3)
-    result += '\n'
-    result += '*- : ' + (num1 * num2 - num3)
-    result += '\n'
-    result += '바스, 벨테인, 루나사, 삼하인, 임볼릭'
     // interaction.reply(result);
 
     const embed = new EmbedBuilder()

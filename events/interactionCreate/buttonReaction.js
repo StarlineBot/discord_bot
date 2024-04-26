@@ -9,11 +9,20 @@ module.exports = async (interaction, client) => {
     const memberId = buttonInfo.memberId
     const clickMember = interaction.member
 
+    const isAllowed = !!clickMember.roles.cache.find(
+      role => role.id === guildInfo.adminRole)
+    const guildRole = clickMember.guild.roles.cache.find(
+      role => role.id === guildInfo.guildMemberRole)
+    const guild = client.guilds.cache.find(
+      guild => guild.id === guildId)
+    const targetMember = guild.members.cache.find(
+      member => member.id === memberId)
+    const roles = targetMember.roles
+    const existRole = !!roles.cache.find(role => role.id === guildRole.id)
+
     let message
     switch (buttonInfo.action) {
       case 'bulkDelete':
-        const isAllowed = !!clickMember.roles.cache.find(
-          role => role.id === guildInfo.adminRole)
         if (!isAllowed) {
           message = `권한이 없는 사용자 입니다.\n\n이 메세지는 ${timeout / 1000}초 후 삭제됩니다.`
           break
@@ -25,15 +34,6 @@ module.exports = async (interaction, client) => {
         break
       case 'doAddRole':
       default:
-
-        const guildRole = clickMember.guild.roles.cache.find(
-          role => role.id === guildInfo.guildMemberRole)
-        const guild = client.guilds.cache.find(
-          guild => guild.id === guildId)
-        const targetMember = guild.members.cache.find(
-          member => member.id === memberId)
-        const roles = targetMember.roles
-        const existRole = !!roles.cache.find(role => role.id === guildRole.id)
         if (!existRole) {
           targetMember.roles.add(guildRole)
         }

@@ -4,11 +4,13 @@ const veteran = ['알비', '키아', '라비', '마스', '피오드', '바리', 
 
 const startDate = DateTime.local(2024, 4, 20, 0, 0)
 
+/* eslint-disable */
 Date.prototype.addDays = function (days) {
   const date = new Date(this.valueOf())
   date.setDate(date.getDate() + days)
   return date
 }
+/* eslint-disable */
 
 let veteranStartIndex = 5
 let veteranIndex = 0

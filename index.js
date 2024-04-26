@@ -13,10 +13,12 @@ const client = new Client({
   ]
 })
 
+/* eslint-disable */
 new CommandHandler({
   client,
   commandsPath: path.join(__dirname, 'commands'),
   eventsPath: path.join(__dirname, 'events')
 })
+/* eslint-disable */
 
 client.login(process.env.TOKEN)

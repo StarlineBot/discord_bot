@@ -59,4 +59,4 @@ jobs:
         run: aws s3 cp --region ap-northeast-2 ./discord_bot.zip s3://discord-bot-build
 
       - name: deploy with AWS codeDeploy
-        run: aws deploy create-deployment --application-name StarlineBot-CodeDeploy --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name GROUP --s3-location bucket=discord-bot-build,bundleType=zip,key=discord_bot.zip
+        run: aws deploy create-deployment --application-name StarlineBot-CodeDeploy --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name GROUP --ignore-application-stop-failures --s3-location bucket=discord-bot-build,bundleType=zip,key=discord_bot.zip

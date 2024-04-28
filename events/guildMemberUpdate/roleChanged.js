@@ -8,10 +8,15 @@ module.exports = (oldMember, newMember) => {
   const embed = new EmbedBuilder()
     .setColor('#86E57F')
     .setAuthor({
-      name: `${newMember.user.globalName}`,
+      name: `${newMember.user.username}`,
       iconURL: newMember.user.displayAvatarURL()
     })
-    .setTitle(`${newMember.user.username}`)
+    .setTitle(`${newMember.user.globalName}`)
+
+  if (oldMember.nickname !== newMember.nickname) {
+    embed.setDescription(
+        `<@${newMember.user.id}> \`${(oldMember.nickname === null) ? oldMember.user.username : oldMember.nickname}\` → \`${newMember.nickname}\`으로 별명이 변경 됨`)
+  }
 
   if (oldMember.roles.cache.size < newMember.roles.cache.size) {
     newMember.roles.cache.forEach(role => {

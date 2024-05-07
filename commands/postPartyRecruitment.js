@@ -218,8 +218,8 @@ module.exports = {
       title = `${dungeonStartDatetime.toFormat('yy년 MM월 dd일 cccc')} ${dungeonStartTime}시 [${dungeonName}] 8인 채워지면 출발!`;
       contents = '<@everyone>' + " feat: 열정이"
           + "\n### 1시간 40릴을 목표로 진행 합니다."
-          + "\n전부 길원들로만 갈거라서 8인이 모여야 출발할수 있습니다."
-          + "\n\n"
+          + "\n전부 길원들로만 갈 거라서 8인이 모여야 출발 할 수 있습니다."
+          + "\n"
           + "\n- 준비물"
           + "\n - `무제한 그림자 미션 통행증` 혹은 `엘리트 통행증 - 섀도우 위자드 퇴치` 5장"
           + "\n - `만사형통의 보약` 1개"

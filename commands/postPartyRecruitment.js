@@ -136,7 +136,31 @@ module.exports = {
               , { name: '2명', value: 2 }
             )
         )
-    ),
+    )
+  .addSubcommand(subcommand =>
+      subcommand
+      .setName('보약팟')
+      .setDescription('보약팟 파티모집을 시작해~')
+      .addStringOption((option) =>
+          option.setName('dungeon_start_date').setDescription(
+              '먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
+          .addChoices(
+              { name: '일', value: '일' },
+              { name: '월', value: '월' },
+              { name: '화', value: '화' },
+              { name: '수', value: '수' },
+              { name: '목', value: '목' },
+              { name: '금', value: '금' },
+              { name: '토', value: '토' }
+          )
+      )
+      .addIntegerOption((option) =>
+          option.setName('dungeon_start_time').setDescription(
+              '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시').setRequired(true)
+          .setMaxValue(24).setMinValue(1)
+      )
+  )
+  ,
   run: async ({ interaction }) => {
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
@@ -165,6 +189,10 @@ module.exports = {
       }
     }
 
+    if(dungeonName === "보약팟") {
+      dungeonDifficult = "엘리트";
+    }
+
     const tagDungeon = partyChannel.availableTags.find(
       ({ name }) => name === dungeonName)
     const tagDungeonDifficult = partyChannel.availableTags.find(
@@ -179,16 +207,32 @@ module.exports = {
       }
     }
 
-    const title = `${dungeonStartDatetime.toFormat('yy년 MM월 dd일 cccc')} ${dungeonStartTime}시 [${dungeonName} ${dungeonDifficult}] ${(dungeonHeadcount === 0
+    let title = `${dungeonStartDatetime.toFormat('yy년 MM월 dd일 cccc')} ${dungeonStartTime}시 [${dungeonName} ${dungeonDifficult}] ${(dungeonHeadcount === 0
         ? '모이면 바로 출발'
 : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
 
+    let contents = '<@everyone>' +
+        '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n' +
+        `<@${interaction.member.id}>`;
+    if(dungeonName === "보약팟") {
+      title = `${dungeonStartDatetime.toFormat('yy년 MM월 dd일 cccc')} ${dungeonStartTime}시 [${dungeonName}] 8인 채워지면 출발!`;
+      contents = '<@everyone>' + " feat: 열정이"
+          + "\n## 1시간 40릴을 목표로 진행 합니다. 전부 길원들로만 갈거라서 8인이 모여야 출발할수 있습니다.\n"
+          + "\n"
+          + "\n- 준비물"
+          + "\n - `무제한 그림자 미션 통행증` 혹은 `엘리트 통행증 - 섀도우 위자드 퇴치` 5장"
+          + "\n - `만사형통의 보약` 1개"
+          + "\n\n### 보약팟이란?"
+          + "\n파티원 8명이 각자 `무제한 그림자 미션 통행증` 혹은 `엘리트 통행증 - 섀도우 위자드 퇴치` 을 5장(혹은 4장)씩 준비하여"
+          + "\n1시간 지속되는 `만사형통의 보약`(몬스터 골드드랍과 퀘스트 완료 골드 보상 2배증가)을 먹고"
+          + "\n보약이 지속되는 동안 40릴(혹은 32릴)을 돌아서 나오는"
+          + "\n새도우위자드 완료보상 35,200 골드와 몬스터 드랍골드, 에린의정기, 알반훈련소 하드-중급 등의 유효보상을 노리는 파티로"
+          + "\n1개 보약 사용시 보통 700만 ~ 1,000만원의 골드를 벌 수 있는 파티입니다.";
+    }
     await partyChannel.threads.create({
       name: title,
       message: {
-        content: '<@everyone>' +
-            '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n' +
-            `<@${interaction.member.id}>`
+        content: contents
       },
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     })
@@ -198,9 +242,7 @@ module.exports = {
       await devPartyChannel.threads.create({
         name: title,
         message: {
-          content: '<@everyone>' +
-              '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n작성자: ' +
-              interaction.user.globalName + ' / ' + interaction.user.username
+          content: contents
         },
         appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
       })

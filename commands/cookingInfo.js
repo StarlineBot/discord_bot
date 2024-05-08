@@ -7,7 +7,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Cornbread Dough(75%) Egg(15%) Yeast(10%)',
-    localRecipe: '콘브레드 반죽(75%) 계란(15%) 이스트(10%)',
+    localRecipe: '콘브레드 반죽(75%) 달걀(15%) 이스트(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/3f/Cornbread.png',
     status: [
       { name: '생명력', value: 30 },
@@ -106,7 +106,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Bread(71%) Curry Powder(14%) Sliced Meat(15%)',
-    localRecipe: '빵(71%) 카레가루(14%) 얇게 썬 고기(15%)',
+    localRecipe: '빵(71%) 카레가루(14%) 고기 조각(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/0/02/Curry_Bread.png',
     status: [ { name: '생명력', value: 15 }, { name: '체력', value: 8 } ]
   } ,
@@ -126,7 +126,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Whipped Cream(55%) Fried Vegetables(25%) Corn(20%)',
-    localRecipe: '휘핑크림(55%) 야채튀김(25%) 옥수수(20%)',
+    localRecipe: '생크림(55%) 야채튀김(25%) 옥수수(20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/2/2d/Corn_Soup.png',
     status: [
       { name: '생명력', value: 40 },
@@ -152,7 +152,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Croissant (65%) Whipped Cream (25%) Blueberry (10%)',
-    localRecipe: '크루아상(65%) 휘핑크림(25%) 블루베리(10%)',
+    localRecipe: '크루아상(65%) 생크림(25%) 블루베리(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/4/40/Croffle.png',
     status: [
       { name: '생명력', value: 50 },
@@ -224,7 +224,7 @@ const cookings = [
     originCookingType: 'Pie Making',
     localCookingType: '파이 만들기',
     originRecipe: 'Pan Pie Crust (50%) Almond (45%) Egg (5%)',
-    localRecipe: '팬파이 크러스트(50%) 아몬드(45%) 계란(5%)',
+    localRecipe: '팬파이 크러스트(50%) 아몬드(45%) 달걀(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/7f/Almond_Pie.png',
     status: [ { name: '마나', value: 10 }, { name: '지력', value: 7 } ]
   } ,
@@ -234,7 +234,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Egg (55%) Milk (40%) Wax (5%)',
-    localRecipe: '계란(55%) 우유(40%) 왁스(5%)',
+    localRecipe: '달걀(55%) 우유(40%) 왁스(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/f4/Cannele.png',
     status: [ { name: '스태미나', value: 30 }, { name: '솜씨', value: 20 } ]
   } ,
@@ -284,11 +284,11 @@ const cookings = [
   } ,
   {
     originName: 'Blueberry Whipped Cream Crepe',
-    localName: '블루베리 휘핑크림 크레이프',
+    localName: '블루베리 생크림 크레이프',
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Crepe (45%) Blueberry (30%) Whipped Cream (25%)',
-    localRecipe: '크레이프 (45%) 블루베리 (30%) 휘핑크림 (25%)',
+    localRecipe: '크레이프 (45%) 블루베리 (30%) 생크림 (25%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/7c/Blueberry_Whipped_Cream_Crepe.png',
     status: [
       { name: '마나', value: 20 },
@@ -486,7 +486,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Crepe (47%) Baking Chocolate (27%) Whipped Cream (26%)',
-    localRecipe: '크레이프 (47%) 베이킹 초콜릿 (27%) 휘핑크림 (26%)',
+    localRecipe: '크레이프 (47%) 베이킹 초콜릿 (27%) 생크림 (26%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/33/Chocolate_Crepe_Cake.png',
     status: [
       { name: '마나', value: 30 },
@@ -538,7 +538,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Strawberry (5%) Whipped Cream (20%) Flour Dough (75%)',
-    localRecipe: '딸기 (5%) 휘핑크림 (20%) 밀가루 반죽 (75%)',
+    localRecipe: '딸기 (5%) 생크림 (20%) 밀가루 반죽 (75%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e3/Birthday_Cake.png',
     status: [
       { name: '행운', value: 10 },
@@ -552,7 +552,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Fried Egg (15%) Sliced Bread (85%)',
-    localRecipe: '계란 후라이 (15%) 얇게 썬 빵 (85%)',
+    localRecipe: '계란프라이 (15%) 얇게 썬 빵 (85%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/81/Egg_Sandwich.png',
     status: [ { name: '의지', value: 4 }, { name: '행운', value: 2 } ]
   } ,
@@ -604,7 +604,7 @@ const cookings = [
     originCookingType: 'Noodle Making',
     localCookingType: '면 만들기',
     originRecipe: 'Somen Noodles (50%) Meat Broth (40%) Mixed Vegetables (10%)',
-    localRecipe: '소면(50%) 고기육수(40%) 각종야채(10%)',
+    localRecipe: '소면(50%) 육수(40%) 각종야채(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/7e/Festive_Noodles.png',
     status: [
       { name: '생명력', value: 15 },
@@ -618,7 +618,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Dragon Flesh Lump (70%) Dragon Bone (30%)',
-    localRecipe: '용살 덩어리(70%) 용뼈(30%)',
+    localRecipe: '드래곤의 살덩어리(70%) 드래곤의 뼈(30%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/6/62/T-Bone_Steak.png',
     status: [ { name: '생명력', value: 200 }, { name: '체력', value: 100 } ]
   } ,
@@ -663,11 +663,11 @@ const cookings = [
   } ,
   {
     originName: 'Egg and Mayo Toast',
-    localName: '계란과 마요네즈 토스트',
+    localName: '달걀과 마요네즈 토스트',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Toast (66%) Egg (24%) Mayonnaise (10%)',
-    localRecipe: '토스트(66%) 계란(24%) 마요네즈(10%)',
+    localRecipe: '토스트(66%) 달걀(24%) 마요네즈(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/f3/Egg_and_Mayo_Toast.png',
     status: [
       { name: '생명력', value: -0 },
@@ -692,7 +692,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Wheat Flour(65%) Baking Chocolate(25%) Whipped Cream(10%)',
-    localRecipe: '밀가루(65%) 베이킹초콜릿(25%) 휘핑크림(10%)',
+    localRecipe: '밀가루(65%) 재료 초콜릿(25%) 생크림(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/87/Chocolate_Cake.png',
     status: [
       { name: '생명력', value: 5 },
@@ -720,7 +720,7 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Taitinn Carp(50%) Potato(41%) Fry Batter(9%)',
-    localRecipe: '은붕어(50%) 감자(41%) 튀김 반죽(9%)',
+    localRecipe: '은붕어(50%) 감자(41%) 튀김옷(9%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/ea/Fish_and_Chips.png',
     status: [
       { name: '생명력', value: 18 },
@@ -783,7 +783,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Black Dragon Blood(94%) Dragon Flesh Lump(6%)',
-    localRecipe: '흑룡혈(94%) 용살덩어리(6%)',
+    localRecipe: '블랙 드래곤의 피(94%) 드래곤의 살덩어리(6%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/0/05/E.O._Grand_Blago.png',
     status: [
       { name: '스태미나', value: 300 },
@@ -851,7 +851,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Whipped Cream (35%) Chocolate (30%) Choco-Rox Cookie (35%)',
-    localRecipe: '휘핑크림(35%) 초콜릿(30%) 초코록스쿠키(35%)',
+    localRecipe: '생크림(35%) 초콜릿(30%) 초코록스쿠키(35%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/5/5c/Devil%27s_Chocomix.png',
     status: [
       { name: '체력', value: 50 },
@@ -861,11 +861,11 @@ const cookings = [
   } ,
   {
     originName: 'Egg Caviar',
-    localName: '계란 캐비어',
+    localName: '달걀 캐비어',
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Fried Egg(45%) Sturgeon(30%) Slice of Cheese(25%)',
-    localRecipe: '계란후라이(45%) 철갑상어(30%) 슬라이스치즈(25%)',
+    localRecipe: '계란프라이(45%) 철갑상어(30%) 슬라이스치즈(25%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/ae/Egg_Caviar.png',
     status: [
       { name: '생명력', value: 17 },
@@ -879,7 +879,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Large Meat (35%) Block of Cheese (45%) Brioche Bun (20%)',
-    localRecipe: '큰 고기 (35%) 치즈 블록 (45%) 브리오슈 번 (20%)',
+    localRecipe: '커다란 고기덩어리 (35%) 치즈 블록 (45%) 브리오슈 번 (20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/35/Gastro_Burger.png',
     status: [
       { name: '스태미나', value: 100 },
@@ -894,7 +894,7 @@ const cookings = [
     originCookingType: 'Pasta Making',
     localCookingType: '파스타 만들기',
     originRecipe: 'Long Pasta(80%) Pasta Ingredients(17%) Whipped Cream(3%)',
-    localRecipe: '롱파스타(80%) 파스타재료(17%) 휘핑크림(3%)',
+    localRecipe: '롱파스타(80%) 파스타재료(17%) 생크림(3%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/1/15/Carbonara.png',
     status: [ { name: '마나', value: -10 }, { name: '스태미나', value: 15 } ]
   } ,
@@ -904,17 +904,17 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Shrimp(65%) Fry Batter(35%)',
-    localRecipe: '새우(65%) 튀김반죽(35%)',
+    localRecipe: '새우(65%) 튀김옷(35%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/c6/Fried_Shrimp.png',
     status: [ { name: '생명력', value: 11 }, { name: '의지', value: 14 } ]
   } ,
   {
     originName: 'Fried Egg',
-    localName: '계란후라이',
+    localName: '계란프라이',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Egg(90%) Salt(10%) OR Egg(82%) Salt(10%) Pepper(8%)',
-    localRecipe: '계란(90%) 소금(10%) OR 계란(82%) 소금(10%) 후추(8%)',
+    localRecipe: '달걀(90%) 소금(10%) OR 달걀(82%) 소금(10%) 후추(8%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/1/18/Fried_Egg.png',
     status: [ { name: '생명력', value: 15 } ]
   } ,
@@ -956,11 +956,11 @@ const cookings = [
   } ,
   {
     originName: 'Fried Abb Neagh Carp',
-    localName: '프라이드 애브 네잉 잉어',
+    localName: '아브 네아 잉어 튀김',
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Abb Neagh Carp(65%) Fry Batter(30%) Salt or Pepper(5%) / Abb Neagh Carp(69%) Fry Batter(31%)',
-    localRecipe: '앱니 잉어(65%) 튀김반죽(30%) 소금 또는 후추(5%) / 앱니 잉어(69%) 튀김반죽(31%)',
+    localRecipe: '아브 네아 잉어(65%) 튀김옷(30%) 소금 또는 후추(5%) / 아브 네아 잉어(69%) 튀김옷(31%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/ec/Fried_Abb_Neagh_Carp.png',
     status: [
       { name: '생명력', value: 20 },
@@ -976,7 +976,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Crepe (74%) Whipped Cream (19%) Fresh Honey (7%)',
-    localRecipe: '크레이프 (74%) 휘핑크림 (19%) 프레시허니 (7%)',
+    localRecipe: '크레이프 (74%) 생크림 (19%) 신선한 벌꿀 (7%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/fd/Crepe_Cake.png',
     status: [
       { name: '생명력', value: 30 },
@@ -986,11 +986,11 @@ const cookings = [
   } ,
   {
     originName: 'Grilled White Dragon Heart',
-    localName: '구운 백룡심장',
+    localName: '하얗게 구워진 드래곤 심장',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'White Dragon Heart(75%) White Dragon Blood(7%) Dragon Flesh Lump(18%)',
-    localRecipe: '백룡심장(75%) 백룡혈(7%) 용살덩어리(18%)',
+    localRecipe: '화이트 드래곤 심장(75%) 화이트 드래곤의 피(7%) 드래곤의 살덩어리(18%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/0/09/Grilled_Black_Dragon_Heart.png',
     status: [
       { name: '체력', value: 150 },
@@ -1103,7 +1103,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Sliced Bread (45%) Sliced Meat (28%) Slice of Cheese (27%)',
-    localRecipe: '얇게 썬 빵(45%) 얇게 썬 고기(28%) 슬라이스 치즈(27%)',
+    localRecipe: '얇게 썬 빵(45%) 고기 조각(28%) 슬라이스 치즈(27%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/c6/Croque_Monsieur.png',
     status: [ { name: '생명력', value: 15 }, { name: '지력', value: 5 } ]
   } ,
@@ -1113,7 +1113,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Flour Dough (60%) Egg (30%) Apple (10%)',
-    localRecipe: '밀가루 반죽(60%) 계란(30%) 사과(10%)',
+    localRecipe: '밀가루 반죽(60%) 달걀(30%) 사과(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/3c/Apple_Souffle.png',
     status: [
       { name: '마나', value: 20 },
@@ -1127,7 +1127,7 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Capelin (60%) Fry Batter (30%) Sugar (10%)',
-    localRecipe: '카펠린(60%) 튀김반죽(30%) 설탕(10%)',
+    localRecipe: '카펠린(60%) 튀김옷(30%) 설탕(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/ae/Salt_Grilled_Sweetfish.png',
     status: [
       { name: '생명력', value: 30 },
@@ -1183,7 +1183,7 @@ const cookings = [
     originCookingType: 'Pizza Making',
     localCookingType: '피자 만들기',
     originRecipe: 'Red Sauce Pizza Dough(44%) Hazelnut Mushroom(39%) Slice of Cheese(17%)',
-    localRecipe: '레드소스 피자도우(44%) 헤이즐넛버섯(39%) 슬라이스치즈(17%)',
+    localRecipe: '레드소스 피자도우(44%) 개암버섯(39%) 슬라이스치즈(17%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e6/Fragrant_Mushroom_Pizza.png',
     status: [ { name: '행운', value: 30 }, { name: '마법방어', value: 3 } ]
   } ,
@@ -1203,11 +1203,11 @@ const cookings = [
   } ,
   {
     originName: 'Full Kraken Meal',
-    localName: '크라켄 정식',
+    localName: '크라켄 한상 차림',
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Spicy Kraken Stew(50%) Kraken Stirfry(50%)',
-    localRecipe: '매콤한 크라켄 스튜(50%) 크라켄 볶음(50%)',
+    localRecipe: '크라켄 매운탕(50%) 크라켄 볶음 모둠(50%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/1/19/Full_Kraken_Meal.png',
     status: [
       { name: '생명력', value: 300 },
@@ -1230,7 +1230,7 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Smelt(70%) Fry Batter(25%) Salt(5%)',
-    localRecipe: '빙어(70%) 튀김반죽(25%) 소금(5%)',
+    localRecipe: '빙어(70%) 튀김옷(25%) 소금(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/d/d8/Fried_Smelt.png',
     status: [ { name: '생명력', value: 30 }, { name: '체력', value: 15 } ]
   } ,
@@ -1280,7 +1280,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Flour Dough(60%) Corn(31%) Whipped Cream(9%)',
-    localRecipe: '밀가루 반죽(60%) 옥수수(31%) 휘핑크림(9%)',
+    localRecipe: '밀가루 반죽(60%) 옥수수(31%) 생크림(9%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/6/62/Corn_Scone.png',
     status: [
       { name: '생명력', value: 30 },
@@ -1311,7 +1311,7 @@ const cookings = [
     originCookingType: 'Pie Making',
     localCookingType: '파이 만들기',
     originRecipe: 'Tart Crust(40%) Egg(30%) Water(30%)',
-    localRecipe: '타르트 크러스트(40%) 계란(30%) 물이 든 병(30%)',
+    localRecipe: '타르트 크러스트(40%) 달걀(30%) 물이 든 병(30%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/8e/Egg_Tart.png',
     status: [ { name: '생명력', value: 30 } ]
   } ,
@@ -1409,7 +1409,7 @@ const cookings = [
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Egg (68%) Milk (20%) Whipped Cream (12%)',
-    localRecipe: '계란 (68%) 우유 (20%) 휘핑크림 (12%)',
+    localRecipe: '달걀 (68%) 우유 (20%) 생크림 (12%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/2/2a/Gelatinous_Custard_Pudding.png',
     status: [
       { name: '마나', value: 10 },
@@ -1424,7 +1424,7 @@ const cookings = [
     originCookingType: 'Pizza Making',
     localCookingType: '피자 만들기',
     originRecipe: 'Plain Pizza Dough(40%)Baking Chocolate(41%)Marshmallow(19%)',
-    localRecipe: '플레인 피자 도우(40%)베이킹 초콜릿(41%)마시멜로(19%)',
+    localRecipe: '담백한 피자 도우(40%)베이킹 초콜릿(41%)마시멜로(19%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/5/55/Chocolate_Pizza.png',
     status: [
       { name: '생명력', value: 50 },
@@ -1448,7 +1448,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'White Dragon Blood(94%) Dragon Flesh Lump(6%)',
-    localRecipe: '백룡혈(94%) 용살덩어리(6%)',
+    localRecipe: '화이트 드래곤의 피(94%) 드래곤의 살덩어리(6%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/a2/Dragon_Blood_White_Wine.png',
     status: [
       { name: '마나', value: 300 },
@@ -1537,7 +1537,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Chocolate Chip Cookie (5%) Whipped Cream (20%) Flour Dough (75%)',
-    localRecipe: '초코칩 쿠키(5%) 휘핑크림(20%) 밀가루 반죽(75%)',
+    localRecipe: '초코칩 쿠키(5%) 생크림(20%) 밀가루 반죽(75%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e8/Cookies_and_Cream_Cake.png',
     status: [
       { name: '행운', value: 10 },
@@ -1547,11 +1547,11 @@ const cookings = [
   } ,
   {
     originName: 'Grilled Black Dragon Heart',
-    localName: '구운 흑룡심장',
+    localName: '까맣게 구워진 드래곤의 심장',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Black Dragon Heart(75%) Black Dragon Blood(7%) Dragon Flesh Lump(18%)',
-    localRecipe: '흑룡심장(75%) 흑룡혈(7%) 용살덩어리(18%)',
+    localRecipe: '블랙 드래곤의 심장(75%) 블랙 드래곤의 피(7%) 드래곤의 살덩어리(18%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/0/09/Grilled_Black_Dragon_Heart.png',
     status: [
       { name: '생명력', value: 300 },
@@ -1628,7 +1628,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Flying Fish(40%) Potato(40%) Egg(20%)',
-    localRecipe: '날치(40%) 감자(40%) 계란(20%)',
+    localRecipe: '날치(40%) 감자(40%) 달걀(20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/0/08/Flying_Fish_Crepe.png',
     status: [ { name: '마나', value: 16 }, { name: '지력', value: 5 } ]
   } ,
@@ -1638,7 +1638,7 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Chicken Wings(72%) Fry Batter(24%) Salt(4%) / Chicken Wings(76%) Fry Batter(24%)',
-    localRecipe: '닭날개(72%) 튀김반죽(24%) 소금(4%) / 닭날개(76%) 튀김반죽(24%)',
+    localRecipe: '닭날개(72%) 튀김옷(24%) 소금(4%) / 닭날개(76%) 튀김옷(24%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/82/Fried_Chicken_Wing.png',
     status: [ { name: '생명력', value: 14 }, { name: '행운', value: 14 } ]
   } ,
@@ -1658,7 +1658,7 @@ const cookings = [
     originCookingType: 'Jam Making',
     localCookingType: '잼 만들기',
     originRecipe: 'Baking Chocolate (42%) Whipped Cream (41%) Sugar (17%)',
-    localRecipe: '베이킹 초콜릿(42%) 휘핑크림(41%) 설탕(17%)',
+    localRecipe: '베이킹 초콜릿(42%) 생크림(41%) 설탕(17%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/d/df/Chocolate.png',
     status: [
       { name: '생명력', value: 12 },
@@ -1672,7 +1672,7 @@ const cookings = [
     originCookingType: 'Pizza Making',
     localCookingType: '피자 만들기',
     originRecipe: 'Plain Pizza Dough(41%) Block of Cheese(41%) Garlic(18%)',
-    localRecipe: '플레인 피자 도우(41%) 치즈블록(41%) 마늘(18%)',
+    localRecipe: '담백한 피자 도우(41%) 커다란 치즈덩어리(41%) 마늘(18%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/2/2c/Gorgonzola.png',
     status: [
       { name: '마나', value: 60 },
@@ -1682,21 +1682,21 @@ const cookings = [
   } ,
   {
     originName: 'Gyeran-mari',
-    localName: '계란마리',
+    localName: '계란말이',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Egg(80%) Butter(12%) Sugar(8%)',
-    localRecipe: '계란(80%) 버터(12%) 설탕(8%)',
+    localRecipe: '달걀(80%) 버터(12%) 설탕(8%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/81/Gyeran-mari.png',
     status: [ { name: '체력', value: 10 }, { name: '의지', value: 25 } ]
   } ,
   {
     originName: 'Chocolate Chip Cookie',
-    localName: '초콜릿 칩 쿠키',
+    localName: '초코칩 쿠키',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Wheat Flour(46%) Baking Chocolate(27%) Butter(27%)',
-    localRecipe: '밀가루(46%) 베이킹초콜릿(27%) 버터(27%)',
+    localRecipe: '밀가루(46%) 재료 초콜릿(27%) 버터(27%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/f0/Chocolate_Chip_Cookie.png',
     status: [
       { name: '생명력', value: 12 },
@@ -1710,7 +1710,7 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Potato (80%) Fry Batter (20%) / Potato(74%) Fry Batter(18%) Salt(8%)',
-    localRecipe: '감자(80%) 튀김 반죽(20%) / 감자(74%) 튀김 반죽(18%) 소금(8%)',
+    localRecipe: '감자(80%) 튀김옷(20%) / 감자(74%) 튀김옷(18%) 소금(8%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/8e/French_Fries.png',
     status: [ { name: '생명력', value: 18 }, { name: '체력', value: 7 } ]
   } ,
@@ -1730,11 +1730,11 @@ const cookings = [
   } ,
   {
     originName: 'Fried Chicken',
-    localName: '닭 튀김',
+    localName: '프라이드 치킨',
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Chicken (71%) Deep Fry Batter (16%) Olive Oil (13%)',
-    localRecipe: '치킨 (71%) 튀김 반죽 (16%) 올리브 오일 (13%)',
+    localRecipe: '닭고기 (71%) 튀김가루 (16%) 올리브유 (13%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/7f/Fried_Chicken.png',
     status: [
       { name: '지력', value: 25 },
@@ -1780,7 +1780,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Egg(10%) Water(50%) Steamed Rice(40%)',
-    localRecipe: '계란(10%) 물이 든 병(50%) 밥(40%)',
+    localRecipe: '달걀(10%) 물이 든 병(50%) 밥(40%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/3e/Egg_Porridge.png',
     status: [ { name: '의지', value: 4 }, { name: '행운', value: 2 } ]
   } ,
@@ -1880,21 +1880,21 @@ const cookings = [
   } ,
   {
     originName: 'Korean Beef Tartare',
-    localName: '한우 타르타르',
+    localName: '육회',
     originCookingType: 'Julienning',
     localCookingType: '저미기',
     originRecipe: 'Large Meat (86%) Egg (14%)',
-    localRecipe: '큰 고기 (86%) 계란 (14%)',
+    localRecipe: '커다란 고기덩어리 (86%) 달걀 (14%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/7a/Korean_Beef_Tartare.png',
     status: [ { name: '생명력', value: 65 }, { name: '솜씨', value: 15 } ]
   } ,
   {
     originName: 'Potato Croquette',
-    localName: '감자 고로케',
+    localName: '감자 크로켓',
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Steamed Potato (65%) Sliced Meat (20%) Bread Crumb (15%)',
-    localRecipe: '찐 감자(65%) 얇게 썬 고기(20%) 빵가루(15%)',
+    localRecipe: '삶은감자(65%) 고기 조각(20%) 빵가루(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/86/Potato_Croquette.png',
     status: [ { name: '솜씨', value: -25 }, { name: '행운', value: 35 } ]
   } ,
@@ -1904,7 +1904,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Rose Petal(70%) Basil(20%) Olive Oil(10%)',
-    localRecipe: '장미꽃잎(70%) 바질(20%) 올리브오일(10%)',
+    localRecipe: '장미꽃잎(70%) 바질(20%) 올리브유(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/2/26/Rose_Basil_Salad.png',
     status: [
       { name: '생명력', value: -90 },
@@ -1971,7 +1971,7 @@ const cookings = [
     originCookingType: 'Stir-frying',
     localCookingType: '볶기',
     originRecipe: 'Mixed Fried Rice (90%) Egg (10%)',
-    localRecipe: '볶음밥(90%) 계란(10%)',
+    localRecipe: '볶음밥(90%) 달걀(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e2/Omurice.png',
     status: [ { name: '생명력', value: 30 }, { name: '체력', value: 7 } ]
   } ,
@@ -1981,7 +1981,7 @@ const cookings = [
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Large Meat (38%) Sliced Bread (28%) Mixed Vegetables (34%)',
-    localRecipe: '큰 고기 (38%) 얇게 썬 빵 (28%) 혼합 야채 (34%)',
+    localRecipe: '커다란 고기덩어리 (38%) 얇게 썬 빵 (28%) 혼합 야채 (34%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/b/b0/Pulled_Pork_Sandwich.png',
     status: [ { name: '마나', value: 45 }, { name: '마법공격력', value: 1 } ]
   } ,
@@ -1997,7 +1997,7 @@ const cookings = [
   } ,
   {
     originName: 'Raw Chopped Kraken',
-    localName: '다진 생 크라켄',
+    localName: '크라켄 탕탕이',
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Kraken Leg Meat(80%) Garlic(20%)',
@@ -2011,7 +2011,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: "Strawberry Whipped Cream Crepe (38%) S'more (34%) Gelatinous Custard Pudding (28%)",
-    localRecipe: '딸기 휘핑크림 크레이프 (38%) 스모어 (34%) 젤라틴 커스터드 푸딩 (28%)',
+    localRecipe: '딸기 생크림 크레이프 (38%) 스모어 (34%) 젤라틴 커스터드 푸딩 (28%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e1/Happy_Dessert_Time_Combo.png',
     status: [
       { name: '솜씨', value: 25 },
@@ -2084,7 +2084,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Egg(35%) Whipped Cream(35%) Butter(30%)',
-    localRecipe: '계란(35%) 휘핑크림(35%) 버터(30%)',
+    localRecipe: '달걀(35%) 생크림(35%) 버터(30%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e4/Macaron.png',
     status: [ { name: '마나', value: 20 }, { name: '의지', value: 25 } ]
   } ,
@@ -2120,7 +2120,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Roasted Bean Flour or Peeled Bean Flour or Water-soaked Bean Flour(70%) Water(20%) Salt(10%)orMagic Bean Flour(33.3%) Water(33.3%) Nigari(33.3%)',
-    localRecipe: '볶은 콩가루 또는 깐 콩가루 또는 불린 콩가루(70%) 물이 든 병(20%) 소금(10%)or마법콩가루(33.3%) 물이 든 병(33.3%) 니가리(33.3%)',
+    localRecipe: '볶은 콩가루 또는 깐 콩가루 또는 불린 콩가루(70%) 물이 든 병(20%) 소금(10%)or마법콩가루(33.3%) 물이 든 병(33.3%) 응고제(33.3%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/f9/Mashed_Tofu.png',
     status: [
       { name: '생명력', value: 10 },
@@ -2160,7 +2160,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Fried Onion(55%) Whipped Cream(35%) Pepper(10%) / Fried Onion(62%) Whipped Cream(38%)',
-    localRecipe: '튀긴양파(55%) 휘핑크림(35%) 고추(10%) / 튀긴양파(62%) 휘핑크림(38%)',
+    localRecipe: '튀긴양파(55%) 생크림(35%) 고추(10%) / 튀긴양파(62%) 생크림(38%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/0/05/Onion_Soup.png',
     status: [ { name: '생명력', value: 14 }, { name: '솜씨', value: 14 } ]
   } ,
@@ -2264,11 +2264,11 @@ const cookings = [
   } ,
   {
     originName: 'Hard-Boiled Egg',
-    localName: '삶은 달걀',
+    localName: '삶은달걀',
     originCookingType: 'Simmering',
     localCookingType: '삶기',
     originRecipe: 'Egg(34%) Water(61%) Salt(5%)',
-    localRecipe: '계란(34%) 물이 든 병(61%) 소금(5%)',
+    localRecipe: '달걀(34%) 물이 든 병(61%) 소금(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/f4/Hard-Boiled_Egg.png',
     status: [ { name: '생명력', value: 12 }, { name: '솜씨', value: 3 } ]
   } ,
@@ -2278,7 +2278,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Large Rice Cake Soup(80%) White Rice Cake(12%) Egg(8%)',
-    localRecipe: '큰떡국(80%) 흰떡(12%) 계란(8%)',
+    localRecipe: '큰떡국(80%) 흰떡(12%) 달걀(8%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/8/8f/Jumbo_Rice_Cake_Soup.png',
     status: [
       { name: '생명력', value: 10 },
@@ -2294,7 +2294,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Steamed Rice(50%) Fried Egg(30%) Cooking Potion(20%)',
-    localRecipe: '밥(50%) 계란후라이(30%) 요리약(20%)',
+    localRecipe: '밥(50%) 계란프라이(30%) 요리약(20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/39/Lunch_Box_of_Memories.png',
     status: [ { name: '마나', value: 19 }, { name: '지력', value: 14 } ]
   } ,
@@ -2342,7 +2342,7 @@ const cookings = [
     originCookingType: 'Julienning',
     localCookingType: '저미기',
     originRecipe: 'Large Meat (70%) Bread (19%) Plain Yogurt (11%)',
-    localRecipe: '큰 고기 (70%) 빵 (19%) 플레인 요거트 (11%)',
+    localRecipe: '커다란 고기덩어리 (70%) 빵 (19%) 플레인 요거트 (11%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/5/54/Iskender_Kebab.png',
     status: [
       { name: '생명력', value: 50 },
@@ -2380,11 +2380,11 @@ const cookings = [
   } ,
   {
     originName: 'Kraken Ink Pasta',
-    localName: '크라켄 잉크 파스타',
+    localName: '크라켄 먹물 파스타',
     originCookingType: 'Pasta Making',
     localCookingType: '파스타 만들기',
     originRecipe: 'Kraken Ink(75%) Garlic(15%) Olive Oil(10%)',
-    localRecipe: '크라켄 잉크(75%) 마늘(15%) 올리브 오일(10%)',
+    localRecipe: '크라켄 먹물(75%) 마늘(15%) 올리브유(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/ec/Kraken_Ink_Pasta.png',
     status: [
       { name: '체력', value: -50 },
@@ -2490,11 +2490,11 @@ const cookings = [
   } ,
   {
     originName: 'Kraken Stirfry',
-    localName: '크라켄 볶음 요리',
+    localName: '크라켄 볶음 모둠',
     originCookingType: 'Stir-frying',
     localCookingType: '볶기',
     originRecipe: 'Kraken Pulpo(35%) Spicy Fried Kraken(35%) Kraken Ink Pasta(30%)',
-    localRecipe: '크라켄 풀포(35%) 매콤한 크라켄 튀김(35%) 크라켄 잉크 파스타(30%)',
+    localRecipe: '크라켄 뽈뽀(35%) 타바스코 프라이드 크라켄(35%) 크라켄 먹물 파스타(30%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/d/df/Kraken_Stirfry.png',
     status: [
       { name: '체력', value: 59 },
@@ -2514,7 +2514,7 @@ const cookings = [
     originCookingType: 'Julienning',
     localCookingType: '저미기',
     originRecipe: 'Sliced Meat(77%) Bell Pepper(12%) Tomato(11%)',
-    localRecipe: '얇게 썬 고기(77%) 피망(12%) 토마토(11%)',
+    localRecipe: '고기 조각(77%) 피망(12%) 토마토(11%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/cc/Shish_Kebab.png',
     status: [
       { name: '생명력', value: 40 },
@@ -2528,7 +2528,7 @@ const cookings = [
     originCookingType: 'Pasta Making',
     localCookingType: '파스타 만들기',
     originRecipe: 'Bread(50%) Long Pasta(45%) Whipped Cream(5%)',
-    localRecipe: '빵(50%) 롱파스타(45%) 휘핑크림(5%)',
+    localRecipe: '빵(50%) 롱파스타(45%) 생크림(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/33/Pane.png',
     status: [ { name: '생명력', value: 12 }, { name: '의지', value: 5 } ]
   } ,
@@ -2538,7 +2538,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Sliced Meat(60%) Mana Herb(25%) Garlic(15%)',
-    localRecipe: '얇게 썬 고기(60%) 마나 허브(25%) 마늘(15%)',
+    localRecipe: '고기 조각(60%) 마나 허브(25%) 마늘(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/6/6d/Mana_Herb_Garlic_Steak.png',
     status: [
       { name: '생명력', value: 20 },
@@ -2564,7 +2564,7 @@ const cookings = [
   } ,
   {
     originName: 'Kraken Skewer',
-    localName: '크라켄 꼬치',
+    localName: '크라켄 호롱구이',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Kraken Leg Meat(80%) Red Pepper Powder(20%)',
@@ -2584,11 +2584,11 @@ const cookings = [
   } ,
   {
     originName: 'Potato and Egg Salad',
-    localName: '감자와 계란 샐러드',
+    localName: '감자계란 샐러드',
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Steamed Potato(53%) Hard-Boiled Egg(36%) Mayonnaise(11%)',
-    localRecipe: '찐 감자(53%) 완숙 계란(36%) 마요네즈(11%)',
+    localRecipe: '삶은감자(53%) 삶은달걀(36%) 마요네즈(11%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/4/4d/Potato_and_Egg_Salad.png',
     status: [
       { name: '생명력', value: 25 },
@@ -2694,7 +2694,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Hazelnut Mushroom(50%) Slice of Cheese(30%) Whipped Cream(20%)',
-    localRecipe: '헤이즐넛버섯(50%) 슬라이스치즈(30%) 휘핑크림(20%)',
+    localRecipe: '개암버섯(50%) 슬라이스치즈(30%) 생크림(20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/33/Mushroom_Canape.png',
     status: [
       { name: '생명력', value: 18 },
@@ -2722,7 +2722,7 @@ const cookings = [
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Rano Salmon(90%) Olive Oil(5%) Thyme(5%)',
-    localRecipe: '라노연어(90%) 올리브오일(5%) 타임(5%)',
+    localRecipe: '라노연어(90%) 올리브유(5%) 타임(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/6/6f/Moist_Salmon_Steak.png',
     status: [
       { name: '스태미나', value: 25 },
@@ -2736,7 +2736,7 @@ const cookings = [
     originCookingType: 'Steaming',
     localCookingType: '찌기',
     originRecipe: 'Large Meat (70%) Mixed Vegetables (10%) Meat Marinade (20%)',
-    localRecipe: '큰 고기 (70%) 혼합 야채 (10%) 고기 양념장 (20%)',
+    localRecipe: '커다란 고기덩어리 (70%) 혼합 야채 (10%) 고기 양념장 (20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/d/d0/Pork_Galbi_Stew.png',
     status: [
       { name: '생명력', value: 28 },
@@ -2775,7 +2775,7 @@ const cookings = [
     originCookingType: 'Pie Making',
     localCookingType: '파이 만들기',
     originRecipe: 'Pan Pie Crust (50%) Large Meat (38%) Meat Marinade (12%)',
-    localRecipe: '팬파이 크러스트(50%) 큰 고기(38%) 고기 양념(12%)',
+    localRecipe: '팬파이 크러스트(50%) 커다란 고기덩어리(38%) 고기 양념(12%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/6/68/Meat_Pie.png',
     status: [
       { name: '생명력', value: 15 },
@@ -2785,7 +2785,7 @@ const cookings = [
   } ,
   {
     originName: 'Kraken Pulpo',
-    localName: '크라켄 풀포',
+    localName: '크라켄 뽈뽀',
     originCookingType: 'Simmering',
     localCookingType: '삶기',
     originRecipe: 'Kraken Leg Meat(80%) Pepper(20%)',
@@ -2813,7 +2813,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Whipped Cream(57%) Gelatin(24%) Sugar(19%)',
-    localRecipe: '휘핑크림(57%) 젤라틴(24%) 설탕(19%)',
+    localRecipe: '생크림(57%) 젤라틴(24%) 설탕(19%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/3d/Panna_Cotta.png',
     status: [
       { name: '생명력', value: -20 },
@@ -2851,7 +2851,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Shrimp(45%) Egg(30%) Carnivorous Fish(25%)',
-    localRecipe: '새우(45%) 계란(30%) 육식성 물고기(25%)',
+    localRecipe: '새우(45%) 달걀(30%) 육식성 물고기(25%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/37/Shark_Fin_Soup.png',
     status: [
       { name: '생명력', value: 40 },
@@ -2898,7 +2898,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Sliced Meat(85%) Wheat Flour(5%) Onion(10%)',
-    localRecipe: '얇게 썬 고기(85%) 밀가루(5%) 양파(10%)',
+    localRecipe: '고기 조각(85%) 밀가루(5%) 양파(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/3a/Sausage.png',
     status: [ { name: '생명력', value: 18 }, { name: '체력', value: 6 } ]
   } ,
@@ -2961,7 +2961,7 @@ const cookings = [
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Sliced Meat(32%) Hazelnut Mushroom(55%) Soy Sauce(13%)',
-    localRecipe: '얇게 썬 고기(32%) 개암버섯(55%) 간장(13%)',
+    localRecipe: '고기 조각(32%) 개암버섯(55%) 간장(13%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/1/19/Mushroom_Jangjorim.png',
     status: [
       { name: '생명력', value: 20 },
@@ -2997,11 +2997,11 @@ const cookings = [
   } ,
   {
     originName: 'Roasted Chicken Wing',
-    localName: '구운 닭 날개',
+    localName: '닭날개 구이',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Chicken Wings(80%) Olive Oil(20%)',
-    localRecipe: '닭날개(80%) 올리브오일(20%)',
+    localRecipe: '닭날개(80%) 올리브유(20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/b/b4/Roasted_Chicken_Wing.png',
     status: [ { name: '생명력', value: 28 }, { name: '행운', value: 10 } ]
   } ,
@@ -3011,17 +3011,17 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Sliced Meat (75%) Bread Crumb (18%) Egg (7%)',
-    localRecipe: '얇게 썬 고기(75%) 빵가루(18%) 계란(7%)',
+    localRecipe: '고기 조각(75%) 빵가루(18%) 달걀(7%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/1/16/Pork_Cutlet.png',
     status: [ { name: '생명력', value: 16 }, { name: '의지', value: 9 } ]
   } ,
   {
     originName: 'Scuabtuinne Sucker Skewers',
-    localName: 'Scuabtuinne 빨판 꼬치',
+    localName: '스쿠압틴산 빨판 꼬치',
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Kraken Sucker (Ingredient)(70%) Salt(15%) Pepper(15%)',
-    localRecipe: '크라켄 써커(성분)(70%) 소금(15%) 후추(15%)',
+    localRecipe: '크라켄 빨판(70%) 소금(15%) 후추(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e0/Scuabtuinne_Sucker_Skewers.png',
     status: [ { name: '솜씨', value: -0 }, { name: '의지', value: 100 } ]
   } ,
@@ -3031,7 +3031,7 @@ const cookings = [
     originCookingType: 'Stir-frying',
     localCookingType: '볶기',
     originRecipe: 'Kimchi (35%) Fried Egg (20%) Mixed Fried Rice (45%)',
-    localRecipe: '김치(35%) 계란후라이(20%) 모듬볶음밥(45%)',
+    localRecipe: '김치(35%) 계란프라이(20%) 모듬볶음밥(45%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/2/29/Kimchi_Fried_Rice.png',
     status: [ { name: '스태미나', value: 45 }, { name: '의지', value: 30 } ]
   } ,
@@ -3041,7 +3041,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Steamed Mushroom(70%) Thyme(20%) Olive Oil(10%)',
-    localRecipe: '찐 버섯(70%) 백리향(20%) 올리브 오일(10%)',
+    localRecipe: '버섯찜(70%) 타임(20%) 올리브유(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/d/df/Herb_Mushroom_Salad.png',
     status: [
       { name: '솜씨', value: -7 },
@@ -3055,7 +3055,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Wheat Flour (50%) Hazelnut Mushroom (40%) Whipped Cream (10%)',
-    localRecipe: '밀가루(50%) 헤이즐넛버섯(40%) 휘핑크림(10%)',
+    localRecipe: '밀가루(50%) 개암버섯(40%) 생크림(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/6/69/Mushroom_Cookie.png',
     status: [
       { name: '생명력', value: 15 },
@@ -3065,11 +3065,11 @@ const cookings = [
   } ,
   {
     originName: 'Magic Bean Tofu',
-    localName: '마법의콩두부',
+    localName: '마법 콩 두부',
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Magic Bean Flour(80%) Water(15%) Nigari(5%)',
-    localRecipe: '마법의 콩가루(80%) 물이 든 병(15%) 니가리(5%)',
+    localRecipe: '마법 콩가루(80%) 물이 든 병(15%) 응고제(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/b/b5/Magic_Bean_Tofu.png',
     status: [
       { name: '생명력', value: 20 },
@@ -3083,17 +3083,17 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Sliced Meat (78%) Giant Potato (12%) Carrot (10%)',
-    localRecipe: '얇게 썬 고기(78%) 거대 감자(12%) 당근(10%)',
+    localRecipe: '고기 조각(78%) 왕감자(12%) 당근(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/3d/Irish_Stew.png',
     status: [ { name: '스태미나', value: 40 }, { name: '행운', value: 25 } ]
   } ,
   {
     originName: 'Mille Feuille Hot Pot',
-    localName: '밀푀유 냄비',
+    localName: '밀푀유 전골',
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Napa Cabbage(25%) Beef(25%) Meat Broth(50%)',
-    localRecipe: '배추(25%) 쇠고기(25%) 고기육수(50%)',
+    localRecipe: '배추(25%) 쇠고기(25%) 육수(50%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/0/00/Mille_Feuille_Hot_Pot.png',
     status: [
       { name: '생명력', value: -0 },
@@ -3104,11 +3104,11 @@ const cookings = [
   } ,
   {
     originName: 'Scuabtuinne Sucker Sous Vide',
-    localName: 'Scuabtuinne Sucker Sous Vide',
+    localName: '스쿠압틴산 빨판 다이어트 수비드',
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Kraken Sucker (Ingredient)(70%) Lemon Juice(15%) Pepper(15%)',
-    localRecipe: '크라켄 써커(성분)(70%) 레몬즙(15%) 후추(15%)',
+    localRecipe: '크라켄 빨판(70%) 레몬즙(15%) 후추(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/6/69/Scuabtuinne_Sucker_Sous_Vide.png',
     status: [ { name: '솜씨', value: 100 } ]
   } ,
@@ -3153,11 +3153,11 @@ const cookings = [
   } ,
   {
     originName: 'Onion Ring',
-    localName: '양파 링',
+    localName: '양파 튀김',
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Onion(60%) Fry Batter(30%) Salt(10%)',
-    localRecipe: '양파(60%) 튀김반죽(30%) 소금(10%)',
+    localRecipe: '양파(60%) 튀김옷(30%) 소금(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/ad/Onion_Ring.png',
     status: [
       { name: '생명력', value: 20 },
@@ -3275,7 +3275,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'White Rice Cake(50%) Beef(35%) Egg(15%)',
-    localRecipe: '흰떡(50%) 쇠고기(35%) 계란(15%)',
+    localRecipe: '흰떡(50%) 쇠고기(35%) 달걀(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/71/Rice_Cake_Soup.png',
     status: [ { name: '생명력', value: 8 }, { name: '체력', value: 2 } ]
   } ,
@@ -3285,7 +3285,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Rice Cake Soup(70%) White Rice Cake(20%) Egg(10%)',
-    localRecipe: '떡국(70%) 흰떡(20%) 계란(10%)',
+    localRecipe: '떡국(70%) 흰떡(20%) 달걀(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/5/52/Large_Rice_Cake_Soup.png',
     status: [
       { name: '생명력', value: 10 },
@@ -3299,7 +3299,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Wheat Flour (65%) Mint Syrup (20%) Baking Chocolate (15%)',
-    localRecipe: '밀가루(65%) 민트시럽(20%) 베이킹초콜릿(15%)',
+    localRecipe: '밀가루(65%) 민트시럽(20%) 재료 초콜릿(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/2/25/Mint_Chocolate_Cookie.png',
     status: [
       { name: '생명력', value: 55 },
@@ -3412,7 +3412,7 @@ const cookings = [
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Chicken (40%) Egg (20%) Steamed Rice (40%)',
-    localRecipe: '닭고기(40%) 계란(20%) 밥(40%)',
+    localRecipe: '닭고기(40%) 달걀(20%) 밥(40%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/c2/Oyakodon.png',
     status: [ { name: '생명력', value: 30 }, { name: '마나', value: 40 } ]
   } ,
@@ -3422,7 +3422,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Turkey (90%) Olive Oil (10%)',
-    localRecipe: '칠면조 (90%) 올리브 오일 (10%)',
+    localRecipe: '칠면조 (90%) 올리브유 (10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/4/4f/Roasted_Turkey.png',
     status: [
       { name: '생명력', value: 30 },
@@ -3485,7 +3485,7 @@ const cookings = [
     originCookingType: 'Jam Making',
     localCookingType: '잼 만들기',
     originRecipe: 'Peanuts(65%) Olive Oil(30%) Salt / Sugar(5%)',
-    localRecipe: '땅콩(65%) 올리브오일(30%) 소금/설탕(5%)',
+    localRecipe: '땅콩(65%) 올리브유(30%) 소금/설탕(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/ea/Peanut_Butter_Jam.png',
     status: [
       { name: '스태미나', value: 2 },
@@ -3513,7 +3513,7 @@ const cookings = [
     originCookingType: 'Steaming',
     localCookingType: '찌기',
     originRecipe: 'Sweet Pumpkin(80%) Sliced Meat(17%) Meat Marinade(3%)',
-    localRecipe: '단호박(80%) 얇게 썬 고기(17%) 고기 양념장(3%)',
+    localRecipe: '단호박(80%) 고기 조각(17%) 고기 양념장(3%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/d/d7/Pumpkin_Galbi_Stew.png',
     status: [ { name: '생명력', value: 20 }, { name: '체력', value: 10 } ]
   } ,
@@ -3537,7 +3537,7 @@ const cookings = [
     originCookingType: 'Stir-frying',
     localCookingType: '볶기',
     originRecipe: 'Steamed Rice(65%) Shrimp(27%) Egg(8%) / Steamed Rice(72%) Shrimp(28%)',
-    localRecipe: '밥(65%) 새우(27%) 계란(8%) / 밥(72%) 새우(28%)',
+    localRecipe: '밥(65%) 새우(27%) 달걀(8%) / 밥(72%) 새우(28%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e3/Shrimp_Fried_Rice.png',
     status: [
       { name: '생명력', value: 6 },
@@ -3564,11 +3564,11 @@ const cookings = [
   } ,
   {
     originName: 'Pickled Eggs',
-    localName: '절인 계란',
+    localName: '달걀 피클',
     originCookingType: 'Fermenting',
     localCookingType: '발효',
     originRecipe: 'Hard-Boiled Egg (71%) Vinegar (16%) Sugar (13%)',
-    localRecipe: '완숙계란(71%) 식초(16%) 설탕(13%)',
+    localRecipe: '삶은달걀(71%) 식초(16%) 설탕(13%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/7e/Pickled_Eggs.png',
     status: [
       { name: '생명력', value: 60 },
@@ -3612,7 +3612,7 @@ const cookings = [
     originCookingType: 'Jam Making',
     localCookingType: '잼 만들기',
     originRecipe: 'Ripe Pumpkin (30%) Baking Chocolate (50%) Whipped Cream (20%)',
-    localRecipe: '익은 호박(30%) 베이킹 초콜릿(50%) 휘핑크림(20%)',
+    localRecipe: '익은 호박(30%) 베이킹 초콜릿(50%) 생크림(20%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/71/Halloween_Pumpkin_Chocolate.png',
     status: [ { name: '마나', value: 10 } ]
   } ,
@@ -3663,11 +3663,11 @@ const cookings = [
   } ,
   {
     originName: 'Strawberry Whipped Cream Crepe',
-    localName: '딸기 휘핑크림 크레이프',
+    localName: '딸기 생크림 크레이프',
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Crepe (45%) Strawberry (31%) Whipped Cream (24%)',
-    localRecipe: '크레이프 (45%) 딸기 (31%) 휘핑크림 (24%)',
+    localRecipe: '크레이프 (45%) 딸기 (31%) 생크림 (24%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/36/Strawberry_Whipped_Cream_Crepe.png',
     status: [
       { name: '생명력', value: 20 },
@@ -3701,7 +3701,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Egg (67%) White Truffle (14%) Mixed Vegetables (19%)',
-    localRecipe: '계란 (67%) 화이트 트러플 (14%) 혼합 야채 (19%)',
+    localRecipe: '달걀 (67%) 화이트 트러플 (14%) 혼합 야채 (19%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/2/26/Truffle_Omelet.png',
     status: [ { name: '스태미나', value: 40 }, { name: '솜씨', value: 30 } ]
   } ,
@@ -3711,7 +3711,7 @@ const cookings = [
     originCookingType: 'Mixing',
     localCookingType: '혼합',
     originRecipe: 'Gyeran-mari (50%) Steamed Rice (45%) Vinegar (5%)',
-    localRecipe: '계란마리(50%) 밥(45%) 식초(5%)',
+    localRecipe: '계란말이(50%) 밥(45%) 식초(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/ac/Tamago_Sushi.png',
     status: [
       { name: '스태미나', value: 30 },
@@ -3721,7 +3721,7 @@ const cookings = [
   } ,
   {
     originName: 'Steamed Mushroom',
-    localName: '찐 버섯',
+    localName: '버섯찜',
     originCookingType: 'Steaming',
     localCookingType: '찌기',
     originRecipe: 'Hazelnut Mushroom(60%) Water(30%) Salt(10%)',
@@ -3783,7 +3783,7 @@ const cookings = [
     originCookingType: 'Pizza Making',
     localCookingType: '피자 만들기',
     originRecipe: 'Red Sauce Pizza Dough(40%) Block of Cheese(42%) Bell Pepper(18%)',
-    localRecipe: '레드소스 피자도우(40%) 치즈블록(42%) 피망(18%)',
+    localRecipe: '레드소스 피자도우(40%) 커다란 치즈덩어리(42%) 피망(18%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/7/73/Tara_Deep_Dish.png',
     status: [
       { name: '스태미나', value: 40 },
@@ -3894,7 +3894,7 @@ const cookings = [
     originCookingType: 'Noodle Making',
     localCookingType: '면 만들기',
     originRecipe: 'Noodle(50%) Meat Broth(45%) Fried Shrimp(5%)',
-    localRecipe: '면(50%) 고기육수(45%) 새우튀김(5%)',
+    localRecipe: '면(50%) 육수(45%) 새우튀김(5%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/1/1a/Shrimp_Tempura_Udon.png',
     status: [
       { name: '생명력', value: 9 },
@@ -3946,7 +3946,7 @@ const cookings = [
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Fried Vegetables(53%) Whipped Cream(38%) Pepper(9%)',
-    localRecipe: '야채튀김(53%) 휘핑크림(38%) 고추(9%)',
+    localRecipe: '야채튀김(53%) 생크림(38%) 고추(9%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/cd/Vegetable_Soup.png',
     status: [
       { name: '생명력', value: 15 },
@@ -3980,7 +3980,7 @@ const cookings = [
   } ,
   {
     originName: 'Steamed Potato',
-    localName: '찐 감자',
+    localName: '삶은감자',
     originCookingType: 'Simmering',
     localCookingType: '삶기',
     originRecipe: 'Potato(41%) Water(56%) Salt (3%) or Pepper (?%)/ Potato(42%) Water(58%)',
@@ -4053,11 +4053,11 @@ const cookings = [
   } ,
   {
     originName: 'Spicy Kraken Stew',
-    localName: '매콤한 크라켄 스튜',
+    localName: '크라켄 매운탕',
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Raw Chopped Kraken(35%) Steamed Kraken(35%) Kraken Skewer(30%)',
-    localRecipe: '생 다진 크라켄(35%) 찐 크라켄(35%) 크라켄 꼬치(30%)',
+    localRecipe: '크라켄 탕탕이(35%) 자숙 크라켄(35%) 크라켄 호롱구이(30%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/a7/Spicy_Kraken_Stew.png',
     status: [
       { name: '생명력', value: 245 },
@@ -4071,7 +4071,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Simmered Octopus(70%) Wheat Flour(15%) Egg(15%)',
-    localRecipe: '문어조림(70%) 밀가루(15%) 계란(15%)',
+    localRecipe: '문어조림(70%) 밀가루(15%) 달걀(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/c9/Takoyaki.png',
     status: [ { name: '스태미나', value: 40 }, { name: '솜씨', value: 7 } ]
   } ,
@@ -4137,7 +4137,7 @@ const cookings = [
   } ,
   {
     originName: 'Thyme Tea',
-    localName: '백리향 차',
+    localName: '타임 차',
     originCookingType: 'Boiling',
     localCookingType: '끓이기',
     originRecipe: 'Water(90%) Thyme(10%)',
@@ -4175,7 +4175,7 @@ const cookings = [
     originCookingType: 'Pasta Making',
     localCookingType: '파스타 만들기',
     originRecipe: 'Long Pasta(80%) Olive Oil(5%) Garlic(15%)',
-    localRecipe: '롱 파스타(80%) 올리브 오일(5%) 마늘(15%)',
+    localRecipe: '롱 파스타(80%) 올리브유(5%) 마늘(15%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/3/3c/Spaghetti_Aglio_e_Olio.png',
     status: [ { name: '생명력', value: -10 }, { name: '마나', value: 17 } ]
   } ,
@@ -4185,7 +4185,7 @@ const cookings = [
     originCookingType: 'Pasta Making',
     localCookingType: '파스타 만들기',
     originRecipe: 'Short Pasta(80%) Shellfish(18%) Olive Oil(2%)',
-    localRecipe: '숏파스타(80%) 조개류(18%) 올리브오일(2%)',
+    localRecipe: '숏파스타(80%) 조개류(18%) 올리브유(2%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/fe/Spaghetti_alle_Vongole.png',
     status: [ { name: '생명력', value: 20 }, { name: '지력', value: -20 } ]
   } ,
@@ -4225,11 +4225,11 @@ const cookings = [
   } ,
   {
     originName: 'Warm Hot Spring Egg',
-    localName: '따뜻한 온천 계란',
+    localName: '따뜻한 온천 달걀',
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Egg(86%) Water(10%) Soy Sauce(4%)',
-    localRecipe: '계란(86%) 물이 든 병(10%) 간장(4%)',
+    localRecipe: '달걀(86%) 물이 든 병(10%) 간장(4%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/a8/Warm_Hot_Spring_Egg.png',
     status: [
       { name: '마나', value: 30 },
@@ -4239,11 +4239,11 @@ const cookings = [
   } ,
   {
     originName: 'Tomato Egg Stir-Fry',
-    localName: '토마토 계란 볶음',
+    localName: '토마토 달걀 볶음',
     originCookingType: 'Stir-frying',
     localCookingType: '볶기',
     originRecipe: 'Tomato (56%) Egg (35%) Pepper (9%)',
-    localRecipe: '토마토(56%) 계란(35%) 후추(9%)',
+    localRecipe: '토마토(56%) 달걀(35%) 후추(9%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/e/e0/Tomato_Egg_Stir-Fry.png',
     status: [
       { name: '체력', value: -0 },
@@ -4257,7 +4257,7 @@ const cookings = [
     originCookingType: 'Steaming',
     localCookingType: '찌기',
     originRecipe: 'Rainbow Trout(54%) Water(37%) Thyme(9%)',
-    localRecipe: '무지개송어(54%) 물이 든 병(37%) 백리향(9%)',
+    localRecipe: '무지개송어(54%) 물이 든 병(37%) 타임(9%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/f/f8/Steamed_Trout.png',
     status: [
       { name: '생명력', value: 22 },
@@ -4364,11 +4364,11 @@ const cookings = [
   } ,
   {
     originName: 'Steamed Egg Casserole',
-    localName: '계란찜 캐서롤',
+    localName: '계란찜',
     originCookingType: 'Steaming',
     localCookingType: '찌기',
     originRecipe: 'Egg(88%) Water(11%) Salt(1%)',
-    localRecipe: '계란(88%) 물이 든 병(11%) 소금(1%)',
+    localRecipe: '달걀(88%) 물이 든 병(11%) 소금(1%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/c3/Steamed_Egg_Casserole.png',
     status: [ { name: '생명력', value: 7 }, { name: '행운', value: 9 } ]
   } ,
@@ -4447,7 +4447,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Magic Bean Tofu (80%) Olive Oil (10%) Worcestershire Sauce (10%)',
-    localRecipe: '마법의콩두부(80%) 올리브오일(10%) 우스터소스(10%)',
+    localRecipe: '마법의콩두부(80%) 올리브유(10%) 우스터소스(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/5/5e/Tofu_Steak.png',
     status: [
       { name: '마나', value: 40 },
@@ -4511,7 +4511,7 @@ const cookings = [
     originCookingType: 'Pizza Making',
     localCookingType: '피자 만들기',
     originRecipe: 'Plain Pizza Dough(40%)Sweet Potato(36%)Slice of Cheese(24%)',
-    localRecipe: '플레인 피자 도우(40%)고구마(36%)슬라이스치즈(24%)',
+    localRecipe: '담백한 피자 도우(40%)고구마(36%)슬라이스치즈(24%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/a/aa/Sweet_Potato_Pizza.png',
     status: [ { name: '마나', value: 60 }, { name: '솜씨', value: 10 } ]
   } ,
@@ -4521,7 +4521,7 @@ const cookings = [
     originCookingType: 'Baking',
     localCookingType: '굽기',
     originRecipe: 'Flour Dough (35%) Strawberry (35%) Whipped Cream (30%)',
-    localRecipe: '밀가루 반죽 (35%) 딸기 (35%) 휘핑크림 (30%)',
+    localRecipe: '밀가루 반죽 (35%) 딸기 (35%) 생크림 (30%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/9/97/Strawberry_Shortcake.png',
     status: [
       { name: '생명력', value: 45 },
@@ -4535,7 +4535,7 @@ const cookings = [
     originCookingType: 'Pie Making',
     localCookingType: '파이 만들기',
     originRecipe: 'Pan Pie Crust (35%) Sweet Potato (55%) Egg (10%)',
-    localRecipe: '팬파이 크러스트(35%) 고구마(55%) 계란(10%)',
+    localRecipe: '팬파이 크러스트(35%) 고구마(55%) 달걀(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/b/bc/Sweet_Potato_Pie.png',
     status: [ { name: '생명력', value: 12 }, { name: '의지', value: 5 } ]
   } ,
@@ -4545,7 +4545,7 @@ const cookings = [
     originCookingType: 'Sous Vide',
     localCookingType: '수비드',
     originRecipe: 'Long Pasta (79%) Olive Oil (9%) Fan Mussel (12%)',
-    localRecipe: '롱 파스타 (79%) 올리브 오일 (9%) 부채 홍합 (12%)',
+    localRecipe: '롱 파스타 (79%) 올리브유 (9%) 부채 홍합 (12%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/9/98/Sous_Vide_Pasta_Aglio_e_Olio.png',
     status: [
       { name: '생명력', value: 40 },
@@ -4555,11 +4555,11 @@ const cookings = [
   } ,
   {
     originName: 'Spicy Fried Kraken',
-    localName: '매콤한 튀김 크라켄',
+    localName: '타바스코 프라이드 크라켄',
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Kraken Leg Meat(75%) Fry Batter(15%) Lemon(10%)',
-    localRecipe: '크라켄 다리살(75%) 튀김반죽(15%) 레몬(10%)',
+    localRecipe: '크라켄 다리살(75%) 튀김옷(15%) 레몬(10%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/1/11/Spicy_Fried_Kraken.png',
     status: [ { name: '보호', value: 4 }, { name: '마법보호', value: 4 } ]
   } ,
@@ -4579,7 +4579,7 @@ const cookings = [
     originCookingType: 'Deep-frying',
     localCookingType: '튀기기',
     originRecipe: 'Sweet Potato (75%) Fry Batter (25%)',
-    localRecipe: '고구마 (75%) 튀김반죽 (25%)',
+    localRecipe: '고구마 (75%) 튀김옷 (25%)',
     thumbnail: 'https://wiki.mabinogiworld.com/images/c/c3/Sweet_Potato_Fries.png',
     status: [ { name: '솜씨', value: 15 }, { name: '행운', value: 15 } ]
   } ,

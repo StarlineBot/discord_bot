@@ -207,7 +207,7 @@ module.exports = {
       }
     }
 
-    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartTime}시 [${dungeonName} ${dungeonDifficult}] ${(dungeonHeadcount === 0
+    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName} ${dungeonDifficult}] ${dungeonStartTime}시, ${(dungeonHeadcount === 0
         ? '모이면 바로 출발'
 : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
 
@@ -215,7 +215,7 @@ module.exports = {
         '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n' +
         `<@${interaction.member.id}>`;
     if(dungeonName === "보약팟") {
-      title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartTime}시 [${dungeonName}] 8인 채워지면 출발!`;
+      title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName}] ${dungeonStartTime}시, 8인 채워지면 출발!`;
       contents = '<@everyone>' + " feat: 열정이"
           + "\n### 1시간 40릴을 목표로 진행 합니다."
           + "\n전부 길원들로만 갈 거라서 8인이 모여야 출발 할 수 있습니다."

@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const guildModule = require('../modules/getGuildInfo')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -17,6 +18,13 @@ module.exports = {
         true)
     ),
   run: ({ interaction }) => {
+    // 길드별로 해야할일이 있을때
+    console.log(interaction.member.guild.id)
+
+    const guildId = interaction.member.guild.id
+    const guildInfo = guildModule.getGuildInfo(guildId)
+    const generalChannelId = guildInfo.generalChannelId
+
     const num1 = interaction.options.get('number-1').value
     const num2 = interaction.options.get('number-2').value
     const num3 = interaction.options.get('number-3').value
@@ -35,6 +43,10 @@ module.exports = {
         , { name: '*-', value: `${(num1 * num2 - num3)}` }
       )
       .setFooter({ text: '바스, 벨테인, 루나사, 삼하인, 임볼릭' })
-    interaction.reply({ embeds: [embed] })
+
+    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    interaction.reply(`입력한 정보는 <#${generalChannel.id}>에 작성했어~`)
+
+    generalChannel.send({ embeds: [embed] })
   }
 }

@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const guildModule = require('../modules/getGuildInfo')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,6 +15,13 @@ module.exports = {
         .setMinValue(1).setMaxValue(10)
     ),
   run: async ({ interaction }) => {
+    // 길드별로 해야할일이 있을때
+    console.log(interaction.member.guild.id)
+
+    const guildId = interaction.member.guild.id
+    const guildInfo = guildModule.getGuildInfo(guildId)
+    const generalChannelId = guildInfo.generalChannelId
+
     const totalPrice = interaction.options.get('total_price').value
     const headcount = interaction.options.get('headcount').value
 
@@ -25,7 +33,10 @@ module.exports = {
         , { name: '입력한 총금액', value: `${totalPrice}숲` }
         , { name: '입력한 인원수', value: `${headcount}명` }
       )
-    interaction.reply(
-      { content: '계산된 금액을 알려줄게~ 소수점은 버렸으니 분배자 수고비로 하자~', embeds: [embed] })
+
+    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    interaction.reply(`입력한 내용은 <#${generalChannel.id}>에 계산 해 놨어~`)
+
+    generalChannel.send({ content: '계산된 금액을 알려줄게~ 소수점은 버렸으니 분배자 수고비로 하자~', embeds: [embed] })
   }
 }

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
-
+const guildModule = require('../modules/getGuildInfo')
 const cookings = [
   {
     originName: 'Cornbread',
@@ -4730,6 +4730,10 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
+    const guildId = interaction.member.guild.id
+    const guildInfo = guildModule.getGuildInfo(guildId)
+    const generalChannelId = guildInfo.generalChannelId
+
     const subcommand = interaction.options._subcommand
     let keyword
     let sortCookings
@@ -4767,7 +4771,11 @@ module.exports = {
       const cooking = sortCookings[i]
       embeds.push(getEmbed(cooking))
     }
-    interaction.reply({ embeds })
+
+    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    interaction.reply(`입력한 요리정보는 <#${generalChannel.id}>에 작성했어~`)
+
+    generalChannel.send({ embeds })
   }
 }
 

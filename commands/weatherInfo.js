@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const axios = require('axios')
 const { DateTime } = require('luxon')
+const guildModule = require('../modules/getGuildInfo')
 const devChannelId = process.env.DEV_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 const local = [
@@ -56,6 +57,13 @@ module.exports = {
     .setName('날씨')
     .setDescription('마비노기 날씨 정보를 가져와~'),
   run: async ({ interaction }) => {
+    // 길드별로 해야할일이 있을때
+    console.log(interaction.member.guild.id)
+
+    const guildId = interaction.member.guild.id
+    const guildInfo = guildModule.getGuildInfo(guildId)
+    const generalChannelId = guildInfo.generalChannelId
+
     try {
       const now = DateTime.now()
 
@@ -113,7 +121,11 @@ module.exports = {
             value: `${afterDateOfType7.toFormat('yyyy-MM-dd HH:mm')}`
           }
         )
-      interaction.reply({ embeds: [embed] })
+
+      const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+      interaction.reply(`현재 시간 기준 에린날씨를 <#${generalChannel.id}>에 작성했어~`)
+
+      generalChannel.send({ embeds: [embed] })
     } catch (error) {
       interaction.reply(basicErrorMessage)
       interaction.client.channels.cache.get(devChannelId).send(

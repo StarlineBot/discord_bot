@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js')
+const guildModule = require('../modules/getGuildInfo')
 
 const week = ['일', '월', '화', '수', '목', '금', '토']
 const oddMonth = [
@@ -25,6 +26,13 @@ module.exports = {
     .setName('교환인챈트')
     .setDescription('현재 날짜에 맞게 스튜어트에게서 복원의 가루로 교환 가능한 인챈트를 알려줄게!'),
   run: ({ interaction }) => {
+    // 길드별로 해야할일이 있을때
+    console.log(interaction.member.guild.id)
+
+    const guildId = interaction.member.guild.id
+    const guildInfo = guildModule.getGuildInfo(guildId)
+    const generalChannelId = guildInfo.generalChannelId
+
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth() + 1
@@ -34,9 +42,14 @@ module.exports = {
     const getObj = isOdd
       ? oddMonth.find(({ weekDay }) => weekDay === getWeekDay)
       : evenMonth.find(({ weekDay }) => weekDay === getWeekDay)
-    interaction.reply(
+
+    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    interaction.reply(`오늘 기준 교환가능 인챈트는 <#${generalChannel.id}>에 작성했어~`)
+
+    generalChannel.send(
       '오늘 ' + year + '년 ' + month + '월 ' + day + '일 ' + getWeekDay +
         '요일, 스튜어트에게 교환할 수 있는 있챈트는 다음과 같아!\n\n' + getObj.enchants.join(', ') +
-        '\n인챈트 버리지 말고 복원의 가루로 꼭 교환해!😎')
+        '\n인챈트 버리지 말고 복원의 가루로 꼭 교환해!😎'
+    )
   }
 }

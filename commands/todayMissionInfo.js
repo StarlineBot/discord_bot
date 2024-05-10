@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const guildModule = require('../modules/getGuildInfo')
 const devChannelId = process.env.DEV_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
@@ -9,6 +10,13 @@ module.exports = {
     .setName('오미')
     .setDescription('오늘의 미션과 베테랑 던전을 알려줄게!'),
   run: async ({ interaction }) => {
+    // 길드별로 해야할일이 있을때
+    console.log(interaction.member.guild.id)
+
+    const guildId = interaction.member.guild.id
+    const guildInfo = guildModule.getGuildInfo(guildId)
+    const generalChannelId = guildInfo.generalChannelId
+
     try {
       const todayMissionObject = await getTodayMission()
       const todayMission = await todayMissionObject.data.missions[0]
@@ -46,10 +54,15 @@ module.exports = {
           }
         )
 
-      interaction.reply({
-        content: '오미를 안내 해줄게~ 그럼 오늘도 화이팅!🤩',
-        embeds: [todayEmbed, tomorrowEmbed]
-      })
+      const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+      interaction.reply(`오늘의 미션을 <#${generalChannel.id}>에 작성했어~`)
+
+      generalChannel.send(
+        {
+          content: '오미를 안내 해줄게~ 그럼 오늘도 화이팅!🤩',
+          embeds: [todayEmbed, tomorrowEmbed]
+        }
+      )
     } catch (error) {
       interaction.reply(basicErrorMessage)
       interaction.client.channels.cache.get(devChannelId).send(

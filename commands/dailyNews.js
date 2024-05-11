@@ -22,7 +22,9 @@ module.exports = {
       const content = $('#news_0').text()
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-      interaction.reply(`매일뉴스는 <#${generalChannel.id}>에 작성했어~`)
+      if (interaction.channelId !== generalChannel.id) {
+        interaction.reply(`매일뉴스는 <#${generalChannel.id}>에 작성했어~`)
+      }
 
       generalChannel.send(content)
     } catch (error) {

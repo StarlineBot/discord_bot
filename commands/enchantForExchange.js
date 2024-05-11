@@ -44,7 +44,9 @@ module.exports = {
       : evenMonth.find(({ weekDay }) => weekDay === getWeekDay)
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    interaction.reply(`오늘 기준 교환가능 인챈트는 <#${generalChannel.id}>에 작성했어~`)
+    if (interaction.channelId !== generalChannel.id) {
+      interaction.reply(`오늘 기준 교환가능 인챈트는 <#${generalChannel.id}>에 작성했어~`)
+    }
 
     generalChannel.send(
       '오늘 ' + year + '년 ' + month + '월 ' + day + '일 ' + getWeekDay +

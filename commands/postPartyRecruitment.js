@@ -249,6 +249,6 @@ module.exports = {
       })
     }
 
-    interaction.reply(`<#${devPartyChannel.id}>에 해당 내용으로 작성했어~😎`)
+    interaction.reply(`<#${partyChannel.id}>에 해당 내용으로 작성했어~😎`)
   }
 }

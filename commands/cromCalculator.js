@@ -45,7 +45,9 @@ module.exports = {
       .setFooter({ text: '바스, 벨테인, 루나사, 삼하인, 임볼릭' })
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    interaction.reply(`입력한 정보는 <#${generalChannel.id}>에 작성했어~`)
+    if (interaction.channelId !== generalChannel.id) {
+      interaction.reply(`입력한 정보는 <#${generalChannel.id}>에 작성했어~`)
+    }
 
     generalChannel.send({ embeds: [embed] })
   }

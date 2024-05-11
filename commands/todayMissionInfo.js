@@ -55,7 +55,9 @@ module.exports = {
         )
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-      interaction.reply(`오늘의 미션을 <#${generalChannel.id}>에 작성했어~`)
+      if (interaction.channelId !== generalChannel.id) {
+        interaction.reply(`오늘의 미션을 <#${generalChannel.id}>에 작성했어~`)
+      }
 
       generalChannel.send(
         {

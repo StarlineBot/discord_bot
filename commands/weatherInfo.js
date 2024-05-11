@@ -123,7 +123,9 @@ module.exports = {
         )
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-      interaction.reply(`현재 시간 기준 에린날씨를 <#${generalChannel.id}>에 작성했어~`)
+      if (interaction.channelId !== generalChannel.id) {
+        interaction.reply(`현재 시간 기준 에린날씨를 <#${generalChannel.id}>에 작성했어~`)
+      }
 
       generalChannel.send({ embeds: [embed] })
     } catch (error) {

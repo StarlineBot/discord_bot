@@ -35,7 +35,9 @@ module.exports = {
       )
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    interaction.reply(`입력한 내용은 <#${generalChannel.id}>에 계산 해 놨어~`)
+    if (interaction.channelId !== generalChannel.id) {
+      interaction.reply(`입력한 내용은 <#${generalChannel.id}>에 계산 해 놨어~`)
+    }
 
     generalChannel.send({ content: '계산된 금액을 알려줄게~ 소수점은 버렸으니 분배자 수고비로 하자~', embeds: [embed] })
   }

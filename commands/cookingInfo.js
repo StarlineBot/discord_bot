@@ -4773,7 +4773,9 @@ module.exports = {
     }
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    interaction.reply(`입력한 요리정보는 <#${generalChannel.id}>에 작성했어~`)
+    if (interaction.channelId !== generalChannel.id) {
+      interaction.reply(`입력한 요리정보는 <#${generalChannel.id}>에 작성했어~`)
+    }
 
     generalChannel.send({ embeds })
   }

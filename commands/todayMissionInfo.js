@@ -13,6 +13,7 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
+    const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
@@ -25,6 +26,7 @@ module.exports = {
       const tomorrowMission = await tomorrowMissionObject.data.missions[0]
 
       const todayEmbed = new EmbedBuilder()
+        .setAuthor(writer)
         .setTitle('오늘의 미션&베테랑')
         .setColor('#86E57F')
         .addFields(
@@ -38,8 +40,10 @@ module.exports = {
             value: `- ${todayMission.Tara.Normal}\n* (PC방) ${todayMission.Tara.VIP}`
           }
         )
+        .setTimestamp()
 
       const tomorrowEmbed = new EmbedBuilder()
+        .setAuthor(writer)
         .setTitle('내일의 미션&베테랑')
         .setColor('#FFBB00')
         .addFields(
@@ -53,11 +57,14 @@ module.exports = {
             value: `- ${tomorrowMission.Tara.Normal}\n* (PC방) ${tomorrowMission.Tara.VIP}`
           }
         )
+        .setTimestamp()
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-      if (interaction.channelId !== generalChannel.id) {
-        interaction.reply(`오늘의 미션을 <#${generalChannel.id}>에 작성했어~`)
+      const replyContent = { content: `오늘의 미션을 <#${generalChannel.id}>에 작성했어~` }
+      if (interaction.channelId === generalChannel.id) {
+        replyContent.ephemeral = true
       }
+      interaction.reply(replyContent)
 
       generalChannel.send(
         {

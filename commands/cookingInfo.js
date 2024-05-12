@@ -4730,6 +4730,7 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
+    const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
@@ -4769,20 +4770,23 @@ module.exports = {
     const count = sortCookings.length < 10 ? sortCookings.length : 10
     for (let i = 0; i < count; i++) {
       const cooking = sortCookings[i]
-      embeds.push(getEmbed(cooking))
+      embeds.push(getEmbed(writer, cooking))
     }
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    if (interaction.channelId !== generalChannel.id) {
-      interaction.reply(`입력한 요리정보는 <#${generalChannel.id}>에 작성했어~`)
+    const replyContent = { content: `입력한 요리정보는 <#${generalChannel.id}>에 작성했어~` }
+    if (interaction.channelId === generalChannel.id) {
+      replyContent.ephemeral = true
     }
+    interaction.reply(replyContent)
 
     generalChannel.send({ embeds })
   }
 }
 
-const getEmbed = function (cooking) {
+const getEmbed = function (writer, cooking) {
   const subEmbed = new EmbedBuilder()
+    .setAuthor(writer)
     .setTitle(`${cooking.localName}`)
     .setColor('#FFE400')
     .setThumbnail(cooking.thumbnail)
@@ -4792,6 +4796,7 @@ const getEmbed = function (cooking) {
     .addFields(
       { name: '레시피', value: `${cooking.localRecipe}` }
     )
+    .setTimestamp()
   for (const subStatus of cooking.status) {
     subStatus.inline = true
     subStatus.value = subStatus.value + ''

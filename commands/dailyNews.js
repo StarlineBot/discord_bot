@@ -12,6 +12,7 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
+    // const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
@@ -22,9 +23,11 @@ module.exports = {
       const content = $('#news_0').text()
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-      if (interaction.channelId !== generalChannel.id) {
-        interaction.reply(`매일뉴스는 <#${generalChannel.id}>에 작성했어~`)
+      const replyContent = { content: `매일뉴스는 <#${generalChannel.id}>에 작성했어~` }
+      if (interaction.channelId === generalChannel.id) {
+        replyContent.ephemeral = true
       }
+      interaction.reply(replyContent)
 
       generalChannel.send(content)
     } catch (error) {

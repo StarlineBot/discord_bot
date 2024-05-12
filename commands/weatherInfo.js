@@ -60,6 +60,7 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
+    const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
@@ -103,6 +104,7 @@ module.exports = {
         { minute: upcomingRainyWeatherObject.data.next.for.type10 })
 
       const embed = new EmbedBuilder()
+        .setAuthor(writer)
         .setTitle('오늘의 에린날씨~🌈')
         .setColor('#FFD9EC')
         .addFields(
@@ -121,11 +123,14 @@ module.exports = {
             value: `${afterDateOfType7.toFormat('yyyy-MM-dd HH:mm')}`
           }
         )
+        .setTimestamp()
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-      if (interaction.channelId !== generalChannel.id) {
-        interaction.reply(`현재 시간 기준 에린날씨를 <#${generalChannel.id}>에 작성했어~`)
+      const replyContent = { content: `현재 시간 기준 에린날씨를 <#${generalChannel.id}>에 작성했어~` }
+      if (interaction.channelId === generalChannel.id) {
+        replyContent.ephemeral = true
       }
+      interaction.reply(replyContent)
 
       generalChannel.send({ embeds: [embed] })
     } catch (error) {

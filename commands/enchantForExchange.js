@@ -29,6 +29,7 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
+    // const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
@@ -44,9 +45,11 @@ module.exports = {
       : evenMonth.find(({ weekDay }) => weekDay === getWeekDay)
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    if (interaction.channelId !== generalChannel.id) {
-      interaction.reply(`오늘 기준 교환가능 인챈트는 <#${generalChannel.id}>에 작성했어~`)
+    const replyContent = { content: `오늘 기준 교환가능 인챈트는 <#${generalChannel.id}>에 작성했어~` }
+    if (interaction.channelId === generalChannel.id) {
+      replyContent.ephemeral = true
     }
+    interaction.reply(replyContent)
 
     generalChannel.send(
       '오늘 ' + year + '년 ' + month + '월 ' + day + '일 ' + getWeekDay +

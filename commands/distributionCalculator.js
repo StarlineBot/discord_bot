@@ -18,6 +18,7 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
+    const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
@@ -26,6 +27,7 @@ module.exports = {
     const headcount = interaction.options.get('headcount').value
 
     const embed = new EmbedBuilder()
+      .setAuthor(writer)
       .setTitle('분배할 금액은~?')
       .setColor(0x0099ff)
       .addFields(
@@ -33,11 +35,14 @@ module.exports = {
         , { name: '입력한 총금액', value: `${totalPrice}숲` }
         , { name: '입력한 인원수', value: `${headcount}명` }
       )
+      .setTimestamp()
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    if (interaction.channelId !== generalChannel.id) {
-      interaction.reply(`입력한 내용은 <#${generalChannel.id}>에 계산 해 놨어~`)
+    const replyContent = { content: `입력한 내용은 <#${generalChannel.id}>에 계산 해 놨어~` }
+    if (interaction.channelId === generalChannel.id) {
+      replyContent.ephemeral = true
     }
+    interaction.reply(replyContent)
 
     generalChannel.send({ content: '계산된 금액을 알려줄게~ 소수점은 버렸으니 분배자 수고비로 하자~', embeds: [embed] })
   }

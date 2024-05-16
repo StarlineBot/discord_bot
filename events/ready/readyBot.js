@@ -5,6 +5,8 @@ const cheerio = require('cheerio')
 const { EmbedBuilder } = require('discord.js')
 const guildModule = require('../../modules/getGuildInfo')
 
+const offset = new Date().getTimezoneOffset() * 60000
+const nowDate = new Date(Date.now() - offset)
 const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
   '../../modules/todayMission')
@@ -19,6 +21,7 @@ const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 module.exports = async (client) => {
   console.log(`server: ${process.env.NODE_ENV}, ${client.user.tag} is online!`)
 
+  const otherChannel = client.channels.cache.get(otherChannelId)
   if (isDelete) {
     const fetchSlash = await client.application.commands.fetch()
     console.log(fetchSlash)
@@ -39,12 +42,11 @@ module.exports = async (client) => {
   })
 
   const eachHoursJob = new cron.CronJob('0 * * * *', function () {
-    const channel = client.channels.cache.get(otherChannelId)
     try {
       const now = new Date()
-      channel.send(`현재 ${now.getHours()}시 ${now.getMinutes()}분 아직 살아있음...`)
+      otherChannel.send(`현재 ${now.getHours()}시 ${now.getMinutes()}분 아직 살아있음...`)
     } catch (error) {
-      channel.send(basicErrorMessage)
+      otherChannel.send(basicErrorMessage)
     }
   })
 
@@ -53,9 +55,32 @@ module.exports = async (client) => {
 
   // 매일 아침 8시에 필요한 정보들을 가져와 채널로 전송
   const cronSchedule = process.env.NODE_ENV === 'development'
-    ? '0 * * * *'
+    ? '* * * * *'
     : '0 08 * * *'
   const dailyJob = new cron.CronJob(cronSchedule, async function () {
+    client.guilds.cache.forEach(guild => {
+      const guildInfo = guildModule.getGuildInfo(guild.id)
+      if (!guildInfo) {
+        return
+      }
+
+      console.log(guildInfo)
+      const partyChannel = guild.channels.cache.get(guildInfo.partyChannelId)
+      partyChannel.threads.cache.forEach(thread => {
+        if (thread.locked) {
+          return
+        }
+        const createdDate = new Date(thread.createdAt)
+        const betweenTime = Math.floor((nowDate.getTime() - createdDate.getTime()) / 1000 / 60)
+        const betweenTimeDay = Math.floor(betweenTime / 60 / 24)
+        if (betweenTimeDay > 7) {
+          thread.delete().then(deletedThread => {
+            otherChannel.send(`포스트 삭제 됨, 제목: ${deletedThread.name}, 생성일: ${deletedThread.createdAt}`)
+          }).catch(console.error)
+        }
+      })
+    })
+
     const channel = client.channels.cache.get(channelId)
     try {
       channel.send(
@@ -80,6 +105,7 @@ module.exports = async (client) => {
             value: `- ${todayMission.Tara.Normal}\n* (PC방) ${todayMission.Tara.VIP}`
           }
         )
+        .setTitle('오늘의 미션&베테랑')
 
       const tomorrowEmbed = new EmbedBuilder()
         .setTitle('내일의 미션&베테랑')
@@ -95,6 +121,7 @@ module.exports = async (client) => {
             value: `- ${tomorrowMission.Tara.Normal}\n* (PC방) ${tomorrowMission.Tara.VIP}`
           }
         )
+        .setTimestamp()
       channel.send({ embeds: [todayEmbed, tomorrowEmbed] })
 
       channel.send(
@@ -111,7 +138,6 @@ module.exports = async (client) => {
       channel.send(error)
 
       if (process.env.NODE_ENV === 'production') {
-        const otherChannel = client.channels.cache.get(otherChannelId)
         otherChannel.send(basicErrorMessage + '\n' + error)
       }
     }

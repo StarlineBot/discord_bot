@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../../modules/getGuildInfo')
-const now = DateTime.now().setLocale('ko')
+const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 module.exports = (member) => {
   const guildId = member.guild.id
   const guildInfo = guildModule.getGuildInfo(guildId)

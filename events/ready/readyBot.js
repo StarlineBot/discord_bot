@@ -5,7 +5,7 @@ const cheerio = require('cheerio')
 const { EmbedBuilder } = require('discord.js')
 const guildModule = require('../../modules/getGuildInfo')
 
-const now = DateTime.now().setLocale('ko')
+const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
   '../../modules/todayMission')
 

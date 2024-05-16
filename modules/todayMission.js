@@ -29,7 +29,7 @@ for (let i = 1; i < 731; i++) {
   veteranIndex++
 }
 
-const today = DateTime.now()
+const today = DateTime.now().setZone("Asia/Seoul").setLocale('ko')
 const todayVeteran = dungeonList.find(
   ({ date }) => date.hasSame(today, 'day') && date.hasSame(today, 'year') &&
         date.hasSame(today, 'month'))

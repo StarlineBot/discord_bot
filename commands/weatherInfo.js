@@ -66,7 +66,7 @@ module.exports = {
     const generalChannelId = guildInfo.generalChannelId
 
     try {
-      const now = DateTime.now()
+      const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 
       const forecastWeatherObject = await axios.get(
           `https://mabi.world/api/forecast/?from=${now.toISO().split('.')[0]}`)

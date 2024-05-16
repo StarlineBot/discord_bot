@@ -66,10 +66,20 @@ module.exports = async (client) => {
 
       console.log(guildInfo)
       const partyChannel = guild.channels.cache.get(guildInfo.partyChannelId)
+      if (guildInfo.partyChannelId !== '1230356497704423426') {
+        return
+      }
       partyChannel.threads.cache.forEach(thread => {
+        // 지우지않는 태그가 있으면 지우지 않음
+        if (thread.appliedTags.indexOf('1240604477875163146') > 0 || thread.appliedTags.indexOf('1240604372660912149') > 0) {
+          return
+        }
+
+        // 마찬가지로 잠금되어 있는 글도 지우지 않음
         if (thread.locked) {
           return
         }
+
         const createdDate = new Date(thread.createdAt)
         const betweenTime = Math.floor((nowDate.getTime() - createdDate.getTime()) / 1000 / 60)
         const betweenTimeDay = Math.floor(betweenTime / 60 / 24)

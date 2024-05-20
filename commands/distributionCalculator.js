@@ -71,14 +71,14 @@ module.exports = {
       판매금 - (분배금*인원수) 로 두번계산하면
        */
       const distributeCount = headcount - 1
-      const salePrice = (totalPrice * 0.95) / distributeCount
-      const comps = totalPrice - (salePrice * distributeCount)
+      const salePrice = Math.floor((totalPrice * 0.95) / distributeCount)
+      const comps = Math.ceil(totalPrice - (salePrice * distributeCount))
       embed = new EmbedBuilder()
         .setAuthor(writer)
         .setTitle('총 분배할 금액은~')
         .setColor(0x0099ff)
         .addFields(
-          { name: '1명당 분배금', value: `${Math.floor(salePrice)}숲` }
+          { name: '1명당 분배금', value: `${salePrice}숲` }
           , { name: '개평', value: `${comps}숲` }
           , { name: '입력한 총금액', value: `${totalPrice}숲`, inline: true }
           , { name: '입력한 인원수', value: `${headcount}명(키쩔포함)`, inline: true }

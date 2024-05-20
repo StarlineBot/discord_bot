@@ -5,9 +5,6 @@ const cheerio = require('cheerio')
 const { EmbedBuilder } = require('discord.js')
 const guildModule = require('../../modules/getGuildInfo')
 
-const offset = new Date().getTimezoneOffset() * 60000
-const nowDate = new Date(Date.now() - offset)
-const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
   '../../modules/todayMission')
 
@@ -42,8 +39,9 @@ module.exports = async (client) => {
   })
 
   const eachHoursJob = new cron.CronJob('* * * * *', function () {
+    const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     try {
-      otherChannel.send(`현재 ${now.toFormat('yyyy년 MM월 dd일 HH:mm:ss cccc ')}분 아직 살아있음...`)
+      otherChannel.send(`현재 ${now.toFormat('yyyy년 MM월 dd일 HH:mm:ss cccc')} 아직 살아있음...`)
     } catch (error) {
       otherChannel.send(basicErrorMessage)
     }
@@ -57,6 +55,9 @@ module.exports = async (client) => {
     ? '* * * * *'
     : '0 08 * * *'
   const dailyJob = new cron.CronJob(cronSchedule, async function () {
+    const offset = new Date().getTimezoneOffset() * 60000
+    const nowDate = new Date(Date.now() - offset)
+    const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     client.guilds.cache.forEach(guild => {
       const guildInfo = guildModule.getGuildInfo(guild.id)
       if (!guildInfo) {

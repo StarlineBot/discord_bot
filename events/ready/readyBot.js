@@ -66,9 +66,6 @@ module.exports = async (client) => {
 
       console.log(guildInfo)
       const partyChannel = guild.channels.cache.get(guildInfo.partyChannelId)
-      if (guildInfo.partyChannelId !== '1230356497704423426') {
-        return
-      }
       partyChannel.threads.cache.forEach(thread => {
         // 지우지않는 태그가 있으면 지우지 않음
         if (thread.appliedTags.indexOf('1240604477875163146') > 0 || thread.appliedTags.indexOf('1240604372660912149') > 0) {

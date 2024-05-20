@@ -41,7 +41,7 @@ module.exports = async (client) => {
     console.log(guildInfo)
   })
 
-  const eachHoursJob = new cron.CronJob('* * * * *', function () {
+  const eachHoursJob = new cron.CronJob('0 * * * *', function () {
     try {
       otherChannel.send(`현재 ${now.toFormat("HH")}시 ${now.toFormat("mm")}분 아직 살아있음...`)
     } catch (error) {
@@ -51,12 +51,6 @@ module.exports = async (client) => {
 
   console.log('eachHoursJob start!')
   eachHoursJob.start()
-
-  const testJob = new cron.CronJob("* * * * *", function () {
-    otherChannel.send(`${now.toFormat('yyyy년 MM월 dd일 cccc')}, ${nowDate}`)
-  })
-
-  testJob.start();
 
   // 매일 아침 8시에 필요한 정보들을 가져와 채널로 전송
   const cronSchedule = process.env.NODE_ENV === 'development'

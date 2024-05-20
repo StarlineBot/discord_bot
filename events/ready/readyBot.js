@@ -38,7 +38,7 @@ module.exports = async (client) => {
     console.log(guildInfo)
   })
 
-  const eachHoursJob = new cron.CronJob('* * * * *', function () {
+  const eachHoursJob = new cron.CronJob('0 * * * *', function () {
     const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     try {
       otherChannel.send(`현재 ${now.toFormat('yyyy년 MM월 dd일 HH:mm:ss cccc')} 아직 살아있음...`)

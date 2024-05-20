@@ -54,7 +54,7 @@ module.exports = async (client) => {
   eachHoursJob.start()
 
   const testJob = new cron.CronJob("* * * * *", function () {
-    otherChannel.send(`${now}, ${nowDate}`)
+    otherChannel.send(`${now.toFormat('yyyy년 MM월 dd일 cccc')}, ${nowDate}`)
   })
 
   testJob.start();

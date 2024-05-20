@@ -53,6 +53,12 @@ module.exports = async (client) => {
   console.log('eachHoursJob start!')
   eachHoursJob.start()
 
+  const testJob = new cron.CronJob("* * * * *", function () {
+    otherChannel.send(`${now}, ${nowDate}`)
+  })
+
+  testJob.start();
+
   // 매일 아침 8시에 필요한 정보들을 가져와 채널로 전송
   const cronSchedule = process.env.NODE_ENV === 'development'
     ? '* * * * *'

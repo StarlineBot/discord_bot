@@ -41,10 +41,9 @@ module.exports = async (client) => {
     console.log(guildInfo)
   })
 
-  const eachHoursJob = new cron.CronJob('0 * * * *', function () {
+  const eachHoursJob = new cron.CronJob('* * * * *', function () {
     try {
-      const now = new Date()
-      otherChannel.send(`현재 ${now.getHours()}시 ${now.getMinutes()}분 아직 살아있음...`)
+      otherChannel.send(`현재 ${now.toFormat("HH")}시 ${now.toFormat("mm")}분 아직 살아있음...`)
     } catch (error) {
       otherChannel.send(basicErrorMessage)
     }

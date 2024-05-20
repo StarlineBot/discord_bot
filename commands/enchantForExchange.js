@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const guildModule = require('../modules/getGuildInfo')
 
 const week = ['일', '월', '화', '수', '목', '금', '토']
@@ -29,7 +29,12 @@ module.exports = {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
-    // const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
+    const writer = {
+      name: interaction.member.nickname == null
+        ? interaction.member.user.globalName
+        : interaction.member.nickname,
+      iconURL: interaction.member.user.displayAvatarURL()
+    }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
@@ -51,10 +56,15 @@ module.exports = {
     }
     interaction.reply(replyContent)
 
-    generalChannel.send(
-      '오늘 ' + year + '년 ' + month + '월 ' + day + '일 ' + getWeekDay +
-        '요일, 스튜어트에게 교환할 수 있는 있챈트는 다음과 같아!\n\n' + getObj.enchants.join(', ') +
-        '\n인챈트 버리지 말고 복원의 가루로 꼭 교환해!😎'
-    )
+    const embed = new EmbedBuilder()
+      .setAuthor(writer)
+      .setTitle(`오늘 ${year}년 ${month}월 ${day}일 스튜어트 교환가능 인챈트는~`)
+      .setColor(0x0099ff)
+      .addFields(
+        { name: '인챈트명', value: getObj.enchants.join(', ') }
+      )
+      .setTimestamp()
+
+    generalChannel.send({ content: '인챈트 버리지 말고 복원의 가루로 꼭 교환해!😎', embeds: [embed] })
   }
 }

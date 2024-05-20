@@ -48,7 +48,6 @@ module.exports = {
     const generalChannelId = guildInfo.generalChannelId
 
     const distribution = interaction.options._subcommand
-    console.log(distribution)
 
     const totalPrice = interaction.options.get('total_price').value
     const headcount = interaction.options.get('headcount').value

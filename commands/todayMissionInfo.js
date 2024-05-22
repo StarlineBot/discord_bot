@@ -1,9 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const guildModule = require('../modules/getGuildInfo')
+const { DateTime } = require('luxon')
 const devChannelId = process.env.DEV_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
-const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
-  '../modules/todayMission')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -18,6 +17,11 @@ module.exports = {
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
 
+    const today = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
+    const offset = new Date().getTimezoneOffset() * 60000
+    const now = new Date(Date.now() - offset)
+    const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
+      '../modules/todayMission')(today, now)
     try {
       const todayMissionObject = await getTodayMission()
       const todayMission = await todayMissionObject.data.missions[0]

@@ -5,9 +5,6 @@ const cheerio = require('cheerio')
 const { EmbedBuilder } = require('discord.js')
 const guildModule = require('../../modules/getGuildInfo')
 
-const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
-  '../../modules/todayMission')
-
 // 슬래시커맨드를 삭제하고 다시 시작해야 할때
 const isDelete = false
 const channelId = process.env.NODE_ENV === 'development'
@@ -88,6 +85,8 @@ module.exports = async (client) => {
       })
     })
 
+    const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
+      '../../modules/todayMission')(now, nowDate)
     const channel = client.channels.cache.get(channelId)
     try {
       channel.send(

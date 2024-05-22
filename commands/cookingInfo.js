@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js')
-const { unlink } = require("node:fs/promises")
-const puppeteer = require("puppeteer")
+const { unlink } = require('node:fs/promises')
+const puppeteer = require('puppeteer')
 const guildModule = require('../modules/getGuildInfo')
-const uuid4 = require("uuid4");
+const uuid4 = require('uuid4')
 const cookings = [
   {
     originName: 'Cornbread',
@@ -4786,27 +4786,27 @@ module.exports = {
       files.push(obj.file)
     }
 
-    generalChannel.send({ embeds, files }).then(async function(){
-      for(let file of files){
+    generalChannel.send({ embeds, files }).then(async function () {
+      for (const file of files) {
         await unlink(file.attachment)
       }
     })
   }
 }
 
-const regex= /[^0-9]/gi;
+const regex = /[^0-9]/gi
 const getEmbed = async function (writer, cooking) {
-  let getRecipes = cooking.localRecipe.split("%")
-  let getParams = "?";
-  for(let i = 0; i < getRecipes.length; i++){
-    let getRecipe = getRecipes[i];
-    if(i > 0){
-      getParams += "&";
+  const getRecipes = cooking.localRecipe.split('%')
+  let getParams = '?'
+  for (let i = 0; i < getRecipes.length; i++) {
+    const getRecipe = getRecipes[i]
+    if (i > 0) {
+      getParams += '&'
     }
-    if(getRecipe === ""){
-      continue;
+    if (getRecipe === '') {
+      continue
     }
-    getParams += `value${i}=${getRecipe.replace(regex, "")}`;
+    getParams += `value${i}=${getRecipe.replace(regex, '')}`
   }
 
   const fileName = await getImage(`http://localhost:3000${getParams}`)
@@ -4829,22 +4829,22 @@ const getEmbed = async function (writer, cooking) {
     subStatus.value = subStatus.value + ''
     subEmbed.addFields(subStatus)
   }
-  return {subEmbed, file}
+  return { subEmbed, file }
 }
 
 const getImage = async function (url) {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.setViewport({width: 265, height: 114})
+  const browser = await puppeteer.launch()
+  const page = await browser.newPage()
+  await page.setViewport({ width: 265, height: 114 })
   await page.goto(url)
-  await page.waitForSelector("#domToImage")
+  await page.waitForSelector('#domToImage')
 
   const id = uuid4()
   const fileName = `img-${id}.png`
   await page.screenshot({
-    path: "./static/img/" + fileName
-  });
-  await page.close();
-  await browser.close();
-  return fileName;
+    path: './static/img/' + fileName
+  })
+  await page.close()
+  await browser.close()
+  return fileName
 }

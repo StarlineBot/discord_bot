@@ -4833,7 +4833,9 @@ const getEmbed = async function (writer, cooking) {
 }
 
 const getImage = async function (url) {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    executablePath: '/usr/bin/chromium-browser'
+  })
   const page = await browser.newPage()
   await page.setViewport({ width: 265, height: 114 })
   await page.goto(url)

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    .cookInfo {
+      position: relative; width: 265px; height: 110px;
+    }
+    .graph {
+      position: absolute;
+      border: 1px solid #000;
+      top: 40px;
+      background-color: #000;
+      height: 7px;
+      width: 241px;
+      margin-left: 10px;
+      display: flex;
+    }
+    .graph_box {
+      position: relative;
+      height: 8px;
+      box-sizing: border-box;
+    }
+  </style>
+  <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"></script>
+  <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"
+    ></script>
+  <script>
+    $(document).ready(function() {
+      const searchParams = new URLSearchParams(window.location.search);
+      const value1 = searchParams.get("value0");
+      const value2 = searchParams.get("value1");
+      const value3 = searchParams.get("value2");
+      let values = [value1, value2, value3];
+      let colors = ['#F2CB61', '#F15F5F'];
+      for(let i = 0; i < values.length; i++) {
+        let value = values[i];
+        if(value === null) {
+          continue;
+        }
+        $(document).find(".graph").append(`<div class='graph_box' style='width: ${value}%; background-color: ${colors[i]}'></div>`)
+      }
+
+      domtoimage.toPng($(document).find(".cookInfo")[0])
+        .then(function(imgUrl) {
+          let img = new Image();
+          img.id = "domToImage"
+          img.src = imgUrl;
+          $(document).find("body").append(img)
+          $(document).find(".cookInfo").remove();
+        });
+    });
+  </script>
+</head>
+<body style="margin: 0; height: 100%; background-color: rgb(14, 14, 14);">
+  <div class="cookInfo">
+    <div class="graph">
+    </div>
+    <img src="../img/mabi_cook2_ver2.png" alt="" style="padding: 10px; background-color: #406D8F;">
+  </div>
+</body>
+</html>

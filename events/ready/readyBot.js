@@ -49,7 +49,7 @@ module.exports = async (client) => {
 
   // 매일 아침 8시에 필요한 정보들을 가져와 채널로 전송
   const cronSchedule = process.env.NODE_ENV === 'development'
-    ? '* * * * *'
+    ? '0 * * * *'
     : '0 08 * * *'
   const dailyJob = new cron.CronJob(cronSchedule, async function () {
     const offset = new Date().getTimezoneOffset() * 60000

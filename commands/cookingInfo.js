@@ -1,5 +1,8 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js')
+const { unlink } = require("node:fs/promises")
+const puppeteer = require("puppeteer")
 const guildModule = require('../modules/getGuildInfo')
+const uuid4 = require("uuid4");
 const cookings = [
   {
     originName: 'Cornbread',
@@ -4726,7 +4729,7 @@ module.exports = {
             )
         )
     ),
-  run: ({ interaction }) => {
+  run: async ({ interaction }) => {
     // 길드별로 해야할일이 있을때
     console.log(interaction.member.guild.id)
 
@@ -4735,11 +4738,19 @@ module.exports = {
     const guildInfo = guildModule.getGuildInfo(guildId)
     const generalChannelId = guildInfo.generalChannelId
 
+    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    const replyContent = { content: `입력한 요리정보는 <#${generalChannel.id}>에 작성중이야~` }
+    if (interaction.channelId === generalChannel.id) {
+      replyContent.ephemeral = true
+    }
+    interaction.reply(replyContent)
+
     const subcommand = interaction.options._subcommand
     let keyword
     let sortCookings
     const getCookings = []
     const embeds = []
+    const files = []
 
     // 재료는 상위 10개 목록을 어떻게 가져올지 고민, cookingType 하고 같이 가져온다던지
     if (subcommand === '재료') {
@@ -4770,21 +4781,36 @@ module.exports = {
     const count = sortCookings.length < 10 ? sortCookings.length : 10
     for (let i = 0; i < count; i++) {
       const cooking = sortCookings[i]
-      embeds.push(getEmbed(writer, cooking))
+      const obj = await getEmbed(writer, cooking)
+      embeds.push(obj.subEmbed)
+      files.push(obj.file)
     }
 
-    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
-    const replyContent = { content: `입력한 요리정보는 <#${generalChannel.id}>에 작성했어~` }
-    if (interaction.channelId === generalChannel.id) {
-      replyContent.ephemeral = true
-    }
-    interaction.reply(replyContent)
-
-    generalChannel.send({ embeds })
+    generalChannel.send({ embeds, files }).then(async function(){
+      for(let file of files){
+        await unlink(file.attachment)
+      }
+    })
   }
 }
 
-const getEmbed = function (writer, cooking) {
+const regex= /[^0-9]/gi;
+const getEmbed = async function (writer, cooking) {
+  let getRecipes = cooking.localRecipe.split("%")
+  let getParams = "?";
+  for(let i = 0; i < getRecipes.length; i++){
+    let getRecipe = getRecipes[i];
+    if(i > 0){
+      getParams += "&";
+    }
+    if(getRecipe === ""){
+      continue;
+    }
+    getParams += `value${i}=${getRecipe.replace(regex, "")}`;
+  }
+
+  const fileName = await getImage(`http://localhost:3000${getParams}`)
+  const file = new AttachmentBuilder(`static/img/${fileName}`)
   const subEmbed = new EmbedBuilder()
     .setAuthor(writer)
     .setTitle(`${cooking.localName}`)
@@ -4796,11 +4822,29 @@ const getEmbed = function (writer, cooking) {
     .addFields(
       { name: '레시피', value: `${cooking.localRecipe}` }
     )
+    .setImage(`attachment://${fileName}`)
     .setTimestamp()
   for (const subStatus of cooking.status) {
     subStatus.inline = true
     subStatus.value = subStatus.value + ''
     subEmbed.addFields(subStatus)
   }
-  return subEmbed
+  return {subEmbed, file}
+}
+
+const getImage = async function (url) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setViewport({width: 265, height: 114})
+  await page.goto(url)
+  await page.waitForSelector("#domToImage")
+
+  const id = uuid4()
+  const fileName = `img-${id}.png`
+  await page.screenshot({
+    path: "./static/img/" + fileName
+  });
+  await page.close();
+  await browser.close();
+  return fileName;
 }

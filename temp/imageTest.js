@@ -1,8 +1,3 @@
-const uuid4 = require('uuid4')
-/*
-const { unlink } = require('node:fs/promises')
-const puppeteer = require('puppeteer')
-*/
 const nodeHtmlToImage = require('node-html-to-image')
 const fs = require('node:fs')
 
@@ -26,11 +21,13 @@ const htmlToImageTest = async function () {
 }
 */
 
-const nodeHtmlToImageTest = function () {
+const nodeHtmlToImageTest = async function () {
   const image = fs.readFileSync('./static/img/mabi_cook2_ver2.png')
   /* eslint new-cap: ["error", { "newIsCap": false }] */
   const base64Image = new Buffer.from(image).toString('base64')
   const dataURI = 'data:image/jpeg;base64,' + base64Image
+
+  const cookingName = '치즈치아바타'
 
   let html = '<!DOCTYPE html>\n' +
       '<html lang="en">' +
@@ -75,19 +72,21 @@ const nodeHtmlToImageTest = function () {
       '</body>' +
       '</html>'
 
-  console.log(html)
-  const id = uuid4()
-  nodeHtmlToImage({
-    output: `./static/img/img-${id}.png`,
-    html,
-    selector: 'div.cookInfo',
-    content: {
-      imageSource: dataURI
-    }
-  }).then((result) => {
-    console.log(result)
-  })
+  const fileName = `${cookingName}.png`
+
+  if (!fs.existsSync(`./static/img/cookings/${fileName}`)) {
+    console.log('file not exists')
+    await nodeHtmlToImage({
+      output: `./static/img/cookings/${fileName}`,
+      html,
+      selector: 'div.cookInfo',
+      content: {
+        imageSource: dataURI
+      }
+    })
+    return fileName
+  }
 }
 
 // htmlToImageTest()
-nodeHtmlToImageTest()
+console.log(await nodeHtmlToImageTest())

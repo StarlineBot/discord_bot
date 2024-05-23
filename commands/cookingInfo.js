@@ -4886,6 +4886,9 @@ const getImage = async function (values) {
     selector: 'div.cookInfo',
     content: {
       imageSource: dataURI
+    },
+    puppeteerArgs: {
+      executablePath: '/usr/bin/chromium-browser'
     }
   })
   return fileName

@@ -1,8 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js')
 const { unlink } = require('node:fs/promises')
-const puppeteer = require('puppeteer')
 const guildModule = require('../modules/getGuildInfo')
 const uuid4 = require('uuid4')
+const nodeHtmlToImage = require('node-html-to-image')
+const fs = require('node:fs')
 const cookings = [
   {
     originName: 'Cornbread',
@@ -4796,20 +4797,17 @@ module.exports = {
 
 const regex = /[^0-9]/gi
 const getEmbed = async function (writer, cooking) {
+  const values = []
   const getRecipes = cooking.localRecipe.split('%')
-  let getParams = '?'
   for (let i = 0; i < getRecipes.length; i++) {
     const getRecipe = getRecipes[i]
-    if (i > 0) {
-      getParams += '&'
-    }
     if (getRecipe === '') {
       continue
     }
-    getParams += `value${i}=${getRecipe.replace(regex, '')}`
+    values.push(getRecipe.replace(regex, ''))
   }
 
-  const fileName = await getImage(`http://localhost:3000${getParams}`)
+  const fileName = await getImage(values)
   const file = new AttachmentBuilder(`static/img/${fileName}`)
   const subEmbed = new EmbedBuilder()
     .setAuthor(writer)
@@ -4832,21 +4830,85 @@ const getEmbed = async function (writer, cooking) {
   return { subEmbed, file }
 }
 
-const getImage = async function (url) {
-  const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/chromium-browser'
-  })
-  const page = await browser.newPage()
-  await page.setViewport({ width: 265, height: 114 })
-  await page.goto(url)
-  await page.waitForSelector('#domToImage')
+const getImage = async function (values) {
+  const image = fs.readFileSync('./static/img/mabi_cook2_ver2.png')
+  /* eslint new-cap: ["error", { "newIsCap": false }] */
+  const base64Image = new Buffer.from(image).toString('base64')
+  const dataURI = 'data:image/jpeg;base64,' + base64Image
+
+  let html = '<!DOCTYPE html>\n' +
+      '<html lang="en">' +
+      '<head>' +
+      '<style>' +
+      '    .cookInfo {' +
+      '      position: relative; width: 265px; height: 110px;' +
+      '    }' +
+      '    .graph {' +
+      '      position: absolute;' +
+      '      border: 1px solid #000;' +
+      '      top: 40px;' +
+      '      background-color: #000;' +
+      '      height: 7px;' +
+      '      width: 241px;' +
+      '      margin-left: 10px;' +
+      '      display: flex;' +
+      '    }' +
+      '    .graph_box {' +
+      '      position: relative;' +
+      '      height: 8px;' +
+      '      box-sizing: border-box;' +
+      '    }' +
+      '  </style>' +
+      '</head>' +
+      '<body style="margin: 0; height: 100%; background-color: rgb(14, 14, 14);">' +
+      '  <div class="cookInfo">' +
+      '    <div class="graph">'
+  const colors = ['#F2CB61', '#F15F5F']
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i]
+    const color = colors[i]
+    if (value === null) {
+      continue
+    }
+    html += `<div class="graph_box" style="width: ${value}%; background-color: ${color};"></div>`
+  }
+  html += ' </div>' +
+      '    <img src="{{imageSource}}" alt="" style="padding: 10px; background-color: #406D8F;">' +
+      '  </div>' +
+      '</body>' +
+      '</html>'
 
   const id = uuid4()
   const fileName = `img-${id}.png`
-  await page.screenshot({
-    path: './static/img/' + fileName
+  await nodeHtmlToImage({
+    output: `./static/img/${fileName}`,
+    html,
+    selector: 'div.cookInfo',
+    content: {
+      imageSource: dataURI
+    }
   })
-  await page.close()
-  await browser.close()
   return fileName
 }
+
+/**
+ * (old) 가상 브라우저를 띄워서 html로 모양을 만들고 이미지로 만들어 사용
+ const getImage = async function (url) {
+ const browser = await puppeteer.launch({
+ executablePath: '/usr/bin/chromium-browser'
+ })
+ const page = await browser.newPage()
+ await page.setViewport({ width: 265, height: 114 })
+ await page.goto(url)
+ await page.waitForSelector('#domToImage')
+
+ const id = uuid4()
+ const fileName = `img-${id}.png`
+ await page.screenshot({
+ path: './static/img/' + fileName
+ })
+ await page.close()
+ await browser.close()
+ return fileName
+ }
+ */

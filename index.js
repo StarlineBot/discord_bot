@@ -1,4 +1,3 @@
-const express = require('express')
 require('dotenv').config()
 const path = require('path')
 const { CommandHandler } = require('djs-commander')
@@ -24,6 +23,8 @@ new CommandHandler({
 
 client.login(process.env.TOKEN)
 
+/**
+ * (old) 웹서버를 띄우고 html 을 만들어 이미지를 저장 후 사용했으나 프로세스 변경으로 사용하지 않음
 const app = express();
 app.use(express.static("static"))
 app.listen(3000, function(){
@@ -34,3 +35,4 @@ app.listen(3000, function(){
 app.get("/", function(req, res){
   res.sendFile(__dirname + "/static/html/cookInfo.html")
 })
+*/

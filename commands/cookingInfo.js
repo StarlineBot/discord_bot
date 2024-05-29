@@ -4,6 +4,8 @@ const { cookings } = require('../modules/cookings')
 const nodeHtmlToImage = require('node-html-to-image')
 const fs = require('node:fs')
 
+const filterCookings = cookings.filter(cooking => cooking.isCatering === true)
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('요리')
@@ -63,7 +65,7 @@ module.exports = {
     // 재료는 상위 10개 목록을 어떻게 가져올지 고민, cookingType 하고 같이 가져온다던지
     if (subcommand === '재료') {
       keyword = interaction.options._hoistedOptions.find(option => option.name === 'material').value
-      for (const cooking of cookings) {
+      for (const cooking of filterCookings) {
         if (cooking.localRecipe.trim().includes(keyword)) {
           getCookings.push(cooking)
         }
@@ -73,7 +75,7 @@ module.exports = {
     }
     if (subcommand === '능력치') {
       keyword = interaction.options._hoistedOptions.find(option => option.name === 'status').value
-      for (const cooking of cookings) {
+      for (const cooking of filterCookings) {
         if (cooking.status.find(subStatus => subStatus.name === keyword)) {
           getCookings.push(cooking)
         }

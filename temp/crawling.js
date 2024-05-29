@@ -1,7 +1,7 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
-const translate = require('@iamtraction/google-translate')
 const mainlUrl = 'https://wiki.mabinogiworld.com'
+const translate = require('@iamtraction/google-translate')
 
 const getHtml = async function () {
   console.log('==============================================================================================')

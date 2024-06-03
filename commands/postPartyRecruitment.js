@@ -215,10 +215,10 @@ module.exports = {
 : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
 
     const targetMember = dungeonDifficult === '도전자' ? `<@&${targetMemberRole.id}>` : '<@everyone>'
+    let contents = dungeonDifficult === '도전자' ? '만 참여 가능한 연습팟 입니다. 댓글로 참여여부를 작성해요.' : '제목과 태그로 던전을 확인하고 댓글로 참여여부를 작성해요.\n\n(예) 음첩지/엘나'
+    contents += `\n\n<@${interaction.member.id}>`
+    contents = targetMember + contents
 
-    let contents = targetMember +
-        '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n' +
-        `<@${interaction.member.id}>`
     if (dungeonName === '보약팟') {
       title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName}] ${dungeonStartTime}시, 8인 채워지면 출발!`
       contents = '<@everyone>' + ' feat: 열정이' +

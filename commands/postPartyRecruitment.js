@@ -41,7 +41,9 @@ module.exports = {
           option.setName('dungeon_difficult').setDescription(
             '다 왔다! 난이도를 골라줘~').setRequired(true)
             .addChoices(
-              { name: '어려움', value: '어려움' }
+              { name: '매우 어려움', value: '매우 어려움' }
+              , { name: '어려움', value: '어려움' }
+              , { name: '도전자', value: '도전자' }
               , { name: '쉬움', value: '쉬움' }
             )
         )
@@ -166,6 +168,8 @@ module.exports = {
     const partyChannel = interaction.client.channels.cache.get(guildInfo.partyChannelId)
     const devPartyChannel = interaction.client.channels.cache.get(devPartyChannelId)
 
+    const targetMemberRole = interaction.member.guild.roles.cache.find(role => role.id === guildInfo.targetMemberRole)
+
     const dungeonName = interaction.options._subcommand
     let dungeonStartDate
     let dungeonDifficult
@@ -210,7 +214,9 @@ module.exports = {
         ? '모이면 바로 출발'
 : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
 
-    let contents = '<@everyone>' +
+    const targetMember = dungeonDifficult === '도전자' ? `<@&${targetMemberRole.id}>` : '<@everyone>'
+
+    let contents = targetMember +
         '\n제목과 태그를 확인하고 댓글로 참여여부를 작성해줘!\n\n(예) 은접시 / 낭만엘나\n\n' +
         `<@${interaction.member.id}>`
     if (dungeonName === '보약팟') {

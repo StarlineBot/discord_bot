@@ -211,13 +211,14 @@ module.exports = {
       }
     }
 
-    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName} ${dungeonDifficult}] ${dungeonStartTime}시, 
-    ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
+    const recruitmentDungeonName = dungeonName === '보약팟' ? dungeonName : `${dungeonName} ${dungeonDifficult}`
+    const recruitmentHeadcount = `${dungeonHeadcount}명`
 
+    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartTime}시, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
     const targetMember = dungeonDifficult === '도전자' ? `<@&${targetMemberRole.id}>` : '<@everyone>'
-    let contents = "## " + targetMember + (dungeonDifficult === '도전자' ? '만 참여 가능한 연습팟 입니다.' : '제목과 태그로 던전을 먼저 확인해요.')
+    let contents = '## ' + targetMember + (dungeonDifficult === '도전자' ? '만 참여 가능한 연습팟 입니다.' : '제목과 태그로 던전을 먼저 확인해요.')
     if (dungeonName === '보약팟') {
-      title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName}] ${dungeonStartTime}시, 8인 채워지면 출발!`
+      title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartTime}시, 8인 채워지면 출발!`
       contents = targetMember + ' feat: 열정이' +
           '\n### 1시간 40릴을 목표로 진행 합니다.' +
           '\n전부 길원들로만 갈 거라서 8인이 모여야 출발 할 수 있습니다.' +
@@ -237,12 +238,16 @@ module.exports = {
     // contents += `\n참여자는 파티 시작전 <@${botId}>이 알림을 드려요`
     contents += `\n\n### 현재 참가인원\n - <@${interaction.member.id}>`
 
-    await partyChannel.threads.create({
+    partyChannel.threads.create({
       name: title,
       message: {
         content: contents
       },
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
+    }).then(partyThreadChannel => {
+      partyThreadChannel.send(`모집던전: ${recruitmentDungeonName}`)
+      partyThreadChannel.send(`출발시간: ${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartTime}시`)
+      partyThreadChannel.send(`모집인원: ${recruitmentHeadcount}`)
     })
 
     if (guildInfo.partyChannelId !== devPartyChannelId) {

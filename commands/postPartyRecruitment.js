@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../modules/getGuildInfo')
+const botId = process.env.BOT_ID
 
 const week = ['일', '월', '화', '수', '목', '금', '토']
 const weekOption = []
@@ -210,18 +211,14 @@ module.exports = {
       }
     }
 
-    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName} ${dungeonDifficult}] ${dungeonStartTime}시, ${(dungeonHeadcount === 0
-        ? '모이면 바로 출발'
-: '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
+    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName} ${dungeonDifficult}] ${dungeonStartTime}시, 
+    ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
 
     const targetMember = dungeonDifficult === '도전자' ? `<@&${targetMemberRole.id}>` : '<@everyone>'
-    let contents = dungeonDifficult === '도전자' ? '만 참여 가능한 연습팟 입니다. 댓글로 참여여부를 작성해요.' : '제목과 태그로 던전을 확인하고 댓글로 참여여부를 작성해요.\n\n(예) 음첩지/엘나'
-    contents += `\n\n<@${interaction.member.id}>`
-    contents = targetMember + contents
-
+    let contents = "## " + targetMember + (dungeonDifficult === '도전자' ? '만 참여 가능한 연습팟 입니다.' : '제목과 태그로 던전을 먼저 확인해요.')
     if (dungeonName === '보약팟') {
       title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${dungeonName}] ${dungeonStartTime}시, 8인 채워지면 출발!`
-      contents = '<@everyone>' + ' feat: 열정이' +
+      contents = targetMember + ' feat: 열정이' +
           '\n### 1시간 40릴을 목표로 진행 합니다.' +
           '\n전부 길원들로만 갈 거라서 8인이 모여야 출발 할 수 있습니다.' +
           '\n' +
@@ -236,6 +233,10 @@ module.exports = {
           '\n새도우위자드 완료보상 35,200 골드와 몬스터 드랍골드, 에린의정기, 알반훈련소 하드-중급 등의 유효보상을 노리는 파티로' +
           '\n1개 보약 사용시 보통 700만 ~ 1,000만원의 골드를 벌 수 있는 파티입니다.'
     }
+    contents += `\n### 하단에 댓글로 <@${botId}>을 맨션하면 자동으로 참여신청 돼요!`
+    // contents += `\n참여자는 파티 시작전 <@${botId}>이 알림을 드려요`
+    contents += `\n\n### 현재 참가인원\n - <@${interaction.member.id}>`
+
     await partyChannel.threads.create({
       name: title,
       message: {

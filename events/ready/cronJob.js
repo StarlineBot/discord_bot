@@ -131,10 +131,7 @@ module.exports = async (client) => {
   console.log('dailyJob start!')
   dailyJob.start()
 
-  const partySchedule = process.env.NODE_ENV === 'development'
-    ? '* * * * *'
-    : '*/10 * * * *'
-  const partyScheduleJob = new cron.CronJob(partySchedule, async function () {
+  const partyScheduleJob = new cron.CronJob('* * * * *', async function () {
     const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     client.guilds.cache.forEach(guild => {
       const guildInfo = guildModule.getGuildInfo(guild.id)

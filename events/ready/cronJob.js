@@ -56,7 +56,7 @@ module.exports = async (client) => {
         const createdDate = new Date(thread.createdAt)
         const betweenTime = Math.floor((nowDate.getTime() - createdDate.getTime()) / 1000 / 60)
         const betweenTimeDay = Math.floor(betweenTime / 60 / 24)
-        if (betweenTimeDay > 7) {
+        if (betweenTimeDay > 10) {
           thread.delete().then(deletedThread => {
             otherChannel.send(`포스트 삭제 됨, 제목: ${deletedThread.name}, 생성일: ${deletedThread.createdAt}`)
           }).catch(console.error)

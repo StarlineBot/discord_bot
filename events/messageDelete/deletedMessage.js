@@ -16,23 +16,23 @@ module.exports = async (message, client) => {
         partyChannel.threads.cache.forEach(thread => {
           thread.messages.fetch().then(messages => {
             const originMessage = messages.get(createdMessageChannelId)
-            if(typeof originMessage === typeof undefined){
+            if (typeof originMessage === typeof undefined) {
               return
             }
-            if(!originMessage.author.bot){
+            if (!originMessage.author.bot) {
               return
             }
             const isBotMention = typeof message.mentions.users.find(member => member.id === botId && member.bot) !== typeof undefined
-            if(!isBotMention){
+            if (!isBotMention) {
               return
             }
-            const findIndex = originMessage.content.lastIndexOf("현재 참가인원")
-            let content = originMessage.content.substring(0, findIndex + "현재 참가인원".length)
-            let members = originMessage.content.substring(findIndex + "현재 참가인원".length, message.length).replaceAll(" ", "").split("-")
-            let participants = []
-            for(let member of members){
-              let memberId = member.replace(/\D/g, "")
-              if(memberId !== ""){
+            const findIndex = originMessage.content.lastIndexOf('현재 참가인원')
+            let content = originMessage.content.substring(0, findIndex + '현재 참가인원'.length)
+            const members = originMessage.content.substring(findIndex + '현재 참가인원'.length, message.length).replaceAll(' ', '').split('-')
+            const participants = []
+            for (const member of members) {
+              const memberId = member.replace(/\D/g, '')
+              if (memberId !== '') {
                 participants.push(memberId)
               }
             }

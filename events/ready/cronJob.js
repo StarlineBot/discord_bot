@@ -159,7 +159,7 @@ module.exports = async (client) => {
           if (typeof dungeonNameMessage === typeof undefined) {
             return
           }
-          const dungeonName = dungeonNameMessage.content.split(':')[1].trim()
+          // const dungeonName = dungeonNameMessage.content.split(':')[1].trim()
 
           const startDateMessage = messages.find(message => message.content.includes('출발시간:'))
           if (typeof startDateMessage === typeof undefined) {
@@ -190,7 +190,7 @@ module.exports = async (client) => {
                 if (member.id === botId) {
                   return
                 }
-                member.send(`시작 ${diffMin}분전 알림: ${guild.name}의 파티모집에서 참가신청한 [${dungeonName}] 파티가 곧 출발합니다.`)
+                member.send(`시작 ${diffMin}분전 알림: ${guild.name}의 <#${partyChannel.id}>에서 참가신청한 <#${thread.id}> 파티가 곧 출발합니다.`)
               })
             }
           }

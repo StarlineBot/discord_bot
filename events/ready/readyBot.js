@@ -7,7 +7,6 @@ module.exports = async (client) => {
 
   if (isDelete) {
     const fetchSlash = await client.application.commands.fetch()
-    console.log(fetchSlash)
 
     await Promise.all(fetchSlash.map(async slash => {
       await client.application.commands.delete(slash.id)

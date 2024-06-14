@@ -28,20 +28,21 @@ module.exports = async (client) => {
 
   // 매일 아침 8시에 필요한 정보들을 가져와 채널로 전송
   const cronSchedule = process.env.NODE_ENV === 'development'
-    ? '0 * * * *'
-    : '0 08 * * *'
-  const dailyJob = new cron.CronJob(cronSchedule, async function () {
+    ? '* * * * *'
+    : '0 07 * * *'
+  const dailyThreadDeleteJob = new cron.CronJob(cronSchedule, async function () {
     const offset = new Date().getTimezoneOffset() * 60000
     const nowDate = new Date(Date.now() - offset)
-    const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     client.guilds.cache.forEach(guild => {
       const guildInfo = guildModule.getGuildInfo(guild.id)
       if (!guildInfo) {
         return
       }
 
-      console.log(guildInfo)
       const partyChannel = guild.channels.cache.get(guildInfo.partyChannelId)
+      if (!partyChannel) {
+        return
+      }
       partyChannel.threads.cache.forEach(thread => {
         // 지우지않는 태그가 있으면 지우지 않음
         if (thread.appliedTags.indexOf('1240604477875163146') > 0 || thread.appliedTags.indexOf('1240604372660912149') > 0) {
@@ -63,7 +64,15 @@ module.exports = async (client) => {
         }
       })
     })
+  })
 
+  console.log('dailyThreadDeleteJob start!')
+  dailyThreadDeleteJob.start()
+
+  const dailyJob = new cron.CronJob('0 08 * * *', async function () {
+    const offset = new Date().getTimezoneOffset() * 60000
+    const nowDate = new Date(Date.now() - offset)
+    const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
       '../../modules/todayMission')(now, nowDate)
     const channel = client.channels.cache.get(channelId)

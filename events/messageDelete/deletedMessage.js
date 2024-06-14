@@ -1,7 +1,6 @@
 const guildModule = require('../../modules/getGuildInfo')
 const botId = process.env.BOT_ID
 module.exports = async (message, client) => {
-  console.log(message)
   // 봇이 작성하지 않은 글에만 반응 해야함
   if (!message.author.bot) {
     // 이 메세지가 생성된 채널아이디

@@ -197,7 +197,7 @@ module.exports = async (client) => {
                   .setColor('#EAEAEA')
                   .setDescription(`${guild.name}의 <#${partyChannel.id}>에서 참가신청한 <#${thread.id}> 파티가 곧 출발합니다.`)
                   .setTimestamp()
-                otherChannel.send({ embeds: [embed] })
+                member.send({ embeds: [embed] })
               })
             }
           }

@@ -203,8 +203,12 @@ module.exports = {
       ({ name }) => name === dungeonDifficult)
 
     let dungeonStartDatetime
-    const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko').startOf('day')
-    for (let i = 1; i < 10; i++) {
+    const nowDate = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
+    const now = nowDate.startOf('day')
+    // 당일인데 시간이 지금보다 이전이면 다음주로 미룸
+    const index = nowDate.get('hour') >= dungeonStartTime ? 1 : 0
+    // 당일부터 요일을 체크함
+    for (let i = index; i < 10; i++) {
       if (now.plus({ days: i }).toFormat('ccc') === dungeonStartDate) {
         dungeonStartDatetime = now.plus({ days: i })
         break

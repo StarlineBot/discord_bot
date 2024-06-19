@@ -160,7 +160,6 @@ module.exports = async (client) => {
             return
           }
           // const dungeonName = dungeonNameMessage.content.split(':')[1].trim()
-
           const startDateMessage = messages.find(message => message.content.includes('출발시간:'))
           if (typeof startDateMessage === typeof undefined) {
             return
@@ -190,7 +189,15 @@ module.exports = async (client) => {
                 if (member.id === botId) {
                   return
                 }
-                member.send(`시작 ${diffMin}분전 알림: ${guild.name}의 <#${partyChannel.id}>에서 참가신청한 <#${thread.id}> 파티가 곧 출발합니다.`)
+
+                const writer = { name: originMessage.author.username, iconURL: originMessage.author.displayAvatarURL() }
+                const embed = new EmbedBuilder()
+                  .setAuthor(writer)
+                  .setTitle(`시작 ${diffMin}분전 알림`)
+                  .setColor('#EAEAEA')
+                  .setDescription(`${guild.name}의 <#${partyChannel.id}>에서 참가신청한 <#${thread.id}> 파티가 곧 출발합니다.`)
+                  .setTimestamp()
+                otherChannel.send({ embeds: [embed] })
               })
             }
           }

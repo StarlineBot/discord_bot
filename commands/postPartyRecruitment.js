@@ -254,17 +254,6 @@ module.exports = {
       partyThreadChannel.send(`모집인원: ${recruitmentHeadcount}`)
     })
 
-    if (guildInfo.partyChannelId !== devPartyChannelId) {
-      // 누가 어떤내용을 작성했는지 확인용 발행
-      await devPartyChannel.threads.create({
-        name: title,
-        message: {
-          content: contents
-        },
-        appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
-      })
-    }
-
     interaction.reply(`<#${partyChannel.id}>에 해당 내용으로 작성했어~😎`)
   }
 }

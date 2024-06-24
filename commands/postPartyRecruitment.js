@@ -54,6 +54,7 @@ module.exports = {
             .addChoices(
               { name: '모바출', value: 0 }
               , { name: '4명', value: 4 }
+              , { name: '6명', value: 4 }
               , { name: '8명', value: 8 }
               , { name: '2명', value: 2 }
             )

@@ -23,6 +23,7 @@ module.exports = {
         , { name: '/분배계산기', value: '금액과 인원수를 입력하면 분배금 뚝딱!' }
         , { name: '/교환인챈트', value: '오늘 복원의 가루로 교환할수 있는 인챈트를 알려줘~' }
         , { name: '/매일뉴스', value: '오늘 간추린 뉴스~' }
+        , { name: '/주사위', value: '1~99의 주사위를 굴려~' }
       )
 
     interaction.reply(

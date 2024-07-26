@@ -169,6 +169,7 @@ module.exports = {
     const guildInfo = guildModule.getGuildInfo(guildId)
     const partyChannel = interaction.client.channels.cache.get(guildInfo.partyChannelId)
     const devPartyChannel = interaction.client.channels.cache.get(devPartyChannelId)
+    console.log(devPartyChannel)
 
     const targetMemberRole = interaction.member.guild.roles.cache.find(role => role.id === guildInfo.targetMemberRole)
 

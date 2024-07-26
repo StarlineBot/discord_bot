@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@iamtraction/google-translate": "^2.0.1",
+    "@kokr/text": "^0.4.1",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
     "cron": "^3.1.7",

@@ -6,6 +6,10 @@ files:
     overwrite: yes
 
 hooks:
+  ApplicationStop:
+    - location: scripts/before-deploy.sh
+      timeout: 30
+      runas: root
   AfterInstall:
     - location: scripts/after-deploy.sh
       timeout: 30

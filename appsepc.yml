@@ -5,12 +5,18 @@ files:
     destination: /home/ubuntu/build
     overwrite: yes
 
+permissions:
+  - object: /home/ubuntu
+    pattern: '**'
+    owner: ubuntu
+    group: ubuntu
+
 hooks:
   ApplicationStop:
     - location: scripts/before-deploy.sh
-      timeout: 30
-      runas: root
+      timeout: 300
+      runas: ubuntu
   AfterInstall:
     - location: scripts/after-deploy.sh
-      timeout: 30
-      runas: root
+      timeout: 300
+      runas: ubuntu

@@ -10,7 +10,7 @@ module.exports = {
     .setDescription('오늘의 간추린 뉴스를 가지고 올게, 출처는 https://quicknews.co.kr/ 여기야!'),
   run: async ({ interaction }) => {
     // 길드별로 해야할일이 있을때
-    console.log(interaction.member.guild.id)
+    // console.log(interaction.member.guild.id)
 
     // const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id

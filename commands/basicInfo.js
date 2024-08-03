@@ -6,7 +6,7 @@ module.exports = {
     .setDescription('안녕? 난 섯다라인 봇이야!'),
   run: ({ interaction }) => {
     // 길드별로 해야할일이 있을때
-    console.log(interaction.member.guild.id)
+    // console.log(interaction.member.guild.id)
 
     const embed = new EmbedBuilder()
       .setTitle('섯다라인 명령어 목록')

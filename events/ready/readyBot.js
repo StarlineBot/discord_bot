@@ -1,4 +1,4 @@
-const guildModule = require('../../modules/getGuildInfo')
+// const guildModule = require('../../modules/getGuildInfo')
 
 // 슬래시커맨드를 삭제하고 다시 시작해야 할때
 const isDelete = false
@@ -17,6 +17,7 @@ module.exports = async (client) => {
     guild.members.fetch()
   })
 
+  /*
   client.guilds.cache.forEach(guild => {
     const guildInfo = guildModule.getGuildInfo(guild.id)
     if (typeof guildInfo === typeof undefined) {
@@ -25,4 +26,5 @@ module.exports = async (client) => {
     // 길드별로 해야할일이 있을때
     console.log(guildInfo)
   })
+  */
 }

@@ -11,7 +11,7 @@ for (const weekDay of week) {
   })
 }
 
-const devPartyChannelId = process.env.DEV_PARTY_RECRUITMENT
+// const devPartyChannelId = process.env.DEV_PARTY_RECRUITMENT
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('파티모집')
@@ -168,8 +168,8 @@ module.exports = {
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const partyChannel = interaction.client.channels.cache.get(guildInfo.partyChannelId)
-    const devPartyChannel = interaction.client.channels.cache.get(devPartyChannelId)
-    console.log(devPartyChannel)
+    // const devPartyChannel = interaction.client.channels.cache.get(devPartyChannelId)
+    // console.log(devPartyChannel)
 
     const targetMemberRole = interaction.member.guild.roles.cache.find(role => role.id === guildInfo.targetMemberRole)
 
@@ -241,6 +241,7 @@ module.exports = {
           '\n1개 보약 사용시 보통 700만 ~ 1,000만원의 골드를 벌 수 있는 파티입니다.'
     }
     contents += `\n### 하단에 댓글로 <@${botId}>을 맨션하면 자동으로 참여신청 돼요!`
+    contents += `\n- <@${botId}>을 맨션하면 출발 10분전에 알림을 받을수 있어요!`
     // contents += `\n참여자는 파티 시작전 <@${botId}>이 알림을 드려요`
     contents += `\n\n### 현재 참가인원\n - <@${interaction.member.id}>`
 

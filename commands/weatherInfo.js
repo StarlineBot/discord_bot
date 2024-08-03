@@ -58,7 +58,7 @@ module.exports = {
     .setDescription('마비노기 날씨 정보를 가져와~'),
   run: async ({ interaction }) => {
     // 길드별로 해야할일이 있을때
-    console.log(interaction.member.guild.id)
+    // console.log(interaction.member.guild.id)
 
     const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id

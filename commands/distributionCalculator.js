@@ -35,7 +35,7 @@ module.exports = {
     ),
   run: async ({ interaction }) => {
     // 길드별로 해야할일이 있을때
-    console.log(interaction.member.guild.id)
+    // console.log(interaction.member.guild.id)
 
     const writer = {
       name: interaction.member.nickname == null

@@ -27,7 +27,7 @@ module.exports = {
     .setDescription('현재 날짜에 맞게 스튜어트에게서 복원의 가루로 교환 가능한 인챈트를 알려줄게!'),
   run: ({ interaction }) => {
     // 길드별로 해야할일이 있을때
-    console.log(interaction.member.guild.id)
+    // console.log(interaction.member.guild.id)
 
     const writer = {
       name: interaction.member.nickname == null

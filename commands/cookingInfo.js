@@ -113,7 +113,9 @@ const getEmbed = async function (writer, cooking) {
   }
 
   const fileName = `cooking-${cooking.index}.png`
+  console.log(fileName)
   await getImage(fileName, values)
+  console.log("??")
   const file = new AttachmentBuilder(`static/img/cookings/${fileName}`)
   const subEmbed = new EmbedBuilder()
     .setAuthor(writer)
@@ -187,17 +189,21 @@ const getImage = async function (fileName, values) {
   // 요리비율 이미지가 존재하는지 확인, 없으면 생성, 있으면 그대로 가져다 사용
   if (!fs.existsSync(`./static/img/cookings/${fileName}`)) {
     console.log("not exist", fileName)
-    await nodeHtmlToImage({
-      output: `./static/img/cookings/${fileName}`,
-      html,
-      selector: 'div.cookInfo',
-      content: {
-        imageSource: dataURI
-      },
-      puppeteerArgs: {
-        executablePath: '/usr/bin/chromium-browser'
-      }
-    })
+    try {
+      await nodeHtmlToImage({
+        output: `./static/img/cookings/${fileName}`,
+        html,
+        selector: 'div.cookInfo',
+        content: {
+          imageSource: dataURI
+        },
+        puppeteerArgs: {
+          executablePath: '/usr/bin/chromium-browser'
+        }
+      })
+    } catch(e) {
+      console.log(e);
+    }
   }
 }
 

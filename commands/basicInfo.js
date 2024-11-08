@@ -25,6 +25,7 @@ module.exports = {
         , { name: '/매일뉴스', value: '오늘 간추린 뉴스~' }
         , { name: '/주사위', value: '1~99의 주사위를 굴려~' }
         , { name: '/거뿔', value: '하프서버의 거대한 외침의 뿔피리 최근 20건을 불러와~' }
+        , { name: '/튼주', value: '하프서버의 튼튼한 주머니를 상인별로 불러와~' }
       )
 
     interaction.reply(

@@ -24,6 +24,7 @@ module.exports = {
         , { name: '/교환인챈트', value: '오늘 복원의 가루로 교환할수 있는 인챈트를 알려줘~' }
         , { name: '/매일뉴스', value: '오늘 간추린 뉴스~' }
         , { name: '/주사위', value: '1~99의 주사위를 굴려~' }
+        , { name: '/거뿔', value: '하프서버의 거대한 외침의 뿔피리 최근 20건을 불러와~' }
       )
 
     interaction.reply(

@@ -186,7 +186,7 @@ const getImage = async function (fileName, values) {
 
   // 요리비율 이미지가 존재하는지 확인, 없으면 생성, 있으면 그대로 가져다 사용
   if (!fs.existsSync(`./static/img/cookings/${fileName}`)) {
-    let puppeteerArgs = process.env.NODE_ENV !== 'development' ? { executablePath: '/usr/bin/chromium-browser' } : {};
+    const puppeteerArgs = process.env.NODE_ENV !== 'development' ? { executablePath: '/usr/bin/chromium-browser' } : {}
     await nodeHtmlToImage({
       output: `./static/img/cookings/${fileName}`,
       html,

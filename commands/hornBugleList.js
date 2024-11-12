@@ -9,10 +9,10 @@ const mainUrl = 'https://open.api.nexon.com'
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('거뿔')
-    .setDescription('최근 1시간 내 거대한 외침의 뿔피리의 가장 최근 10건을 불러와~')
+    .setDescription('최근 1시간 내 거대한 외침의 뿔피리를 조회해~')
     .addSubcommand(subcommand =>
         subcommand.setName("전체검색")
-        .setDescription("오늘 날짜로 최근 10건을 검색해~")
+        .setDescription("최근 1시간 내 10건을 검색해~")
     )
     .addSubcommand(subcommand =>
         subcommand.setName("아이디")

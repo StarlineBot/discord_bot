@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const guildModule = require('../modules/getGuildInfo')
+const { getDate } = require('../modules/common')
 const axios = require('axios')
 const devChannelId = process.env.DEV_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
@@ -143,14 +144,4 @@ module.exports = {
     interaction.reply("검색조건에 맞는 거뿔 목록이 없네.. 다른걸로 입력해보면 어떨까?")
   }
 
-}
-
-const getDate = function (date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, 0)
-  const day = String(date.getDate()).padStart(2, 0)
-  const hours = String(date.getHours()).padStart(2, 0)
-  const min = String(date.getMinutes()).padStart(2, 0)
-  const sec = String(date.getSeconds()).padStart(2, 0)
-  return `${year}-${month}-${day} ${hours}:${min}:${sec}`
 }

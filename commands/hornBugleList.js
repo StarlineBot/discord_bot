@@ -140,7 +140,7 @@ module.exports = {
       )
       return false;
     }
-    interaction.reply("검색조건에 맞는 거뿔 목록이 없네.. 다른걸로 입력해보면 어떨끼?")
+    interaction.reply("검색조건에 맞는 거뿔 목록이 없네.. 다른걸로 입력해보면 어떨까?")
   }
 
 }

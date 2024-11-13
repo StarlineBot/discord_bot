@@ -237,7 +237,10 @@ module.exports = async (client) => {
       if (hornBugle.message.startsWith(hornBugle.character_name + ' : #')) {
         continue
       }
-      if (typeof beforeHornBugle !== typeof undefined && beforeHornBugle.character_name === hornBugle.character_name && beforeHornBugle.message && hornBugle.message && beforeHornBugle.date_send === hornBugle.date_send) {
+      if (typeof beforeHornBugle !== typeof undefined
+          && beforeHornBugle.character_name === hornBugle.character_name
+          && beforeHornBugle.message === hornBugle.message
+          && beforeHornBugle.date_send === hornBugle.date_send) {
         break
       }
       newHornBugleList.push(hornBugle)

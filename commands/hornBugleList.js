@@ -12,24 +12,24 @@ module.exports = {
     .setName('거뿔')
     .setDescription('최근 1시간 내 거대한 외침의 뿔피리를 조회해~')
     .addSubcommand(subcommand =>
-        subcommand.setName("전체검색")
-        .setDescription("최근 1시간 내 10건을 검색해~")
+      subcommand.setName('전체검색')
+        .setDescription('최근 1시간 내 10건을 검색해~')
     )
     .addSubcommand(subcommand =>
-        subcommand.setName("아이디")
-        .setDescription("최근 1시간 내 입력한 내용이 포함된 아이디로 거뿔을 조회해~")
+      subcommand.setName('아이디')
+        .setDescription('최근 1시간 내 입력한 내용이 포함된 아이디로 거뿔을 조회해~')
         .addStringOption(option =>
-            option.setName("search_id").setDescription("입력한 아이디를 조회해~").setRequired(true)
+          option.setName('search_id').setDescription('입력한 아이디를 조회해~').setRequired(true)
         )
     )
     .addSubcommand(subcommand =>
-        subcommand.setName("내용")
-        .setDescription("최근 1시간 내 입력한 내용이 포함된 거뿔을 조회해~")
+      subcommand.setName('내용')
+        .setDescription('최근 1시간 내 입력한 내용이 포함된 거뿔을 조회해~')
         .addStringOption(option =>
-            option.setName("search_content").setDescription("입력한 내용으로 조회해~").setRequired(true)
+          option.setName('search_content').setDescription('입력한 내용으로 조회해~').setRequired(true)
         )
-    )
-  , run: async ({ interaction }) => {
+    ),
+  run: async ({ interaction }) => {
     const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
@@ -50,80 +50,73 @@ module.exports = {
 
       const hornBugleList = getBody.data.horn_bugle_world_history
       switch (subCommand) {
-        case "아이디":
-          const searchId = interaction.options._hoistedOptions.find(option => option.name === 'search_id').value;
-          let searchIdCount = 0;
-          for(let hornBugle of hornBugleList) {
-            if(searchIdCount === 10){
-              break;
+        case '아이디':
+          const searchId = interaction.options._hoistedOptions.find(option => option.name === 'search_id').value
+          let searchIdCount = 0
+          for (const hornBugle of hornBugleList) {
+            if (searchIdCount === 10) {
+              break
             }
             if (hornBugle.character_name.indexOf(searchId) > -1) {
-              const date = new Date(hornBugle.date_send)
-
               const hornBugleEmbed = new EmbedBuilder()
-              .setAuthor(writer)
-              .setTitle('거대한 외침의 뿔피리')
-              .setColor('#86E57F')
-              .setThumbnail('attachment://horn.png')
-              .addFields(
-                  { name: '작성일시', value: getDate(date) },
+                .setAuthor(writer)
+                .setTitle('거대한 외침의 뿔피리')
+                .setColor('#86E57F')
+                .setThumbnail('attachment://horn.png')
+                .addFields(
+                  { name: '작성일시', value: getDate(new Date(hornBugle.date_send)) },
                   { name: '작성자', value: hornBugle.character_name },
                   { name: '내용', value: hornBugle.message }
-              )
-              .setTimestamp()
+                )
+                .setTimestamp()
               embeds.push(hornBugleEmbed)
               searchIdCount++
             }
           }
-          break;
-        case "내용":
-          const searchContent = interaction.options._hoistedOptions.find(option => option.name === 'search_content').value;
-          let searchContentCount = 0;
-          for(let hornBugle of hornBugleList) {
-            if(searchContentCount === 10){
-              break;
+          break
+        case '내용':
+          const searchContent = interaction.options._hoistedOptions.find(option => option.name === 'search_content').value
+          let searchContentCount = 0
+          for (const hornBugle of hornBugleList) {
+            if (searchContentCount === 10) {
+              break
             }
             if (hornBugle.message.indexOf(searchContent) > -1) {
-              const date = new Date(hornBugle.date_send)
-
               const hornBugleEmbed = new EmbedBuilder()
+                .setAuthor(writer)
+                .setTitle('거대한 외침의 뿔피리')
+                .setColor('#86E57F')
+                .setThumbnail('attachment://horn.png')
+                .addFields(
+                  { name: '작성일시', value: getDate(new Date(hornBugle.date_send)) },
+                  { name: '작성자', value: hornBugle.character_name },
+                  { name: '내용', value: hornBugle.message }
+                )
+                .setTimestamp()
+              embeds.push(hornBugleEmbed)
+              searchContentCount++
+            }
+          }
+          break
+        case '전체검색':
+        default:
+          for (let i = 0; i < 10; i++) {
+            const hornBugle = hornBugleList[i]
+            const hornBugleEmbed = new EmbedBuilder()
               .setAuthor(writer)
               .setTitle('거대한 외침의 뿔피리')
               .setColor('#86E57F')
               .setThumbnail('attachment://horn.png')
               .addFields(
-                  { name: '작성일시', value: getDate(date) },
-                  { name: '작성자', value: hornBugle.character_name },
-                  { name: '내용', value: hornBugle.message }
-              )
-              .setTimestamp()
-              embeds.push(hornBugleEmbed)
-              searchContentCount++
-            }
-          }
-          break;
-        case "전체검색":
-        default:
-          for (let i = 0; i < 10; i++) {
-            const hornBugle = hornBugleList[i]
-            const date = new Date(hornBugle.date_send)
-
-            const hornBugleEmbed = new EmbedBuilder()
-            .setAuthor(writer)
-            .setTitle('거대한 외침의 뿔피리')
-            .setColor('#86E57F')
-            .setThumbnail('attachment://horn.png')
-            .addFields(
-                { name: '작성일시', value: getDate(date) },
+                { name: '작성일시', value: getDate(new Date(hornBugle.date_send)) },
                 { name: '작성자', value: hornBugle.character_name },
                 { name: '내용', value: hornBugle.message }
-            )
-            .setTimestamp()
+              )
+              .setTimestamp()
             embeds.push(hornBugleEmbed)
           }
-          break;
+          break
       }
-
     } catch (error) {
       interaction.reply(basicErrorMessage)
       interaction.client.channels.cache.get(devChannelId).send(
@@ -139,9 +132,9 @@ module.exports = {
           files: [{ attachment: './static/img/horn.png', name: 'horn.png' }]
         }
       )
-      return false;
+      return false
     }
-    interaction.reply("검색조건에 맞는 거뿔 목록이 없네.. 다른걸로 입력해보면 어떨까?")
+    interaction.reply('검색조건에 맞는 거뿔 목록이 없네.. 다른걸로 입력해보면 어떨까?')
   }
 
 }

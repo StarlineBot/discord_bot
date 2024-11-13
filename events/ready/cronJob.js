@@ -4,12 +4,17 @@ const { DateTime } = require('luxon')
 const axios = require('axios')
 const cheerio = require('cheerio')
 const guildModule = require('../../modules/getGuildInfo')
+const { getDate } = require('../../modules/common')
+const nexonApiMainUrl = 'https://open.api.nexon.com'
+const nexonApiKey = process.env.NEXON_API_KEY
+const fs = require('fs')
 
 const botId = process.env.BOT_ID
 const channelId = process.env.NODE_ENV === 'development'
   ? process.env.DEV_CHANNEL_ID
   : process.env.CHANNEL_ID
 const otherChannelId = process.env.DEV_CHANNEL_ID
+const bugleHornChannelId = process.env.NODE_ENV === 'development' ? process.env.DEV_BUGLE_HORN_CHANNEL_ID : process.env.BUGLE_HORN_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 module.exports = async (client) => {
   // 봇 살아있는지 헬스체크
@@ -208,4 +213,83 @@ module.exports = async (client) => {
 
   console.log('partyScheduleJob start!')
   partyScheduleJob.start()
+
+  const bugleHornChannel = client.channels.cache.get(bugleHornChannelId)
+  const bugleHornJob = new cron.CronJob('*/5 * * * * *', async function () {
+    const getBody = await axios({
+      method: 'GET',
+      url: nexonApiMainUrl + '/mabinogi/v1/horn-bugle-world/history?server_name=하프',
+      headers: {
+        'x-nxopen-api-key': nexonApiKey
+      }
+    })
+    const hornBugleList = getBody.data.horn_bugle_world_history
+
+    let beforeHornBugle
+    if (!fs.existsSync('./static/json/hornBugle.json')) {
+      fs.writeFileSync('./static/json/hornBugle.json', JSON.stringify(hornBugleList[0]))
+    } else {
+      beforeHornBugle = JSON.parse(fs.readFileSync('./static/json/hornBugle.json'))
+    }
+
+    const newHornBugleList = []
+    for (const hornBugle of hornBugleList) {
+      if (hornBugle.message.startsWith(hornBugle.character_name + ' : #')) {
+        continue
+      }
+      if (typeof beforeHornBugle !== typeof undefined && beforeHornBugle.character_name === hornBugle.character_name && beforeHornBugle.message && hornBugle.message && beforeHornBugle.date_send === hornBugle.date_send) {
+        break
+      }
+      newHornBugleList.push(hornBugle)
+    }
+
+    const embeds = new Map()
+    let embedIndex = 0
+    for (let i = newHornBugleList.length - 1; i >= 0; i--) {
+      const hornBugle = newHornBugleList[i]
+      if (i === 0) {
+        fs.writeFileSync('./static/json/hornBugle.json', JSON.stringify(hornBugle))
+      }
+      const hornBugleEmbed = new EmbedBuilder()
+        .setTitle('거대한 외침의 뿔피리')
+        .setColor(`${getRandomColor()}`)
+        .setThumbnail('attachment://horn.png')
+        .addFields(
+          { name: '작성일시', value: getDate(new Date(hornBugle.date_send)) },
+          { name: '작성자', value: hornBugle.character_name },
+          { name: '내용', value: hornBugle.message }
+        )
+        .setTimestamp()
+      embeds.set(embedIndex, hornBugleEmbed)
+      embedIndex++
+    }
+
+    if (embeds.size > 0) {
+      const resultEmbedMap = new Map()
+      let index = 0
+      const embedList = [...embeds.values()]
+      for (let i = 0; i < embedList.length; i += 10) {
+        const tempList = embedList.slice(i, i + 10)
+        resultEmbedMap.set(index, tempList)
+        index++
+      }
+
+      const resultEmbedList = [...resultEmbedMap.values()]
+      for (const resultEmbed of resultEmbedList) {
+        await bugleHornChannel.send({ embeds: resultEmbed, files: [{ attachment: './static/img/horn.png', name: 'horn.png' }] })
+      }
+    }
+  })
+
+  console.log('bugleHornJob start!')
+  bugleHornJob.start()
+}
+
+const getRandomColor = function () {
+  const letters = '0123456789ABCDEF'
+  let color = '#'
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)]
+  }
+  return color
 }

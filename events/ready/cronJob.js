@@ -134,7 +134,7 @@ module.exports = async (client) => {
     }
     const getBody = await axios.get('https://quicknews.co.kr/')
     const $ = cheerio.load(getBody.data)
-    const content = '간추린뉴스 출처: https://quicknews.co.kr\nn' + $('#news_0').text()
+    const content = '간추린뉴스 출처: https://quicknews.co.kr\n\n' + $('#news_0').text()
 
     dailyNewsChannel.send(content)
   })

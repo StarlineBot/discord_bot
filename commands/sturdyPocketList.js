@@ -95,6 +95,46 @@ module.exports = {
 
       await generalChannel.sendTyping()
       switch (subcommand) {
+        case '채널별':
+          // 전체 상인, 전체 주머니를 선택한 채널로 검색
+          for (const getSeller of sellers) {
+            generalChannel.send(text`${channel}채널에 ${getSeller}가 파는 주머니를 찾았어~`).then((getMessage) => {
+              getMessage.startThread({
+                name: `${getMessage}`,
+                autoArchiveDuration: 60,
+                type: 'GUILD_PUBLIC_THREAD'
+              }).then(async (getThread) => {
+                const getBody = await getApiRequest(channel, getSeller)
+                const nextUpdateDate = new Date(getBody.data.date_shop_next_update)
+                const itemList = getBody.data.shop.find(getShop => getShop.tab_name === '주머니').item
+                const embeds = []
+                for (const item of itemList) {
+                  const itemEmbed = new EmbedBuilder()
+                    .setAuthor(writer)
+                    .setTitle(item.item_display_name)
+                    .setThumbnail(item.image_url)
+                    .setColor('#FFD8D8')
+                    .addFields(
+                      { name: '채널', value: `${channel}채널` }
+                    )
+                    .addFields(
+                      { name: '판매상인', value: getSeller }
+                    )
+                    .addFields(
+                      { name: '다음 갱신 시간', value: getDate(nextUpdateDate) }
+                    )
+                    .setTimestamp()
+                  embeds.push(itemEmbed)
+                }
+
+                const resultEmbedList = splitResultList(embeds)
+                for await (const embedList of resultEmbedList) {
+                  await getThread.send({ embeds: embedList })
+                }
+              })
+            })
+          }
+          break
         case '상인별':
           // 전체 채널, 전체 주머니를 선택한 상인으로 검색
           // 채널별 주머니 그룹화 필요

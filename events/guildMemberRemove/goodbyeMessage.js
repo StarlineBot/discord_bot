@@ -8,10 +8,10 @@ module.exports = (member) => {
   const embed = new EmbedBuilder()
     .setColor('#FF0000')
     .setAuthor({
-      name: `${member.user.globalName}`,
+      name: `${member.user.username}`,
       iconURL: member.user.displayAvatarURL()
     })
-    .setTitle(`${member.user.username}`)
+    .setTitle(`${member.user.globalName === null ? member.user.id : member.user.globalName}`)
     .setDescription(`<@${member.user.id}> 님이 서버에서 퇴장 함`)
     .setFooter(
       { text: `ID: ${member.user.id} ${now.toFormat('yyyy-MM-dd HH:mm cccc')}` })

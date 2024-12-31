@@ -50,7 +50,7 @@ module.exports = {
 
       const hornBugleList = getBody.data.horn_bugle_world_history
       switch (subCommand) {
-        case '아이디':
+        case '아이디': {
           const searchId = interaction.options._hoistedOptions.find(option => option.name === 'search_id').value
           let searchIdCount = 0
           for (const hornBugle of hornBugleList) {
@@ -73,8 +73,9 @@ module.exports = {
               searchIdCount++
             }
           }
+        }
           break
-        case '내용':
+        case '내용': {
           const searchContent = interaction.options._hoistedOptions.find(option => option.name === 'search_content').value
           let searchContentCount = 0
           for (const hornBugle of hornBugleList) {
@@ -97,6 +98,7 @@ module.exports = {
               searchContentCount++
             }
           }
+        }
           break
         case '전체검색':
         default:

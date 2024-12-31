@@ -3,6 +3,7 @@ const guildInfo = [
   {
     guildId: process.env.GUILD_ID,
     adminRole: process.env.GUILD_ADMIN_ROLE_ID,
+    ownerId: process.env.GUILD_OWNER_ID,
     guestRole: process.env.GUILD_GUEST_ROLE_ID,
     guildMemberRole: process.env.GUILD_ROLE,
     roleAuditingChannelId: process.env.ROLE_AUDITING_CHANNEL_ID,
@@ -18,6 +19,7 @@ const guildInfo = [
   {
     guildId: process.env.DEV_GUILD_ID,
     adminRole: process.env.DEV_GUILD_ADMIN_ROLE_ID,
+    ownerId: process.env.DEV_GUILD_OWNER_ID,
     guestRole: process.env.DEV_GUILD_GUEST_ROLE_ID,
     guildMemberRole: process.env.DEV_GUILD_ROLE,
     roleAuditingChannelId: process.env.DEV_ROLE_AUDITING_CHANNEL_ID,

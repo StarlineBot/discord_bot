@@ -11,7 +11,7 @@ module.exports = (oldMember, newMember) => {
       name: `${newMember.user.username}`,
       iconURL: newMember.user.displayAvatarURL()
     })
-    .setTitle(`${newMember.user.globalName}`)
+    .setTitle(`${newMember.user.globalName === null ? newMember.user.id : newMember.user.globalName}`)
 
   if (oldMember.nickname !== newMember.nickname) {
     embed.setDescription(

@@ -9,8 +9,10 @@ module.exports = async (interaction, client) => {
     const memberId = buttonInfo.memberId
     const clickMember = interaction.member
 
+    const owner = await clickMember.guild.fetchOwner()
     const isAllowed = !!clickMember.roles.cache.find(
-      role => role.id === guildInfo.adminRole)
+      role => role.id === guildInfo.adminRole) || owner.user.id === guildInfo.ownerId
+
     const guildRole = clickMember.guild.roles.cache.find(
       role => role.id === guildInfo.guildMemberRole)
     const guild = client.guilds.cache.find(

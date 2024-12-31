@@ -16,10 +16,10 @@ module.exports = (member) => {
   const embed = new EmbedBuilder()
     .setColor('#FF0000')
     .setAuthor({
-      name: `${member.user.globalName}`,
+      name: `${member.user.username}`,
       iconURL: member.user.displayAvatarURL()
     })
-    .setTitle(`${member.user.username}`)
+    .setTitle(`${member.user.globalName === null ? member.user.id : member.user.globalName}`)
     .setDescription(
       `<@${member.user.id}> 님이 서버에 입장 했어요.\n\n\`${member.guild}\`의 길드원이 맞다면 아래 버튼을 눌러 \`${guildRole.name}\` 권한을 부여하세요.`)
     .setFooter(

@@ -103,6 +103,9 @@ module.exports = {
           // 전체 채널, 전체 주머니를 선택한 상인으로 검색
           // 채널별 주머니 그룹화 필요
           for (let getChannel = minChannel; getChannel <= maxChannel; getChannel++) {
+            if (getChannel === 10) {
+              continue;
+            }
             const channelInfo = { channel: getChannel }
             const sellerInfo = { seller, items: [] }
             getBody = await getApiRequest(getChannel, seller)
@@ -152,6 +155,9 @@ module.exports = {
           // 전체 채널, 전체 상인으로 선택한 주머니를 검색
           // 채널별 상인으로 그룹화 필요
           for (let getChannel = minChannel; getChannel <= maxChannel; getChannel++) {
+            if (getChannel === 10) {
+              continue;
+            }
             const channelInfo = { channel: getChannel }
             for (const getSeller of sellers) {
               const sellerInfo = { seller: getSeller, items: [] }

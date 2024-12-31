@@ -102,7 +102,7 @@ module.exports = {
             if (getChannel === 10) {
               continue
             }
-            generalChannel.send(text`${seller}이 ${getChannel}채널에서 파는 주머니를 찾았어~`).then((getMessage) => {
+            generalChannel.send(text`<@${interaction.member.id}>이 선택한 ${seller}이 ${getChannel}채널에서 파는 주머니를 찾았어~`).then((getMessage) => {
               getMessage.startThread({
                 name: `${getMessage}`,
                 autoArchiveDuration: 60,
@@ -146,7 +146,7 @@ module.exports = {
             if (getChannel === 10) {
               continue
             }
-            generalChannel.send(text`선택한 ${pocket}주머니를 ${getChannel}채널에서 상인별로 찾았어~`).then((getMessage) => {
+            generalChannel.send(text`<@${interaction.member.id}>이 선택한 ${pocket}주머니를 ${getChannel}채널에서 상인별로 찾았어~`).then((getMessage) => {
               getMessage.startThread({
                 name: `${getMessage}`,
                 autoArchiveDuration: 60,
@@ -193,7 +193,7 @@ module.exports = {
         case '직접검색':
         default:
           // 채널, 상인을 선택하면 주머니 목록을 보여줌
-          generalChannel.send(text`${channel}채널에서 ${seller}가 파는 주머니를 찾았어~`).then((getMessage) => {
+          generalChannel.send(text`<@${interaction.member.id}>이 선택한 ${channel}채널 ${seller}가 파는 주머니를 찾았어~`).then((getMessage) => {
             getMessage.startThread({
               name: `${getMessage}`,
               autoArchiveDuration: 60,

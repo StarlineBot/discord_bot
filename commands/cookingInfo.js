@@ -93,7 +93,9 @@ module.exports = {
       const cooking = sortCookings[i]
       const obj = await getEmbed(writer, cooking)
       embeds.push(obj.subEmbed)
-      files.push(obj.file)
+      if (typeof obj.file !== typeof undefined) {
+        files.push(obj.file)
+      }
     }
 
     generalChannel.send({ embeds, files })
@@ -103,37 +105,44 @@ module.exports = {
 const regex = /[^0-9]/gi
 const getEmbed = async function (writer, cooking) {
   const values = []
-  const getRecipes = cooking.localRecipe.split('%')
-  for (let i = 0; i < getRecipes.length; i++) {
-    const getRecipe = getRecipes[i]
-    if (getRecipe === '') {
-      continue
+  let fileName = ''
+  let file
+  if (typeof cooking.localRecipe !== typeof undefined && cooking.localRecipe !== '') {
+    const getRecipes = cooking.localRecipe.split('%')
+    for (let i = 0; i < getRecipes.length; i++) {
+      const getRecipe = getRecipes[i]
+      if (getRecipe === '') {
+        continue
+      }
+      values.push(getRecipe.replace(regex, ''))
     }
-    values.push(getRecipe.replace(regex, ''))
+    fileName = `cooking-${cooking.index}.png`
+    await getImage(fileName, values)
+    file = new AttachmentBuilder(`static/img/cookings/${fileName}`)
   }
-
-  const fileName = `cooking-${cooking.index}.png`
-  await getImage(fileName, values)
-  const file = new AttachmentBuilder(`static/img/cookings/${fileName}`)
   const subEmbed = new EmbedBuilder()
     .setAuthor(writer)
     .setTitle(`${cooking.localName}`)
     .setColor('#FFE400')
     .setThumbnail(cooking.thumbnail)
-    .addFields(
-      { name: '요리방법', value: cooking.localCookingType }
-    )
-    .addFields(
-      { name: '레시피', value: `${cooking.localRecipe}` }
-    )
-    .setImage(`attachment://${fileName}`)
     .setTimestamp()
   for (const subStatus of cooking.status) {
     subStatus.inline = true
     subStatus.value = subStatus.value + ''
     subEmbed.addFields(subStatus)
   }
-  return { subEmbed, file }
+
+  if (fileName !== '') {
+    subEmbed.addFields(
+      { name: '요리방법', value: cooking.localCookingType }
+    )
+    subEmbed.addFields(
+      { name: '레시피', value: `${cooking.localRecipe}` }
+    )
+    subEmbed.setImage(`attachment://${fileName}`)
+    return { subEmbed, file }
+  }
+  return { subEmbed }
 }
 
 const getImage = async function (fileName, values) {

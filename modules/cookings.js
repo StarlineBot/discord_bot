@@ -8182,3197 +8182,4746 @@ const cookings = [
   }
 ]
 
-const checkCookings =
-    [
-      {
-        localName: '로나의 특제 도시락',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '보호', value: 2 },
-          { name: '마법보호', value: 2 },
-          { name: '방어', value: 5 },
-          { name: '마법방어', value: 5 }
-        ]
-      },
-      {
-        localName: '애프터눈 티 세트',
-        status: [
-          { name: '최대대미지', value: 3 },
-          { name: '체력', value: 30 },
-          { name: '의지', value: 50 },
-          { name: '마법보호', value: 2 }
-        ]
-      },
-      {
-        localName: '달걀 피클',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '생명력', value: 60 },
-          { name: '방어', value: 3 }
-        ]
-      },
-      {
-        localName: '드래곤 블러드 화이트 와인',
-        status: [
-          { name: '마나', value: 300 },
-          { name: '솜씨', value: 100 },
-          { name: '지력', value: 100 },
-          { name: '행운', value: 100 }
-        ]
-      },
-      {
-        localName: '새우 버거',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 50 },
-          { name: '스태미나', value: 60 }
-        ]
-      },
-      {
-        localName: '치킨 버거',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 50 },
-          { name: '스태미나', value: 60 }
-        ]
-      },
-      {
-        localName: '베이컨 버거',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 50 },
-          { name: '스태미나', value: 60 }
-        ]
-      },
-      {
-        localName: '까맣게 구워진 드래곤 심장',
-        status: [
-          { name: '생명력', value: 300 },
-          { name: '마나', value: 300 },
-          { name: '스태미나', value: 300 }
-        ]
-      },
-      {
-        localName: '치즈 버거',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 50 },
-          { name: '스태미나', value: 60 }
-        ]
-      },
-      {
-        localName: '육회',
-        status: [{ name: '생명력', value: 65 }, { name: '솜씨', value: 15 }]
-      },
-      {
-        localName: '챔피언 요리',
-        status: [
-          { name: '생명력', value: 100 },
-          { name: '마나', value: 100 },
-          { name: '스태미나', value: 100 },
-          { name: '체력', value: 60 },
-          { name: '솜씨', value: 60 },
-          { name: '의지', value: 60 },
-          { name: '지력', value: 60 },
-          { name: '행운', value: 60 }
-        ]
-      },
-      {
-        localName: '닭가슴살 샐러드',
-        status: [
-          { name: '마나', value: 50 },
-          { name: '지력', value: 25 },
-          { name: '마법보호', value: 1 }
-        ]
-      },
-      {
-        localName: '떡볶이',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '스태미나', value: 40 },
-          { name: '의지', value: 30 }
-        ]
-      },
-      {
-        localName: '플레인 요거트',
-        status: [{ name: '스태미나', value: 60 }, { name: '행운', value: 25 }]
-      },
-      {
-        localName: '고추장 찌개',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 35 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '모둠회국수',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '체력', value: 55 },
-          { name: '지력', value: 35 },
-          { name: '방어', value: 8 }
-        ]
-      },
-      {
-        localName: '갈치회국수',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '솜씨', value: 40 },
-          { name: '행운', value: 25 }
-        ]
-      },
-      {
-        localName: '오이 피클',
-        status: [
-          { name: '마나', value: 60 },
-          { name: '마법보호', value: 1 },
-          { name: '마법방어', value: 2 }
-        ]
-      },
-      {
-        localName: '스모어',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '마나', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '아이리쉬 스튜',
-        status: [{ name: '스태미나', value: 40 }, { name: '행운', value: 25 }]
-      },
-      {
-        localName: '쩍쩍 붙을 거야! 엿다발',
-        status: [{ name: '생명력', value: 100 }, { name: '방어', value: 5 }]
-      },
-      {
-        localName: '클로버 새싹 샐러드',
-        status: [
-          { name: '생명력', value: 100 },
-          { name: '체력', value: 40 },
-          { name: '지력', value: 40 },
-          { name: '방어', value: 5 }
-        ]
-      },
-      {
-        localName: '슈바인스학세',
-        status: [
-          { name: '스태미나', value: 25 },
-          { name: '체력', value: 45 },
-          { name: '의지', value: 35 }
-        ]
-      },
-      {
-        localName: '두부 스테이크',
-        status: [
-          { name: '마법공격력', value: 1 },
-          { name: '마나', value: 40 },
-          { name: '마법보호', value: 1 },
-          { name: '마법방어', value: 1 }
-        ]
-      },
-      {
-        localName: '청어 소금 구이',
-        status: [{ name: '스태미나', value: 35 }, { name: '솜씨', value: 15 }]
-      },
-      {
-        localName: '계란말이',
-        status: [{ name: '체력', value: 10 }, { name: '의지', value: 25 }]
-      },
-      {
-        localName: '트뤼프 오믈렛',
-        status: [{ name: '스태미나', value: 40 }, { name: '솜씨', value: 30 }]
-      },
-      {
-        localName: '장어회',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '스태미나', value: 55 },
-          { name: '솜씨', value: 10 }
-        ]
-      },
-      {
-        localName: '슈하스코',
-        status: [{ name: '생명력', value: 50 }, { name: '방어', value: 4 }]
-      },
-      {
-        localName: '고추장 돼지불고기',
-        status: [
-          { name: '마나', value: 30 },
-          { name: '의지', value: 50 },
-          { name: '지력', value: 15 }
-        ]
-      },
-      { localName: '구운 파인애플', status: [{ name: '행운', value: 10 }] },
-      {
-        localName: '파인애플 베이컨 꼬치',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '마나', value: 25 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '매실차',
-        status: [{ name: '생명력', value: 35 }, { name: '지력', value: 35 }]
-      },
-      {
-        localName: '벌꿀 요거트',
-        status: [
-          { name: '마나', value: 55 },
-          { name: '스태미나', value: 15 },
-          { name: '지력', value: 25 }
-        ]
-      },
-      {
-        localName: '딸기 요거트',
-        status: [
-          { name: '생명력', value: 65 },
-          { name: '의지', value: 25 },
-          { name: '방어', value: 2 }
-        ]
-      },
-      {
-        localName: '탱글탱글 커스터드 푸딩',
-        status: [
-          { name: '마나', value: 10 },
-          { name: '스태미나', value: 30 },
-          { name: '솜씨', value: 30 },
-          { name: '지력', value: 20 }
-        ]
-      },
-      {
-        localName: '버섯 장조림',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 10 },
-          { name: '지력', value: 20 }
-        ]
-      },
-      {
-        localName: '오야코동',
-        status: [{ name: '생명력', value: 30 }, { name: '마나', value: 40 }]
-      },
-      {
-        localName: '연어 오야코동',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '생명력', value: 30 },
-          { name: '마나', value: 40 }
-        ]
-      },
-      {
-        localName: '수비드 오일 파스타',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 25 },
-          { name: '방어', value: 4 }
-        ]
-      },
-      {
-        localName: '매실청',
-        status: [{ name: '생명력', value: 10 }, { name: '체력', value: 10 }]
-      },
-      {
-        localName: '새우회',
-        status: [
-          { name: '생명력', value: 55 },
-          { name: '마나', value: 10 },
-          { name: '스태미나', value: 10 }
-        ]
-      },
-      {
-        localName: '참치회',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '마나', value: 50 },
-          { name: '스태미나', value: 20 }
-        ]
-      },
-      {
-        localName: '연어회',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '생명력', value: 20 },
-          { name: '마나', value: 55 },
-          { name: '방어', value: 3 }
-        ]
-      },
-      {
-        localName: '갈치회',
-        status: [
-          { name: '마나', value: 45 },
-          { name: '행운', value: 10 },
-          { name: '마법방어', value: 2 }
-        ]
-      },
-      {
-        localName: '복어회',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '마나', value: 40 },
-          { name: '의지', value: 30 }
-        ]
-      },
-      {
-        localName: '송어회',
-        status: [{ name: '스태미나', value: 75 }, { name: '마법보호', value: 1 }]
-      },
-      {
-        localName: '바닷가재회',
-        status: [{ name: '생명력', value: 50 }, { name: '체력', value: 35 }]
-      },
-      {
-        localName: '돼지 보쌈',
-        status: [
-          { name: '생명력', value: 35 },
-          { name: '마나', value: 15 },
-          { name: '방어', value: 1 },
-          { name: '마법방어', value: 2 }
-        ]
-      },
-      {
-        localName: '고등어 조림',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: 15 }
-        ]
-      },
-      {
-        localName: '수비드 소갈비찜',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '마나', value: 20 },
-          { name: '의지', value: 35 }
-        ]
-      },
-      {
-        localName: '블루베리 요거트',
-        status: [
-          { name: '마나', value: 65 },
-          { name: '솜씨', value: 25 },
-          { name: '방어', value: 2 }
-        ]
-      },
-      {
-        localName: '사우어크라우트',
-        status: [
-          { name: '마나', value: 45 },
-          { name: '지력', value: 30 },
-          { name: '마법방어', value: 1 }
-        ]
-      },
-      {
-        localName: '우메보시',
-        status: [
-          { name: '체력', value: 40 },
-          { name: '솜씨', value: 25 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '하우카르틀',
-        status: [{ name: '스태미나', value: 10 }, { name: '의지', value: 100 }]
-      },
-      {
-        localName: '낫토',
-        status: [
-          { name: '생명력', value: 55 },
-          { name: '스태미나', value: 25 },
-          { name: '체력', value: 30 },
-          { name: '방어', value: 2 }
-        ]
-      },
-      {
-        localName: '파인애플 볶음밥',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '생명력', value: 60 },
-          { name: '마법보호', value: 1 }
-        ]
-      },
-      {
-        localName: '풀드포크 샌드위치',
-        status: [{ name: '마법공격력', value: 1 }, { name: '마나', value: 45 }]
-      },
-      {
-        localName: '촉촉한 연어 스테이크',
-        status: [
-          { name: '스태미나', value: 25 },
-          { name: '의지', value: 30 },
-          { name: '마법방어', value: 3 }
-        ]
-      },
-      {
-        localName: '따끈한 온천 달걀',
-        status: [
-          { name: '마나', value: 30 },
-          { name: '솜씨', value: 55 },
-          { name: '행운', value: 25 }
-        ]
-      },
-      {
-        localName: '채끝살 스테이크',
-        status: [{ name: '최대대미지', value: 1 }, { name: '생명력', value: 35 }]
-      },
-      {
-        localName: '수제 등심 햄',
-        status: [{ name: '스태미나', value: 65 }, { name: '방어', value: 3 }]
-      },
-      {
-        localName: '고등어 카레 구이',
-        status: [
-          { name: '스태미나', value: 45 },
-          { name: '솜씨', value: 15 },
-          { name: '지력', value: 30 }
-        ]
-      },
-      {
-        localName: '닭가슴살 유린기',
-        status: [
-          { name: '체력', value: 35 },
-          { name: '행운', value: 20 },
-          { name: '방어', value: 3 }
-        ]
-      },
-      {
-        localName: '문어숙회',
-        status: [
-          { name: '마나', value: 45 },
-          { name: '스태미나', value: 25 },
-          { name: '방어', value: 3 }
-        ]
-      },
-      {
-        localName: '소시지',
-        status: [{ name: '생명력', value: 18 }, { name: '체력', value: 6 }]
-      },
-      {
-        localName: '단호박 해물찜',
-        status: [{ name: '마나', value: 15 }, { name: '지력', value: 15 }]
-      },
-      {
-        localName: '야채찜닭',
-        status: [{ name: '스태미나', value: 15 }, { name: '의지', value: 15 }]
-      },
-      { localName: '찐만두', status: [{ name: '스태미나', value: 15 }] },
-      {
-        localName: '알리오 올리오',
-        status: [{ name: '생명력', value: -10 }, { name: '마나', value: 17 }]
-      },
-      {
-        localName: '까르보나라',
-        status: [{ name: '마나', value: -10 }, { name: '스태미나', value: 15 }]
-      },
-      {
-        localName: '아마트리치아나',
-        status: [{ name: '생명력', value: 15 }, { name: '스태미나', value: -8 }]
-      },
-      {
-        localName: '봉골레',
-        status: [{ name: '생명력', value: 20 }, { name: '지력', value: -20 }]
-      },
-      {
-        localName: '빠네',
-        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
-      },
-      { localName: '호두 파이', status: [{ name: '마나', value: 23 }] },
-      {
-        localName: '고구마 파이',
-        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '아몬드 파이',
-        status: [{ name: '마나', value: 10 }, { name: '지력', value: 7 }]
-      },
-      {
-        localName: '아몬드 딸기잼 타르트',
-        status: [{ name: '스태미나', value: 15 }, { name: '솜씨', value: 10 }]
-      },
-      {
-        localName: '블루베리잼',
-        status: [{ name: '생명력', value: 18 }, { name: '체력', value: 8 }]
-      },
-      { localName: '가지찜', status: [{ name: '마나', value: 10 }] },
-      {
-        localName: '단호박 갈비찜',
-        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 10 }]
-      },
-      {
-        localName: '해물 볶음우동',
-        status: [{ name: '생명력', value: 15 }, { name: '행운', value: 15 }]
-      },
-      {
-        localName: '팟타이',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '의지', value: 20 },
-          { name: '지력', value: -30 }
-        ]
-      },
-      {
-        localName: '새우튀김 우동',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: -10 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '구운 콩국수',
-        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
-      },
-      {
-        localName: '껍질 벗긴 콩국수',
-        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
-      },
-      {
-        localName: '물에 불린 콩국수',
-        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
-      },
-      {
-        localName: '잔치국수',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '솜씨', value: 2 },
-          { name: '의지', value: 8 }
-        ]
-      },
-      {
-        localName: '카레우동',
-        status: [{ name: '생명력', value: 22 }, { name: '솜씨', value: 3 }]
-      },
-      {
-        localName: '두부국수',
-        status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }]
-      },
-      {
-        localName: '두부국수',
-        status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }]
-      },
-      {
-        localName: '두부국수',
-        status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }]
-      },
-      {
-        localName: '계란찜',
-        status: [{ name: '생명력', value: 8 }, { name: '행운', value: 10 }]
-      },
-      {
-        localName: '돼지갈비찜',
-        status: [
-          { name: '생명력', value: 28 },
-          { name: '솜씨', value: 5 },
-          { name: '의지', value: 5 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '오렌지 마멀레이드',
-        status: [{ name: '생명력', value: 15 }, { name: '의지', value: 8 }]
-      },
-      {
-        localName: '레몬잼',
-        status: [{ name: '생명력', value: 30 }, { name: '체력', value: -20 }]
-      },
-      {
-        localName: '닭똥집 볶음',
-        status: [
-          { name: '마나', value: 42 },
-          { name: '체력', value: 4 },
-          { name: '지력', value: 7 },
-          { name: '행운', value: 3 }
-        ]
-      },
-      {
-        localName: '번데기탕',
-        status: [
-          { name: '스태미나', value: 49 },
-          { name: '솜씨', value: 13 },
-          { name: '의지', value: 9 },
-          { name: '행운', value: 6 }
-        ]
-      },
-      {
-        localName: '해물파전',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '솜씨', value: 4 },
-          { name: '지력', value: 9 }
-        ]
-      },
-      {
-        localName: '사과 사탕',
-        status: [
-          { name: '생명력', value: 27 },
-          { name: '마나', value: 38 },
-          { name: '스태미나', value: 46 }
-        ]
-      },
-      {
-        localName: '초코 바나나',
-        status: [
-          { name: '체력', value: 4 },
-          { name: '지력', value: 11 },
-          { name: '행운', value: 6 }
-        ]
-      },
-      {
-        localName: '치즈맛 팝콘',
-        status: [
-          { name: '체력', value: 6 },
-          { name: '솜씨', value: 9 },
-          { name: '의지', value: 11 },
-          { name: '지력', value: 10 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '구운 오징어',
-        status: [
-          { name: '스태미나', value: 42 },
-          { name: '솜씨', value: 11 },
-          { name: '의지', value: 10 },
-          { name: '행운', value: 4 }
-        ]
-      },
-      {
-        localName: '소프트 아이스크림',
-        status: [
-          { name: '마나', value: 46 },
-          { name: '솜씨', value: 11 },
-          { name: '지력', value: 16 }
-        ]
-      },
-      {
-        localName: '구름 솜사탕',
-        status: [
-          { name: '생명력', value: 38 },
-          { name: '마나', value: 20 },
-          { name: '스태미나', value: 25 },
-          { name: '체력', value: 7 },
-          { name: '솜씨', value: 6 }
-        ]
-      },
-      {
-        localName: '응원해! 수능 찹쌀떡',
-        status: [
-          { name: '체력', value: 50 },
-          { name: '솜씨', value: 50 },
-          { name: '의지', value: 50 },
-          { name: '지력', value: 50 },
-          { name: '행운', value: 50 }
-        ]
-      },
-      {
-        localName: '응원해! 수능 엿',
-        status: [
-          { name: '보호', value: 5 },
-          { name: '생명력', value: 150 },
-          { name: '스태미나', value: 120 }
-        ]
-      },
-      {
-        localName: '척척 붙을 거야! 호두 찹쌀떡',
-        status: [{ name: '지력', value: 77 }]
-      },
-      { localName: '할 수 있어! 럭키 케이크', status: [{ name: '행운', value: 77 }] },
-      {
-        localName: '튀김 우동',
-        status: [
-          { name: '보호', value: 2 },
-          { name: '스태미나', value: 35 },
-          { name: '방어', value: 4 }
-        ]
-      },
-      {
-        localName: '매운 어묵탕',
-        status: [
-          { name: '생명력', value: 39 },
-          { name: '마나', value: 35 },
-          { name: '스태미나', value: 47 },
-          { name: '체력', value: 9 }
-        ]
-      },
-      {
-        localName: '소시지 야채 볶음',
-        status: [{ name: '스태미나', value: 15 }, { name: '방어', value: 1 }]
-      },
-      {
-        localName: '가지 볶음',
-        status: [{ name: '생명력', value: 15 }, { name: '방어', value: 1 }]
-      },
-      {
-        localName: '낙지 볶음',
-        status: [{ name: '마나', value: 15 }, { name: '방어', value: 1 }]
-      },
-      {
-        localName: '고구마 튀김',
-        status: [{ name: '솜씨', value: 15 }, { name: '행운', value: 15 }]
-      },
-      {
-        localName: '감자 크로켓',
-        status: [{ name: '솜씨', value: -25 }, { name: '행운', value: 35 }]
-      },
-      {
-        localName: '고구마 맛탕',
-        status: [{ name: '생명력', value: 11 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '돈가스',
-        status: [{ name: '생명력', value: 16 }, { name: '의지', value: 9 }]
-      },
-      {
-        localName: '양배추 콩찜',
-        status: [{ name: '생명력', value: 15 }, { name: '의지', value: 3 }]
-      },
-      { localName: '힘이 불끈! 에너지 드링크', status: [{ name: '체력', value: 77 }] },
-      {
-        localName: '홍차 벌꿀 스콘',
-        status: [
-          { name: '마나', value: 50 },
-          { name: '행운', value: 30 },
-          { name: '마법보호', value: 1 }
-        ]
-      },
-      {
-        localName: '밀푀유 전골',
-        status: [{ name: '스태미나', value: 30 }, { name: '지력', value: 25 }]
-      },
-      {
-        localName: '판나코타',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 15 },
-          { name: '지력', value: 20 }
-        ]
-      },
-      {
-        localName: '로쿰',
-        status: [
-          { name: '마나', value: 20 },
-          { name: '솜씨', value: 20 },
-          { name: '의지', value: 15 }
-        ]
-      },
-      {
-        localName: '닭볶음탕',
-        status: [
-          { name: '스태미나', value: 20 },
-          { name: '의지', value: 15 },
-          { name: '행운', value: 20 }
-        ]
-      },
-      {
-        localName: '프라이드 치킨',
-        status: [
-          { name: '지력', value: 25 },
-          { name: '행운', value: 15 },
-          { name: '방어', value: 2 }
-        ]
-      },
-      {
-        localName: '토마토 달걀 볶음',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '솜씨', value: 35 },
-          { name: '마법보호', value: 1 }
-        ]
-      },
-      {
-        localName: '김치',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '마나', value: 30 },
-          { name: '스태미나', value: 30 }
-        ]
-      },
-      {
-        localName: '마법 콩 두부',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      {
-        localName: '쿤이 구워준 마시멜로',
-        status: [{ name: '생명력', value: 10 }, { name: '행운', value: 15 }]
-      },
-      {
-        localName: '딸기 맛 사탕',
-        status: [
-          { name: '생명력', value: 35 },
-          { name: '마나', value: 15 },
-          { name: '스태미나', value: 15 },
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: 30 },
-          { name: '의지', value: 30 },
-          { name: '지력', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '포도 맛 사탕',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '마나', value: 35 },
-          { name: '스태미나', value: 15 },
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: 30 },
-          { name: '의지', value: 30 },
-          { name: '지력', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '오렌지 맛 사탕',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '마나', value: 15 },
-          { name: '스태미나', value: 35 },
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: 30 },
-          { name: '의지', value: 30 },
-          { name: '지력', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '밀크티',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '마나', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '홍차',
-        status: [{ name: '생명력', value: 30 }, { name: '행운', value: 25 }]
-      },
-      {
-        localName: '계란 마요 토스트',
-        status: [
-          { name: '체력', value: 15 },
-          { name: '의지', value: 15 },
-          { name: '방어', value: 5 }
-        ]
-      },
-      {
-        localName: '크로플',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 50 },
-          { name: '체력', value: 10 }
-        ]
-      },
-      {
-        localName: '김치 찌개',
-        status: [{ name: '솜씨', value: 30 }, { name: '최소 공격력', value: 1 }]
-      },
-      {
-        localName: '매운 라면',
-        status: [{ name: '마나', value: 50 }, { name: '행운', value: 30 }]
-      },
-      {
-        localName: '양념 치킨',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '생명력', value: 40 },
-          { name: '마나', value: 40 }
-        ]
-      },
-      {
-        localName: '김치볶음밥',
-        status: [{ name: '스태미나', value: 45 }, { name: '의지', value: 30 }]
-      },
-      {
-        localName: '트뤼프 크림 뇨키',
-        status: [{ name: '마법공격력', value: 1 }, { name: '지력', value: 35 }]
-      },
-      {
-        localName: '치즈 떡볶이',
-        status: [{ name: '스태미나', value: 40 }, { name: '솜씨', value: 20 }]
-      },
-      {
-        localName: '크루아상',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '체력', value: 15 },
-          { name: '방어', value: 3 }
-        ]
-      },
-      {
-        localName: '딸기 찹쌀떡',
-        status: [
-          { name: '마나', value: 30 },
-          { name: '지력', value: 10 },
-          { name: '마법방어', value: 2 }
-        ]
-      },
-      {
-        localName: '마카롱',
-        status: [{ name: '마나', value: 20 }, { name: '의지', value: 25 }]
-      },
-      {
-        localName: '배추전',
-        status: [{ name: '마나', value: 50 }, { name: '지력', value: 20 }]
-      },
-      {
-        localName: '까눌레',
-        status: [{ name: '스태미나', value: 30 }, { name: '솜씨', value: 20 }]
-      },
-      {
-        localName: '별가루 감자 샐러드',
-        status: [{ name: '최대대미지', value: 1 }, { name: '최소 공격력', value: 1 }]
-      },
-      { localName: '별가루 계란말이', status: [{ name: '마법공격력', value: 1 }] },
-      {
-        localName: '은하수 레몬 주스',
-        status: [{ name: '보호', value: 2 }, { name: '방어', value: 20 }]
-      },
-      {
-        localName: '방울토마토 스파게티',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '보호', value: 1 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '두근두근 리코타 치즈 샐러드',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '보호', value: 2 },
-          { name: '마법보호', value: 2 },
-          { name: '방어', value: 5 },
-          { name: '마법방어', value: 5 }
-        ]
-      },
-      {
-        localName: '두근두근 스위트 디저트',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '보호', value: 2 },
-          { name: '마법보호', value: 2 },
-          { name: '방어', value: 5 },
-          { name: '마법방어', value: 5 }
-        ]
-      },
-      {
-        localName: '두근두근 스테이크',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '보호', value: 2 },
-          { name: '마법보호', value: 2 },
-          { name: '방어', value: 5 },
-          { name: '마법방어', value: 5 }
-        ]
-      },
-      {
-        localName: '두근두근 하트 파스타',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '보호', value: 2 },
-          { name: '마법보호', value: 2 },
-          { name: '방어', value: 5 },
-          { name: '마법방어', value: 5 }
-        ]
-      },
-      {
-        localName: '순수 우유 케이크',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '보호', value: 2 },
-          { name: '마법보호', value: 2 },
-          { name: '방어', value: 5 },
-          { name: '마법방어', value: 5 }
-        ]
-      },
-      {
-        localName: '판이 그려진 달고나',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '최소 공격력', value: 1 }
-        ]
-      },
-      {
-        localName: '니엘이 만든 옥수수 스프',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '처갓집 와락치킨',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 50 },
-          { name: '스태미나', value: 50 }
-        ]
-      },
-      {
-        localName: '처갓집 꼬꼬뱅 슈프림양념치킨',
-        status: [
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 10 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '처갓집 슈프림양념치킨',
-        status: [{ name: '최대대미지', value: 3 }, { name: '마법공격력', value: 5 }]
-      },
-      {
-        localName: '방울토마토 치즈 치아바타',
-        status: [
-          { name: '마법공격력', value: 3 },
-          { name: '마법보호', value: 1 },
-          { name: '마법방어', value: 1 }
-        ]
-      },
-      {
-        localName: '방울토마토 주스',
-        status: [
-          { name: '체력', value: 5 },
-          { name: '솜씨', value: 5 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '표고버섯볶음',
-        status: [{ name: '의지', value: 5 }, { name: '지력', value: 5 }]
-      },
-      {
-        localName: '은하수 사과 주스',
-        status: [{ name: '마법보호', value: 2 }, { name: '마법방어', value: 20 }]
-      },
-      {
-        localName: '달가루 핫케이크',
-        status: [
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: 30 },
-          { name: '의지', value: 30 },
-          { name: '지력', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '달가루 비프 스테이크',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 50 },
-          { name: '스태미나', value: 50 }
-        ]
-      },
-      {
-        localName: '칠면조 테트라치니',
-        status: [{ name: '스태미나', value: 30 }, { name: '체력', value: 10 }]
-      },
-      {
-        localName: '영양만점 호두과자',
-        status: [{ name: '생명력', value: 35 }, { name: '마나', value: 35 }]
-      },
-      {
-        localName: '꿀밤 라떼',
-        status: [{ name: '스태미나', value: 30 }, { name: '의지', value: 10 }]
-      },
-      {
-        localName: '가리비 토마토 스튜',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '솜씨', value: 10 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '모둠조개회',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '보호', value: 1 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '가리비 치즈구이',
-        status: [
-          { name: '지력', value: 15 },
-          { name: '행운', value: 10 },
-          { name: '최소 공격력', value: 1 }
-        ]
-      },
-      {
-        localName: '불닭볶음면',
-        status: [
-          { name: '최대대미지', value: 2 },
-          { name: '보호', value: 1 },
-          { name: '방어', value: 10 },
-          { name: '최소 공격력', value: 2 }
-        ]
-      },
-      {
-        localName: '까르보불닭볶음면',
-        status: [
-          { name: '마법공격력', value: 5 },
-          { name: '마법보호', value: 1 },
-          { name: '마법방어', value: 10 }
-        ]
-      },
-      {
-        localName: '4가지치즈불닭볶음면',
-        status: [
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 10 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '처갓집양념치킨',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '마법보호', value: 1 },
-          { name: '방어', value: 10 },
-          { name: '마법방어', value: 10 }
-        ]
-      },
-      {
-        localName: '사과 수플레',
-        status: [
-          { name: '마나', value: 20 },
-          { name: '솜씨', value: 30 },
-          { name: '지력', value: 20 }
-        ]
-      },
-      {
-        localName: '모둠생선회',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '마법공격력', value: 1 },
-          { name: '보호', value: 1 },
-          { name: '스태미나', value: 20 }
-        ]
-      },
-      {
-        localName: '핫치킨 피자',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '마나', value: 30 },
-          { name: '스태미나', value: 50 }
-        ]
-      },
-      {
-        localName: '타라 딥 디쉬',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '스태미나', value: 40 },
-          { name: '지력', value: 25 }
-        ]
-      },
-      {
-        localName: '베지터블 피자',
-        status: [
-          { name: '생명력', value: 55 },
-          { name: '스태미나', value: 30 },
-          { name: '솜씨', value: 30 }
-        ]
-      },
-      {
-        localName: '쿠르클레 피자',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 40 },
-          { name: '행운', value: 10 },
-          { name: '방어', value: 5 }
-        ]
-      },
-      {
-        localName: '루벤 샌드위치',
-        status: [
-          { name: '보호', value: 2 },
-          { name: '마법보호', value: 1 },
-          { name: '방어', value: 3 },
-          { name: '마법방어', value: 3 }
-        ]
-      },
-      {
-        localName: '새우초밥',
-        status: [
-          { name: '생명력', value: 45 },
-          { name: '스태미나', value: 50 },
-          { name: '최소 공격력', value: 1 }
-        ]
-      },
-      {
-        localName: '장어초밥',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 35 },
-          { name: '스태미나', value: 35 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '계란초밥',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '스태미나', value: 30 },
-          { name: '솜씨', value: 40 }
-        ]
-      },
-      {
-        localName: '참치뱃살초밥',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 35 },
-          { name: '스태미나', value: 15 },
-          { name: '방어', value: 2 }
-        ]
-      },
-      {
-        localName: '연어초밥',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '마나', value: 80 },
-          { name: '스태미나', value: 15 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '라씨',
-        status: [
-          { name: '마나', value: 20 },
-          { name: '지력', value: 25 },
-          { name: '마법방어', value: 2 }
-        ]
-      },
-      {
-        localName: '코울슬로',
-        status: [
-          { name: '체력', value: 25 },
-          { name: '의지', value: 10 },
-          { name: '행운', value: 25 }
-        ]
-      },
-      {
-        localName: '포카치아',
-        status: [{ name: '생명력', value: 55 }, { name: '행운', value: 30 }]
-      },
-      {
-        localName: '스테이크 피자',
-        status: [
-          { name: '마법공격력', value: 1 },
-          { name: '마나', value: 55 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '쉬림프 피자',
-        status: [{ name: '마나', value: 50 }, { name: '의지', value: 30 }]
-      },
-      {
-        localName: '모둠회덮밥',
-        status: [
-          { name: '최대대미지', value: 2 },
-          { name: '마법공격력', value: 2 },
-          { name: '생명력', value: 35 },
-          { name: '마나', value: 25 }
-        ]
-      },
-      {
-        localName: '쉬쉬 케밥',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '행운', value: 30 },
-          { name: '방어', value: 1 }
-        ]
-      },
-      {
-        localName: '이스켄데르 케밥',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '마나', value: 25 },
-          { name: '지력', value: 35 }
-        ]
-      },
-      {
-        localName: '소풍용 치킨 케밥',
-        status: [
-          { name: '마나', value: 30 },
-          { name: '솜씨', value: 40 },
-          { name: '마법보호', value: 1 }
-        ]
-      },
-      {
-        localName: '부리토',
-        status: [
-          { name: '스태미나', value: 50 },
-          { name: '체력', value: 25 },
-          { name: '방어', value: 4 }
-        ]
-      },
-      {
-        localName: '고르곤졸라',
-        status: [
-          { name: '마나', value: 60 },
-          { name: '지력', value: 10 },
-          { name: '마법방어', value: 3 }
-        ]
-      },
-      {
-        localName: '마르게리따',
-        status: [
-          { name: '생명력', value: 35 },
-          { name: '마나', value: 20 },
-          { name: '솜씨', value: 35 }
-        ]
-      },
-      {
-        localName: '칼초네',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '마나', value: 15 },
-          { name: '체력', value: 35 }
-        ]
-      },
-      {
-        localName: '스위트 포테이토 피자',
-        status: [{ name: '마나', value: 60 }, { name: '솜씨', value: 10 }]
-      },
-      {
-        localName: '페퍼로니 피자',
-        status: [
-          { name: '스태미나', value: 55 },
-          { name: '의지', value: 30 },
-          { name: '방어', value: 3 }
-        ]
-      },
-      {
-        localName: '향긋한 버섯 피자',
-        status: [{ name: '행운', value: 30 }, { name: '마법방어', value: 3 }]
-      },
-      {
-        localName: '초콜릿 피자',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '체력', value: 15 },
-          { name: '최소 공격력', value: 1 }
-        ]
-      },
-      {
-        localName: '다이어트 연어 샐러드',
-        status: [
-          { name: '마나', value: 35 },
-          { name: '지력', value: 25 },
-          { name: '마법보호', value: 1 }
-        ]
-      },
-      {
-        localName: '마시멜로',
-        status: [{ name: '생명력', value: 10 }, { name: '행운', value: 15 }]
-      },
-      {
-        localName: '크레이프 케이크',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '마나', value: 20 },
-          { name: '체력', value: 30 }
-        ]
-      },
-      {
-        localName: '특이한 당근',
-        status: [
-          { name: '생명력', value: 14 },
-          { name: '마나', value: 14 },
-          { name: '체력', value: 14 },
-          { name: '솜씨', value: 14 },
-          { name: '의지', value: 14 },
-          { name: '지력', value: 14 },
-          { name: '행운', value: 14 }
-        ]
-      },
-      {
-        localName: '몬스터 초콜릿',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 14 },
-          { name: '의지', value: 14 }
-        ]
-      },
-      {
-        localName: '체리 포레누아',
-        status: [
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: 15 },
-          { name: '의지', value: 15 },
-          { name: '지력', value: 15 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      {
-        localName: '퐁당 쇼콜라',
-        status: [
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: 15 },
-          { name: '의지', value: 15 },
-          { name: '지력', value: 15 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      {
-        localName: '초코 슈크림',
-        status: [
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: -10 },
-          { name: '의지', value: -10 },
-          { name: '지력', value: -10 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '초콜릿 무스',
-        status: [
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: -10 },
-          { name: '의지', value: -10 },
-          { name: '지력', value: -10 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '엘시가 준 딸기우유',
-        status: [{ name: '생명력', value: 25 }, { name: '지력', value: 6 }]
-      },
-      {
-        localName: '할로윈 축제 요리',
-        status: [
-          { name: '생명력', value: 70 },
-          { name: '마나', value: 70 },
-          { name: '스태미나', value: 70 },
-          { name: '체력', value: 40 },
-          { name: '솜씨', value: 40 },
-          { name: '의지', value: 40 },
-          { name: '지력', value: 40 },
-          { name: '행운', value: 40 }
-        ]
-      },
-      {
-        localName: '맛있는 송편 세트',
-        status: [
-          { name: '보호', value: 2 },
-          { name: '체력', value: 90 },
-          { name: '솜씨', value: 90 },
-          { name: '의지', value: 90 },
-          { name: '지력', value: 90 },
-          { name: '행운', value: 90 },
-          { name: '마법보호', value: 2 },
-          { name: '방어', value: 4 },
-          { name: '마법방어', value: 4 }
-        ]
-      },
-      {
-        localName: '불금 반반 치맥 세트',
-        status: [
-          { name: '마법공격력', value: 5 },
-          { name: '보호', value: 2 },
-          { name: '지력', value: 50 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '딸기 쇼트케익',
-        status: [
-          { name: '생명력', value: 45 },
-          { name: '마나', value: 45 },
-          { name: '행운', value: 50 }
-        ]
-      },
-      {
-        localName: '민트초코 프라페',
-        status: [
-          { name: '스태미나', value: 30 },
-          { name: '의지', value: 30 },
-          { name: '방어', value: 2 }
-        ]
-      },
-      {
-        localName: '팥빙수',
-        status: [{ name: '마나', value: 20 }, { name: '행운', value: 15 }]
-      },
-      {
-        localName: '계란 샌드위치',
-        status: [{ name: '의지', value: 4 }, { name: '행운', value: 2 }]
-      },
-      {
-        localName: '계란죽',
-        status: [{ name: '의지', value: 4 }, { name: '행운', value: 2 }]
-      },
-      {
-        localName: '딸기 생크림 크레이프',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '마나', value: 30 },
-          { name: '지력', value: 30 }
-        ]
-      },
-      {
-        localName: '블루베리 생크림 크레이프',
-        status: [
-          { name: '마나', value: 20 },
-          { name: '스태미나', value: 35 },
-          { name: '솜씨', value: 30 }
-        ]
-      },
-      {
-        localName: '초코 크레이프 케이크',
-        status: [
-          { name: '마나', value: 30 },
-          { name: '스태미나', value: 20 },
-          { name: '의지', value: 30 }
-        ]
-      },
-      {
-        localName: '해피 디저트 타임 세트',
-        status: [
-          { name: '최대대미지', value: 2 },
-          { name: '보호', value: 1 },
-          { name: '솜씨', value: 25 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '모둠 바베큐',
-        status: [
-          { name: '체력', value: 80 },
-          { name: '지력', value: 80 },
-          { name: '방어', value: 10 }
-        ]
-      },
-      { localName: '15주년 애플파이', status: [{ name: '행운', value: 30 }] },
-      {
-        localName: '15주년 아이스 카페 모카',
-        status: [
-          { name: '체력', value: 20 },
-          { name: '솜씨', value: 30 },
-          { name: '지력', value: 30 }
-        ]
-      },
-      {
-        localName: '생일 케이크',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '보호', value: 1 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '쿠키 케이크',
-        status: [
-          { name: '최대대미지', value: 1 },
-          { name: '보호', value: 1 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '하이볼',
-        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 5 }]
-      },
-      {
-        localName: '애플사이다',
-        status: [{ name: '스태미나', value: 20 }, { name: '지력', value: 5 }]
-      },
-      {
-        localName: '오므라이스',
-        status: [{ name: '생명력', value: 30 }, { name: '체력', value: 7 }]
-      },
-      {
-        localName: '민트초코칩 쿠키',
-        status: [{ name: '생명력', value: 55 }, { name: '방어', value: 1 }]
-      },
-      {
-        localName: '핫 케이크',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '체력', value: 3 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '보리빵',
-        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 9 }]
-      },
-      {
-        localName: '찐 옥수수',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 20 },
-          { name: '솜씨', value: 8 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '샥스핀 스프',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: 8 },
-          { name: '의지', value: 16 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '콘소메',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 12 },
-          { name: '의지', value: 12 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '치킨 누들 콘소메',
-        status: [
-          { name: '생명력', value: 35 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 8 },
-          { name: '의지', value: 12 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '옥수수 스프',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '양파 튀김',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 22 },
-          { name: '솜씨', value: 4 },
-          { name: '의지', value: 20 },
-          { name: '지력', value: 4 }
-        ]
-      },
-      {
-        localName: '모둠 튀김',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 20 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 22 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '콘칩',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 12 },
-          { name: '의지', value: 12 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '모둠 볶음밥',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: 8 },
-          { name: '의지', value: 20 },
-          { name: '지력', value: 4 }
-        ]
-      },
-      {
-        localName: '버섯 볶음밥',
-        status: [
-          { name: '생명력', value: 35 },
-          { name: '체력', value: 12 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 18 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '팝콘',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 8 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '토마토 스파게티',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 30 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 4 }
-        ]
-      },
-      {
-        localName: '크림 파르팔레',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 20 },
-          { name: '의지', value: 20 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '옥수수 식빵',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 16 },
-          { name: '솜씨', value: 8 },
-          { name: '의지', value: 8 },
-          { name: '지력', value: 12 }
-        ]
-      },
-      {
-        localName: '옥수수 스콘',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: 15 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '은붕어 꼬치구이',
-        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 14 }]
-      },
-      {
-        localName: '금은 매운탕',
-        status: [
-          { name: '생명력', value: 35 },
-          { name: '체력', value: 15 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '브리흐네 락스',
-        status: [
-          { name: '생명력', value: 45 },
-          { name: '체력', value: 25 },
-          { name: '솜씨', value: -10 },
-          { name: '지력', value: -10 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      {
-        localName: '스크류 드라이버',
-        status: [
-          { name: '생명력', value: 42 },
-          { name: '체력', value: 26 },
-          { name: '솜씨', value: -8 },
-          { name: '지력', value: -8 },
-          { name: '행운', value: 18 }
-        ]
-      },
-      {
-        localName: '라인 슬링',
-        status: [
-          { name: '생명력', value: 38 },
-          { name: '체력', value: 20 },
-          { name: '솜씨', value: -8 },
-          { name: '지력', value: -8 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      {
-        localName: 'BnR',
-        status: [
-          { name: '생명력', value: 50 },
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: -12 },
-          { name: '지력', value: -12 },
-          { name: '행운', value: 20 }
-        ]
-      },
-      {
-        localName: '키스 온 더 립스',
-        status: [
-          { name: '생명력', value: 45 },
-          { name: '체력', value: 26 },
-          { name: '솜씨', value: -8 },
-          { name: '지력', value: -8 },
-          { name: '행운', value: 18 }
-        ]
-      },
-      {
-        localName: '레드 선라이즈',
-        status: [
-          { name: '생명력', value: 42 },
-          { name: '체력', value: 20 },
-          { name: '솜씨', value: -10 },
-          { name: '지력', value: -10 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      {
-        localName: '초콜릿',
-        status: [
-          { name: '생명력', value: 12 },
-          { name: '체력', value: 4 },
-          { name: '지력', value: 4 }
-        ]
-      },
-      {
-        localName: '개 과자',
-        status: [
-          { name: '생명력', value: 8 },
-          { name: '체력', value: 2 },
-          { name: '지력', value: 2 }
-        ]
-      },
-      {
-        localName: '베이컨과 감자 개밥',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 6 },
-          { name: '솜씨', value: -6 }
-        ]
-      },
-      {
-        localName: '새우 개밥',
-        status: [
-          { name: '생명력', value: 14 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: -8 }
-        ]
-      },
-      {
-        localName: '오믈렛',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 18 },
-          { name: '솜씨', value: 4 },
-          { name: '의지', value: 12 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '해물 스파게티',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 5 },
-          { name: '솜씨', value: 25 },
-          { name: '의지', value: 15 },
-          { name: '지력', value: 12 }
-        ]
-      },
-      {
-        localName: '조개구이',
-        status: [{ name: '생명력', value: 10 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '독버섯 스튜',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 15 }
-        ]
-      },
-      {
-        localName: '버섯 그라탕',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 15 },
-          { name: '지력', value: 30 }
-        ]
-      },
-      {
-        localName: '버섯 마리네이드',
-        status: [
-          { name: '생명력', value: 45 },
-          { name: '지력', value: -8 },
-          { name: '행운', value: 26 }
-        ]
-      },
-      {
-        localName: '버섯찜',
-        status: [
-          { name: '생명력', value: 18 },
-          { name: '솜씨', value: 5 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '루아의 요리',
-        status: [{ name: '생명력', value: 40 }, { name: '행운', value: 10 }]
-      },
-      {
-        localName: '뭉개진 껍질 벗긴 콩가루 두부',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 5 },
-          { name: '의지', value: 5 }
-        ]
-      },
-      {
-        localName: '뭉개진 물에 불린 콩가루 두부',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 5 },
-          { name: '의지', value: 5 }
-        ]
-      },
-      {
-        localName: '10주년 기념 케익',
-        status: [
-          { name: '생명력', value: 36 },
-          { name: '마나', value: 36 },
-          { name: '스태미나', value: 36 },
-          { name: '체력', value: 6 },
-          { name: '의지', value: 6 }
-        ]
-      },
-      {
-        localName: '10살 생일 케익',
-        status: [
-          { name: '생명력', value: 100 },
-          { name: '마나', value: 100 },
-          { name: '스태미나', value: 100 },
-          { name: '체력', value: 100 },
-          { name: '솜씨', value: 100 },
-          { name: '의지', value: 100 },
-          { name: '지력', value: 100 },
-          { name: '행운', value: 100 }
-        ]
-      },
-      {
-        localName: '11주년 기념 케익',
-        status: [
-          { name: '생명력', value: 36 },
-          { name: '마나', value: 36 },
-          { name: '스태미나', value: 36 },
-          { name: '체력', value: 6 },
-          { name: '의지', value: 6 }
-        ]
-      },
-      {
-        localName: '12주년 기념 케익',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '마나', value: 40 },
-          { name: '스태미나', value: 40 },
-          { name: '체력', value: 8 },
-          { name: '의지', value: 8 }
-        ]
-      },
-      {
-        localName: '13주년 기념 케익',
-        status: [
-          { name: '생명력', value: 44 },
-          { name: '마나', value: 44 },
-          { name: '스태미나', value: 44 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      { localName: '타라식 소시지 샌드위치', status: [{ name: '체력', value: 30 }] },
-      {
-        localName: '버섯 카나페',
-        status: [
-          { name: '생명력', value: 18 },
-          { name: '솜씨', value: 3 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '버섯 카푸치노스프',
-        status: [
-          { name: '생명력', value: 13 },
-          { name: '의지', value: 12 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '비단 청새치구이',
-        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '케이크 만들기 키트',
-        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '청새치 스테이크',
-        status: [
-          { name: '생명력', value: 22 },
-          { name: '체력', value: 10 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '훈제 개복치',
-        status: [
-          { name: '스태미나', value: 24 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 10 }
-        ]
-      },
-      {
-        localName: '날치 크레이프',
-        status: [{ name: '마나', value: 16 }, { name: '지력', value: 5 }]
-      },
-      {
-        localName: '킹 크랩찜',
-        status: [
-          { name: '생명력', value: 24 },
-          { name: '체력', value: 15 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      {
-        localName: '가오리 아가미 퓌레',
-        status: [{ name: '스태미나', value: 12 }, { name: '의지', value: 7 }]
-      },
-      {
-        localName: '해파리 냉채',
-        status: [
-          { name: '마나', value: 8 },
-          { name: '의지', value: 8 },
-          { name: '지력', value: 12 }
-        ]
-      },
-      {
-        localName: '아귀찜',
-        status: [
-          { name: '생명력', value: 26 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 15 }
-        ]
-      },
-      {
-        localName: '뭉개진 구운 콩가루 두부',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 5 },
-          { name: '의지', value: 5 }
-        ]
-      },
-      {
-        localName: '마법 콩 두부',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      {
-        localName: '버섯 포타주',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '체력', value: 20 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      {
-        localName: '버섯 콘소메',
-        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 30 }]
-      },
-      { localName: '딸기잼 토스트', status: [{ name: '지력', value: 30 }] },
-      {
-        localName: '로스트 치킨',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: 2 },
-          { name: '의지', value: 8 }
-        ]
-      },
-      {
-        localName: '양파맛 팝콘',
-        status: [
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 11 },
-          { name: '의지', value: 14 },
-          { name: '지력', value: 12 },
-          { name: '행운', value: 7 }
-        ]
-      },
-      {
-        localName: '밥',
-        status: [
-          { name: '체력', value: 6 },
-          { name: '솜씨', value: 8 },
-          { name: '지력', value: 7 }
-        ]
-      },
-      {
-        localName: '베이컨구이',
-        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
-      },
-      {
-        localName: '비프 스테이크',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 15 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      {
-        localName: '삶은감자',
-        status: [{ name: '생명력', value: 12 }, { name: '체력', value: 3 }]
-      },
-      {
-        localName: '삶은달걀',
-        status: [{ name: '생명력', value: 12 }, { name: '솜씨', value: 3 }]
-      },
-      {
-        localName: '새우볶음밥',
-        status: [
-          { name: '생명력', value: 6 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 15 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '새우튀김',
-        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 15 }]
-      },
-      {
-        localName: '식빵',
-        status: [{ name: '생명력', value: 15 }, { name: '의지', value: 3 }]
-      },
-      {
-        localName: '야채볶음',
-        status: [
-          { name: '생명력', value: 6 },
-          { name: '솜씨', value: 10 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '야채스프',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '솜씨', value: 10 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '양송이볶음',
-        status: [{ name: '생명력', value: 10 }, { name: '지력', value: 12 }]
-      },
-      {
-        localName: '양송이스프',
-        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 15 }]
-      },
-      {
-        localName: '양파볶음',
-        status: [{ name: '생명력', value: 10 }, { name: '솜씨', value: 12 }]
-      },
-      {
-        localName: '마늘빵',
-        status: [{ name: '생명력', value: 10 }, { name: '체력', value: 3 }]
-      },
-      {
-        localName: '딸기우유',
-        status: [{ name: '생명력', value: 25 }, { name: '지력', value: 6 }]
-      },
-      {
-        localName: '캬라멜맛 팝콘',
-        status: [
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 11 },
-          { name: '의지', value: 14 },
-          { name: '지력', value: 12 },
-          { name: '행운', value: 7 }
-        ]
-      },
-      {
-        localName: '과일 도시락',
-        status: [
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 11 },
-          { name: '의지', value: 14 },
-          { name: '지력', value: 12 },
-          { name: '행운', value: 7 }
-        ]
-      },
-      {
-        localName: '치킨 팝콘과 콜라 세트',
-        status: [
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 11 },
-          { name: '의지', value: 14 },
-          { name: '지력', value: 12 },
-          { name: '행운', value: 7 }
-        ]
-      },
-      {
-        localName: '치킨 팝콘과 맥주 세트',
-        status: [
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 11 },
-          { name: '의지', value: 14 },
-          { name: '지력', value: 12 },
-          { name: '행운', value: 7 }
-        ]
-      },
-      {
-        localName: '감자계란샐러드',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '체력', value: 3 },
-          { name: '솜씨', value: 5 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '감자샐러드',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '솜씨', value: 6 },
-          { name: '지력', value: 5 }
-        ]
-      },
-      {
-        localName: '감자튀김',
-        status: [{ name: '생명력', value: 18 }, { name: '체력', value: 7 }]
-      },
-      {
-        localName: '계란샐러드',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 3 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      { localName: '계란프라이', status: [{ name: '생명력', value: 15 }] },
-      {
-        localName: '과일 모둠',
-        status: [{ name: '생명력', value: 25 }, { name: '솜씨', value: 3 }]
-      },
-      {
-        localName: '과일샐러드',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '솜씨', value: 3 },
-          { name: '지력', value: 5 }
-        ]
-      },
-      {
-        localName: '닭날개구이',
-        status: [{ name: '생명력', value: 28 }, { name: '행운', value: 10 }]
-      },
-      {
-        localName: '닭날개튀김',
-        status: [{ name: '생명력', value: 15 }, { name: '행운', value: 15 }]
-      },
-      {
-        localName: '양파스프',
-        status: [{ name: '생명력', value: 15 }, { name: '솜씨', value: 15 }]
-      },
-      {
-        localName: '우유식빵',
-        status: [{ name: '생명력', value: 18 }, { name: '솜씨', value: 7 }]
-      },
-      {
-        localName: '레어치즈 케익',
-        status: [{ name: '생명력', value: 18 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '가토 오 쇼콜라',
-        status: [{ name: '생명력', value: 22 }, { name: '솜씨', value: 3 }]
-      },
-      {
-        localName: '크로크 무슈',
-        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 5 }]
-      },
-      {
-        localName: '브라우니',
-        status: [
-          { name: '생명력', value: 12 },
-          { name: '체력', value: 6 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '버터 비스킷',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '솜씨', value: 3 },
-          { name: '지력', value: 5 }
-        ]
-      },
-      {
-        localName: '초코칩 쿠키',
-        status: [
-          { name: '생명력', value: 12 },
-          { name: '체력', value: 5 },
-          { name: '솜씨', value: 2 }
-        ]
-      },
-      {
-        localName: '오렌지 주스',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '의지', value: 5 },
-          { name: '지력', value: 5 }
-        ]
-      },
-      {
-        localName: '레몬 주스',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '의지', value: 5 },
-          { name: '지력', value: 5 }
-        ]
-      },
-      {
-        localName: '초콜릿 우유',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '체력', value: 5 },
-          { name: '지력', value: 5 }
-        ]
-      },
-      {
-        localName: '라인산 진',
-        status: [
-          { name: '생명력', value: 28 },
-          { name: '체력', value: 16 },
-          { name: '솜씨', value: -6 },
-          { name: '행운', value: 6 }
-        ]
-      },
-      {
-        localName: '브리흐네 위스키',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: -4 },
-          { name: '행운', value: 4 }
-        ]
-      },
-      {
-        localName: '데브니쉬 흑맥주',
-        status: [
-          { name: '생명력', value: 32 },
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: -6 },
-          { name: '행운', value: 6 }
-        ]
-      },
-      {
-        localName: '사과 주스',
-        status: [
-          { name: '생명력', value: 12 },
-          { name: '체력', value: 5 },
-          { name: '솜씨', value: 5 }
-        ]
-      },
-      {
-        localName: '이멘 마하산 와인',
-        status: [
-          { name: '생명력', value: 17 },
-          { name: '체력', value: 7 },
-          { name: '솜씨', value: -2 },
-          { name: '행운', value: 2 }
-        ]
-      },
-      {
-        localName: '치즈 퐁듀',
-        status: [
-          { name: '생명력', value: 28 },
-          { name: '솜씨', value: 5 },
-          { name: '의지', value: 5 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      { localName: '치즈빵', status: [{ name: '생명력', value: 15 }] },
-      {
-        localName: '토스트',
-        status: [{ name: '생명력', value: 30 }, { name: '체력', value: 3 }]
-      },
-      {
-        localName: '통감자구이',
-        status: [{ name: '생명력', value: 10 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '브리흐네 잉어구이',
-        status: [{ name: '생명력', value: 11 }, { name: '의지', value: 5 }]
-      },
-      {
-        localName: '브리흐네 잉어찜',
-        status: [{ name: '생명력', value: 12 }, { name: '체력', value: 6 }]
-      },
-      {
-        localName: '은붕어 스튜',
-        status: [{ name: '생명력', value: 16 }, { name: '의지', value: 9 }]
-      },
-      {
-        localName: '피쉬 앤 칩스',
-        status: [
-          { name: '생명력', value: 18 },
-          { name: '솜씨', value: 5 },
-          { name: '의지', value: 5 }
-        ]
-      },
-      {
-        localName: 'T본 스테이크',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 5 },
-          { name: '의지', value: 5 }
-        ]
-      },
-      {
-        localName: '치즈 그라탕',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '솜씨', value: 3 },
-          { name: '지력', value: 3 }
-        ]
-      },
-      {
-        localName: '카레 라이스',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 5 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '코 코 뱅',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 3 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 8 }
-        ]
-      },
-      {
-        localName: '송어찜',
-        status: [
-          { name: '생명력', value: 22 },
-          { name: '솜씨', value: 5 },
-          { name: '지력', value: 7 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '부야 베스',
-        status: [
-          { name: '생명력', value: 32 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 5 },
-          { name: '의지', value: 5 }
-        ]
-      },
-      {
-        localName: '카레빵',
-        status: [{ name: '생명력', value: 15 }, { name: '체력', value: 8 }]
-      },
-      { localName: '클럽 샌드위치', status: [{ name: '솜씨', value: 35 }] },
-      {
-        localName: '복지리',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '마나', value: 30 },
-          { name: '지력', value: 15 }
-        ]
-      },
-      {
-        localName: '떡국',
-        status: [{ name: '생명력', value: 8 }, { name: '체력', value: 2 }]
-      },
-      {
-        localName: '떡국 곱빼기',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 4 }
-        ]
-      },
-      {
-        localName: '특대 떡국',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 18 },
-          { name: '솜씨', value: 4 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '월병',
-        status: [{ name: '생명력', value: 8 }, { name: '체력', value: 2 }]
-      },
-      {
-        localName: '큰 월병',
-        status: [{ name: '생명력', value: 15 }, { name: '체력', value: 8 }]
-      },
-      {
-        localName: '특대 월병',
-        status: [
-          { name: '보호', value: 1 },
-          { name: '생명력', value: 15 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 10 },
-          { name: '지력', value: 12 }
-        ]
-      },
-      {
-        localName: '할로윈 호박 사탕',
-        status: [{ name: '생명력', value: 5 }, { name: '마나', value: 5 }]
-      },
-      { localName: '할로윈 포장 캔디', status: [{ name: '생명력', value: 15 }] },
-      { localName: '할로윈 호박 초콜릿', status: [{ name: '마나', value: 10 }] },
-      { localName: '할로윈 포장 쿠키', status: [{ name: '스태미나', value: 10 }] },
-      { localName: '할로윈 호박 파이', status: [{ name: '생명력', value: 10 }] },
-      { localName: '할로윈 모자 쿠키', status: [{ name: '의지', value: 10 }] },
-      { localName: '할로윈 별 쿠키', status: [{ name: '행운', value: 10 }] },
-      {
-        localName: '드래곤 블러드 레드 와인',
-        status: [
-          { name: '스태미나', value: 300 },
-          { name: '체력', value: 100 },
-          { name: '의지', value: 100 },
-          { name: '행운', value: 100 }
-        ]
-      },
-      {
-        localName: '드래곤 티본 스테이크',
-        status: [{ name: '생명력', value: 200 }, { name: '체력', value: 100 }]
-      },
-      {
-        localName: '감성돔 카레구이',
-        status: [{ name: '체력', value: 20 }, { name: '의지', value: 20 }]
-      },
-      {
-        localName: '참돔 카레구이',
-        status: [{ name: '솜씨', value: 20 }, { name: '행운', value: 20 }]
-      },
-      {
-        localName: '돔돔 매운탕',
-        status: [
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 10 },
-          { name: '지력', value: 10 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '샥스핀 찜',
-        status: [{ name: '체력', value: 30 }, { name: '솜씨', value: 30 }]
-      },
-      {
-        localName: '캐비어 샐러드',
-        status: [{ name: '마나', value: 30 }, { name: '지력', value: 30 }]
-      },
-      {
-        localName: '버터구이 랍스타',
-        status: [{ name: '체력', value: -10 }, { name: '솜씨', value: 40 }]
-      },
-      {
-        localName: '고등어 스테이크',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '마나', value: 30 },
-          { name: '스태미나', value: 30 }
-        ]
-      },
-      {
-        localName: '벨바스트 장어 덮밥',
-        status: [{ name: '체력', value: 40 }, { name: '솜씨', value: -10 }]
-      },
-      {
-        localName: '갈치스튜',
-        status: [{ name: '지력', value: 40 }, { name: '행운', value: -10 }]
-      },
-      {
-        localName: '참돔 매운탕',
-        status: [
-          { name: '체력', value: 12 },
-          { name: '솜씨', value: 10 },
-          { name: '의지', value: 15 },
-          { name: '지력', value: 8 },
-          { name: '행운', value: 8 }
-        ]
-      },
-      {
-        localName: '추억의 도시락',
-        status: [{ name: '마나', value: 20 }, { name: '지력', value: 15 }]
-      },
-      {
-        localName: '벨바스트 위스키',
-        status: [{ name: '생명력', value: 32 }, { name: '체력', value: 16 }]
-      },
-      {
-        localName: '하얗게 구워진 드래곤 심장',
-        status: [
-          { name: '체력', value: 150 },
-          { name: '솜씨', value: 150 },
-          { name: '의지', value: 150 },
-          { name: '지력', value: 150 },
-          { name: '행운', value: 150 }
-        ]
-      },
-      { localName: '할로윈 부엉이 쿠키', status: [{ name: '솜씨', value: 10 }] },
-      { localName: '할로윈 유령 젤리', status: [{ name: '지력', value: 10 }] },
-      {
-        localName: '초콜릿 케이크',
-        status: [
-          { name: '생명력', value: 5 },
-          { name: '지력', value: -10 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '삼계탕',
-        status: [
-          { name: '체력', value: 28 },
-          { name: '솜씨', value: -15 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      { localName: '가락엿', status: [{ name: '체력', value: 15 }] },
-      {
-        localName: '거대한 별사탕',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '솜씨', value: 7 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      { localName: '삶은 고구마', status: [{ name: '솜씨', value: 8 }] },
-      { localName: '삶은 콩', status: [{ name: '체력', value: 8 }] },
-      { localName: '삶은 문어', status: [{ name: '스태미나', value: 8 }] },
-      { localName: '삶은 양배추', status: [{ name: '마나', value: 8 }] },
-      { localName: '삶은 밤', status: [{ name: '생명력', value: 8 }] },
-      { localName: '하얀 떡', status: [{ name: '생명력', value: 12 }] },
-      {
-        localName: '미트파이',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '의지', value: 5 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      { localName: '3단 핫 케이크', status: [{ name: '행운', value: 21 }] },
-      { localName: '옥수수 구이', status: [{ name: '생명력', value: 15 }] },
-      { localName: '할로윈 호박 젤리', status: [{ name: '체력', value: 10 }] },
-      { localName: '군만두', status: [{ name: '지력', value: 8 }] },
-      {
-        localName: '군만두 곱빼기',
-        status: [
-          { name: '솜씨', value: 8 },
-          { name: '의지', value: 16 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      {
-        localName: '특대 군만두',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 15 },
-          { name: '솜씨', value: 8 },
-          { name: '의지', value: 16 },
-          { name: '지력', value: 8 }
-        ]
-      },
-      { localName: '구운 떡', status: [{ name: '생명력', value: 15 }] },
-      {
-        localName: '칠면조 구이',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      {
-        localName: '타라식 소시지 샌드위치',
-        status: [{ name: '솜씨', value: 10 }, { name: '지력', value: 10 }]
-      },
-      {
-        localName: '송편',
-        status: [{ name: '체력', value: 10 }, { name: '솜씨', value: 15 }]
-      },
-      {
-        localName: '트뤼프 파이',
-        status: [
-          { name: '생명력', value: 40 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: -17 },
-          { name: '행운', value: 8 }
-        ]
-      },
-      {
-        localName: '초콜릿 수플레',
-        status: [{ name: '생명력', value: 15 }, { name: '체력', value: -5 }]
-      },
-      {
-        localName: '샐러리 샐러드',
-        status: [
-          { name: '스태미나', value: 12 },
-          { name: '의지', value: 7 },
-          { name: '지력', value: -15 }
-        ]
-      },
-      {
-        localName: '닭고기 볶음면',
-        status: [
-          { name: '스태미나', value: -12 },
-          { name: '체력', value: 20 },
-          { name: '의지', value: 10 }
-        ]
-      },
-      {
-        localName: '그라니타',
-        status: [{ name: '마나', value: 27 }, { name: '행운', value: 23 }]
-      },
-      { localName: '호박 타르트', status: [{ name: '마나', value: 30 }] },
-      {
-        localName: '나레스 케익 세트',
-        status: [{ name: '생명력', value: 45 }, { name: '솜씨', value: 5 }]
-      },
-      {
-        localName: '버섯 쿠키',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '체력', value: 9 },
-          { name: '솜씨', value: 3 }
-        ]
-      },
-      {
-        localName: '코코넛 쿠키',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 18 },
-          { name: '의지', value: 17 }
-        ]
-      },
-      {
-        localName: '코코넛 파운드 케익',
-        status: [
-          { name: '생명력', value: 28 },
-          { name: '체력', value: 13 },
-          { name: '행운', value: 13 }
-        ]
-      },
-      {
-        localName: '코코넛 게살 스프',
-        status: [
-          { name: '생명력', value: 38 },
-          { name: '체력', value: 28 },
-          { name: '행운', value: 21 }
-        ]
-      },
-      {
-        localName: '키시',
-        status: [
-          { name: '생명력', value: 28 },
-          { name: '체력', value: 13 },
-          { name: '의지', value: 18 }
-        ]
-      },
-      {
-        localName: '잣죽',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 5 },
-          { name: '의지', value: 8 }
-        ]
-      },
-      {
-        localName: '철갑상어 스테이크',
-        status: [
-          { name: '생명력', value: 45 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 20 }
-        ]
-      },
-      {
-        localName: '캐비어 카나페',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '솜씨', value: 4 },
-          { name: '행운', value: 20 }
-        ]
-      },
-      {
-        localName: '에그 캐비어',
-        status: [
-          { name: '생명력', value: 17 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 11 }
-        ]
-      },
-      {
-        localName: '발레스 위스키',
-        status: [
-          { name: '생명력', value: 15 },
-          { name: '체력', value: 5 },
-          { name: '솜씨', value: -2 },
-          { name: '행운', value: 9 }
-        ]
-      },
-      {
-        localName: '발레스 화이어',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '체력', value: 38 },
-          { name: '솜씨', value: -15 },
-          { name: '지력', value: -15 },
-          { name: '행운', value: 25 }
-        ]
-      },
-      {
-        localName: '카멜리아 슬링',
-        status: [
-          { name: '생명력', value: 18 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: -3 },
-          { name: '지력', value: -3 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '루트라 칵테일 세트',
-        status: [{ name: '체력', value: 20 }, { name: '솜씨', value: 5 }]
-      },
-      {
-        localName: '필리아 쿠키 세트',
-        status: [{ name: '솜씨', value: 5 }, { name: '행운', value: 20 }]
-      },
-      { localName: '에그 타르트', status: [{ name: '생명력', value: 30 }] },
-      { localName: '애플파이', status: [{ name: '행운', value: 30 }] },
-      { localName: '피칸파이', status: [{ name: '의지', value: 40 }] },
-      {
-        localName: '바질티',
-        status: [{ name: '솜씨', value: 8 }, { name: '의지', value: 12 }]
-      },
-      {
-        localName: '레몬티',
-        status: [
-          { name: '생명력', value: 6 },
-          { name: '솜씨', value: 8 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '스팀밀크',
-        status: [
-          { name: '생명력', value: 5 },
-          { name: '체력', value: 6 },
-          { name: '지력', value: 3 }
-        ]
-      },
-      {
-        localName: '핫초코',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 25 },
-          { name: '지력', value: 22 }
-        ]
-      },
-      {
-        localName: '보리차',
-        status: [{ name: '솜씨', value: 3 }, { name: '행운', value: 12 }]
-      },
-      {
-        localName: '타임티',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '의지', value: 10 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '베지터블 카나페',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '솜씨', value: -9 },
-          { name: '행운', value: 12 }
-        ]
-      },
-      {
-        localName: '토마토 바질 샐러드',
-        status: [
-          { name: '솜씨', value: -8 },
-          { name: '지력', value: 5 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '허브 버섯 샐러드',
-        status: [
-          { name: '솜씨', value: -7 },
-          { name: '의지', value: 5 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '옥수수차',
-        status: [{ name: '솜씨', value: -5 }, { name: '행운', value: 20 }]
-      },
-      {
-        localName: '빙어 무침',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 5 },
-          { name: '의지', value: 15 }
-        ]
-      },
-      {
-        localName: '빙어 튀김',
-        status: [{ name: '생명력', value: 30 }, { name: '체력', value: 15 }]
-      },
-      {
-        localName: '아브 네아 잉어 튀김',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 40 },
-          { name: '솜씨', value: -20 },
-          { name: '의지', value: 30 },
-          { name: '지력', value: -20 }
-        ]
-      },
-      {
-        localName: '아브 네아 잉어 채소 절임',
-        status: [
-          { name: '생명력', value: 30 },
-          { name: '마나', value: 20 },
-          { name: '지력', value: 10 }
-        ]
-      },
-      {
-        localName: '아브 네아 잉어 스튜',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '체력', value: 10 },
-          { name: '의지', value: 5 },
-          { name: '행운', value: 20 }
-        ]
-      },
-      {
-        localName: '메기 조개 찜',
-        status: [{ name: '생명력', value: 33 }, { name: '의지', value: 35 }]
-      },
-      {
-        localName: '메기구이',
-        status: [
-          { name: '생명력', value: 26 },
-          { name: '체력', value: 10 },
-          { name: '행운', value: 20 }
-        ]
-      },
-      {
-        localName: '메기 야채 샐러드',
-        status: [
-          { name: '생명력', value: 28 },
-          { name: '마나', value: 30 },
-          { name: '지력', value: 20 }
-        ]
-      },
-      {
-        localName: '은어 소금구이',
-        status: [
-          { name: '생명력', value: 25 },
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 10 }
-        ]
-      },
-      {
-        localName: '새우초밥',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '솜씨', value: 7 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '문어초밥',
-        status: [
-          { name: '생명력', value: 9 },
-          { name: '솜씨', value: 6 },
-          { name: '행운', value: 4 }
-        ]
-      },
-      {
-        localName: 'E.O. 그랑 블라고',
-        status: [
-          { name: '체력', value: 30 },
-          { name: '솜씨', value: -30 },
-          { name: '지력', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: 'E.O. 에란스 크뤼',
-        status: [
-          { name: '체력', value: -30 },
-          { name: '솜씨', value: 30 },
-          { name: '지력', value: 30 },
-          { name: '행운', value: 30 }
-        ]
-      },
-      {
-        localName: '어린이날 초록 솜사탕',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '솜씨', value: 14 },
-          { name: '행운', value: 10 }
-        ]
-      },
-      {
-        localName: '새우 부르스케타',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '마나', value: 10 },
-          { name: '스태미나', value: 10 },
-          { name: '행운', value: 23 }
-        ]
-      },
-      {
-        localName: '아이스 마끼아또',
-        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 25 }]
-      },
-      {
-        localName: '아이스 카페 모카',
-        status: [
-          { name: '체력', value: 20 },
-          { name: '솜씨', value: 30 },
-          { name: '지력', value: 30 }
-        ]
-      },
-      {
-        localName: '장어 구이',
-        status: [
-          { name: '생명력', value: 20 },
-          { name: '체력', value: 30 },
-          { name: '행운', value: -5 }
-        ]
-      },
-      {
-        localName: '주니퍼 젤리',
-        status: [
-          { name: '생명력', value: 5 },
-          { name: '솜씨', value: 10 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      {
-        localName: '까르르 버섯 쿠키',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '솜씨', value: 7 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      {
-        localName: '눈물 우동',
-        status: [
-          { name: '마나', value: 12 },
-          { name: '솜씨', value: 8 },
-          { name: '지력', value: 5 }
-        ]
-      },
-      {
-        localName: '크레이지 초코볼',
-        status: [
-          { name: '스태미나', value: 15 },
-          { name: '의지', value: 10 },
-          { name: '행운', value: 6 }
-        ]
-      },
-      {
-        localName: '잘난체 스테이크',
-        status: [
-          { name: '생명력', value: 10 },
-          { name: '체력', value: 8 },
-          { name: '지력', value: 7 }
-        ]
-      },
-      {
-        localName: '두근두근 가토 오 쇼콜라',
-        status: [
-          { name: '생명력', value: 9 },
-          { name: '마나', value: 11 },
-          { name: '의지', value: 8 }
-        ]
-      },
-      {
-        localName: '우정의 새우볶음밥',
-        status: [
-          { name: '생명력', value: 9 },
-          { name: '체력', value: 8 },
-          { name: '솜씨', value: 8 }
-        ]
-      },
-      {
-        localName: '에스프레소',
-        status: [
-          { name: '솜씨', value: 5 },
-          { name: '의지', value: 15 },
-          { name: '행운', value: 15 }
-        ]
-      },
-      {
-        localName: '에스프레소 마끼아또',
-        status: [
-          { name: '생명력', value: 5 },
-          { name: '의지', value: 5 },
-          { name: '행운', value: 5 }
-        ]
-      },
-      { localName: '카푸치노', status: [{ name: '행운', value: 20 }] },
-      {
-        localName: '마끼아또',
-        status: [{ name: '생명력', value: 10 }, { name: '체력', value: 15 }]
-      },
-      {
-        localName: '카페 모카',
-        status: [
-          { name: '체력', value: 10 },
-          { name: '솜씨', value: 20 },
-          { name: '지력', value: 20 }
-        ]
-      },
-      {
-        localName: '토마토 페스카토레',
-        status: [{ name: '스태미나', value: 30 }, { name: '체력', value: 30 }]
-      }
-    ]
+const checkCookings = [
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30658.png',
+    localName: '로나의 특제 도시락',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '보호', value: 2 },
+      { name: '마법보호', value: 2 },
+      { name: '방어', value: 5 },
+      { name: '마법방어', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30625.png',
+    localName: '애프터눈 티 세트',
+    status: [
+      { name: '최대대미지', value: 3 },
+      { name: '체력', value: 30 },
+      { name: '의지', value: 50 },
+      { name: '마법보호', value: 2 }
+    ],
+    localRecipe: '홍차 벌꿀 스콘(35%) 마카롱(35%) 판나코타(35%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10797.png',
+    localName: '달걀 피클',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '생명력', value: 60 },
+      { name: '방어', value: 3 }
+    ],
+    localRecipe: '삶은달걀(71%) 식초(16%) 설탕(13%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10290.png',
+    localName: '드래곤 블러드 화이트 와인',
+    status: [
+      { name: '마나', value: 300 },
+      { name: '솜씨', value: 100 },
+      { name: '지력', value: 100 },
+      { name: '행운', value: 100 }
+    ],
+    localRecipe: '화이트 드래곤의 피(94%) 드래곤의 살덩어리(6%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10896.png',
+    localName: '새우 버거',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 50 },
+      { name: '스태미나', value: 60 }
+    ],
+    localRecipe: '빵(50%) 새우(25%) 양배추(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10898.png',
+    localName: '치킨 버거',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 50 },
+      { name: '스태미나', value: 60 }
+    ],
+    localRecipe: '빵(50%) 닭고기(25%) 양배추(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10897.png',
+    localName: '베이컨 버거',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 50 },
+      { name: '스태미나', value: 60 }
+    ],
+    localRecipe: '빵(50%) 베이컨(25%) 양배추(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10288.png',
+    localName: '까맣게 구워진 드래곤 심장',
+    status: [
+      { name: '생명력', value: 300 },
+      { name: '마나', value: 300 },
+      { name: '스태미나', value: 300 }
+    ],
+    localRecipe: '블랙 드래곤의 심장(75%) 블랙 드래곤의 피(7%) 드래곤의 살덩어리(18%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10895.png',
+    localName: '치즈 버거',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 50 },
+      { name: '스태미나', value: 60 }
+    ],
+    localRecipe: '빵(50%) 치즈 조각(25%) 양배추(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10833.png',
+    localName: '육회',
+    status: [{ name: '생명력', value: 65 }, { name: '솜씨', value: 15 }],
+    localRecipe: '커다란 고기덩어리(86%) 달걀(14%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-16139.png',
+    localName: '챔피언 요리',
+    status: [
+      { name: '생명력', value: 100 },
+      { name: '마나', value: 100 },
+      { name: '스태미나', value: 100 },
+      { name: '체력', value: 60 },
+      { name: '솜씨', value: 60 },
+      { name: '의지', value: 60 },
+      { name: '지력', value: 60 },
+      { name: '행운', value: 60 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10813.png',
+    localName: '닭가슴살 샐러드',
+    status: [
+      { name: '마나', value: 50 },
+      { name: '지력', value: 25 },
+      { name: '마법보호', value: 1 }
+    ],
+    localRecipe: '닭고기(65%) 샐러리 샐러드(29%) 와인 식초(6%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10791.png',
+    localName: '떡볶이',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '스태미나', value: 40 },
+      { name: '의지', value: 30 }
+    ],
+    localRecipe: '하얀 떡(53%) 고추장(17%) 육수(30%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10799.png',
+    localName: '플레인 요거트',
+    status: [{ name: '스태미나', value: 60 }, { name: '행운', value: 25 }],
+    localRecipe: '우유(100%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10792.png',
+    localName: '고추장 찌개',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 35 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '고추장(30%) 감자(30%) 육수(50%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10793.png',
+    localName: '모둠회국수',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '체력', value: 55 },
+      { name: '지력', value: 35 },
+      { name: '방어', value: 8 }
+    ],
+    localRecipe: '모둠생선회(50%) 소면(33%) 육수(22%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10794.png',
+    localName: '갈치회국수',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '솜씨', value: 40 },
+      { name: '행운', value: 25 }
+    ],
+    localRecipe: '갈치회(35%) 소면(55%) 양배추(10%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10798.png',
+    localName: '오이 피클',
+    status: [
+      { name: '마나', value: 60 },
+      { name: '마법보호', value: 1 },
+      { name: '마법방어', value: 2 }
+    ],
+    localRecipe: '오이(71%) 물이 든 병(14%) 식초(15%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10783.png',
+    localName: '스모어',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '마나', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '마시멜로(55%) 초코칩 쿠키(60%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10790.png',
+    localName: '아이리쉬 스튜',
+    status: [{ name: '스태미나', value: 40 }, { name: '행운', value: 25 }],
+    localRecipe: '고기 조각(78%) 왕감자(12%) 당근(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10528.png',
+    localName: '쩍쩍 붙을 거야! 엿다발',
+    status: [{ name: '생명력', value: 100 }, { name: '방어', value: 5 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10529.png',
+    localName: '클로버 새싹 샐러드',
+    status: [
+      { name: '생명력', value: 100 },
+      { name: '체력', value: 40 },
+      { name: '지력', value: 40 },
+      { name: '방어', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10776.png',
+    localName: '슈바인스학세',
+    status: [
+      { name: '스태미나', value: 25 },
+      { name: '체력', value: 45 },
+      { name: '의지', value: 35 }
+    ],
+    localRecipe: '커다란 고기덩어리(50%) 사우어크라우트(35%) 감자튀김(25%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10777.png',
+    localName: '두부 스테이크',
+    status: [
+      { name: '마법공격력', value: 1 },
+      { name: '마나', value: 40 },
+      { name: '마법보호', value: 1 },
+      { name: '마법방어', value: 1 }
+    ],
+    localRecipe: '마법 콩 두부(80%) 올리브유(10%) 우스터 소스(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10778.png',
+    localName: '청어 소금 구이',
+    status: [{ name: '스태미나', value: 35 }, { name: '솜씨', value: 15 }],
+    localRecipe: '청어(88%) 소금(7%) 레몬즙(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10779.png',
+    localName: '계란말이',
+    status: [{ name: '체력', value: 10 }, { name: '의지', value: 25 }],
+    localRecipe: '달걀(80%) 버터(12%) 설탕(8%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10782.png',
+    localName: '트뤼프 오믈렛',
+    status: [{ name: '스태미나', value: 40 }, { name: '솜씨', value: 30 }],
+    localRecipe: '달걀(70%) 송로버섯(16%) 야채 모둠(19%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10829.png',
+    localName: '장어회',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '스태미나', value: 55 },
+      { name: '솜씨', value: 10 }
+    ],
+    localRecipe: '벨바스트 장어(88%) 초장(12%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10784.png',
+    localName: '슈하스코',
+    status: [{ name: '생명력', value: 50 }, { name: '방어', value: 4 }],
+    localRecipe: '수제 등심 햄(50%) 닭고기(30%) 소시지(35%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10785.png',
+    localName: '고추장 돼지불고기',
+    status: [
+      { name: '마나', value: 30 },
+      { name: '의지', value: 50 },
+      { name: '지력', value: 15 }
+    ],
+    localRecipe: '고기 조각(81%) 고추장(11%) 양파(8%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10786.png',
+    localName: '구운 파인애플',
+    status: [{ name: '행운', value: 10 }],
+    localRecipe: '파인애플(94%) 설탕(6%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10787.png',
+    localName: '파인애플 베이컨 꼬치',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '마나', value: 25 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '베이컨(44%) 파인애플(46%) 새우(20%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10789.png',
+    localName: '매실차',
+    status: [{ name: '생명력', value: 35 }, { name: '지력', value: 35 }],
+    localRecipe: '매실청(14%) 물이 든 병(86%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10800.png',
+    localName: '벌꿀 요거트',
+    status: [
+      { name: '마나', value: 55 },
+      { name: '스태미나', value: 15 },
+      { name: '지력', value: 25 }
+    ],
+    localRecipe: '우유(88%) 신선한 벌꿀(12%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10801.png',
+    localName: '딸기 요거트',
+    status: [
+      { name: '생명력', value: 65 },
+      { name: '의지', value: 25 },
+      { name: '방어', value: 2 }
+    ],
+    localRecipe: '우유(78%) 딸기잼(22%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10822.png',
+    localName: '탱글탱글 커스터드 푸딩',
+    status: [
+      { name: '마나', value: 10 },
+      { name: '스태미나', value: 30 },
+      { name: '솜씨', value: 30 },
+      { name: '지력', value: 20 }
+    ],
+    localRecipe: '달걀(68%) 우유(20%) 생크림(12%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10823.png',
+    localName: '버섯 장조림',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 10 },
+      { name: '지력', value: 20 }
+    ],
+    localRecipe: '고기 조각(32%) 개암버섯(55%) 간장(13%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10824.png',
+    localName: '오야코동',
+    status: [{ name: '생명력', value: 30 }, { name: '마나', value: 40 }],
+    localRecipe: '닭고기(40%) 달걀(20%) 밥(40%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10825.png',
+    localName: '연어 오야코동',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '생명력', value: 30 },
+      { name: '마나', value: 40 }
+    ],
+    localRecipe: '라노산 연어(54%) 밥(52%) 레몬(4%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10826.png',
+    localName: '수비드 오일 파스타',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 25 },
+      { name: '방어', value: 4 }
+    ],
+    localRecipe: '롱 파스타(79%) 올리브유(9%) 키조개(12%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10827.png',
+    localName: '매실청',
+    status: [{ name: '생명력', value: 10 }, { name: '체력', value: 10 }],
+    localRecipe: '매실(59%) 설탕(41%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10828.png',
+    localName: '새우회',
+    status: [
+      { name: '생명력', value: 55 },
+      { name: '마나', value: 10 },
+      { name: '스태미나', value: 10 }
+    ],
+    localRecipe: '새우(89%) 초장(11%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10830.png',
+    localName: '참치회',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '마나', value: 50 },
+      { name: '스태미나', value: 20 }
+    ],
+    localRecipe: '황다랑어(91%) 초장(9%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10831.png',
+    localName: '연어회',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '생명력', value: 20 },
+      { name: '마나', value: 55 },
+      { name: '방어', value: 3 }
+    ],
+    localRecipe: '라노산 연어(90%) 초장(10%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10832.png',
+    localName: '갈치회',
+    status: [
+      { name: '마나', value: 45 },
+      { name: '행운', value: 10 },
+      { name: '마법방어', value: 2 }
+    ],
+    localRecipe: '갈치(92%) 초장(8%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10834.png',
+    localName: '복어회',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '마나', value: 40 },
+      { name: '의지', value: 30 }
+    ],
+    localRecipe: '복어(82%) 해독 포션(10%) 물이 든 병(8%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10835.png',
+    localName: '송어회',
+    status: [{ name: '스태미나', value: 75 }, { name: '마법보호', value: 1 }],
+    localRecipe: '무지개 송어(87%) 초장(13%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10836.png',
+    localName: '바닷가재회',
+    status: [{ name: '생명력', value: 50 }, { name: '체력', value: 35 }],
+    localRecipe: '바닷가재(88%) 간장(7%) 레몬즙(5%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10821.png',
+    localName: '돼지 보쌈',
+    status: [
+      { name: '생명력', value: 35 },
+      { name: '마나', value: 15 },
+      { name: '방어', value: 1 },
+      { name: '마법방어', value: 2 }
+    ],
+    localRecipe: '커다란 고기덩어리(80%) 부추(12%) 양배추(8%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10820.png',
+    localName: '고등어 조림',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: 15 }
+    ],
+    localRecipe: '고등어(81%) 간장(14%) 레몬즙(5%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10819.png',
+    localName: '수비드 소갈비찜',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '마나', value: 20 },
+      { name: '의지', value: 35 }
+    ],
+    localRecipe: '쇠고기(83%) 매운 고추(8%) 고기양념(9%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10802.png',
+    localName: '블루베리 요거트',
+    status: [
+      { name: '마나', value: 65 },
+      { name: '솜씨', value: 25 },
+      { name: '방어', value: 2 }
+    ],
+    localRecipe: '우유(77%) 블루베리잼(23%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10805.png',
+    localName: '사우어크라우트',
+    status: [
+      { name: '마나', value: 45 },
+      { name: '지력', value: 30 },
+      { name: '마법방어', value: 1 }
+    ],
+    localRecipe: '양배추(77%) 소금(9%) 식초(14%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10806.png',
+    localName: '우메보시',
+    status: [
+      { name: '체력', value: 40 },
+      { name: '솜씨', value: 25 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '매실(70%) 소금(15%) 설탕(15%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10807.png',
+    localName: '하우카르틀',
+    status: [{ name: '스태미나', value: 10 }, { name: '의지', value: 100 }],
+    localRecipe: '민물 거대 육식 어류(104%) 후추(6%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10808.png',
+    localName: '낫토',
+    status: [
+      { name: '생명력', value: 55 },
+      { name: '스태미나', value: 25 },
+      { name: '체력', value: 30 },
+      { name: '방어', value: 2 }
+    ],
+    localRecipe: '삶은 콩(91%) 간장(9%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10810.png',
+    localName: '파인애플 볶음밥',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '생명력', value: 60 },
+      { name: '마법보호', value: 1 }
+    ],
+    localRecipe: '밥(65%) 파인애플(25%) 우스터 소스(10%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10811.png',
+    localName: '풀드포크 샌드위치',
+    status: [{ name: '마법공격력', value: 1 }, { name: '마나', value: 45 }],
+    localRecipe: '커다란 고기덩어리(40%) 식빵(30%) 야채 모둠(35%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10812.png',
+    localName: '촉촉한 연어 스테이크',
+    status: [
+      { name: '스태미나', value: 25 },
+      { name: '의지', value: 30 },
+      { name: '마법방어', value: 3 }
+    ],
+    localRecipe: '라노산 연어(99%) 올리브유(6%) 타임(5%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10814.png',
+    localName: '따끈한 온천 달걀',
+    status: [
+      { name: '마나', value: 30 },
+      { name: '솜씨', value: 55 },
+      { name: '행운', value: 25 }
+    ],
+    localRecipe: '달걀(86%) 물이 든 병(10%) 간장(4%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10815.png',
+    localName: '채끝살 스테이크',
+    status: [{ name: '최대대미지', value: 1 }, { name: '생명력', value: 35 }],
+    localRecipe: '쇠고기(76%) 야채볶음(15%) 우스터 소스(9%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10816.png',
+    localName: '수제 등심 햄',
+    status: [{ name: '스태미나', value: 65 }, { name: '방어', value: 3 }],
+    localRecipe: '커다란 고기덩어리(85%) 후추(6%) 버터(9%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10817.png',
+    localName: '고등어 카레 구이',
+    status: [
+      { name: '스태미나', value: 45 },
+      { name: '솜씨', value: 15 },
+      { name: '지력', value: 30 }
+    ],
+    localRecipe: '고등어(81%) 카레가루(12%) 밀가루(7%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10818.png',
+    localName: '닭가슴살 유린기',
+    status: [
+      { name: '체력', value: 35 },
+      { name: '행운', value: 20 },
+      { name: '방어', value: 3 }
+    ],
+    localRecipe: '닭고기(77%) 매운 고추(8%) 양배추(15%)',
+    localCookingType: '수비드'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10837.png',
+    localName: '문어숙회',
+    status: [
+      { name: '마나', value: 45 },
+      { name: '스태미나', value: 25 },
+      { name: '방어', value: 3 }
+    ],
+    localRecipe: '삶은 문어(99%) 초장(11%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10339.png',
+    localName: '소시지',
+    status: [{ name: '생명력', value: 18 }, { name: '체력', value: 6 }],
+    localRecipe: '고기 조각(85%) 밀가루(5%) 양파(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10360.png',
+    localName: '단호박 해물찜',
+    status: [{ name: '마나', value: 15 }, { name: '지력', value: 15 }],
+    localRecipe: '단호박(75%) 낙지(15%) 새우(10%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10361.png',
+    localName: '야채찜닭',
+    status: [{ name: '스태미나', value: 15 }, { name: '의지', value: 15 }],
+    localRecipe: '닭고기(75%) 야채 모둠(20%) 고기양념(5%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10362.png',
+    localName: '찐만두',
+    status: [{ name: '스태미나', value: 15 }],
+    localRecipe: '밀가루(50%) 고기 조각(45%) 부추(5%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10363.png',
+    localName: '알리오 올리오',
+    status: [{ name: '생명력', value: -10 }, { name: '마나', value: 17 }],
+    localRecipe: '롱 파스타(80%) 올리브유(5%) 마늘(15%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10364.png',
+    localName: '까르보나라',
+    status: [{ name: '마나', value: -10 }, { name: '스태미나', value: 15 }],
+    localRecipe: '롱 파스타(80%) 생크림(3%) 파스타 재료 모둠(17%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10365.png',
+    localName: '아마트리치아나',
+    status: [{ name: '생명력', value: 15 }, { name: '스태미나', value: -8 }],
+    localRecipe: '쇼트 파스타(80%) 토마토 소스(18%) 매운 고추(2%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10366.png',
+    localName: '봉골레',
+    status: [{ name: '생명력', value: 20 }, { name: '지력', value: -20 }],
+    localRecipe: '쇼트 파스타(80%) 올리브유(2%) 조개(18%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10367.png',
+    localName: '빠네',
+    status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }],
+    localRecipe: '빵(50%) 롱 파스타(45%) 생크림(5%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10368.png',
+    localName: '호두 파이',
+    status: [{ name: '마나', value: 23 }],
+    localRecipe: '파이 틀(45%) 호두(45%) 버터(10%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10369.png',
+    localName: '고구마 파이',
+    status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }],
+    localRecipe: '파이 틀(35%) 고구마(55%) 달걀(10%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10370.png',
+    localName: '아몬드 파이',
+    status: [{ name: '마나', value: 10 }, { name: '지력', value: 7 }],
+    localRecipe: '파이 틀(50%) 아몬드(45%) 달걀(5%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10371.png',
+    localName: '아몬드 딸기잼 타르트',
+    status: [{ name: '스태미나', value: 15 }, { name: '솜씨', value: 10 }],
+    localRecipe: '타르트 틀(50%) 딸기잼(40%) 아몬드(10%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10372.png',
+    localName: '블루베리잼',
+    status: [{ name: '생명력', value: 18 }, { name: '체력', value: 8 }],
+    localRecipe: '블루베리(70%) 설탕(30%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10359.png',
+    localName: '가지찜',
+    status: [{ name: '마나', value: 10 }],
+    localRecipe: '가지(95%) 소금(2%) 마늘(3%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10358.png',
+    localName: '단호박 갈비찜',
+    status: [{ name: '생명력', value: 20 }, { name: '체력', value: 10 }],
+    localRecipe: '단호박(80%) 고기 조각(17%) 고기양념(3%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10345.png',
+    localName: '해물 볶음우동',
+    status: [{ name: '생명력', value: 15 }, { name: '행운', value: 15 }],
+    localRecipe: '누들(80%) 야채 모둠(15%) 조개(5%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10346.png',
+    localName: '팟타이',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '의지', value: 20 },
+      { name: '지력', value: -30 }
+    ],
+    localRecipe: '누들(75%) 야채 모둠(20%) 간장(5%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10347.png',
+    localName: '새우튀김 우동',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: -10 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '누들(50%) 새우튀김(5%) 육수(45%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10348.png',
+    localName: '구운 콩국수',
+    status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }],
+    localRecipe: '소면(75%) 구운 콩물(25%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10349.png',
+    localName: '껍질 벗긴 콩국수',
+    status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }],
+    localRecipe: '소면(75%) 껍질 벗긴 콩물(25%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10350.png',
+    localName: '물에 불린 콩국수',
+    status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }],
+    localRecipe: '소면(75%) 물에 불린 콩물(25%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10351.png',
+    localName: '잔치국수',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '솜씨', value: 2 },
+      { name: '의지', value: 8 }
+    ],
+    localRecipe: '소면(50%) 야채 모둠(10%) 육수(40%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10352.png',
+    localName: '카레우동',
+    status: [{ name: '생명력', value: 22 }, { name: '솜씨', value: 3 }],
+    localRecipe: '누들(60%) 카레가루(5%) 물이 든 병(35%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10353.png',
+    localName: '두부국수',
+    status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }],
+    localRecipe: '',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10354.png',
+    localName: '두부국수',
+    status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }],
+    localRecipe: '',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10355.png',
+    localName: '두부국수',
+    status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }],
+    localRecipe: '',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10356.png',
+    localName: '계란찜',
+    status: [{ name: '생명력', value: 8 }, { name: '행운', value: 10 }],
+    localRecipe: '달걀(88%) 물이 든 병(11%) 소금(1%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10357.png',
+    localName: '돼지갈비찜',
+    status: [
+      { name: '생명력', value: 28 },
+      { name: '솜씨', value: 5 },
+      { name: '의지', value: 5 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '커다란 고기덩어리(70%) 야채 모둠(10%) 고기양념(20%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10373.png',
+    localName: '오렌지 마멀레이드',
+    status: [{ name: '생명력', value: 15 }, { name: '의지', value: 8 }],
+    localRecipe: '오렌지(70%) 설탕(25%) 물이 든 병(5%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10374.png',
+    localName: '레몬잼',
+    status: [{ name: '생명력', value: 30 }, { name: '체력', value: -20 }],
+    localRecipe: '레몬(80%) 설탕(20%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10395.png',
+    localName: '닭똥집 볶음',
+    status: [
+      { name: '마나', value: 42 },
+      { name: '체력', value: 4 },
+      { name: '지력', value: 7 },
+      { name: '행운', value: 3 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10396.png',
+    localName: '번데기탕',
+    status: [
+      { name: '스태미나', value: 49 },
+      { name: '솜씨', value: 13 },
+      { name: '의지', value: 9 },
+      { name: '행운', value: 6 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10397.png',
+    localName: '해물파전',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '솜씨', value: 4 },
+      { name: '지력', value: 9 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10406.png',
+    localName: '사과 사탕',
+    status: [
+      { name: '생명력', value: 27 },
+      { name: '마나', value: 38 },
+      { name: '스태미나', value: 46 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10407.png',
+    localName: '초코 바나나',
+    status: [
+      { name: '체력', value: 4 },
+      { name: '지력', value: 11 },
+      { name: '행운', value: 6 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10408.png',
+    localName: '치즈맛 팝콘',
+    status: [
+      { name: '체력', value: 6 },
+      { name: '솜씨', value: 9 },
+      { name: '의지', value: 11 },
+      { name: '지력', value: 10 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10409.png',
+    localName: '구운 오징어',
+    status: [
+      { name: '스태미나', value: 42 },
+      { name: '솜씨', value: 11 },
+      { name: '의지', value: 10 },
+      { name: '행운', value: 4 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10410.png',
+    localName: '소프트 아이스크림',
+    status: [
+      { name: '마나', value: 46 },
+      { name: '솜씨', value: 11 },
+      { name: '지력', value: 16 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10411.png',
+    localName: '구름 솜사탕',
+    status: [
+      { name: '생명력', value: 38 },
+      { name: '마나', value: 20 },
+      { name: '스태미나', value: 25 },
+      { name: '체력', value: 7 },
+      { name: '솜씨', value: 6 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10482.png',
+    localName: '응원해! 수능 찹쌀떡',
+    status: [
+      { name: '체력', value: 50 },
+      { name: '솜씨', value: 50 },
+      { name: '의지', value: 50 },
+      { name: '지력', value: 50 },
+      { name: '행운', value: 50 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10483.png',
+    localName: '응원해! 수능 엿',
+    status: [
+      { name: '보호', value: 5 },
+      { name: '생명력', value: 150 },
+      { name: '스태미나', value: 120 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10525.png',
+    localName: '척척 붙을 거야! 호두 찹쌀떡',
+    status: [{ name: '지력', value: 77 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10526.png',
+    localName: '할 수 있어! 럭키 케이크',
+    status: [{ name: '행운', value: 77 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10394.png',
+    localName: '튀김 우동',
+    status: [
+      { name: '보호', value: 2 },
+      { name: '스태미나', value: 35 },
+      { name: '방어', value: 4 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10393.png',
+    localName: '매운 어묵탕',
+    status: [
+      { name: '생명력', value: 39 },
+      { name: '마나', value: 35 },
+      { name: '스태미나', value: 47 },
+      { name: '체력', value: 9 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10376.png',
+    localName: '소시지 야채 볶음',
+    status: [{ name: '스태미나', value: 15 }, { name: '방어', value: 1 }],
+    localRecipe: '소시지(70%) 양파(15%) 당근(15%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10377.png',
+    localName: '가지 볶음',
+    status: [{ name: '생명력', value: 15 }, { name: '방어', value: 1 }],
+    localRecipe: '가지(80%) 양파(10%) 소금(10%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10378.png',
+    localName: '낙지 볶음',
+    status: [{ name: '마나', value: 15 }, { name: '방어', value: 1 }],
+    localRecipe: '낙지(75%) 양배추(15%) 고춧가루(10%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10379.png',
+    localName: '고구마 튀김',
+    status: [{ name: '솜씨', value: 15 }, { name: '행운', value: 15 }],
+    localRecipe: '고구마(75%) 튀김옷(25%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10380.png',
+    localName: '감자 크로켓',
+    status: [{ name: '솜씨', value: -25 }, { name: '행운', value: 35 }],
+    localRecipe: '삶은감자(65%) 고기 조각(20%) 빵가루(15%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10381.png',
+    localName: '고구마 맛탕',
+    status: [{ name: '생명력', value: 11 }, { name: '의지', value: 5 }],
+    localRecipe: '고구마(85%) 설탕(15%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10382.png',
+    localName: '돈가스',
+    status: [{ name: '생명력', value: 16 }, { name: '의지', value: 9 }],
+    localRecipe: '고기 조각(75%) 빵가루(18%) 달걀(7%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10388.png',
+    localName: '양배추 콩찜',
+    status: [{ name: '생명력', value: 15 }, { name: '의지', value: 3 }],
+    localRecipe: '양배추(60%) 콩(20%) 물이 든 병(20%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10527.png',
+    localName: '힘이 불끈! 에너지 드링크',
+    status: [{ name: '체력', value: 77 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30630.png',
+    localName: '홍차 벌꿀 스콘',
+    status: [
+      { name: '마나', value: 50 },
+      { name: '행운', value: 30 },
+      { name: '마법보호', value: 1 }
+    ],
+    localRecipe: '밀가루 빵 반죽(55%) 홍차(35%) 신선한 벌꿀(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30646.png',
+    localName: '밀푀유 전골',
+    status: [{ name: '스태미나', value: 30 }, { name: '지력', value: 25 }],
+    localRecipe: '배추(25%) 쇠고기(25%) 육수(50%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30647.png',
+    localName: '판나코타',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 15 },
+      { name: '지력', value: 20 }
+    ],
+    localRecipe: '생크림(57%) 젤라틴(24%) 설탕(19%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30648.png',
+    localName: '로쿰',
+    status: [
+      { name: '마나', value: 20 },
+      { name: '솜씨', value: 20 },
+      { name: '의지', value: 15 }
+    ],
+    localRecipe: '물이 든 병(32%) 설탕(57%) 레몬즙(11%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30649.png',
+    localName: '닭볶음탕',
+    status: [
+      { name: '스태미나', value: 20 },
+      { name: '의지', value: 15 },
+      { name: '행운', value: 20 }
+    ],
+    localRecipe: '닭고기(60%) 감자(22%) 고추장(18%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30650.png',
+    localName: '프라이드 치킨',
+    status: [
+      { name: '지력', value: 25 },
+      { name: '행운', value: 15 },
+      { name: '방어', value: 2 }
+    ],
+    localRecipe: '닭고기(71%) 튀김가루(16%) 올리브유(13%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30651.png',
+    localName: '토마토 달걀 볶음',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '솜씨', value: 35 },
+      { name: '마법보호', value: 1 }
+    ],
+    localRecipe: '토마토(56%) 달걀(35%) 후추(9%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30653.png',
+    localName: '김치',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '마나', value: 30 },
+      { name: '스태미나', value: 30 }
+    ],
+    localRecipe: '배추(77%) 소금(10%) 고춧가루(23%)',
+    localCookingType: '발효'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30657.png',
+    localName: '마법 콩 두부',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '마법 콩가루(80%) 물이 든 병(15%) 응고제(5%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30660.png',
+    localName: '쿤이 구워준 마시멜로',
+    status: [{ name: '생명력', value: 10 }, { name: '행운', value: 15 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30664.png',
+    localName: '딸기 맛 사탕',
+    status: [
+      { name: '생명력', value: 35 },
+      { name: '마나', value: 15 },
+      { name: '스태미나', value: 15 },
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: 30 },
+      { name: '의지', value: 30 },
+      { name: '지력', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30665.png',
+    localName: '포도 맛 사탕',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '마나', value: 35 },
+      { name: '스태미나', value: 15 },
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: 30 },
+      { name: '의지', value: 30 },
+      { name: '지력', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30666.png',
+    localName: '오렌지 맛 사탕',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '마나', value: 15 },
+      { name: '스태미나', value: 35 },
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: 30 },
+      { name: '의지', value: 30 },
+      { name: '지력', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30645.png',
+    localName: '밀크티',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '마나', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '홍차(77%) 우유(18%) 설탕(5%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30644.png',
+    localName: '홍차',
+    status: [{ name: '생명력', value: 30 }, { name: '행운', value: 25 }],
+    localRecipe: '찻잎(25%) 물이 든 병(75%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30643.png',
+    localName: '계란 마요 토스트',
+    status: [
+      { name: '체력', value: 15 },
+      { name: '의지', value: 15 },
+      { name: '방어', value: 5 }
+    ],
+    localRecipe: '토스트(66%) 달걀(24%) 마요네즈(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30631.png',
+    localName: '크로플',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 50 },
+      { name: '체력', value: 10 }
+    ],
+    localRecipe: '크루아상(70%) 생크림(25%) 블루베리(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30632.png',
+    localName: '김치 찌개',
+    status: [{ name: '솜씨', value: 30 }, { name: '최소 공격력', value: 1 }],
+    localRecipe: '김치(30%) 물이 든 병(60%) 고기(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30633.png',
+    localName: '매운 라면',
+    status: [{ name: '마나', value: 50 }, { name: '행운', value: 30 }],
+    localRecipe: '소면(43%) 물이 든 병(40%) 매운 고추(17%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30634.png',
+    localName: '양념 치킨',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '생명력', value: 40 },
+      { name: '마나', value: 40 }
+    ],
+    localRecipe: '프라이드 치킨(75%) 물엿(10%) 고추장(20%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30635.png',
+    localName: '김치볶음밥',
+    status: [{ name: '스태미나', value: 45 }, { name: '의지', value: 30 }],
+    localRecipe: '김치(35%) 모둠 볶음밥(45%) 계란프라이(20%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30636.png',
+    localName: '트뤼프 크림 뇨키',
+    status: [{ name: '마법공격력', value: 1 }, { name: '지력', value: 35 }],
+    localRecipe: '삶은감자(40%) 크림 소스(40%) 송로버섯(20%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30637.png',
+    localName: '치즈 떡볶이',
+    status: [{ name: '스태미나', value: 40 }, { name: '솜씨', value: 20 }],
+    localRecipe: '하얀 떡(54%) 고추장(28%) 치즈 조각(18%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30638.png',
+    localName: '크루아상',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '체력', value: 15 },
+      { name: '방어', value: 3 }
+    ],
+    localRecipe: '밀가루 빵 반죽(66%) 우유(22%) 버터(12%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30639.png',
+    localName: '딸기 찹쌀떡',
+    status: [
+      { name: '마나', value: 30 },
+      { name: '지력', value: 10 },
+      { name: '마법방어', value: 2 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30640.png',
+    localName: '마카롱',
+    status: [{ name: '마나', value: 20 }, { name: '의지', value: 25 }],
+    localRecipe: '달걀(35%) 생크림(35%) 버터(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30641.png',
+    localName: '배추전',
+    status: [{ name: '마나', value: 50 }, { name: '지력', value: 20 }],
+    localRecipe: '배추(70%) 밀가루(25%) 간장(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30642.png',
+    localName: '까눌레',
+    status: [{ name: '스태미나', value: 30 }, { name: '솜씨', value: 20 }],
+    localRecipe: '달걀(55%) 우유(40%) 밀랍(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30667.png',
+    localName: '별가루 감자 샐러드',
+    status: [{ name: '최대대미지', value: 1 }, { name: '최소 공격력', value: 1 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30668.png',
+    localName: '별가루 계란말이',
+    status: [{ name: '마법공격력', value: 1 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30669.png',
+    localName: '은하수 레몬 주스',
+    status: [{ name: '보호', value: 2 }, { name: '방어', value: 20 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30696.png',
+    localName: '방울토마토 스파게티',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '보호', value: 1 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30710.png',
+    localName: '두근두근 리코타 치즈 샐러드',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '보호', value: 2 },
+      { name: '마법보호', value: 2 },
+      { name: '방어', value: 5 },
+      { name: '마법방어', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30711.png',
+    localName: '두근두근 스위트 디저트',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '보호', value: 2 },
+      { name: '마법보호', value: 2 },
+      { name: '방어', value: 5 },
+      { name: '마법방어', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30712.png',
+    localName: '두근두근 스테이크',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '보호', value: 2 },
+      { name: '마법보호', value: 2 },
+      { name: '방어', value: 5 },
+      { name: '마법방어', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30713.png',
+    localName: '두근두근 하트 파스타',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '보호', value: 2 },
+      { name: '마법보호', value: 2 },
+      { name: '방어', value: 5 },
+      { name: '마법방어', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30717.png',
+    localName: '순수 우유 케이크',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '보호', value: 2 },
+      { name: '마법보호', value: 2 },
+      { name: '방어', value: 5 },
+      { name: '마법방어', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30719.png',
+    localName: '판이 그려진 달고나',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '최소 공격력', value: 1 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-34575.png',
+    localName: '니엘이 만든 옥수수 스프',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-34580.png',
+    localName: '처갓집 와락치킨',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 50 },
+      { name: '스태미나', value: 50 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-34581.png',
+    localName: '처갓집 꼬꼬뱅 슈프림양념치킨',
+    status: [
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 10 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-34582.png',
+    localName: '처갓집 슈프림양념치킨',
+    status: [{ name: '최대대미지', value: 3 }, { name: '마법공격력', value: 5 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30688.png',
+    localName: '방울토마토 치즈 치아바타',
+    status: [
+      { name: '마법공격력', value: 3 },
+      { name: '마법보호', value: 1 },
+      { name: '마법방어', value: 1 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30687.png',
+    localName: '방울토마토 주스',
+    status: [
+      { name: '체력', value: 5 },
+      { name: '솜씨', value: 5 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30685.png',
+    localName: '표고버섯볶음',
+    status: [{ name: '의지', value: 5 }, { name: '지력', value: 5 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30670.png',
+    localName: '은하수 사과 주스',
+    status: [{ name: '마법보호', value: 2 }, { name: '마법방어', value: 20 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30671.png',
+    localName: '달가루 핫케이크',
+    status: [
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: 30 },
+      { name: '의지', value: 30 },
+      { name: '지력', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30672.png',
+    localName: '달가루 비프 스테이크',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 50 },
+      { name: '스태미나', value: 50 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30673.png',
+    localName: '칠면조 테트라치니',
+    status: [{ name: '스태미나', value: 30 }, { name: '체력', value: 10 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30674.png',
+    localName: '영양만점 호두과자',
+    status: [{ name: '생명력', value: 35 }, { name: '마나', value: 35 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30675.png',
+    localName: '꿀밤 라떼',
+    status: [{ name: '스태미나', value: 30 }, { name: '의지', value: 10 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30676.png',
+    localName: '가리비 토마토 스튜',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '솜씨', value: 10 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30677.png',
+    localName: '모둠조개회',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '보호', value: 1 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30678.png',
+    localName: '가리비 치즈구이',
+    status: [
+      { name: '지력', value: 15 },
+      { name: '행운', value: 10 },
+      { name: '최소 공격력', value: 1 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30679.png',
+    localName: '불닭볶음면',
+    status: [
+      { name: '최대대미지', value: 2 },
+      { name: '보호', value: 1 },
+      { name: '방어', value: 10 },
+      { name: '최소 공격력', value: 2 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30680.png',
+    localName: '까르보불닭볶음면',
+    status: [
+      { name: '마법공격력', value: 5 },
+      { name: '마법보호', value: 1 },
+      { name: '마법방어', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30681.png',
+    localName: '4가지치즈불닭볶음면',
+    status: [
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 10 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-34583.png',
+    localName: '처갓집양념치킨',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '마법보호', value: 1 },
+      { name: '방어', value: 10 },
+      { name: '마법방어', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30629.png',
+    localName: '사과 수플레',
+    status: [
+      { name: '마나', value: 20 },
+      { name: '솜씨', value: 30 },
+      { name: '지력', value: 20 }
+    ],
+    localRecipe: '밀가루 빵 반죽(60%) 달걀(30%) 사과(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10838.png',
+    localName: '모둠생선회',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '마법공격력', value: 1 },
+      { name: '보호', value: 1 },
+      { name: '스태미나', value: 20 }
+    ],
+    localRecipe: '연어회(44%) 장어회(33%) 참치회(33%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10856.png',
+    localName: '핫치킨 피자',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '마나', value: 30 },
+      { name: '스태미나', value: 50 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(42%) 닭날개(37%) 치즈 조각(21%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10857.png',
+    localName: '타라 딥 디쉬',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '스태미나', value: 40 },
+      { name: '지력', value: 25 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(40%) 커다란 치즈덩어리(42%) 파프리카(18%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10858.png',
+    localName: '베지터블 피자',
+    status: [
+      { name: '생명력', value: 55 },
+      { name: '스태미나', value: 30 },
+      { name: '솜씨', value: 30 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(43%) 야채 모둠(48%) 치즈 조각(19%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10859.png',
+    localName: '쿠르클레 피자',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 40 },
+      { name: '행운', value: 10 },
+      { name: '방어', value: 5 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(41%) 파인애플(28%) 수제 등심 햄(41%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10861.png',
+    localName: '루벤 샌드위치',
+    status: [
+      { name: '보호', value: 2 },
+      { name: '마법보호', value: 1 },
+      { name: '방어', value: 3 },
+      { name: '마법방어', value: 3 }
+    ],
+    localRecipe: '식빵(55%) 살라미(25%) 사우어크라우트(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10862.png',
+    localName: '새우초밥',
+    status: [
+      { name: '생명력', value: 45 },
+      { name: '스태미나', value: 50 },
+      { name: '최소 공격력', value: 1 }
+    ],
+    localRecipe: '새우회(50%) 밥(40%) 식초(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10863.png',
+    localName: '장어초밥',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 35 },
+      { name: '스태미나', value: 35 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '장어회(62%) 밥(33%) 식초(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10864.png',
+    localName: '계란초밥',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '스태미나', value: 30 },
+      { name: '솜씨', value: 40 }
+    ],
+    localRecipe: '계란말이(50%) 밥(45%) 식초(5%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10865.png',
+    localName: '참치뱃살초밥',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 35 },
+      { name: '스태미나', value: 15 },
+      { name: '방어', value: 2 }
+    ],
+    localRecipe: '참치회(51%) 밥(39%) 식초(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10866.png',
+    localName: '연어초밥',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '마나', value: 80 },
+      { name: '스태미나', value: 15 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '연어회(52%) 밥(38%) 식초(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10867.png',
+    localName: '라씨',
+    status: [
+      { name: '마나', value: 20 },
+      { name: '지력', value: 25 },
+      { name: '마법방어', value: 2 }
+    ],
+    localRecipe: '플레인 요거트(76%) 물이 든 병(10%) 과일 모둠(14%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10868.png',
+    localName: '코울슬로',
+    status: [
+      { name: '체력', value: 25 },
+      { name: '의지', value: 10 },
+      { name: '행운', value: 25 }
+    ],
+    localRecipe: '양배추(77%) 마요네즈(13%) 식초(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10855.png',
+    localName: '포카치아',
+    status: [{ name: '생명력', value: 55 }, { name: '행운', value: 30 }],
+    localRecipe: '밀가루 빵 반죽(66%) 타임(19%) 올리브유(15%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10854.png',
+    localName: '스테이크 피자',
+    status: [
+      { name: '마법공격력', value: 1 },
+      { name: '마나', value: 55 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(41%) 수제 등심 햄(49%) 치즈 조각(20%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10853.png',
+    localName: '쉬림프 피자',
+    status: [{ name: '마나', value: 50 }, { name: '의지', value: 30 }],
+    localRecipe: '토마토 소스 피자 도우(40%) 새우(38%) 치즈 조각(22%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10839.png',
+    localName: '모둠회덮밥',
+    status: [
+      { name: '최대대미지', value: 2 },
+      { name: '마법공격력', value: 2 },
+      { name: '생명력', value: 35 },
+      { name: '마나', value: 25 }
+    ],
+    localRecipe: '모둠생선회(50%) 밥(20%) 야채 모둠(40%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10840.png',
+    localName: '쉬쉬 케밥',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '행운', value: 30 },
+      { name: '방어', value: 1 }
+    ],
+    localRecipe: '고기 조각(77%) 파프리카(12%) 토마토(11%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10841.png',
+    localName: '이스켄데르 케밥',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '마나', value: 25 },
+      { name: '지력', value: 35 }
+    ],
+    localRecipe: '커다란 고기덩어리(70%) 빵(19%) 플레인 요거트(11%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10842.png',
+    localName: '소풍용 치킨 케밥',
+    status: [
+      { name: '마나', value: 30 },
+      { name: '솜씨', value: 40 },
+      { name: '마법보호', value: 1 }
+    ],
+    localRecipe: '닭고기(60%) 파프리카(28%) 토르티야(22%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10843.png',
+    localName: '부리토',
+    status: [
+      { name: '스태미나', value: 50 },
+      { name: '체력', value: 25 },
+      { name: '방어', value: 4 }
+    ],
+    localRecipe: '수제 등심 햄(60%) 야채 모둠(20%) 토르티야(20%)',
+    localCookingType: '저미기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10846.png',
+    localName: '고르곤졸라',
+    status: [
+      { name: '마나', value: 60 },
+      { name: '지력', value: 10 },
+      { name: '마법방어', value: 3 }
+    ],
+    localRecipe: '담백한 피자 도우(41%) 커다란 치즈덩어리(41%) 마늘(18%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10847.png',
+    localName: '마르게리따',
+    status: [
+      { name: '생명력', value: 35 },
+      { name: '마나', value: 20 },
+      { name: '솜씨', value: 35 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(40%) 바질(30%) 치즈 조각(30%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10848.png',
+    localName: '칼초네',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '마나', value: 15 },
+      { name: '체력', value: 35 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(41%) 베이컨(32%) 치즈 조각(27%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10849.png',
+    localName: '스위트 포테이토 피자',
+    status: [{ name: '마나', value: 60 }, { name: '솜씨', value: 10 }],
+    localRecipe: '담백한 피자 도우(40%) 고구마(36%) 치즈 조각(24%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10850.png',
+    localName: '페퍼로니 피자',
+    status: [
+      { name: '스태미나', value: 55 },
+      { name: '의지', value: 30 },
+      { name: '방어', value: 3 }
+    ],
+    localRecipe: '토마토 소스 피자 도우(42%) 살라미(38%) 치즈 조각(20%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10851.png',
+    localName: '향긋한 버섯 피자',
+    status: [{ name: '행운', value: 30 }, { name: '마법방어', value: 3 }],
+    localRecipe: '토마토 소스 피자 도우(44%) 개암버섯(39%) 치즈 조각(17%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10852.png',
+    localName: '초콜릿 피자',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '체력', value: 15 },
+      { name: '최소 공격력', value: 1 }
+    ],
+    localRecipe: '담백한 피자 도우(40%) 재료 초콜릿(41%) 마시멜로(19%)',
+    localCookingType: '피자 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10869.png',
+    localName: '다이어트 연어 샐러드',
+    status: [
+      { name: '마나', value: 35 },
+      { name: '지력', value: 25 },
+      { name: '마법보호', value: 1 }
+    ],
+    localRecipe: '연어회(71%) 양파(21%) 와인 식초(8%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10870.png',
+    localName: '마시멜로',
+    status: [{ name: '생명력', value: 10 }, { name: '행운', value: 15 }],
+    localRecipe: '설탕(56%) 젤라틴(33%) 물이 든 병(11%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10871.png',
+    localName: '크레이프 케이크',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '마나', value: 20 },
+      { name: '체력', value: 30 }
+    ],
+    localRecipe: '크레이프(78%) 생크림(19%) 신선한 벌꿀(8%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-12905.png',
+    localName: '특이한 당근',
+    status: [
+      { name: '생명력', value: 14 },
+      { name: '마나', value: 14 },
+      { name: '체력', value: 14 },
+      { name: '솜씨', value: 14 },
+      { name: '의지', value: 14 },
+      { name: '지력', value: 14 },
+      { name: '행운', value: 14 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-13226.png',
+    localName: '몬스터 초콜릿',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 14 },
+      { name: '의지', value: 14 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-20071.png',
+    localName: '체리 포레누아',
+    status: [
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: 15 },
+      { name: '의지', value: 15 },
+      { name: '지력', value: 15 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-20072.png',
+    localName: '퐁당 쇼콜라',
+    status: [
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: 15 },
+      { name: '의지', value: 15 },
+      { name: '지력', value: 15 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-20073.png',
+    localName: '초코 슈크림',
+    status: [
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: -10 },
+      { name: '의지', value: -10 },
+      { name: '지력', value: -10 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-20074.png',
+    localName: '초콜릿 무스',
+    status: [
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: -10 },
+      { name: '의지', value: -10 },
+      { name: '지력', value: -10 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-23131.png',
+    localName: '엘시가 준 딸기우유',
+    status: [{ name: '생명력', value: 25 }, { name: '지력', value: 6 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30622.png',
+    localName: '할로윈 축제 요리',
+    status: [
+      { name: '생명력', value: 70 },
+      { name: '마나', value: 70 },
+      { name: '스태미나', value: 70 },
+      { name: '체력', value: 40 },
+      { name: '솜씨', value: 40 },
+      { name: '의지', value: 40 },
+      { name: '지력', value: 40 },
+      { name: '행운', value: 40 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30623.png',
+    localName: '맛있는 송편 세트',
+    status: [
+      { name: '보호', value: 2 },
+      { name: '체력', value: 90 },
+      { name: '솜씨', value: 90 },
+      { name: '의지', value: 90 },
+      { name: '지력', value: 90 },
+      { name: '행운', value: 90 },
+      { name: '마법보호', value: 2 },
+      { name: '방어', value: 4 },
+      { name: '마법방어', value: 4 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30624.png',
+    localName: '불금 반반 치맥 세트',
+    status: [
+      { name: '마법공격력', value: 5 },
+      { name: '보호', value: 2 },
+      { name: '지력', value: 50 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '프라이드 치킨(40%) 양념 치킨(40%) 하이볼(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30626.png',
+    localName: '딸기 쇼트케익',
+    status: [
+      { name: '생명력', value: 45 },
+      { name: '마나', value: 45 },
+      { name: '행운', value: 50 }
+    ],
+    localRecipe: '밀가루 빵 반죽(35%) 딸기(35%) 생크림(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30627.png',
+    localName: '민트초코 프라페',
+    status: [
+      { name: '스태미나', value: 30 },
+      { name: '의지', value: 30 },
+      { name: '방어', value: 2 }
+    ],
+    localRecipe: '우유(65%) 민트 시럽(15%) 재료 초콜릿(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10906.png',
+    localName: '팥빙수',
+    status: [{ name: '마나', value: 20 }, { name: '행운', value: 15 }],
+    localRecipe: '팥(15%) 얼음(60%) 과일 모둠(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10905.png',
+    localName: '계란 샌드위치',
+    status: [{ name: '의지', value: 4 }, { name: '행운', value: 2 }],
+    localRecipe: '계란프라이(15%) 식빵(85%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10904.png',
+    localName: '계란죽',
+    status: [{ name: '의지', value: 4 }, { name: '행운', value: 2 }],
+    localRecipe: '달걀(10%) 물이 든 병(50%) 밥(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10872.png',
+    localName: '딸기 생크림 크레이프',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '마나', value: 30 },
+      { name: '지력', value: 30 }
+    ],
+    localRecipe: '크레이프(45%) 딸기(31%) 생크림(24%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10873.png',
+    localName: '블루베리 생크림 크레이프',
+    status: [
+      { name: '마나', value: 20 },
+      { name: '스태미나', value: 35 },
+      { name: '솜씨', value: 30 }
+    ],
+    localRecipe: '크레이프(45%) 블루베리(30%) 생크림(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10874.png',
+    localName: '초코 크레이프 케이크',
+    status: [
+      { name: '마나', value: 30 },
+      { name: '스태미나', value: 20 },
+      { name: '의지', value: 30 }
+    ],
+    localRecipe: '크레이프(47%) 재료 초콜릿(27%) 생크림(26%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10875.png',
+    localName: '해피 디저트 타임 세트',
+    status: [
+      { name: '최대대미지', value: 2 },
+      { name: '보호', value: 1 },
+      { name: '솜씨', value: 25 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '딸기 생크림 크레이프(44%) 스모어(38%) 탱글탱글 커스터드 푸딩(33%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10877.png',
+    localName: '모둠 바베큐',
+    status: [
+      { name: '체력', value: 80 },
+      { name: '지력', value: 80 },
+      { name: '방어', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10890.png',
+    localName: '15주년 애플파이',
+    status: [{ name: '행운', value: 30 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10891.png',
+    localName: '15주년 아이스 카페 모카',
+    status: [
+      { name: '체력', value: 20 },
+      { name: '솜씨', value: 30 },
+      { name: '지력', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10899.png',
+    localName: '생일 케이크',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '보호', value: 1 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '딸기(5%) 생크림(20%) 밀가루 빵 반죽(75%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10900.png',
+    localName: '쿠키 케이크',
+    status: [
+      { name: '최대대미지', value: 1 },
+      { name: '보호', value: 1 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '초코칩 쿠키(5%) 생크림(20%) 밀가루 빵 반죽(75%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10901.png',
+    localName: '하이볼',
+    status: [{ name: '생명력', value: 20 }, { name: '체력', value: 5 }],
+    localRecipe: '레몬(25%) 브리흐네 위스키(75%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10902.png',
+    localName: '애플사이다',
+    status: [{ name: '스태미나', value: 20 }, { name: '지력', value: 5 }],
+    localRecipe: '사과(75%) 브리흐네 위스키(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10903.png',
+    localName: '오므라이스',
+    status: [{ name: '생명력', value: 30 }, { name: '체력', value: 7 }],
+    localRecipe: '모둠 볶음밥(90%) 달걀(10%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30628.png',
+    localName: '민트초코칩 쿠키',
+    status: [{ name: '생명력', value: 55 }, { name: '방어', value: 1 }],
+    localRecipe: '밀가루(65%) 민트 시럽(20%) 재료 초콜릿(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10338.png',
+    localName: '핫 케이크',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '체력', value: 3 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '밀가루(75%) 우유(8%) 설탕(17%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9759.png',
+    localName: '보리빵',
+    status: [{ name: '생명력', value: 15 }, { name: '지력', value: 9 }],
+    localRecipe: '보릿가루(60%) 물이 든 병(40%) 이스트(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9789.png',
+    localName: '찐 옥수수',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 20 },
+      { name: '솜씨', value: 8 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '옥수수(80%) 물이 든 병(20%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9795.png',
+    localName: '샥스핀 스프',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: 8 },
+      { name: '의지', value: 16 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '민물 거대 육식 어류(25%) 새우(45%) 달걀(30%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9796.png',
+    localName: '콘소메',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 12 },
+      { name: '의지', value: 12 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '야채 모둠(40%) 고기 조각(35%) 이멘 마하산 와인(25%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9797.png',
+    localName: '치킨 누들 콘소메',
+    status: [
+      { name: '생명력', value: 35 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 8 },
+      { name: '의지', value: 12 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '닭날개(20%) 누들(25%) 콘소메(55%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9798.png',
+    localName: '옥수수 스프',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '옥수수(20%) 야채볶음(25%) 생크림(55%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9803.png',
+    localName: '양파 튀김',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 22 },
+      { name: '솜씨', value: 4 },
+      { name: '의지', value: 20 },
+      { name: '지력', value: 4 }
+    ],
+    localRecipe: '양파(60%) 튀김옷(30%) 소금(10%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9804.png',
+    localName: '모둠 튀김',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 20 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 22 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '베이컨(35%) 야채 모둠(45%) 튀김옷(20%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9805.png',
+    localName: '콘칩',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 12 },
+      { name: '의지', value: 12 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '옥수수 빵 반죽(80%) 소금(20%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9806.png',
+    localName: '모둠 볶음밥',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: 8 },
+      { name: '의지', value: 20 },
+      { name: '지력', value: 4 }
+    ],
+    localRecipe: '베이컨(20%) 야채 모둠(30%) 밥(50%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9807.png',
+    localName: '버섯 볶음밥',
+    status: [
+      { name: '생명력', value: 35 },
+      { name: '체력', value: 12 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 18 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '양송이(20%) 야채 모둠(30%) 밥(50%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9808.png',
+    localName: '팝콘',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 8 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '옥수수(80%) 버터(15%) 소금(5%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9809.png',
+    localName: '토마토 스파게티',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 30 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 4 }
+    ],
+    localRecipe: '롱 파스타(60%) 토마토 소스(30%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9810.png',
+    localName: '크림 파르팔레',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 20 },
+      { name: '의지', value: 20 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '쇼트 파스타(60%) 크림 소스(30%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9788.png',
+    localName: '옥수수 식빵',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 16 },
+      { name: '솜씨', value: 8 },
+      { name: '의지', value: 8 },
+      { name: '지력', value: 12 }
+    ],
+    localRecipe: '옥수수 빵 반죽(75%) 달걀(15%) 이스트(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9787.png',
+    localName: '옥수수 스콘',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: 15 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '옥수수(30%) 밀가루 빵 반죽(60%) 생크림(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9760.png',
+    localName: '은붕어 꼬치구이',
+    status: [{ name: '생명력', value: 20 }, { name: '체력', value: 14 }],
+    localRecipe: '은붕어(70%) 타임(20%) 레몬(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9761.png',
+    localName: '금은 매운탕',
+    status: [
+      { name: '생명력', value: 35 },
+      { name: '체력', value: 15 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '금린어(45%) 은붕어(45%) 고춧가루(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9762.png',
+    localName: '브리흐네 락스',
+    status: [
+      { name: '생명력', value: 45 },
+      { name: '체력', value: 25 },
+      { name: '솜씨', value: -10 },
+      { name: '지력', value: -10 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '브리흐네 위스키(40%) 레몬(5%) 얼음(60%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9763.png',
+    localName: '스크류 드라이버',
+    status: [
+      { name: '생명력', value: 42 },
+      { name: '체력', value: 26 },
+      { name: '솜씨', value: -8 },
+      { name: '지력', value: -8 },
+      { name: '행운', value: 18 }
+    ],
+    localRecipe: '브리흐네 위스키(20%) 레몬(5%) 오렌지 주스(80%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9764.png',
+    localName: '라인 슬링',
+    status: [
+      { name: '생명력', value: 38 },
+      { name: '체력', value: 20 },
+      { name: '솜씨', value: -8 },
+      { name: '지력', value: -8 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '라인산 진(20%) 레몬 주스(80%) 설탕(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9765.png',
+    localName: 'BnR',
+    status: [
+      { name: '생명력', value: 50 },
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: -12 },
+      { name: '지력', value: -12 },
+      { name: '행운', value: 20 }
+    ],
+    localRecipe: '브리흐네 위스키(40%) 라인산 진(40%) 얼음(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9766.png',
+    localName: '키스 온 더 립스',
+    status: [
+      { name: '생명력', value: 45 },
+      { name: '체력', value: 26 },
+      { name: '솜씨', value: -8 },
+      { name: '지력', value: -8 },
+      { name: '행운', value: 18 }
+    ],
+    localRecipe: '브리흐네 위스키(60%) 레몬 주스(35%) 설탕(15%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9767.png',
+    localName: '레드 선라이즈',
+    status: [
+      { name: '생명력', value: 42 },
+      { name: '체력', value: 20 },
+      { name: '솜씨', value: -10 },
+      { name: '지력', value: -10 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '브리흐네 위스키(25%) 오렌지 주스(60%) 설탕(15%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9770.png',
+    localName: '초콜릿',
+    status: [
+      { name: '생명력', value: 12 },
+      { name: '체력', value: 4 },
+      { name: '지력', value: 4 }
+    ],
+    localRecipe: '재료 초콜릿(50%) 생크림(50%) 설탕(20%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9777.png',
+    localName: '개 과자',
+    status: [
+      { name: '생명력', value: 8 },
+      { name: '체력', value: 2 },
+      { name: '지력', value: 2 }
+    ],
+    localRecipe: '버터 비스킷(40%) 초코칩 쿠키(60%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9778.png',
+    localName: '베이컨과 감자 개밥',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 6 },
+      { name: '솜씨', value: -6 }
+    ],
+    localRecipe: '감자(60%) 베이컨(40%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9779.png',
+    localName: '새우 개밥',
+    status: [
+      { name: '생명력', value: 14 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: -8 }
+    ],
+    localRecipe: '새우(30%) 밥(60%) 소금(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9786.png',
+    localName: '오믈렛',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 18 },
+      { name: '솜씨', value: 4 },
+      { name: '의지', value: 12 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '달걀(55%) 야채 모둠(25%) 베이컨(20%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9811.png',
+    localName: '해물 스파게티',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 5 },
+      { name: '솜씨', value: 25 },
+      { name: '의지', value: 15 },
+      { name: '지력', value: 12 }
+    ],
+    localRecipe: '롱 파스타(60%) 해물 소스(30%)',
+    localCookingType: '파스타 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9813.png',
+    localName: '조개구이',
+    status: [{ name: '생명력', value: 10 }, { name: '의지', value: 5 }],
+    localRecipe: '조개(90%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9846.png',
+    localName: '독버섯 스튜',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 15 }
+    ],
+    localRecipe: '담갈색송이버섯(60%) 브리흐네 위스키(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9847.png',
+    localName: '버섯 그라탕',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 15 },
+      { name: '지력', value: 30 }
+    ],
+    localRecipe: '개암버섯(50%) 커다란 치즈덩어리(20%) 양파(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9848.png',
+    localName: '버섯 마리네이드',
+    status: [
+      { name: '생명력', value: 45 },
+      { name: '지력', value: -8 },
+      { name: '행운', value: 26 }
+    ],
+    localRecipe: '개암버섯(50%) 튀김옷(10%) 야자열매(40%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9849.png',
+    localName: '버섯찜',
+    status: [
+      { name: '생명력', value: 18 },
+      { name: '솜씨', value: 5 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '개암버섯(60%) 물이 든 병(30%) 소금(10%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9888.png',
+    localName: '루아의 요리',
+    status: [{ name: '생명력', value: 40 }, { name: '행운', value: 10 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9955.png',
+    localName: '뭉개진 껍질 벗긴 콩가루 두부',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 5 },
+      { name: '의지', value: 5 }
+    ],
+    localRecipe: '껍질 벗긴 콩가루(70%) 물이 든 병(20%) 소금(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9956.png',
+    localName: '뭉개진 물에 불린 콩가루 두부',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 5 },
+      { name: '의지', value: 5 }
+    ],
+    localRecipe: '물에 불린 콩가루(70%) 물이 든 병(20%) 소금(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9957.png',
+    localName: '10주년 기념 케익',
+    status: [
+      { name: '생명력', value: 36 },
+      { name: '마나', value: 36 },
+      { name: '스태미나', value: 36 },
+      { name: '체력', value: 6 },
+      { name: '의지', value: 6 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9958.png',
+    localName: '10살 생일 케익',
+    status: [
+      { name: '생명력', value: 100 },
+      { name: '마나', value: 100 },
+      { name: '스태미나', value: 100 },
+      { name: '체력', value: 100 },
+      { name: '솜씨', value: 100 },
+      { name: '의지', value: 100 },
+      { name: '지력', value: 100 },
+      { name: '행운', value: 100 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9959.png',
+    localName: '11주년 기념 케익',
+    status: [
+      { name: '생명력', value: 36 },
+      { name: '마나', value: 36 },
+      { name: '스태미나', value: 36 },
+      { name: '체력', value: 6 },
+      { name: '의지', value: 6 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9960.png',
+    localName: '12주년 기념 케익',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '마나', value: 40 },
+      { name: '스태미나', value: 40 },
+      { name: '체력', value: 8 },
+      { name: '의지', value: 8 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9961.png',
+    localName: '13주년 기념 케익',
+    status: [
+      { name: '생명력', value: 44 },
+      { name: '마나', value: 44 },
+      { name: '스태미나', value: 44 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9980.png',
+    localName: '타라식 소시지 샌드위치',
+    status: [{ name: '체력', value: 30 }],
+    localRecipe: '마늘빵(35%) 소시지(35%) 양배추(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9845.png',
+    localName: '버섯 카나페',
+    status: [
+      { name: '생명력', value: 18 },
+      { name: '솜씨', value: 3 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '개암버섯(50%) 치즈 조각(30%) 생크림(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9844.png',
+    localName: '버섯 카푸치노스프',
+    status: [
+      { name: '생명력', value: 13 },
+      { name: '의지', value: 12 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '개암버섯(60%) 이멘 마하산 와인(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9815.png',
+    localName: '비단 청새치구이',
+    status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }],
+    localRecipe: '비단 청새치(80%) 올리브유(10%) 소금(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9816.png',
+    localName: '케이크 만들기 키트',
+    status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9829.png',
+    localName: '청새치 스테이크',
+    status: [
+      { name: '생명력', value: 22 },
+      { name: '체력', value: 10 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '청새치(80%) 소금(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9830.png',
+    localName: '훈제 개복치',
+    status: [
+      { name: '스태미나', value: 24 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 10 }
+    ],
+    localRecipe: '개복치(80%) 소금(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9831.png',
+    localName: '날치 크레이프',
+    status: [{ name: '마나', value: 16 }, { name: '지력', value: 5 }],
+    localRecipe: '날치(40%) 감자(40%) 달걀(20%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9832.png',
+    localName: '킹 크랩찜',
+    status: [
+      { name: '생명력', value: 24 },
+      { name: '체력', value: 15 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '킹 크랩(80%) 샐러리(20%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9833.png',
+    localName: '가오리 아가미 퓌레',
+    status: [{ name: '스태미나', value: 12 }, { name: '의지', value: 7 }],
+    localRecipe: '가오리(80%) 마늘(5%) 물이 든 병(15%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9834.png',
+    localName: '해파리 냉채',
+    status: [
+      { name: '마나', value: 8 },
+      { name: '의지', value: 8 },
+      { name: '지력', value: 12 }
+    ],
+    localRecipe: '해파리(80%) 소금(10%) 설탕(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9835.png',
+    localName: '아귀찜',
+    status: [
+      { name: '생명력', value: 26 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 15 }
+    ],
+    localRecipe: '아귀(60%) 샐러리(40%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9837.png',
+    localName: '뭉개진 구운 콩가루 두부',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 5 },
+      { name: '의지', value: 5 }
+    ],
+    localRecipe: '구운 콩가루(70%) 물이 든 병(20%) 소금(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9838.png',
+    localName: '마법 콩 두부',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '마법 콩가루(80%) 물이 든 병(15%) 응고제(5%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9842.png',
+    localName: '버섯 포타주',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '체력', value: 20 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '개암버섯(70%) 생크림(30%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9843.png',
+    localName: '버섯 콘소메',
+    status: [{ name: '생명력', value: 15 }, { name: '지력', value: 30 }],
+    localRecipe: '개암버섯(60%) 양파(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9981.png',
+    localName: '딸기잼 토스트',
+    status: [{ name: '지력', value: 30 }],
+    localRecipe: '우유식빵(60%) 딸기잼(30%) 버터(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9758.png',
+    localName: '로스트 치킨',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: 2 },
+      { name: '의지', value: 8 }
+    ],
+    localRecipe: '닭날개(80%) 타임(20%) 소금(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9151.png',
+    localName: '양파맛 팝콘',
+    status: [
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 11 },
+      { name: '의지', value: 14 },
+      { name: '지력', value: 12 },
+      { name: '행운', value: 7 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9688.png',
+    localName: '밥',
+    status: [
+      { name: '체력', value: 6 },
+      { name: '솜씨', value: 8 },
+      { name: '지력', value: 7 }
+    ],
+    localRecipe: '쌀(60%) 물이 든 병(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9691.png',
+    localName: '베이컨구이',
+    status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }],
+    localRecipe: '베이컨(75%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9692.png',
+    localName: '비프 스테이크',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 15 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '쇠고기(75%) 마늘(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9693.png',
+    localName: '삶은감자',
+    status: [{ name: '생명력', value: 12 }, { name: '체력', value: 3 }],
+    localRecipe: '감자(50%) 물이 든 병(70%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9694.png',
+    localName: '삶은달걀',
+    status: [{ name: '생명력', value: 12 }, { name: '솜씨', value: 3 }],
+    localRecipe: '달걀(40%) 물이 든 병(70%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9696.png',
+    localName: '새우볶음밥',
+    status: [
+      { name: '생명력', value: 6 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 15 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '밥(75%) 새우(30%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9697.png',
+    localName: '새우튀김',
+    status: [{ name: '생명력', value: 12 }, { name: '의지', value: 15 }],
+    localRecipe: '새우(65%) 튀김옷(35%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9702.png',
+    localName: '식빵',
+    status: [{ name: '생명력', value: 15 }, { name: '의지', value: 3 }],
+    localRecipe: '밀가루 빵 반죽(75%) 버터(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9704.png',
+    localName: '야채볶음',
+    status: [
+      { name: '생명력', value: 6 },
+      { name: '솜씨', value: 10 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '양배추(75%) 당근(50%) 양파(40%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9705.png',
+    localName: '야채스프',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '솜씨', value: 10 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '야채볶음(55%) 생크림(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9708.png',
+    localName: '양송이볶음',
+    status: [{ name: '생명력', value: 10 }, { name: '지력', value: 12 }],
+    localRecipe: '양송이(75%) 마늘(30%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9709.png',
+    localName: '양송이스프',
+    status: [{ name: '생명력', value: 15 }, { name: '지력', value: 15 }],
+    localRecipe: '양송이볶음(75%) 생크림(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9711.png',
+    localName: '양파볶음',
+    status: [{ name: '생명력', value: 10 }, { name: '솜씨', value: 12 }],
+    localRecipe: '양파(55%) 마늘(45%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9684.png',
+    localName: '마늘빵',
+    status: [{ name: '생명력', value: 10 }, { name: '체력', value: 3 }],
+    localRecipe: '빵(75%) 마늘(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9682.png',
+    localName: '딸기우유',
+    status: [{ name: '생명력', value: 25 }, { name: '지력', value: 6 }],
+    localRecipe: '딸기(30%) 우유(65%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9152.png',
+    localName: '캬라멜맛 팝콘',
+    status: [
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 11 },
+      { name: '의지', value: 14 },
+      { name: '지력', value: 12 },
+      { name: '행운', value: 7 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9153.png',
+    localName: '과일 도시락',
+    status: [
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 11 },
+      { name: '의지', value: 14 },
+      { name: '지력', value: 12 },
+      { name: '행운', value: 7 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9154.png',
+    localName: '치킨 팝콘과 콜라 세트',
+    status: [
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 11 },
+      { name: '의지', value: 14 },
+      { name: '지력', value: 12 },
+      { name: '행운', value: 7 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9155.png',
+    localName: '치킨 팝콘과 맥주 세트',
+    status: [
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 11 },
+      { name: '의지', value: 14 },
+      { name: '지력', value: 12 },
+      { name: '행운', value: 7 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9670.png',
+    localName: '감자계란샐러드',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '체력', value: 3 },
+      { name: '솜씨', value: 5 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '삶은달걀(50%) 삶은감자(75%) 마요네즈(15%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9671.png',
+    localName: '감자샐러드',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '솜씨', value: 6 },
+      { name: '지력', value: 5 }
+    ],
+    localRecipe: '삶은감자(75%) 양파(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9672.png',
+    localName: '감자튀김',
+    status: [{ name: '생명력', value: 18 }, { name: '체력', value: 7 }],
+    localRecipe: '감자(80%) 튀김옷(20%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9673.png',
+    localName: '계란샐러드',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 3 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9674.png',
+    localName: '계란프라이',
+    status: [{ name: '생명력', value: 15 }],
+    localRecipe: '달걀(90%) 소금(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9675.png',
+    localName: '과일 모둠',
+    status: [{ name: '생명력', value: 25 }, { name: '솜씨', value: 3 }],
+    localRecipe: '딸기(75%) 사과(50%) 나무열매(40%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9676.png',
+    localName: '과일샐러드',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '솜씨', value: 3 },
+      { name: '지력', value: 5 }
+    ],
+    localRecipe: '과일 모둠(75%) 마요네즈(15%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9678.png',
+    localName: '닭날개구이',
+    status: [{ name: '생명력', value: 28 }, { name: '행운', value: 10 }],
+    localRecipe: '닭날개(75%) 올리브유(20%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9679.png',
+    localName: '닭날개튀김',
+    status: [{ name: '생명력', value: 15 }, { name: '행운', value: 15 }],
+    localRecipe: '닭날개(75%) 튀김옷(25%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9712.png',
+    localName: '양파스프',
+    status: [{ name: '생명력', value: 15 }, { name: '솜씨', value: 15 }],
+    localRecipe: '양파볶음(65%) 생크림(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9714.png',
+    localName: '우유식빵',
+    status: [{ name: '생명력', value: 18 }, { name: '솜씨', value: 7 }],
+    localRecipe: '밀가루 빵 반죽(75%) 버터(10%) 우유(25%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9737.png',
+    localName: '레어치즈 케익',
+    status: [{ name: '생명력', value: 18 }, { name: '의지', value: 5 }],
+    localRecipe: '커다란 치즈덩어리(70%) 생크림(15%) 버터 비스킷(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9738.png',
+    localName: '가토 오 쇼콜라',
+    status: [{ name: '생명력', value: 22 }, { name: '솜씨', value: 3 }],
+    localRecipe: '밀가루(40%) 초콜릿(35%) 달걀(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9739.png',
+    localName: '크로크 무슈',
+    status: [{ name: '생명력', value: 15 }, { name: '지력', value: 5 }],
+    localRecipe: '식빵(50%) 고기 조각(30%) 치즈 조각(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9740.png',
+    localName: '브라우니',
+    status: [
+      { name: '생명력', value: 12 },
+      { name: '체력', value: 6 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '밀가루(50%) 초콜릿(50%) 이스트(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9741.png',
+    localName: '버터 비스킷',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '솜씨', value: 3 },
+      { name: '지력', value: 5 }
+    ],
+    localRecipe: '밀가루(50%) 버터(30%) 설탕(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9742.png',
+    localName: '초코칩 쿠키',
+    status: [
+      { name: '생명력', value: 12 },
+      { name: '체력', value: 5 },
+      { name: '솜씨', value: 2 }
+    ],
+    localRecipe: '밀가루(50%) 버터(30%) 재료 초콜릿(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9743.png',
+    localName: '오렌지 주스',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '의지', value: 5 },
+      { name: '지력', value: 5 }
+    ],
+    localRecipe: '오렌지(80%) 나무열매(20%) 설탕(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9744.png',
+    localName: '레몬 주스',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '의지', value: 5 },
+      { name: '지력', value: 5 }
+    ],
+    localRecipe: '레몬(60%) 나무열매(30%) 설탕(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9745.png',
+    localName: '초콜릿 우유',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '체력', value: 5 },
+      { name: '지력', value: 5 }
+    ],
+    localRecipe: '초콜릿(50%) 우유(50%) 설탕(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9746.png',
+    localName: '라인산 진',
+    status: [
+      { name: '생명력', value: 28 },
+      { name: '체력', value: 16 },
+      { name: '솜씨', value: -6 },
+      { name: '행운', value: 6 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9747.png',
+    localName: '브리흐네 위스키',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: -4 },
+      { name: '행운', value: 4 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9748.png',
+    localName: '데브니쉬 흑맥주',
+    status: [
+      { name: '생명력', value: 32 },
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: -6 },
+      { name: '행운', value: 6 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9755.png',
+    localName: '사과 주스',
+    status: [
+      { name: '생명력', value: 12 },
+      { name: '체력', value: 5 },
+      { name: '솜씨', value: 5 }
+    ],
+    localRecipe: '사과(80%) 나무열매(20%) 설탕(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9736.png',
+    localName: '이멘 마하산 와인',
+    status: [
+      { name: '생명력', value: 17 },
+      { name: '체력', value: 7 },
+      { name: '솜씨', value: -2 },
+      { name: '행운', value: 2 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9735.png',
+    localName: '치즈 퐁듀',
+    status: [
+      { name: '생명력', value: 28 },
+      { name: '솜씨', value: 5 },
+      { name: '의지', value: 5 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '치즈 조각(45%) 고기 조각(30%) 감자(30%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9716.png',
+    localName: '치즈빵',
+    status: [{ name: '생명력', value: 15 }],
+    localRecipe: '빵(75%) 치즈 조각(20%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9717.png',
+    localName: '토스트',
+    status: [{ name: '생명력', value: 30 }, { name: '체력', value: 3 }],
+    localRecipe: '식빵(75%) 버터(20%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9718.png',
+    localName: '통감자구이',
+    status: [{ name: '생명력', value: 10 }, { name: '의지', value: 5 }],
+    localRecipe: '감자(75%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9725.png',
+    localName: '브리흐네 잉어구이',
+    status: [{ name: '생명력', value: 11 }, { name: '의지', value: 5 }],
+    localRecipe: '브리흐네 잉어(80%) 올리브유(10%) 소금(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9726.png',
+    localName: '브리흐네 잉어찜',
+    status: [{ name: '생명력', value: 12 }, { name: '체력', value: 6 }],
+    localRecipe: '브리흐네 잉어(90%) 소금(10%) 물이 든 병(20%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9727.png',
+    localName: '은붕어 스튜',
+    status: [{ name: '생명력', value: 16 }, { name: '의지', value: 9 }],
+    localRecipe: '은붕어(50%) 마늘(10%) 감자(30%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9728.png',
+    localName: '피쉬 앤 칩스',
+    status: [
+      { name: '생명력', value: 18 },
+      { name: '솜씨', value: 5 },
+      { name: '의지', value: 5 }
+    ],
+    localRecipe: '은붕어(50%) 튀김옷(10%) 감자(40%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9729.png',
+    localName: 'T본 스테이크',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 5 },
+      { name: '의지', value: 5 }
+    ],
+    localRecipe: '커다란 고기덩어리(80%) 타임(15%) 소금(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9730.png',
+    localName: '치즈 그라탕',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '솜씨', value: 3 },
+      { name: '지력', value: 3 }
+    ],
+    localRecipe: '커다란 치즈덩어리(40%) 치즈빵(35%) 달걀(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9731.png',
+    localName: '카레 라이스',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 5 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '카레 페이스트(40%) 밥(60%) 버터(15%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9732.png',
+    localName: '코 코 뱅',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 3 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 8 }
+    ],
+    localRecipe: '닭날개(50%) 이멘 마하산 와인(40%) 타임(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9733.png',
+    localName: '송어찜',
+    status: [
+      { name: '생명력', value: 22 },
+      { name: '솜씨', value: 5 },
+      { name: '지력', value: 7 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '무지개 송어(60%) 타임(10%) 물이 든 병(40%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9734.png',
+    localName: '부야 베스',
+    status: [
+      { name: '생명력', value: 32 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 5 },
+      { name: '의지', value: 5 }
+    ],
+    localRecipe: '은붕어(45%) 새우(40%) 이멘 마하산 와인(40%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9756.png',
+    localName: '카레빵',
+    status: [{ name: '생명력', value: 15 }, { name: '체력', value: 8 }],
+    localRecipe: '빵(70%) 고기 조각(15%) 카레가루(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9982.png',
+    localName: '클럽 샌드위치',
+    status: [{ name: '솜씨', value: 35 }],
+    localRecipe: '식빵(50%) 양배추(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10228.png',
+    localName: '복지리',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '마나', value: 30 },
+      { name: '지력', value: 15 }
+    ],
+    localRecipe: '복어(38%) 마늘(10%) 물이 든 병(52%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10294.png',
+    localName: '떡국',
+    status: [{ name: '생명력', value: 8 }, { name: '체력', value: 2 }],
+    localRecipe: '하얀 떡(50%) 쇠고기(35%) 달걀(15%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10295.png',
+    localName: '떡국 곱빼기',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 4 }
+    ],
+    localRecipe: '떡국(70%) 하얀 떡(20%) 달걀(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10296.png',
+    localName: '특대 떡국',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 18 },
+      { name: '솜씨', value: 4 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '떡국 곱빼기(80%) 하얀 떡(12%) 달걀(8%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10297.png',
+    localName: '월병',
+    status: [{ name: '생명력', value: 8 }, { name: '체력', value: 2 }],
+    localRecipe: '밀가루 빵 반죽(50%) 팥소(35%) 땅콩(15%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10298.png',
+    localName: '큰 월병',
+    status: [{ name: '생명력', value: 15 }, { name: '체력', value: 8 }],
+    localRecipe: '월병(70%) 팥소(20%) 땅콩(10%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10299.png',
+    localName: '특대 월병',
+    status: [
+      { name: '보호', value: 1 },
+      { name: '생명력', value: 15 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 10 },
+      { name: '지력', value: 12 }
+    ],
+    localRecipe: '큰 월병(80%) 팥소(12%) 땅콩(8%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10300.png',
+    localName: '할로윈 호박 사탕',
+    status: [{ name: '생명력', value: 5 }, { name: '마나', value: 5 }],
+    localRecipe: '청둥호박(30%) 설탕(50%) 물엿(20%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10301.png',
+    localName: '할로윈 포장 캔디',
+    status: [{ name: '생명력', value: 15 }],
+    localRecipe: '할로윈 호박 사탕(30%) 할로윈 유령 젤리(35%) 할로윈 호박 젤리(35%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10302.png',
+    localName: '할로윈 호박 초콜릿',
+    status: [{ name: '마나', value: 10 }],
+    localRecipe: '청둥호박(30%) 재료 초콜릿(50%) 생크림(20%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10303.png',
+    localName: '할로윈 포장 쿠키',
+    status: [{ name: '스태미나', value: 10 }],
+    localRecipe: '할로윈 모자 쿠키(30%) 할로윈 별 쿠키(35%) 할로윈 부엉이 쿠키(35%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10304.png',
+    localName: '할로윈 호박 파이',
+    status: [{ name: '생명력', value: 10 }],
+    localRecipe: '파이 틀(45%) 단호박 퓌레(35%) 아몬드(20%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10305.png',
+    localName: '할로윈 모자 쿠키',
+    status: [{ name: '의지', value: 10 }],
+    localRecipe: '밀가루(70%) 버터(25%) 모자 모양 틀(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10306.png',
+    localName: '할로윈 별 쿠키',
+    status: [{ name: '행운', value: 10 }],
+    localRecipe: '밀가루(70%) 버터(25%) 별 모양 틀(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10291.png',
+    localName: '드래곤 블러드 레드 와인',
+    status: [
+      { name: '스태미나', value: 300 },
+      { name: '체력', value: 100 },
+      { name: '의지', value: 100 },
+      { name: '행운', value: 100 }
+    ],
+    localRecipe: '블랙 드래곤의 피(94%) 드래곤의 살덩어리(6%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10289.png',
+    localName: '드래곤 티본 스테이크',
+    status: [{ name: '생명력', value: 200 }, { name: '체력', value: 100 }],
+    localRecipe: '드래곤의 뼈(30%) 드래곤의 살덩어리(70%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10229.png',
+    localName: '감성돔 카레구이',
+    status: [{ name: '체력', value: 20 }, { name: '의지', value: 20 }],
+    localRecipe: '감성돔(78%) 카레가루(15%) 소금(7%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10230.png',
+    localName: '참돔 카레구이',
+    status: [{ name: '솜씨', value: 20 }, { name: '행운', value: 20 }],
+    localRecipe: '참돔(78%) 카레가루(15%) 소금(7%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10231.png',
+    localName: '돔돔 매운탕',
+    status: [
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 10 },
+      { name: '지력', value: 10 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '감성돔(45%) 참돔(45%) 고춧가루(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10232.png',
+    localName: '샥스핀 찜',
+    status: [{ name: '체력', value: 30 }, { name: '솜씨', value: 30 }],
+    localRecipe: '청상아리(40%) 샐러리(24%) 물이 든 병(36%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10233.png',
+    localName: '캐비어 샐러드',
+    status: [{ name: '마나', value: 30 }, { name: '지력', value: 30 }],
+    localRecipe: '청상아리(18%) 과일 모둠(72%) 마요네즈(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10243.png',
+    localName: '버터구이 랍스타',
+    status: [{ name: '체력', value: -10 }, { name: '솜씨', value: 40 }],
+    localRecipe: '바닷가재(50%) 버터(37%) 마늘(13%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10244.png',
+    localName: '고등어 스테이크',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '마나', value: 30 },
+      { name: '스태미나', value: 30 }
+    ],
+    localRecipe: '고등어(80%) 소금(12%) 후추(8%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10245.png',
+    localName: '벨바스트 장어 덮밥',
+    status: [{ name: '체력', value: 40 }, { name: '솜씨', value: -10 }],
+    localRecipe: '벨바스트 장어(36%) 밥(53%) 야채 모둠(11%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10246.png',
+    localName: '갈치스튜',
+    status: [{ name: '지력', value: 40 }, { name: '행운', value: -10 }],
+    localRecipe: '갈치(47%) 감자(30%) 마늘(23%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10247.png',
+    localName: '참돔 매운탕',
+    status: [
+      { name: '체력', value: 12 },
+      { name: '솜씨', value: 10 },
+      { name: '의지', value: 15 },
+      { name: '지력', value: 8 },
+      { name: '행운', value: 8 }
+    ],
+    localRecipe: '참돔(60%) 고춧가루(10%) 물이 든 병(30%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10248.png',
+    localName: '추억의 도시락',
+    status: [{ name: '마나', value: 20 }, { name: '지력', value: 15 }],
+    localRecipe: '밥(50%) 계란프라이(30%) 쿠킹 포션(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10249.png',
+    localName: '벨바스트 위스키',
+    status: [{ name: '생명력', value: 32 }, { name: '체력', value: 16 }],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10287.png',
+    localName: '하얗게 구워진 드래곤 심장',
+    status: [
+      { name: '체력', value: 150 },
+      { name: '솜씨', value: 150 },
+      { name: '의지', value: 150 },
+      { name: '지력', value: 150 },
+      { name: '행운', value: 150 }
+    ],
+    localRecipe: '화이트 드래곤의 심장(75%) 화이트 드래곤의 피(7%) 드래곤의 살덩어리(18%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10307.png',
+    localName: '할로윈 부엉이 쿠키',
+    status: [{ name: '솜씨', value: 10 }],
+    localRecipe: '밀가루(70%) 버터(25%) 부엉이 모양 틀(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10308.png',
+    localName: '할로윈 유령 젤리',
+    status: [{ name: '지력', value: 10 }],
+    localRecipe: '젤라틴(85%) 레몬(15%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10324.png',
+    localName: '초콜릿 케이크',
+    status: [
+      { name: '생명력', value: 5 },
+      { name: '지력', value: -10 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '밀가루(65%) 재료 초콜릿(25%) 생크림(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10325.png',
+    localName: '삼계탕',
+    status: [
+      { name: '체력', value: 28 },
+      { name: '솜씨', value: -15 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '닭고기(50%) 쌀(10%) 물이 든 병(40%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10326.png',
+    localName: '가락엿',
+    status: [{ name: '체력', value: 15 }],
+    localRecipe: '쌀(7%) 엿기름(73%) 물이 든 병(20%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10327.png',
+    localName: '거대한 별사탕',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '솜씨', value: 7 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '설탕(65%) 물이 든 병(10%) 쿠킹 포션(25%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10329.png',
+    localName: '삶은 고구마',
+    status: [{ name: '솜씨', value: 8 }],
+    localRecipe: '고구마(85%) 물이 든 병(15%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10330.png',
+    localName: '삶은 콩',
+    status: [{ name: '체력', value: 8 }],
+    localRecipe: '콩(85%) 물이 든 병(15%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10331.png',
+    localName: '삶은 문어',
+    status: [{ name: '스태미나', value: 8 }],
+    localRecipe: '문어(85%) 물이 든 병(15%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10332.png',
+    localName: '삶은 양배추',
+    status: [{ name: '마나', value: 8 }],
+    localRecipe: '양배추(85%) 물이 든 병(15%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10333.png',
+    localName: '삶은 밤',
+    status: [{ name: '생명력', value: 8 }],
+    localRecipe: '밤(85%) 물이 든 병(15%)',
+    localCookingType: '삶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10335.png',
+    localName: '하얀 떡',
+    status: [{ name: '생명력', value: 12 }],
+    localRecipe: '쌀(90%) 물이 든 병(10%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10336.png',
+    localName: '미트파이',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '의지', value: 5 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '파이 틀(50%) 커다란 고기덩어리(38%) 고기양념(12%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10323.png',
+    localName: '3단 핫 케이크',
+    status: [{ name: '행운', value: 21 }],
+    localRecipe: '핫 케이크(60%) 생크림(30%) 나무열매(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10322.png',
+    localName: '옥수수 구이',
+    status: [{ name: '생명력', value: 15 }],
+    localRecipe: '옥수수(95%) 버터(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10309.png',
+    localName: '할로윈 호박 젤리',
+    status: [{ name: '체력', value: 10 }],
+    localRecipe: '젤라틴(85%) 청둥호박(15%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10310.png',
+    localName: '군만두',
+    status: [{ name: '지력', value: 8 }],
+    localRecipe: '밀가루(50%) 고기 조각(35%) 부추(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10311.png',
+    localName: '군만두 곱빼기',
+    status: [
+      { name: '솜씨', value: 8 },
+      { name: '의지', value: 16 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '군만두(70%) 고기 조각(20%) 부추(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10312.png',
+    localName: '특대 군만두',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 15 },
+      { name: '솜씨', value: 8 },
+      { name: '의지', value: 16 },
+      { name: '지력', value: 8 }
+    ],
+    localRecipe: '군만두 곱빼기(80%) 고기 조각(12%) 부추(8%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10313.png',
+    localName: '구운 떡',
+    status: [{ name: '생명력', value: 15 }],
+    localRecipe: '하얀 떡(100%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10315.png',
+    localName: '칠면조 구이',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '칠면조 고기(90%) 올리브유(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10316.png',
+    localName: '타라식 소시지 샌드위치',
+    status: [{ name: '솜씨', value: 10 }, { name: '지력', value: 10 }],
+    localRecipe: '마늘빵(35%) 소시지(35%) 양배추(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10317.png',
+    localName: '송편',
+    status: [{ name: '체력', value: 10 }, { name: '솜씨', value: 15 }],
+    localRecipe: '쌀(75%) 물이 든 병(18%) 설탕(7%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10318.png',
+    localName: '트뤼프 파이',
+    status: [
+      { name: '생명력', value: 40 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: -17 },
+      { name: '행운', value: 8 }
+    ],
+    localRecipe: '파이 틀(75%) 송로버섯(25%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10319.png',
+    localName: '초콜릿 수플레',
+    status: [{ name: '생명력', value: 15 }, { name: '체력', value: -5 }],
+    localRecipe: '밀가루(45%) 재료 초콜릿(50%) 우유(5%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10320.png',
+    localName: '샐러리 샐러드',
+    status: [
+      { name: '스태미나', value: 12 },
+      { name: '의지', value: 7 },
+      { name: '지력', value: -15 }
+    ],
+    localRecipe: '샐러리(35%) 당근(27%) 양배추(38%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10321.png',
+    localName: '닭고기 볶음면',
+    status: [
+      { name: '스태미나', value: -12 },
+      { name: '체력', value: 20 },
+      { name: '의지', value: 10 }
+    ],
+    localRecipe: '누들(65%) 닭고기(27%) 파프리카(8%)',
+    localCookingType: '면 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10224.png',
+    localName: '그라니타',
+    status: [{ name: '마나', value: 27 }, { name: '행운', value: 23 }],
+    localRecipe: '얼음(35%) 과일 모둠(50%) 설탕(15%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9986.png',
+    localName: '호박 타르트',
+    status: [{ name: '마나', value: 30 }],
+    localRecipe: '타르트 틀(50%) 청둥호박(40%) 생크림(10%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10074.png',
+    localName: '나레스 케익 세트',
+    status: [{ name: '생명력', value: 45 }, { name: '솜씨', value: 5 }],
+    localRecipe: '가토 오 쇼콜라(30%) 레어치즈 케익(20%) 코코넛 파운드 케익(50%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10075.png',
+    localName: '버섯 쿠키',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '체력', value: 9 },
+      { name: '솜씨', value: 3 }
+    ],
+    localRecipe: '개암버섯(40%) 밀가루(50%) 생크림(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10076.png',
+    localName: '코코넛 쿠키',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 18 },
+      { name: '의지', value: 17 }
+    ],
+    localRecipe: '야자열매(40%) 밀가루(50%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10077.png',
+    localName: '코코넛 파운드 케익',
+    status: [
+      { name: '생명력', value: 28 },
+      { name: '체력', value: 13 },
+      { name: '행운', value: 13 }
+    ],
+    localRecipe: '야자열매(30%) 밀가루 빵 반죽(50%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10078.png',
+    localName: '코코넛 게살 스프',
+    status: [
+      { name: '생명력', value: 38 },
+      { name: '체력', value: 28 },
+      { name: '행운', value: 21 }
+    ],
+    localRecipe: '야자열매(30%) 킹 크랩찜(50%) 버섯찜(20%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10079.png',
+    localName: '키시',
+    status: [
+      { name: '생명력', value: 28 },
+      { name: '체력', value: 13 },
+      { name: '의지', value: 18 }
+    ],
+    localRecipe: '양파볶음(30%) 달걀(40%) 커다란 치즈덩어리(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10083.png',
+    localName: '잣죽',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 5 },
+      { name: '의지', value: 8 }
+    ],
+    localRecipe: '잣(45%) 밥(50%) 소금(5%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10084.png',
+    localName: '철갑상어 스테이크',
+    status: [
+      { name: '생명력', value: 45 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 20 }
+    ],
+    localRecipe: '철갑상어(85%) 후추(15%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10085.png',
+    localName: '캐비어 카나페',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '솜씨', value: 4 },
+      { name: '행운', value: 20 }
+    ],
+    localRecipe: '철갑상어(40%) 나무열매(5%) 빵(55%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10086.png',
+    localName: '에그 캐비어',
+    status: [
+      { name: '생명력', value: 17 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 11 }
+    ],
+    localRecipe: '철갑상어(30%) 계란프라이(45%) 치즈 조각(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10087.png',
+    localName: '발레스 위스키',
+    status: [
+      { name: '생명력', value: 15 },
+      { name: '체력', value: 5 },
+      { name: '솜씨', value: -2 },
+      { name: '행운', value: 9 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10088.png',
+    localName: '발레스 화이어',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '체력', value: 38 },
+      { name: '솜씨', value: -15 },
+      { name: '지력', value: -15 },
+      { name: '행운', value: 25 }
+    ],
+    localRecipe: '발레스 위스키(75%) 얼음(25%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10089.png',
+    localName: '카멜리아 슬링',
+    status: [
+      { name: '생명력', value: 18 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: -3 },
+      { name: '지력', value: -3 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '동백 열매(30%) 물이 든 병(10%) 발레스 위스키(60%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10073.png',
+    localName: '루트라 칵테일 세트',
+    status: [{ name: '체력', value: 20 }, { name: '솜씨', value: 5 }],
+    localRecipe: '레드 선라이즈(30%) 라인 슬링(40%) 스크류 드라이버(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10072.png',
+    localName: '필리아 쿠키 세트',
+    status: [{ name: '솜씨', value: 5 }, { name: '행운', value: 20 }],
+    localRecipe: '초코칩 쿠키(20%) 버섯 쿠키(40%) 코코넛 쿠키(40%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9987.png',
+    localName: '에그 타르트',
+    status: [{ name: '생명력', value: 30 }],
+    localRecipe: '타르트 틀(40%) 물이 든 병(30%) 달걀(30%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9989.png',
+    localName: '애플파이',
+    status: [{ name: '행운', value: 30 }],
+    localRecipe: '파이 틀(45%) 사과(45%) 설탕(10%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9990.png',
+    localName: '피칸파이',
+    status: [{ name: '의지', value: 40 }],
+    localRecipe: '파이 틀(35%) 피칸(35%) 달걀(30%)',
+    localCookingType: '파이 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10062.png',
+    localName: '바질티',
+    status: [{ name: '솜씨', value: 8 }, { name: '의지', value: 12 }],
+    localRecipe: '바질(15%) 물이 든 병(85%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10063.png',
+    localName: '레몬티',
+    status: [
+      { name: '생명력', value: 6 },
+      { name: '솜씨', value: 8 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '레몬(10%) 물이 든 병(85%) 설탕(5%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10064.png',
+    localName: '스팀밀크',
+    status: [
+      { name: '생명력', value: 5 },
+      { name: '체력', value: 6 },
+      { name: '지력', value: 3 }
+    ],
+    localRecipe: '우유(90%) 물이 든 병(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10065.png',
+    localName: '핫초코',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 25 },
+      { name: '지력', value: 22 }
+    ],
+    localRecipe: '초콜릿(70%) 스팀밀크(20%) 생크림(10%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10066.png',
+    localName: '보리차',
+    status: [{ name: '솜씨', value: 3 }, { name: '행운', value: 12 }],
+    localRecipe: '보릿가루(30%) 물이 든 병(70%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10067.png',
+    localName: '타임티',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '의지', value: 10 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '타임(10%) 물이 든 병(90%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10068.png',
+    localName: '베지터블 카나페',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '솜씨', value: -9 },
+      { name: '행운', value: 12 }
+    ],
+    localRecipe: '삶은감자(40%) 당근(50%) 레몬(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10069.png',
+    localName: '토마토 바질 샐러드',
+    status: [
+      { name: '솜씨', value: -8 },
+      { name: '지력', value: 5 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '토마토(50%) 바질(30%) 삶은감자(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10070.png',
+    localName: '허브 버섯 샐러드',
+    status: [
+      { name: '솜씨', value: -7 },
+      { name: '의지', value: 5 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '버섯찜(70%) 타임(20%) 올리브유(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10071.png',
+    localName: '옥수수차',
+    status: [{ name: '솜씨', value: -5 }, { name: '행운', value: 20 }],
+    localRecipe: '찐 옥수수(30%) 물이 든 병(70%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10090.png',
+    localName: '빙어 무침',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 5 },
+      { name: '의지', value: 15 }
+    ],
+    localRecipe: '야채볶음(60%) 빙어(40%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10091.png',
+    localName: '빙어 튀김',
+    status: [{ name: '생명력', value: 30 }, { name: '체력', value: 15 }],
+    localRecipe: '빙어(70%) 튀김옷(25%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10134.png',
+    localName: '아브 네아 잉어 튀김',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 40 },
+      { name: '솜씨', value: -20 },
+      { name: '의지', value: 30 },
+      { name: '지력', value: -20 }
+    ],
+    localRecipe: '아브 네아 잉어(65%) 튀김옷(30%)',
+    localCookingType: '튀기기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10135.png',
+    localName: '아브 네아 잉어 채소 절임',
+    status: [
+      { name: '생명력', value: 30 },
+      { name: '마나', value: 20 },
+      { name: '지력', value: 10 }
+    ],
+    localRecipe: '아브 네아 잉어(55%) 야채 모둠(30%) 소금(15%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10136.png',
+    localName: '아브 네아 잉어 스튜',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '체력', value: 10 },
+      { name: '의지', value: 5 },
+      { name: '행운', value: 20 }
+    ],
+    localRecipe: '아브 네아 잉어(50%) 쌀(30%) 물이 든 병(20%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10137.png',
+    localName: '메기 조개 찜',
+    status: [{ name: '생명력', value: 33 }, { name: '의지', value: 35 }],
+    localRecipe: '메기(50%) 조개(40%) 마늘(10%)',
+    localCookingType: '찌기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10138.png',
+    localName: '메기구이',
+    status: [
+      { name: '생명력', value: 26 },
+      { name: '체력', value: 10 },
+      { name: '행운', value: 20 }
+    ],
+    localRecipe: '메기(80%) 양배추(20%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10139.png',
+    localName: '메기 야채 샐러드',
+    status: [
+      { name: '생명력', value: 28 },
+      { name: '마나', value: 30 },
+      { name: '지력', value: 20 }
+    ],
+    localRecipe: '메기(60%) 야채 모둠(25%) 마요네즈(15%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10140.png',
+    localName: '은어 소금구이',
+    status: [
+      { name: '생명력', value: 25 },
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 10 }
+    ],
+    localRecipe: '은어(75%) 소금(15%) 레몬(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10155.png',
+    localName: '새우초밥',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '솜씨', value: 7 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '새우회(50%) 밥(40%) 식초(10%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10156.png',
+    localName: '문어초밥',
+    status: [
+      { name: '생명력', value: 9 },
+      { name: '솜씨', value: 6 },
+      { name: '행운', value: 4 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10181.png',
+    localName: 'E.O. 그랑 블라고',
+    status: [
+      { name: '체력', value: 30 },
+      { name: '솜씨', value: -30 },
+      { name: '지력', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10184.png',
+    localName: 'E.O. 에란스 크뤼',
+    status: [
+      { name: '체력', value: -30 },
+      { name: '솜씨', value: 30 },
+      { name: '지력', value: 30 },
+      { name: '행운', value: 30 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10188.png',
+    localName: '어린이날 초록 솜사탕',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '솜씨', value: 14 },
+      { name: '행운', value: 10 }
+    ],
+    localRecipe: '',
+    localCookingType: ''
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10222.png',
+    localName: '새우 부르스케타',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '마나', value: 10 },
+      { name: '스태미나', value: 10 },
+      { name: '행운', value: 23 }
+    ],
+    localRecipe: '새우(20%) 빵(40%) 야채 모둠(40%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10109.png',
+    localName: '아이스 마끼아또',
+    status: [{ name: '생명력', value: 20 }, { name: '체력', value: 25 }],
+    localRecipe: '마끼아또(50%) 얼음(20%) 생크림(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10108.png',
+    localName: '아이스 카페 모카',
+    status: [
+      { name: '체력', value: 20 },
+      { name: '솜씨', value: 30 },
+      { name: '지력', value: 30 }
+    ],
+    localRecipe: '카페 모카(60%) 얼음(20%) 생크림(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10092.png',
+    localName: '장어 구이',
+    status: [
+      { name: '생명력', value: 20 },
+      { name: '체력', value: 30 },
+      { name: '행운', value: -5 }
+    ],
+    localRecipe: '칠성장어(90%) 소금(10%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10093.png',
+    localName: '주니퍼 젤리',
+    status: [
+      { name: '생명력', value: 5 },
+      { name: '솜씨', value: 10 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '주니퍼 베리(30%) 설탕(70%)',
+    localCookingType: '잼 만들기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10095.png',
+    localName: '까르르 버섯 쿠키',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '솜씨', value: 7 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '버섯 쿠키(45%) 담갈색송이버섯(25%) 쿠킹 포션(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10096.png',
+    localName: '눈물 우동',
+    status: [
+      { name: '마나', value: 12 },
+      { name: '솜씨', value: 8 },
+      { name: '지력', value: 5 }
+    ],
+    localRecipe: '누들(80%) 고춧가루(15%) 쿠킹 포션(5%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10097.png',
+    localName: '크레이지 초코볼',
+    status: [
+      { name: '스태미나', value: 15 },
+      { name: '의지', value: 10 },
+      { name: '행운', value: 6 }
+    ],
+    localRecipe: '재료 초콜릿(50%) 후추(25%) 쿠킹 포션(25%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10098.png',
+    localName: '잘난체 스테이크',
+    status: [
+      { name: '생명력', value: 10 },
+      { name: '체력', value: 8 },
+      { name: '지력', value: 7 }
+    ],
+    localRecipe: '비프 스테이크(30%) 생크림(35%) 쿠킹 포션(35%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10099.png',
+    localName: '두근두근 가토 오 쇼콜라',
+    status: [
+      { name: '생명력', value: 9 },
+      { name: '마나', value: 11 },
+      { name: '의지', value: 8 }
+    ],
+    localRecipe: '가토 오 쇼콜라(50%) 발레스 위스키(20%) 쿠킹 포션(30%)',
+    localCookingType: '굽기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10100.png',
+    localName: '우정의 새우볶음밥',
+    status: [
+      { name: '생명력', value: 9 },
+      { name: '체력', value: 8 },
+      { name: '솜씨', value: 8 }
+    ],
+    localRecipe: '새우볶음밥(50%) 새우튀김(30%) 쿠킹 포션(20%)',
+    localCookingType: '볶기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10103.png',
+    localName: '에스프레소',
+    status: [
+      { name: '솜씨', value: 5 },
+      { name: '의지', value: 15 },
+      { name: '행운', value: 15 }
+    ],
+    localRecipe: '볶은 커피(20%) 물이 든 병(80%)',
+    localCookingType: '끓이기'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10104.png',
+    localName: '에스프레소 마끼아또',
+    status: [
+      { name: '생명력', value: 5 },
+      { name: '의지', value: 5 },
+      { name: '행운', value: 5 }
+    ],
+    localRecipe: '에스프레소(40%) 스팀밀크(40%) 물이 든 병(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10105.png',
+    localName: '카푸치노',
+    status: [{ name: '행운', value: 20 }],
+    localRecipe: '에스프레소(30%) 스팀밀크(40%) 우유(30%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10106.png',
+    localName: '마끼아또',
+    status: [{ name: '생명력', value: 10 }, { name: '체력', value: 15 }],
+    localRecipe: '에스프레소(30%) 스팀밀크(35%) 생크림(35%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10107.png',
+    localName: '카페 모카',
+    status: [
+      { name: '체력', value: 10 },
+      { name: '솜씨', value: 20 },
+      { name: '지력', value: 20 }
+    ],
+    localRecipe: '에스프레소(40%) 스팀밀크(40%) 재료 초콜릿(20%)',
+    localCookingType: '혼합'
+  },
+  {
+    thumbnail: 'https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10223.png',
+    localName: '토마토 페스카토레',
+    status: [{ name: '스태미나', value: 30 }, { name: '체력', value: 30 }],
+    localRecipe: '롱 파스타(55%) 토마토(25%) 양파(20%)',
+    localCookingType: '파스타 만들기'
+  }
+]
 
 for (const checkCooking of checkCookings) {
-  const findCooking = cookings.find(cooking => cooking.localName === checkCooking.localName)
+  const findCooking = cookings.find(
+    cooking => cooking.localName === checkCooking.localName)
   if (typeof findCooking === typeof undefined) {
+    checkCooking.isCatering = true
     cookings.push(checkCooking)
   } else {
     findCooking.status = checkCooking.status

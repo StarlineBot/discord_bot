@@ -12925,6 +12925,7 @@ for (const checkCooking of checkCookings) {
     cookings.push(checkCooking)
   } else {
     findCooking.status = checkCooking.status
+    findCooking.thumbnail = checkCooking.thumbnail
   }
 }
 

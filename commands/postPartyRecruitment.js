@@ -32,7 +32,7 @@ module.exports = {
         )
         .addIntegerOption((option) =>
           option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시').setRequired(true)
+            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
             .setMaxValue(24).setMinValue(1)
         )
         .addStringOption((option) =>
@@ -64,7 +64,7 @@ module.exports = {
         )
         .addIntegerOption((option) =>
           option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시').setRequired(true)
+            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
             .setMaxValue(24).setMinValue(1)
         )
         .addStringOption((option) =>
@@ -108,7 +108,7 @@ module.exports = {
         )
         .addIntegerOption((option) =>
           option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시').setRequired(true)
+            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
             .setMaxValue(24).setMinValue(1)
         )
         .addStringOption((option) =>
@@ -149,7 +149,7 @@ module.exports = {
         )
         .addIntegerOption((option) =>
           option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시').setRequired(true)
+            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
             .setMaxValue(24).setMinValue(1)
         )
         .addStringOption((option) =>
@@ -189,7 +189,7 @@ module.exports = {
         )
         .addIntegerOption((option) =>
           option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시').setRequired(true)
+            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
             .setMaxValue(24).setMinValue(1)
         )
     ),

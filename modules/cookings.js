@@ -8182,6 +8182,3203 @@ const cookings = [
   }
 ]
 
+const checkCookings =
+    [
+      {
+        localName: '로나의 특제 도시락',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '보호', value: 2 },
+          { name: '마법보호', value: 2 },
+          { name: '방어', value: 5 },
+          { name: '마법방어', value: 5 }
+        ]
+      },
+      {
+        localName: '애프터눈 티 세트',
+        status: [
+          { name: '최대대미지', value: 3 },
+          { name: '체력', value: 30 },
+          { name: '의지', value: 50 },
+          { name: '마법보호', value: 2 }
+        ]
+      },
+      {
+        localName: '달걀 피클',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '생명력', value: 60 },
+          { name: '방어', value: 3 }
+        ]
+      },
+      {
+        localName: '드래곤 블러드 화이트 와인',
+        status: [
+          { name: '마나', value: 300 },
+          { name: '솜씨', value: 100 },
+          { name: '지력', value: 100 },
+          { name: '행운', value: 100 }
+        ]
+      },
+      {
+        localName: '새우 버거',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 50 },
+          { name: '스태미나', value: 60 }
+        ]
+      },
+      {
+        localName: '치킨 버거',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 50 },
+          { name: '스태미나', value: 60 }
+        ]
+      },
+      {
+        localName: '베이컨 버거',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 50 },
+          { name: '스태미나', value: 60 }
+        ]
+      },
+      {
+        localName: '까맣게 구워진 드래곤 심장',
+        status: [
+          { name: '생명력', value: 300 },
+          { name: '마나', value: 300 },
+          { name: '스태미나', value: 300 }
+        ]
+      },
+      {
+        localName: '치즈 버거',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 50 },
+          { name: '스태미나', value: 60 }
+        ]
+      },
+      {
+        localName: '육회',
+        status: [{ name: '생명력', value: 65 }, { name: '솜씨', value: 15 }]
+      },
+      {
+        localName: '챔피언 요리',
+        status: [
+          { name: '생명력', value: 100 },
+          { name: '마나', value: 100 },
+          { name: '스태미나', value: 100 },
+          { name: '체력', value: 60 },
+          { name: '솜씨', value: 60 },
+          { name: '의지', value: 60 },
+          { name: '지력', value: 60 },
+          { name: '행운', value: 60 }
+        ]
+      },
+      {
+        localName: '닭가슴살 샐러드',
+        status: [
+          { name: '마나', value: 50 },
+          { name: '지력', value: 25 },
+          { name: '마법보호', value: 1 }
+        ]
+      },
+      {
+        localName: '떡볶이',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '스태미나', value: 40 },
+          { name: '의지', value: 30 }
+        ]
+      },
+      {
+        localName: '플레인 요거트',
+        status: [{ name: '스태미나', value: 60 }, { name: '행운', value: 25 }]
+      },
+      {
+        localName: '고추장 찌개',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 35 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '모둠회국수',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '체력', value: 55 },
+          { name: '지력', value: 35 },
+          { name: '방어', value: 8 }
+        ]
+      },
+      {
+        localName: '갈치회국수',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '솜씨', value: 40 },
+          { name: '행운', value: 25 }
+        ]
+      },
+      {
+        localName: '오이 피클',
+        status: [
+          { name: '마나', value: 60 },
+          { name: '마법보호', value: 1 },
+          { name: '마법방어', value: 2 }
+        ]
+      },
+      {
+        localName: '스모어',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '마나', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '아이리쉬 스튜',
+        status: [{ name: '스태미나', value: 40 }, { name: '행운', value: 25 }]
+      },
+      {
+        localName: '쩍쩍 붙을 거야! 엿다발',
+        status: [{ name: '생명력', value: 100 }, { name: '방어', value: 5 }]
+      },
+      {
+        localName: '클로버 새싹 샐러드',
+        status: [
+          { name: '생명력', value: 100 },
+          { name: '체력', value: 40 },
+          { name: '지력', value: 40 },
+          { name: '방어', value: 5 }
+        ]
+      },
+      {
+        localName: '슈바인스학세',
+        status: [
+          { name: '스태미나', value: 25 },
+          { name: '체력', value: 45 },
+          { name: '의지', value: 35 }
+        ]
+      },
+      {
+        localName: '두부 스테이크',
+        status: [
+          { name: '마법공격력', value: 1 },
+          { name: '마나', value: 40 },
+          { name: '마법보호', value: 1 },
+          { name: '마법방어', value: 1 }
+        ]
+      },
+      {
+        localName: '청어 소금 구이',
+        status: [{ name: '스태미나', value: 35 }, { name: '솜씨', value: 15 }]
+      },
+      {
+        localName: '계란말이',
+        status: [{ name: '체력', value: 10 }, { name: '의지', value: 25 }]
+      },
+      {
+        localName: '트뤼프 오믈렛',
+        status: [{ name: '스태미나', value: 40 }, { name: '솜씨', value: 30 }]
+      },
+      {
+        localName: '장어회',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '스태미나', value: 55 },
+          { name: '솜씨', value: 10 }
+        ]
+      },
+      {
+        localName: '슈하스코',
+        status: [{ name: '생명력', value: 50 }, { name: '방어', value: 4 }]
+      },
+      {
+        localName: '고추장 돼지불고기',
+        status: [
+          { name: '마나', value: 30 },
+          { name: '의지', value: 50 },
+          { name: '지력', value: 15 }
+        ]
+      },
+      { localName: '구운 파인애플', status: [{ name: '행운', value: 10 }] },
+      {
+        localName: '파인애플 베이컨 꼬치',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '마나', value: 25 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '매실차',
+        status: [{ name: '생명력', value: 35 }, { name: '지력', value: 35 }]
+      },
+      {
+        localName: '벌꿀 요거트',
+        status: [
+          { name: '마나', value: 55 },
+          { name: '스태미나', value: 15 },
+          { name: '지력', value: 25 }
+        ]
+      },
+      {
+        localName: '딸기 요거트',
+        status: [
+          { name: '생명력', value: 65 },
+          { name: '의지', value: 25 },
+          { name: '방어', value: 2 }
+        ]
+      },
+      {
+        localName: '탱글탱글 커스터드 푸딩',
+        status: [
+          { name: '마나', value: 10 },
+          { name: '스태미나', value: 30 },
+          { name: '솜씨', value: 30 },
+          { name: '지력', value: 20 }
+        ]
+      },
+      {
+        localName: '버섯 장조림',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 10 },
+          { name: '지력', value: 20 }
+        ]
+      },
+      {
+        localName: '오야코동',
+        status: [{ name: '생명력', value: 30 }, { name: '마나', value: 40 }]
+      },
+      {
+        localName: '연어 오야코동',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '생명력', value: 30 },
+          { name: '마나', value: 40 }
+        ]
+      },
+      {
+        localName: '수비드 오일 파스타',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 25 },
+          { name: '방어', value: 4 }
+        ]
+      },
+      {
+        localName: '매실청',
+        status: [{ name: '생명력', value: 10 }, { name: '체력', value: 10 }]
+      },
+      {
+        localName: '새우회',
+        status: [
+          { name: '생명력', value: 55 },
+          { name: '마나', value: 10 },
+          { name: '스태미나', value: 10 }
+        ]
+      },
+      {
+        localName: '참치회',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '마나', value: 50 },
+          { name: '스태미나', value: 20 }
+        ]
+      },
+      {
+        localName: '연어회',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '생명력', value: 20 },
+          { name: '마나', value: 55 },
+          { name: '방어', value: 3 }
+        ]
+      },
+      {
+        localName: '갈치회',
+        status: [
+          { name: '마나', value: 45 },
+          { name: '행운', value: 10 },
+          { name: '마법방어', value: 2 }
+        ]
+      },
+      {
+        localName: '복어회',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '마나', value: 40 },
+          { name: '의지', value: 30 }
+        ]
+      },
+      {
+        localName: '송어회',
+        status: [{ name: '스태미나', value: 75 }, { name: '마법보호', value: 1 }]
+      },
+      {
+        localName: '바닷가재회',
+        status: [{ name: '생명력', value: 50 }, { name: '체력', value: 35 }]
+      },
+      {
+        localName: '돼지 보쌈',
+        status: [
+          { name: '생명력', value: 35 },
+          { name: '마나', value: 15 },
+          { name: '방어', value: 1 },
+          { name: '마법방어', value: 2 }
+        ]
+      },
+      {
+        localName: '고등어 조림',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: 15 }
+        ]
+      },
+      {
+        localName: '수비드 소갈비찜',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '마나', value: 20 },
+          { name: '의지', value: 35 }
+        ]
+      },
+      {
+        localName: '블루베리 요거트',
+        status: [
+          { name: '마나', value: 65 },
+          { name: '솜씨', value: 25 },
+          { name: '방어', value: 2 }
+        ]
+      },
+      {
+        localName: '사우어크라우트',
+        status: [
+          { name: '마나', value: 45 },
+          { name: '지력', value: 30 },
+          { name: '마법방어', value: 1 }
+        ]
+      },
+      {
+        localName: '우메보시',
+        status: [
+          { name: '체력', value: 40 },
+          { name: '솜씨', value: 25 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '하우카르틀',
+        status: [{ name: '스태미나', value: 10 }, { name: '의지', value: 100 }]
+      },
+      {
+        localName: '낫토',
+        status: [
+          { name: '생명력', value: 55 },
+          { name: '스태미나', value: 25 },
+          { name: '체력', value: 30 },
+          { name: '방어', value: 2 }
+        ]
+      },
+      {
+        localName: '파인애플 볶음밥',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '생명력', value: 60 },
+          { name: '마법보호', value: 1 }
+        ]
+      },
+      {
+        localName: '풀드포크 샌드위치',
+        status: [{ name: '마법공격력', value: 1 }, { name: '마나', value: 45 }]
+      },
+      {
+        localName: '촉촉한 연어 스테이크',
+        status: [
+          { name: '스태미나', value: 25 },
+          { name: '의지', value: 30 },
+          { name: '마법방어', value: 3 }
+        ]
+      },
+      {
+        localName: '따끈한 온천 달걀',
+        status: [
+          { name: '마나', value: 30 },
+          { name: '솜씨', value: 55 },
+          { name: '행운', value: 25 }
+        ]
+      },
+      {
+        localName: '채끝살 스테이크',
+        status: [{ name: '최대대미지', value: 1 }, { name: '생명력', value: 35 }]
+      },
+      {
+        localName: '수제 등심 햄',
+        status: [{ name: '스태미나', value: 65 }, { name: '방어', value: 3 }]
+      },
+      {
+        localName: '고등어 카레 구이',
+        status: [
+          { name: '스태미나', value: 45 },
+          { name: '솜씨', value: 15 },
+          { name: '지력', value: 30 }
+        ]
+      },
+      {
+        localName: '닭가슴살 유린기',
+        status: [
+          { name: '체력', value: 35 },
+          { name: '행운', value: 20 },
+          { name: '방어', value: 3 }
+        ]
+      },
+      {
+        localName: '문어숙회',
+        status: [
+          { name: '마나', value: 45 },
+          { name: '스태미나', value: 25 },
+          { name: '방어', value: 3 }
+        ]
+      },
+      {
+        localName: '소시지',
+        status: [{ name: '생명력', value: 18 }, { name: '체력', value: 6 }]
+      },
+      {
+        localName: '단호박 해물찜',
+        status: [{ name: '마나', value: 15 }, { name: '지력', value: 15 }]
+      },
+      {
+        localName: '야채찜닭',
+        status: [{ name: '스태미나', value: 15 }, { name: '의지', value: 15 }]
+      },
+      { localName: '찐만두', status: [{ name: '스태미나', value: 15 }] },
+      {
+        localName: '알리오 올리오',
+        status: [{ name: '생명력', value: -10 }, { name: '마나', value: 17 }]
+      },
+      {
+        localName: '까르보나라',
+        status: [{ name: '마나', value: -10 }, { name: '스태미나', value: 15 }]
+      },
+      {
+        localName: '아마트리치아나',
+        status: [{ name: '생명력', value: 15 }, { name: '스태미나', value: -8 }]
+      },
+      {
+        localName: '봉골레',
+        status: [{ name: '생명력', value: 20 }, { name: '지력', value: -20 }]
+      },
+      {
+        localName: '빠네',
+        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
+      },
+      { localName: '호두 파이', status: [{ name: '마나', value: 23 }] },
+      {
+        localName: '고구마 파이',
+        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '아몬드 파이',
+        status: [{ name: '마나', value: 10 }, { name: '지력', value: 7 }]
+      },
+      {
+        localName: '아몬드 딸기잼 타르트',
+        status: [{ name: '스태미나', value: 15 }, { name: '솜씨', value: 10 }]
+      },
+      {
+        localName: '블루베리잼',
+        status: [{ name: '생명력', value: 18 }, { name: '체력', value: 8 }]
+      },
+      { localName: '가지찜', status: [{ name: '마나', value: 10 }] },
+      {
+        localName: '단호박 갈비찜',
+        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 10 }]
+      },
+      {
+        localName: '해물 볶음우동',
+        status: [{ name: '생명력', value: 15 }, { name: '행운', value: 15 }]
+      },
+      {
+        localName: '팟타이',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '의지', value: 20 },
+          { name: '지력', value: -30 }
+        ]
+      },
+      {
+        localName: '새우튀김 우동',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: -10 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '구운 콩국수',
+        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
+      },
+      {
+        localName: '껍질 벗긴 콩국수',
+        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
+      },
+      {
+        localName: '물에 불린 콩국수',
+        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
+      },
+      {
+        localName: '잔치국수',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '솜씨', value: 2 },
+          { name: '의지', value: 8 }
+        ]
+      },
+      {
+        localName: '카레우동',
+        status: [{ name: '생명력', value: 22 }, { name: '솜씨', value: 3 }]
+      },
+      {
+        localName: '두부국수',
+        status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }]
+      },
+      {
+        localName: '두부국수',
+        status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }]
+      },
+      {
+        localName: '두부국수',
+        status: [{ name: '생명력', value: 40 }, { name: '체력', value: -30 }]
+      },
+      {
+        localName: '계란찜',
+        status: [{ name: '생명력', value: 8 }, { name: '행운', value: 10 }]
+      },
+      {
+        localName: '돼지갈비찜',
+        status: [
+          { name: '생명력', value: 28 },
+          { name: '솜씨', value: 5 },
+          { name: '의지', value: 5 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '오렌지 마멀레이드',
+        status: [{ name: '생명력', value: 15 }, { name: '의지', value: 8 }]
+      },
+      {
+        localName: '레몬잼',
+        status: [{ name: '생명력', value: 30 }, { name: '체력', value: -20 }]
+      },
+      {
+        localName: '닭똥집 볶음',
+        status: [
+          { name: '마나', value: 42 },
+          { name: '체력', value: 4 },
+          { name: '지력', value: 7 },
+          { name: '행운', value: 3 }
+        ]
+      },
+      {
+        localName: '번데기탕',
+        status: [
+          { name: '스태미나', value: 49 },
+          { name: '솜씨', value: 13 },
+          { name: '의지', value: 9 },
+          { name: '행운', value: 6 }
+        ]
+      },
+      {
+        localName: '해물파전',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '솜씨', value: 4 },
+          { name: '지력', value: 9 }
+        ]
+      },
+      {
+        localName: '사과 사탕',
+        status: [
+          { name: '생명력', value: 27 },
+          { name: '마나', value: 38 },
+          { name: '스태미나', value: 46 }
+        ]
+      },
+      {
+        localName: '초코 바나나',
+        status: [
+          { name: '체력', value: 4 },
+          { name: '지력', value: 11 },
+          { name: '행운', value: 6 }
+        ]
+      },
+      {
+        localName: '치즈맛 팝콘',
+        status: [
+          { name: '체력', value: 6 },
+          { name: '솜씨', value: 9 },
+          { name: '의지', value: 11 },
+          { name: '지력', value: 10 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '구운 오징어',
+        status: [
+          { name: '스태미나', value: 42 },
+          { name: '솜씨', value: 11 },
+          { name: '의지', value: 10 },
+          { name: '행운', value: 4 }
+        ]
+      },
+      {
+        localName: '소프트 아이스크림',
+        status: [
+          { name: '마나', value: 46 },
+          { name: '솜씨', value: 11 },
+          { name: '지력', value: 16 }
+        ]
+      },
+      {
+        localName: '구름 솜사탕',
+        status: [
+          { name: '생명력', value: 38 },
+          { name: '마나', value: 20 },
+          { name: '스태미나', value: 25 },
+          { name: '체력', value: 7 },
+          { name: '솜씨', value: 6 }
+        ]
+      },
+      {
+        localName: '응원해! 수능 찹쌀떡',
+        status: [
+          { name: '체력', value: 50 },
+          { name: '솜씨', value: 50 },
+          { name: '의지', value: 50 },
+          { name: '지력', value: 50 },
+          { name: '행운', value: 50 }
+        ]
+      },
+      {
+        localName: '응원해! 수능 엿',
+        status: [
+          { name: '보호', value: 5 },
+          { name: '생명력', value: 150 },
+          { name: '스태미나', value: 120 }
+        ]
+      },
+      {
+        localName: '척척 붙을 거야! 호두 찹쌀떡',
+        status: [{ name: '지력', value: 77 }]
+      },
+      { localName: '할 수 있어! 럭키 케이크', status: [{ name: '행운', value: 77 }] },
+      {
+        localName: '튀김 우동',
+        status: [
+          { name: '보호', value: 2 },
+          { name: '스태미나', value: 35 },
+          { name: '방어', value: 4 }
+        ]
+      },
+      {
+        localName: '매운 어묵탕',
+        status: [
+          { name: '생명력', value: 39 },
+          { name: '마나', value: 35 },
+          { name: '스태미나', value: 47 },
+          { name: '체력', value: 9 }
+        ]
+      },
+      {
+        localName: '소시지 야채 볶음',
+        status: [{ name: '스태미나', value: 15 }, { name: '방어', value: 1 }]
+      },
+      {
+        localName: '가지 볶음',
+        status: [{ name: '생명력', value: 15 }, { name: '방어', value: 1 }]
+      },
+      {
+        localName: '낙지 볶음',
+        status: [{ name: '마나', value: 15 }, { name: '방어', value: 1 }]
+      },
+      {
+        localName: '고구마 튀김',
+        status: [{ name: '솜씨', value: 15 }, { name: '행운', value: 15 }]
+      },
+      {
+        localName: '감자 크로켓',
+        status: [{ name: '솜씨', value: -25 }, { name: '행운', value: 35 }]
+      },
+      {
+        localName: '고구마 맛탕',
+        status: [{ name: '생명력', value: 11 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '돈가스',
+        status: [{ name: '생명력', value: 16 }, { name: '의지', value: 9 }]
+      },
+      {
+        localName: '양배추 콩찜',
+        status: [{ name: '생명력', value: 15 }, { name: '의지', value: 3 }]
+      },
+      { localName: '힘이 불끈! 에너지 드링크', status: [{ name: '체력', value: 77 }] },
+      {
+        localName: '홍차 벌꿀 스콘',
+        status: [
+          { name: '마나', value: 50 },
+          { name: '행운', value: 30 },
+          { name: '마법보호', value: 1 }
+        ]
+      },
+      {
+        localName: '밀푀유 전골',
+        status: [{ name: '스태미나', value: 30 }, { name: '지력', value: 25 }]
+      },
+      {
+        localName: '판나코타',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 15 },
+          { name: '지력', value: 20 }
+        ]
+      },
+      {
+        localName: '로쿰',
+        status: [
+          { name: '마나', value: 20 },
+          { name: '솜씨', value: 20 },
+          { name: '의지', value: 15 }
+        ]
+      },
+      {
+        localName: '닭볶음탕',
+        status: [
+          { name: '스태미나', value: 20 },
+          { name: '의지', value: 15 },
+          { name: '행운', value: 20 }
+        ]
+      },
+      {
+        localName: '프라이드 치킨',
+        status: [
+          { name: '지력', value: 25 },
+          { name: '행운', value: 15 },
+          { name: '방어', value: 2 }
+        ]
+      },
+      {
+        localName: '토마토 달걀 볶음',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '솜씨', value: 35 },
+          { name: '마법보호', value: 1 }
+        ]
+      },
+      {
+        localName: '김치',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '마나', value: 30 },
+          { name: '스태미나', value: 30 }
+        ]
+      },
+      {
+        localName: '마법 콩 두부',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      {
+        localName: '쿤이 구워준 마시멜로',
+        status: [{ name: '생명력', value: 10 }, { name: '행운', value: 15 }]
+      },
+      {
+        localName: '딸기 맛 사탕',
+        status: [
+          { name: '생명력', value: 35 },
+          { name: '마나', value: 15 },
+          { name: '스태미나', value: 15 },
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: 30 },
+          { name: '의지', value: 30 },
+          { name: '지력', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '포도 맛 사탕',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '마나', value: 35 },
+          { name: '스태미나', value: 15 },
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: 30 },
+          { name: '의지', value: 30 },
+          { name: '지력', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '오렌지 맛 사탕',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '마나', value: 15 },
+          { name: '스태미나', value: 35 },
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: 30 },
+          { name: '의지', value: 30 },
+          { name: '지력', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '밀크티',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '마나', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '홍차',
+        status: [{ name: '생명력', value: 30 }, { name: '행운', value: 25 }]
+      },
+      {
+        localName: '계란 마요 토스트',
+        status: [
+          { name: '체력', value: 15 },
+          { name: '의지', value: 15 },
+          { name: '방어', value: 5 }
+        ]
+      },
+      {
+        localName: '크로플',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 50 },
+          { name: '체력', value: 10 }
+        ]
+      },
+      {
+        localName: '김치 찌개',
+        status: [{ name: '솜씨', value: 30 }, { name: '최소 공격력', value: 1 }]
+      },
+      {
+        localName: '매운 라면',
+        status: [{ name: '마나', value: 50 }, { name: '행운', value: 30 }]
+      },
+      {
+        localName: '양념 치킨',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '생명력', value: 40 },
+          { name: '마나', value: 40 }
+        ]
+      },
+      {
+        localName: '김치볶음밥',
+        status: [{ name: '스태미나', value: 45 }, { name: '의지', value: 30 }]
+      },
+      {
+        localName: '트뤼프 크림 뇨키',
+        status: [{ name: '마법공격력', value: 1 }, { name: '지력', value: 35 }]
+      },
+      {
+        localName: '치즈 떡볶이',
+        status: [{ name: '스태미나', value: 40 }, { name: '솜씨', value: 20 }]
+      },
+      {
+        localName: '크루아상',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '체력', value: 15 },
+          { name: '방어', value: 3 }
+        ]
+      },
+      {
+        localName: '딸기 찹쌀떡',
+        status: [
+          { name: '마나', value: 30 },
+          { name: '지력', value: 10 },
+          { name: '마법방어', value: 2 }
+        ]
+      },
+      {
+        localName: '마카롱',
+        status: [{ name: '마나', value: 20 }, { name: '의지', value: 25 }]
+      },
+      {
+        localName: '배추전',
+        status: [{ name: '마나', value: 50 }, { name: '지력', value: 20 }]
+      },
+      {
+        localName: '까눌레',
+        status: [{ name: '스태미나', value: 30 }, { name: '솜씨', value: 20 }]
+      },
+      {
+        localName: '별가루 감자 샐러드',
+        status: [{ name: '최대대미지', value: 1 }, { name: '최소 공격력', value: 1 }]
+      },
+      { localName: '별가루 계란말이', status: [{ name: '마법공격력', value: 1 }] },
+      {
+        localName: '은하수 레몬 주스',
+        status: [{ name: '보호', value: 2 }, { name: '방어', value: 20 }]
+      },
+      {
+        localName: '방울토마토 스파게티',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '보호', value: 1 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '두근두근 리코타 치즈 샐러드',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '보호', value: 2 },
+          { name: '마법보호', value: 2 },
+          { name: '방어', value: 5 },
+          { name: '마법방어', value: 5 }
+        ]
+      },
+      {
+        localName: '두근두근 스위트 디저트',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '보호', value: 2 },
+          { name: '마법보호', value: 2 },
+          { name: '방어', value: 5 },
+          { name: '마법방어', value: 5 }
+        ]
+      },
+      {
+        localName: '두근두근 스테이크',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '보호', value: 2 },
+          { name: '마법보호', value: 2 },
+          { name: '방어', value: 5 },
+          { name: '마법방어', value: 5 }
+        ]
+      },
+      {
+        localName: '두근두근 하트 파스타',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '보호', value: 2 },
+          { name: '마법보호', value: 2 },
+          { name: '방어', value: 5 },
+          { name: '마법방어', value: 5 }
+        ]
+      },
+      {
+        localName: '순수 우유 케이크',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '보호', value: 2 },
+          { name: '마법보호', value: 2 },
+          { name: '방어', value: 5 },
+          { name: '마법방어', value: 5 }
+        ]
+      },
+      {
+        localName: '판이 그려진 달고나',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '최소 공격력', value: 1 }
+        ]
+      },
+      {
+        localName: '니엘이 만든 옥수수 스프',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '처갓집 와락치킨',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 50 },
+          { name: '스태미나', value: 50 }
+        ]
+      },
+      {
+        localName: '처갓집 꼬꼬뱅 슈프림양념치킨',
+        status: [
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 10 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '처갓집 슈프림양념치킨',
+        status: [{ name: '최대대미지', value: 3 }, { name: '마법공격력', value: 5 }]
+      },
+      {
+        localName: '방울토마토 치즈 치아바타',
+        status: [
+          { name: '마법공격력', value: 3 },
+          { name: '마법보호', value: 1 },
+          { name: '마법방어', value: 1 }
+        ]
+      },
+      {
+        localName: '방울토마토 주스',
+        status: [
+          { name: '체력', value: 5 },
+          { name: '솜씨', value: 5 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '표고버섯볶음',
+        status: [{ name: '의지', value: 5 }, { name: '지력', value: 5 }]
+      },
+      {
+        localName: '은하수 사과 주스',
+        status: [{ name: '마법보호', value: 2 }, { name: '마법방어', value: 20 }]
+      },
+      {
+        localName: '달가루 핫케이크',
+        status: [
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: 30 },
+          { name: '의지', value: 30 },
+          { name: '지력', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '달가루 비프 스테이크',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 50 },
+          { name: '스태미나', value: 50 }
+        ]
+      },
+      {
+        localName: '칠면조 테트라치니',
+        status: [{ name: '스태미나', value: 30 }, { name: '체력', value: 10 }]
+      },
+      {
+        localName: '영양만점 호두과자',
+        status: [{ name: '생명력', value: 35 }, { name: '마나', value: 35 }]
+      },
+      {
+        localName: '꿀밤 라떼',
+        status: [{ name: '스태미나', value: 30 }, { name: '의지', value: 10 }]
+      },
+      {
+        localName: '가리비 토마토 스튜',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '솜씨', value: 10 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '모둠조개회',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '보호', value: 1 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '가리비 치즈구이',
+        status: [
+          { name: '지력', value: 15 },
+          { name: '행운', value: 10 },
+          { name: '최소 공격력', value: 1 }
+        ]
+      },
+      {
+        localName: '불닭볶음면',
+        status: [
+          { name: '최대대미지', value: 2 },
+          { name: '보호', value: 1 },
+          { name: '방어', value: 10 },
+          { name: '최소 공격력', value: 2 }
+        ]
+      },
+      {
+        localName: '까르보불닭볶음면',
+        status: [
+          { name: '마법공격력', value: 5 },
+          { name: '마법보호', value: 1 },
+          { name: '마법방어', value: 10 }
+        ]
+      },
+      {
+        localName: '4가지치즈불닭볶음면',
+        status: [
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 10 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '처갓집양념치킨',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '마법보호', value: 1 },
+          { name: '방어', value: 10 },
+          { name: '마법방어', value: 10 }
+        ]
+      },
+      {
+        localName: '사과 수플레',
+        status: [
+          { name: '마나', value: 20 },
+          { name: '솜씨', value: 30 },
+          { name: '지력', value: 20 }
+        ]
+      },
+      {
+        localName: '모둠생선회',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '마법공격력', value: 1 },
+          { name: '보호', value: 1 },
+          { name: '스태미나', value: 20 }
+        ]
+      },
+      {
+        localName: '핫치킨 피자',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '마나', value: 30 },
+          { name: '스태미나', value: 50 }
+        ]
+      },
+      {
+        localName: '타라 딥 디쉬',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '스태미나', value: 40 },
+          { name: '지력', value: 25 }
+        ]
+      },
+      {
+        localName: '베지터블 피자',
+        status: [
+          { name: '생명력', value: 55 },
+          { name: '스태미나', value: 30 },
+          { name: '솜씨', value: 30 }
+        ]
+      },
+      {
+        localName: '쿠르클레 피자',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 40 },
+          { name: '행운', value: 10 },
+          { name: '방어', value: 5 }
+        ]
+      },
+      {
+        localName: '루벤 샌드위치',
+        status: [
+          { name: '보호', value: 2 },
+          { name: '마법보호', value: 1 },
+          { name: '방어', value: 3 },
+          { name: '마법방어', value: 3 }
+        ]
+      },
+      {
+        localName: '새우초밥',
+        status: [
+          { name: '생명력', value: 45 },
+          { name: '스태미나', value: 50 },
+          { name: '최소 공격력', value: 1 }
+        ]
+      },
+      {
+        localName: '장어초밥',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 35 },
+          { name: '스태미나', value: 35 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '계란초밥',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '스태미나', value: 30 },
+          { name: '솜씨', value: 40 }
+        ]
+      },
+      {
+        localName: '참치뱃살초밥',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 35 },
+          { name: '스태미나', value: 15 },
+          { name: '방어', value: 2 }
+        ]
+      },
+      {
+        localName: '연어초밥',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '마나', value: 80 },
+          { name: '스태미나', value: 15 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '라씨',
+        status: [
+          { name: '마나', value: 20 },
+          { name: '지력', value: 25 },
+          { name: '마법방어', value: 2 }
+        ]
+      },
+      {
+        localName: '코울슬로',
+        status: [
+          { name: '체력', value: 25 },
+          { name: '의지', value: 10 },
+          { name: '행운', value: 25 }
+        ]
+      },
+      {
+        localName: '포카치아',
+        status: [{ name: '생명력', value: 55 }, { name: '행운', value: 30 }]
+      },
+      {
+        localName: '스테이크 피자',
+        status: [
+          { name: '마법공격력', value: 1 },
+          { name: '마나', value: 55 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '쉬림프 피자',
+        status: [{ name: '마나', value: 50 }, { name: '의지', value: 30 }]
+      },
+      {
+        localName: '모둠회덮밥',
+        status: [
+          { name: '최대대미지', value: 2 },
+          { name: '마법공격력', value: 2 },
+          { name: '생명력', value: 35 },
+          { name: '마나', value: 25 }
+        ]
+      },
+      {
+        localName: '쉬쉬 케밥',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '행운', value: 30 },
+          { name: '방어', value: 1 }
+        ]
+      },
+      {
+        localName: '이스켄데르 케밥',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '마나', value: 25 },
+          { name: '지력', value: 35 }
+        ]
+      },
+      {
+        localName: '소풍용 치킨 케밥',
+        status: [
+          { name: '마나', value: 30 },
+          { name: '솜씨', value: 40 },
+          { name: '마법보호', value: 1 }
+        ]
+      },
+      {
+        localName: '부리토',
+        status: [
+          { name: '스태미나', value: 50 },
+          { name: '체력', value: 25 },
+          { name: '방어', value: 4 }
+        ]
+      },
+      {
+        localName: '고르곤졸라',
+        status: [
+          { name: '마나', value: 60 },
+          { name: '지력', value: 10 },
+          { name: '마법방어', value: 3 }
+        ]
+      },
+      {
+        localName: '마르게리따',
+        status: [
+          { name: '생명력', value: 35 },
+          { name: '마나', value: 20 },
+          { name: '솜씨', value: 35 }
+        ]
+      },
+      {
+        localName: '칼초네',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '마나', value: 15 },
+          { name: '체력', value: 35 }
+        ]
+      },
+      {
+        localName: '스위트 포테이토 피자',
+        status: [{ name: '마나', value: 60 }, { name: '솜씨', value: 10 }]
+      },
+      {
+        localName: '페퍼로니 피자',
+        status: [
+          { name: '스태미나', value: 55 },
+          { name: '의지', value: 30 },
+          { name: '방어', value: 3 }
+        ]
+      },
+      {
+        localName: '향긋한 버섯 피자',
+        status: [{ name: '행운', value: 30 }, { name: '마법방어', value: 3 }]
+      },
+      {
+        localName: '초콜릿 피자',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '체력', value: 15 },
+          { name: '최소 공격력', value: 1 }
+        ]
+      },
+      {
+        localName: '다이어트 연어 샐러드',
+        status: [
+          { name: '마나', value: 35 },
+          { name: '지력', value: 25 },
+          { name: '마법보호', value: 1 }
+        ]
+      },
+      {
+        localName: '마시멜로',
+        status: [{ name: '생명력', value: 10 }, { name: '행운', value: 15 }]
+      },
+      {
+        localName: '크레이프 케이크',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '마나', value: 20 },
+          { name: '체력', value: 30 }
+        ]
+      },
+      {
+        localName: '특이한 당근',
+        status: [
+          { name: '생명력', value: 14 },
+          { name: '마나', value: 14 },
+          { name: '체력', value: 14 },
+          { name: '솜씨', value: 14 },
+          { name: '의지', value: 14 },
+          { name: '지력', value: 14 },
+          { name: '행운', value: 14 }
+        ]
+      },
+      {
+        localName: '몬스터 초콜릿',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 14 },
+          { name: '의지', value: 14 }
+        ]
+      },
+      {
+        localName: '체리 포레누아',
+        status: [
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: 15 },
+          { name: '의지', value: 15 },
+          { name: '지력', value: 15 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      {
+        localName: '퐁당 쇼콜라',
+        status: [
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: 15 },
+          { name: '의지', value: 15 },
+          { name: '지력', value: 15 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      {
+        localName: '초코 슈크림',
+        status: [
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: -10 },
+          { name: '의지', value: -10 },
+          { name: '지력', value: -10 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '초콜릿 무스',
+        status: [
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: -10 },
+          { name: '의지', value: -10 },
+          { name: '지력', value: -10 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '엘시가 준 딸기우유',
+        status: [{ name: '생명력', value: 25 }, { name: '지력', value: 6 }]
+      },
+      {
+        localName: '할로윈 축제 요리',
+        status: [
+          { name: '생명력', value: 70 },
+          { name: '마나', value: 70 },
+          { name: '스태미나', value: 70 },
+          { name: '체력', value: 40 },
+          { name: '솜씨', value: 40 },
+          { name: '의지', value: 40 },
+          { name: '지력', value: 40 },
+          { name: '행운', value: 40 }
+        ]
+      },
+      {
+        localName: '맛있는 송편 세트',
+        status: [
+          { name: '보호', value: 2 },
+          { name: '체력', value: 90 },
+          { name: '솜씨', value: 90 },
+          { name: '의지', value: 90 },
+          { name: '지력', value: 90 },
+          { name: '행운', value: 90 },
+          { name: '마법보호', value: 2 },
+          { name: '방어', value: 4 },
+          { name: '마법방어', value: 4 }
+        ]
+      },
+      {
+        localName: '불금 반반 치맥 세트',
+        status: [
+          { name: '마법공격력', value: 5 },
+          { name: '보호', value: 2 },
+          { name: '지력', value: 50 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '딸기 쇼트케익',
+        status: [
+          { name: '생명력', value: 45 },
+          { name: '마나', value: 45 },
+          { name: '행운', value: 50 }
+        ]
+      },
+      {
+        localName: '민트초코 프라페',
+        status: [
+          { name: '스태미나', value: 30 },
+          { name: '의지', value: 30 },
+          { name: '방어', value: 2 }
+        ]
+      },
+      {
+        localName: '팥빙수',
+        status: [{ name: '마나', value: 20 }, { name: '행운', value: 15 }]
+      },
+      {
+        localName: '계란 샌드위치',
+        status: [{ name: '의지', value: 4 }, { name: '행운', value: 2 }]
+      },
+      {
+        localName: '계란죽',
+        status: [{ name: '의지', value: 4 }, { name: '행운', value: 2 }]
+      },
+      {
+        localName: '딸기 생크림 크레이프',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '마나', value: 30 },
+          { name: '지력', value: 30 }
+        ]
+      },
+      {
+        localName: '블루베리 생크림 크레이프',
+        status: [
+          { name: '마나', value: 20 },
+          { name: '스태미나', value: 35 },
+          { name: '솜씨', value: 30 }
+        ]
+      },
+      {
+        localName: '초코 크레이프 케이크',
+        status: [
+          { name: '마나', value: 30 },
+          { name: '스태미나', value: 20 },
+          { name: '의지', value: 30 }
+        ]
+      },
+      {
+        localName: '해피 디저트 타임 세트',
+        status: [
+          { name: '최대대미지', value: 2 },
+          { name: '보호', value: 1 },
+          { name: '솜씨', value: 25 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '모둠 바베큐',
+        status: [
+          { name: '체력', value: 80 },
+          { name: '지력', value: 80 },
+          { name: '방어', value: 10 }
+        ]
+      },
+      { localName: '15주년 애플파이', status: [{ name: '행운', value: 30 }] },
+      {
+        localName: '15주년 아이스 카페 모카',
+        status: [
+          { name: '체력', value: 20 },
+          { name: '솜씨', value: 30 },
+          { name: '지력', value: 30 }
+        ]
+      },
+      {
+        localName: '생일 케이크',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '보호', value: 1 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '쿠키 케이크',
+        status: [
+          { name: '최대대미지', value: 1 },
+          { name: '보호', value: 1 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '하이볼',
+        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 5 }]
+      },
+      {
+        localName: '애플사이다',
+        status: [{ name: '스태미나', value: 20 }, { name: '지력', value: 5 }]
+      },
+      {
+        localName: '오므라이스',
+        status: [{ name: '생명력', value: 30 }, { name: '체력', value: 7 }]
+      },
+      {
+        localName: '민트초코칩 쿠키',
+        status: [{ name: '생명력', value: 55 }, { name: '방어', value: 1 }]
+      },
+      {
+        localName: '핫 케이크',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '체력', value: 3 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '보리빵',
+        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 9 }]
+      },
+      {
+        localName: '찐 옥수수',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 20 },
+          { name: '솜씨', value: 8 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '샥스핀 스프',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: 8 },
+          { name: '의지', value: 16 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '콘소메',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 12 },
+          { name: '의지', value: 12 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '치킨 누들 콘소메',
+        status: [
+          { name: '생명력', value: 35 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 8 },
+          { name: '의지', value: 12 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '옥수수 스프',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '양파 튀김',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 22 },
+          { name: '솜씨', value: 4 },
+          { name: '의지', value: 20 },
+          { name: '지력', value: 4 }
+        ]
+      },
+      {
+        localName: '모둠 튀김',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 20 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 22 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '콘칩',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 12 },
+          { name: '의지', value: 12 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '모둠 볶음밥',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: 8 },
+          { name: '의지', value: 20 },
+          { name: '지력', value: 4 }
+        ]
+      },
+      {
+        localName: '버섯 볶음밥',
+        status: [
+          { name: '생명력', value: 35 },
+          { name: '체력', value: 12 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 18 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '팝콘',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 8 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '토마토 스파게티',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 30 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 4 }
+        ]
+      },
+      {
+        localName: '크림 파르팔레',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 20 },
+          { name: '의지', value: 20 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '옥수수 식빵',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 16 },
+          { name: '솜씨', value: 8 },
+          { name: '의지', value: 8 },
+          { name: '지력', value: 12 }
+        ]
+      },
+      {
+        localName: '옥수수 스콘',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: 15 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '은붕어 꼬치구이',
+        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 14 }]
+      },
+      {
+        localName: '금은 매운탕',
+        status: [
+          { name: '생명력', value: 35 },
+          { name: '체력', value: 15 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '브리흐네 락스',
+        status: [
+          { name: '생명력', value: 45 },
+          { name: '체력', value: 25 },
+          { name: '솜씨', value: -10 },
+          { name: '지력', value: -10 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      {
+        localName: '스크류 드라이버',
+        status: [
+          { name: '생명력', value: 42 },
+          { name: '체력', value: 26 },
+          { name: '솜씨', value: -8 },
+          { name: '지력', value: -8 },
+          { name: '행운', value: 18 }
+        ]
+      },
+      {
+        localName: '라인 슬링',
+        status: [
+          { name: '생명력', value: 38 },
+          { name: '체력', value: 20 },
+          { name: '솜씨', value: -8 },
+          { name: '지력', value: -8 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      {
+        localName: 'BnR',
+        status: [
+          { name: '생명력', value: 50 },
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: -12 },
+          { name: '지력', value: -12 },
+          { name: '행운', value: 20 }
+        ]
+      },
+      {
+        localName: '키스 온 더 립스',
+        status: [
+          { name: '생명력', value: 45 },
+          { name: '체력', value: 26 },
+          { name: '솜씨', value: -8 },
+          { name: '지력', value: -8 },
+          { name: '행운', value: 18 }
+        ]
+      },
+      {
+        localName: '레드 선라이즈',
+        status: [
+          { name: '생명력', value: 42 },
+          { name: '체력', value: 20 },
+          { name: '솜씨', value: -10 },
+          { name: '지력', value: -10 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      {
+        localName: '초콜릿',
+        status: [
+          { name: '생명력', value: 12 },
+          { name: '체력', value: 4 },
+          { name: '지력', value: 4 }
+        ]
+      },
+      {
+        localName: '개 과자',
+        status: [
+          { name: '생명력', value: 8 },
+          { name: '체력', value: 2 },
+          { name: '지력', value: 2 }
+        ]
+      },
+      {
+        localName: '베이컨과 감자 개밥',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 6 },
+          { name: '솜씨', value: -6 }
+        ]
+      },
+      {
+        localName: '새우 개밥',
+        status: [
+          { name: '생명력', value: 14 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: -8 }
+        ]
+      },
+      {
+        localName: '오믈렛',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 18 },
+          { name: '솜씨', value: 4 },
+          { name: '의지', value: 12 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '해물 스파게티',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 5 },
+          { name: '솜씨', value: 25 },
+          { name: '의지', value: 15 },
+          { name: '지력', value: 12 }
+        ]
+      },
+      {
+        localName: '조개구이',
+        status: [{ name: '생명력', value: 10 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '독버섯 스튜',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 15 }
+        ]
+      },
+      {
+        localName: '버섯 그라탕',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 15 },
+          { name: '지력', value: 30 }
+        ]
+      },
+      {
+        localName: '버섯 마리네이드',
+        status: [
+          { name: '생명력', value: 45 },
+          { name: '지력', value: -8 },
+          { name: '행운', value: 26 }
+        ]
+      },
+      {
+        localName: '버섯찜',
+        status: [
+          { name: '생명력', value: 18 },
+          { name: '솜씨', value: 5 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '루아의 요리',
+        status: [{ name: '생명력', value: 40 }, { name: '행운', value: 10 }]
+      },
+      {
+        localName: '뭉개진 껍질 벗긴 콩가루 두부',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 5 },
+          { name: '의지', value: 5 }
+        ]
+      },
+      {
+        localName: '뭉개진 물에 불린 콩가루 두부',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 5 },
+          { name: '의지', value: 5 }
+        ]
+      },
+      {
+        localName: '10주년 기념 케익',
+        status: [
+          { name: '생명력', value: 36 },
+          { name: '마나', value: 36 },
+          { name: '스태미나', value: 36 },
+          { name: '체력', value: 6 },
+          { name: '의지', value: 6 }
+        ]
+      },
+      {
+        localName: '10살 생일 케익',
+        status: [
+          { name: '생명력', value: 100 },
+          { name: '마나', value: 100 },
+          { name: '스태미나', value: 100 },
+          { name: '체력', value: 100 },
+          { name: '솜씨', value: 100 },
+          { name: '의지', value: 100 },
+          { name: '지력', value: 100 },
+          { name: '행운', value: 100 }
+        ]
+      },
+      {
+        localName: '11주년 기념 케익',
+        status: [
+          { name: '생명력', value: 36 },
+          { name: '마나', value: 36 },
+          { name: '스태미나', value: 36 },
+          { name: '체력', value: 6 },
+          { name: '의지', value: 6 }
+        ]
+      },
+      {
+        localName: '12주년 기념 케익',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '마나', value: 40 },
+          { name: '스태미나', value: 40 },
+          { name: '체력', value: 8 },
+          { name: '의지', value: 8 }
+        ]
+      },
+      {
+        localName: '13주년 기념 케익',
+        status: [
+          { name: '생명력', value: 44 },
+          { name: '마나', value: 44 },
+          { name: '스태미나', value: 44 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      { localName: '타라식 소시지 샌드위치', status: [{ name: '체력', value: 30 }] },
+      {
+        localName: '버섯 카나페',
+        status: [
+          { name: '생명력', value: 18 },
+          { name: '솜씨', value: 3 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '버섯 카푸치노스프',
+        status: [
+          { name: '생명력', value: 13 },
+          { name: '의지', value: 12 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '비단 청새치구이',
+        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '케이크 만들기 키트',
+        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '청새치 스테이크',
+        status: [
+          { name: '생명력', value: 22 },
+          { name: '체력', value: 10 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '훈제 개복치',
+        status: [
+          { name: '스태미나', value: 24 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 10 }
+        ]
+      },
+      {
+        localName: '날치 크레이프',
+        status: [{ name: '마나', value: 16 }, { name: '지력', value: 5 }]
+      },
+      {
+        localName: '킹 크랩찜',
+        status: [
+          { name: '생명력', value: 24 },
+          { name: '체력', value: 15 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      {
+        localName: '가오리 아가미 퓌레',
+        status: [{ name: '스태미나', value: 12 }, { name: '의지', value: 7 }]
+      },
+      {
+        localName: '해파리 냉채',
+        status: [
+          { name: '마나', value: 8 },
+          { name: '의지', value: 8 },
+          { name: '지력', value: 12 }
+        ]
+      },
+      {
+        localName: '아귀찜',
+        status: [
+          { name: '생명력', value: 26 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 15 }
+        ]
+      },
+      {
+        localName: '뭉개진 구운 콩가루 두부',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 5 },
+          { name: '의지', value: 5 }
+        ]
+      },
+      {
+        localName: '마법 콩 두부',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      {
+        localName: '버섯 포타주',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '체력', value: 20 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      {
+        localName: '버섯 콘소메',
+        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 30 }]
+      },
+      { localName: '딸기잼 토스트', status: [{ name: '지력', value: 30 }] },
+      {
+        localName: '로스트 치킨',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: 2 },
+          { name: '의지', value: 8 }
+        ]
+      },
+      {
+        localName: '양파맛 팝콘',
+        status: [
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 11 },
+          { name: '의지', value: 14 },
+          { name: '지력', value: 12 },
+          { name: '행운', value: 7 }
+        ]
+      },
+      {
+        localName: '밥',
+        status: [
+          { name: '체력', value: 6 },
+          { name: '솜씨', value: 8 },
+          { name: '지력', value: 7 }
+        ]
+      },
+      {
+        localName: '베이컨구이',
+        status: [{ name: '생명력', value: 18 }, { name: '지력', value: 3 }]
+      },
+      {
+        localName: '비프 스테이크',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 15 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      {
+        localName: '삶은감자',
+        status: [{ name: '생명력', value: 12 }, { name: '체력', value: 3 }]
+      },
+      {
+        localName: '삶은달걀',
+        status: [{ name: '생명력', value: 12 }, { name: '솜씨', value: 3 }]
+      },
+      {
+        localName: '새우볶음밥',
+        status: [
+          { name: '생명력', value: 6 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 15 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '새우튀김',
+        status: [{ name: '생명력', value: 12 }, { name: '의지', value: 15 }]
+      },
+      {
+        localName: '식빵',
+        status: [{ name: '생명력', value: 15 }, { name: '의지', value: 3 }]
+      },
+      {
+        localName: '야채볶음',
+        status: [
+          { name: '생명력', value: 6 },
+          { name: '솜씨', value: 10 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '야채스프',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '솜씨', value: 10 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '양송이볶음',
+        status: [{ name: '생명력', value: 10 }, { name: '지력', value: 12 }]
+      },
+      {
+        localName: '양송이스프',
+        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 15 }]
+      },
+      {
+        localName: '양파볶음',
+        status: [{ name: '생명력', value: 10 }, { name: '솜씨', value: 12 }]
+      },
+      {
+        localName: '마늘빵',
+        status: [{ name: '생명력', value: 10 }, { name: '체력', value: 3 }]
+      },
+      {
+        localName: '딸기우유',
+        status: [{ name: '생명력', value: 25 }, { name: '지력', value: 6 }]
+      },
+      {
+        localName: '캬라멜맛 팝콘',
+        status: [
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 11 },
+          { name: '의지', value: 14 },
+          { name: '지력', value: 12 },
+          { name: '행운', value: 7 }
+        ]
+      },
+      {
+        localName: '과일 도시락',
+        status: [
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 11 },
+          { name: '의지', value: 14 },
+          { name: '지력', value: 12 },
+          { name: '행운', value: 7 }
+        ]
+      },
+      {
+        localName: '치킨 팝콘과 콜라 세트',
+        status: [
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 11 },
+          { name: '의지', value: 14 },
+          { name: '지력', value: 12 },
+          { name: '행운', value: 7 }
+        ]
+      },
+      {
+        localName: '치킨 팝콘과 맥주 세트',
+        status: [
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 11 },
+          { name: '의지', value: 14 },
+          { name: '지력', value: 12 },
+          { name: '행운', value: 7 }
+        ]
+      },
+      {
+        localName: '감자계란샐러드',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '체력', value: 3 },
+          { name: '솜씨', value: 5 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '감자샐러드',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '솜씨', value: 6 },
+          { name: '지력', value: 5 }
+        ]
+      },
+      {
+        localName: '감자튀김',
+        status: [{ name: '생명력', value: 18 }, { name: '체력', value: 7 }]
+      },
+      {
+        localName: '계란샐러드',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 3 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      { localName: '계란프라이', status: [{ name: '생명력', value: 15 }] },
+      {
+        localName: '과일 모둠',
+        status: [{ name: '생명력', value: 25 }, { name: '솜씨', value: 3 }]
+      },
+      {
+        localName: '과일샐러드',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '솜씨', value: 3 },
+          { name: '지력', value: 5 }
+        ]
+      },
+      {
+        localName: '닭날개구이',
+        status: [{ name: '생명력', value: 28 }, { name: '행운', value: 10 }]
+      },
+      {
+        localName: '닭날개튀김',
+        status: [{ name: '생명력', value: 15 }, { name: '행운', value: 15 }]
+      },
+      {
+        localName: '양파스프',
+        status: [{ name: '생명력', value: 15 }, { name: '솜씨', value: 15 }]
+      },
+      {
+        localName: '우유식빵',
+        status: [{ name: '생명력', value: 18 }, { name: '솜씨', value: 7 }]
+      },
+      {
+        localName: '레어치즈 케익',
+        status: [{ name: '생명력', value: 18 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '가토 오 쇼콜라',
+        status: [{ name: '생명력', value: 22 }, { name: '솜씨', value: 3 }]
+      },
+      {
+        localName: '크로크 무슈',
+        status: [{ name: '생명력', value: 15 }, { name: '지력', value: 5 }]
+      },
+      {
+        localName: '브라우니',
+        status: [
+          { name: '생명력', value: 12 },
+          { name: '체력', value: 6 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '버터 비스킷',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '솜씨', value: 3 },
+          { name: '지력', value: 5 }
+        ]
+      },
+      {
+        localName: '초코칩 쿠키',
+        status: [
+          { name: '생명력', value: 12 },
+          { name: '체력', value: 5 },
+          { name: '솜씨', value: 2 }
+        ]
+      },
+      {
+        localName: '오렌지 주스',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '의지', value: 5 },
+          { name: '지력', value: 5 }
+        ]
+      },
+      {
+        localName: '레몬 주스',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '의지', value: 5 },
+          { name: '지력', value: 5 }
+        ]
+      },
+      {
+        localName: '초콜릿 우유',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '체력', value: 5 },
+          { name: '지력', value: 5 }
+        ]
+      },
+      {
+        localName: '라인산 진',
+        status: [
+          { name: '생명력', value: 28 },
+          { name: '체력', value: 16 },
+          { name: '솜씨', value: -6 },
+          { name: '행운', value: 6 }
+        ]
+      },
+      {
+        localName: '브리흐네 위스키',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: -4 },
+          { name: '행운', value: 4 }
+        ]
+      },
+      {
+        localName: '데브니쉬 흑맥주',
+        status: [
+          { name: '생명력', value: 32 },
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: -6 },
+          { name: '행운', value: 6 }
+        ]
+      },
+      {
+        localName: '사과 주스',
+        status: [
+          { name: '생명력', value: 12 },
+          { name: '체력', value: 5 },
+          { name: '솜씨', value: 5 }
+        ]
+      },
+      {
+        localName: '이멘 마하산 와인',
+        status: [
+          { name: '생명력', value: 17 },
+          { name: '체력', value: 7 },
+          { name: '솜씨', value: -2 },
+          { name: '행운', value: 2 }
+        ]
+      },
+      {
+        localName: '치즈 퐁듀',
+        status: [
+          { name: '생명력', value: 28 },
+          { name: '솜씨', value: 5 },
+          { name: '의지', value: 5 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      { localName: '치즈빵', status: [{ name: '생명력', value: 15 }] },
+      {
+        localName: '토스트',
+        status: [{ name: '생명력', value: 30 }, { name: '체력', value: 3 }]
+      },
+      {
+        localName: '통감자구이',
+        status: [{ name: '생명력', value: 10 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '브리흐네 잉어구이',
+        status: [{ name: '생명력', value: 11 }, { name: '의지', value: 5 }]
+      },
+      {
+        localName: '브리흐네 잉어찜',
+        status: [{ name: '생명력', value: 12 }, { name: '체력', value: 6 }]
+      },
+      {
+        localName: '은붕어 스튜',
+        status: [{ name: '생명력', value: 16 }, { name: '의지', value: 9 }]
+      },
+      {
+        localName: '피쉬 앤 칩스',
+        status: [
+          { name: '생명력', value: 18 },
+          { name: '솜씨', value: 5 },
+          { name: '의지', value: 5 }
+        ]
+      },
+      {
+        localName: 'T본 스테이크',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 5 },
+          { name: '의지', value: 5 }
+        ]
+      },
+      {
+        localName: '치즈 그라탕',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '솜씨', value: 3 },
+          { name: '지력', value: 3 }
+        ]
+      },
+      {
+        localName: '카레 라이스',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 5 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '코 코 뱅',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 3 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 8 }
+        ]
+      },
+      {
+        localName: '송어찜',
+        status: [
+          { name: '생명력', value: 22 },
+          { name: '솜씨', value: 5 },
+          { name: '지력', value: 7 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '부야 베스',
+        status: [
+          { name: '생명력', value: 32 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 5 },
+          { name: '의지', value: 5 }
+        ]
+      },
+      {
+        localName: '카레빵',
+        status: [{ name: '생명력', value: 15 }, { name: '체력', value: 8 }]
+      },
+      { localName: '클럽 샌드위치', status: [{ name: '솜씨', value: 35 }] },
+      {
+        localName: '복지리',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '마나', value: 30 },
+          { name: '지력', value: 15 }
+        ]
+      },
+      {
+        localName: '떡국',
+        status: [{ name: '생명력', value: 8 }, { name: '체력', value: 2 }]
+      },
+      {
+        localName: '떡국 곱빼기',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 4 }
+        ]
+      },
+      {
+        localName: '특대 떡국',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 18 },
+          { name: '솜씨', value: 4 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '월병',
+        status: [{ name: '생명력', value: 8 }, { name: '체력', value: 2 }]
+      },
+      {
+        localName: '큰 월병',
+        status: [{ name: '생명력', value: 15 }, { name: '체력', value: 8 }]
+      },
+      {
+        localName: '특대 월병',
+        status: [
+          { name: '보호', value: 1 },
+          { name: '생명력', value: 15 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 10 },
+          { name: '지력', value: 12 }
+        ]
+      },
+      {
+        localName: '할로윈 호박 사탕',
+        status: [{ name: '생명력', value: 5 }, { name: '마나', value: 5 }]
+      },
+      { localName: '할로윈 포장 캔디', status: [{ name: '생명력', value: 15 }] },
+      { localName: '할로윈 호박 초콜릿', status: [{ name: '마나', value: 10 }] },
+      { localName: '할로윈 포장 쿠키', status: [{ name: '스태미나', value: 10 }] },
+      { localName: '할로윈 호박 파이', status: [{ name: '생명력', value: 10 }] },
+      { localName: '할로윈 모자 쿠키', status: [{ name: '의지', value: 10 }] },
+      { localName: '할로윈 별 쿠키', status: [{ name: '행운', value: 10 }] },
+      {
+        localName: '드래곤 블러드 레드 와인',
+        status: [
+          { name: '스태미나', value: 300 },
+          { name: '체력', value: 100 },
+          { name: '의지', value: 100 },
+          { name: '행운', value: 100 }
+        ]
+      },
+      {
+        localName: '드래곤 티본 스테이크',
+        status: [{ name: '생명력', value: 200 }, { name: '체력', value: 100 }]
+      },
+      {
+        localName: '감성돔 카레구이',
+        status: [{ name: '체력', value: 20 }, { name: '의지', value: 20 }]
+      },
+      {
+        localName: '참돔 카레구이',
+        status: [{ name: '솜씨', value: 20 }, { name: '행운', value: 20 }]
+      },
+      {
+        localName: '돔돔 매운탕',
+        status: [
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 10 },
+          { name: '지력', value: 10 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '샥스핀 찜',
+        status: [{ name: '체력', value: 30 }, { name: '솜씨', value: 30 }]
+      },
+      {
+        localName: '캐비어 샐러드',
+        status: [{ name: '마나', value: 30 }, { name: '지력', value: 30 }]
+      },
+      {
+        localName: '버터구이 랍스타',
+        status: [{ name: '체력', value: -10 }, { name: '솜씨', value: 40 }]
+      },
+      {
+        localName: '고등어 스테이크',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '마나', value: 30 },
+          { name: '스태미나', value: 30 }
+        ]
+      },
+      {
+        localName: '벨바스트 장어 덮밥',
+        status: [{ name: '체력', value: 40 }, { name: '솜씨', value: -10 }]
+      },
+      {
+        localName: '갈치스튜',
+        status: [{ name: '지력', value: 40 }, { name: '행운', value: -10 }]
+      },
+      {
+        localName: '참돔 매운탕',
+        status: [
+          { name: '체력', value: 12 },
+          { name: '솜씨', value: 10 },
+          { name: '의지', value: 15 },
+          { name: '지력', value: 8 },
+          { name: '행운', value: 8 }
+        ]
+      },
+      {
+        localName: '추억의 도시락',
+        status: [{ name: '마나', value: 20 }, { name: '지력', value: 15 }]
+      },
+      {
+        localName: '벨바스트 위스키',
+        status: [{ name: '생명력', value: 32 }, { name: '체력', value: 16 }]
+      },
+      {
+        localName: '하얗게 구워진 드래곤 심장',
+        status: [
+          { name: '체력', value: 150 },
+          { name: '솜씨', value: 150 },
+          { name: '의지', value: 150 },
+          { name: '지력', value: 150 },
+          { name: '행운', value: 150 }
+        ]
+      },
+      { localName: '할로윈 부엉이 쿠키', status: [{ name: '솜씨', value: 10 }] },
+      { localName: '할로윈 유령 젤리', status: [{ name: '지력', value: 10 }] },
+      {
+        localName: '초콜릿 케이크',
+        status: [
+          { name: '생명력', value: 5 },
+          { name: '지력', value: -10 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '삼계탕',
+        status: [
+          { name: '체력', value: 28 },
+          { name: '솜씨', value: -15 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      { localName: '가락엿', status: [{ name: '체력', value: 15 }] },
+      {
+        localName: '거대한 별사탕',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '솜씨', value: 7 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      { localName: '삶은 고구마', status: [{ name: '솜씨', value: 8 }] },
+      { localName: '삶은 콩', status: [{ name: '체력', value: 8 }] },
+      { localName: '삶은 문어', status: [{ name: '스태미나', value: 8 }] },
+      { localName: '삶은 양배추', status: [{ name: '마나', value: 8 }] },
+      { localName: '삶은 밤', status: [{ name: '생명력', value: 8 }] },
+      { localName: '하얀 떡', status: [{ name: '생명력', value: 12 }] },
+      {
+        localName: '미트파이',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '의지', value: 5 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      { localName: '3단 핫 케이크', status: [{ name: '행운', value: 21 }] },
+      { localName: '옥수수 구이', status: [{ name: '생명력', value: 15 }] },
+      { localName: '할로윈 호박 젤리', status: [{ name: '체력', value: 10 }] },
+      { localName: '군만두', status: [{ name: '지력', value: 8 }] },
+      {
+        localName: '군만두 곱빼기',
+        status: [
+          { name: '솜씨', value: 8 },
+          { name: '의지', value: 16 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      {
+        localName: '특대 군만두',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 15 },
+          { name: '솜씨', value: 8 },
+          { name: '의지', value: 16 },
+          { name: '지력', value: 8 }
+        ]
+      },
+      { localName: '구운 떡', status: [{ name: '생명력', value: 15 }] },
+      {
+        localName: '칠면조 구이',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      {
+        localName: '타라식 소시지 샌드위치',
+        status: [{ name: '솜씨', value: 10 }, { name: '지력', value: 10 }]
+      },
+      {
+        localName: '송편',
+        status: [{ name: '체력', value: 10 }, { name: '솜씨', value: 15 }]
+      },
+      {
+        localName: '트뤼프 파이',
+        status: [
+          { name: '생명력', value: 40 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: -17 },
+          { name: '행운', value: 8 }
+        ]
+      },
+      {
+        localName: '초콜릿 수플레',
+        status: [{ name: '생명력', value: 15 }, { name: '체력', value: -5 }]
+      },
+      {
+        localName: '샐러리 샐러드',
+        status: [
+          { name: '스태미나', value: 12 },
+          { name: '의지', value: 7 },
+          { name: '지력', value: -15 }
+        ]
+      },
+      {
+        localName: '닭고기 볶음면',
+        status: [
+          { name: '스태미나', value: -12 },
+          { name: '체력', value: 20 },
+          { name: '의지', value: 10 }
+        ]
+      },
+      {
+        localName: '그라니타',
+        status: [{ name: '마나', value: 27 }, { name: '행운', value: 23 }]
+      },
+      { localName: '호박 타르트', status: [{ name: '마나', value: 30 }] },
+      {
+        localName: '나레스 케익 세트',
+        status: [{ name: '생명력', value: 45 }, { name: '솜씨', value: 5 }]
+      },
+      {
+        localName: '버섯 쿠키',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '체력', value: 9 },
+          { name: '솜씨', value: 3 }
+        ]
+      },
+      {
+        localName: '코코넛 쿠키',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 18 },
+          { name: '의지', value: 17 }
+        ]
+      },
+      {
+        localName: '코코넛 파운드 케익',
+        status: [
+          { name: '생명력', value: 28 },
+          { name: '체력', value: 13 },
+          { name: '행운', value: 13 }
+        ]
+      },
+      {
+        localName: '코코넛 게살 스프',
+        status: [
+          { name: '생명력', value: 38 },
+          { name: '체력', value: 28 },
+          { name: '행운', value: 21 }
+        ]
+      },
+      {
+        localName: '키시',
+        status: [
+          { name: '생명력', value: 28 },
+          { name: '체력', value: 13 },
+          { name: '의지', value: 18 }
+        ]
+      },
+      {
+        localName: '잣죽',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 5 },
+          { name: '의지', value: 8 }
+        ]
+      },
+      {
+        localName: '철갑상어 스테이크',
+        status: [
+          { name: '생명력', value: 45 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 20 }
+        ]
+      },
+      {
+        localName: '캐비어 카나페',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '솜씨', value: 4 },
+          { name: '행운', value: 20 }
+        ]
+      },
+      {
+        localName: '에그 캐비어',
+        status: [
+          { name: '생명력', value: 17 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 11 }
+        ]
+      },
+      {
+        localName: '발레스 위스키',
+        status: [
+          { name: '생명력', value: 15 },
+          { name: '체력', value: 5 },
+          { name: '솜씨', value: -2 },
+          { name: '행운', value: 9 }
+        ]
+      },
+      {
+        localName: '발레스 화이어',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '체력', value: 38 },
+          { name: '솜씨', value: -15 },
+          { name: '지력', value: -15 },
+          { name: '행운', value: 25 }
+        ]
+      },
+      {
+        localName: '카멜리아 슬링',
+        status: [
+          { name: '생명력', value: 18 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: -3 },
+          { name: '지력', value: -3 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '루트라 칵테일 세트',
+        status: [{ name: '체력', value: 20 }, { name: '솜씨', value: 5 }]
+      },
+      {
+        localName: '필리아 쿠키 세트',
+        status: [{ name: '솜씨', value: 5 }, { name: '행운', value: 20 }]
+      },
+      { localName: '에그 타르트', status: [{ name: '생명력', value: 30 }] },
+      { localName: '애플파이', status: [{ name: '행운', value: 30 }] },
+      { localName: '피칸파이', status: [{ name: '의지', value: 40 }] },
+      {
+        localName: '바질티',
+        status: [{ name: '솜씨', value: 8 }, { name: '의지', value: 12 }]
+      },
+      {
+        localName: '레몬티',
+        status: [
+          { name: '생명력', value: 6 },
+          { name: '솜씨', value: 8 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '스팀밀크',
+        status: [
+          { name: '생명력', value: 5 },
+          { name: '체력', value: 6 },
+          { name: '지력', value: 3 }
+        ]
+      },
+      {
+        localName: '핫초코',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 25 },
+          { name: '지력', value: 22 }
+        ]
+      },
+      {
+        localName: '보리차',
+        status: [{ name: '솜씨', value: 3 }, { name: '행운', value: 12 }]
+      },
+      {
+        localName: '타임티',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '의지', value: 10 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '베지터블 카나페',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '솜씨', value: -9 },
+          { name: '행운', value: 12 }
+        ]
+      },
+      {
+        localName: '토마토 바질 샐러드',
+        status: [
+          { name: '솜씨', value: -8 },
+          { name: '지력', value: 5 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '허브 버섯 샐러드',
+        status: [
+          { name: '솜씨', value: -7 },
+          { name: '의지', value: 5 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '옥수수차',
+        status: [{ name: '솜씨', value: -5 }, { name: '행운', value: 20 }]
+      },
+      {
+        localName: '빙어 무침',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 5 },
+          { name: '의지', value: 15 }
+        ]
+      },
+      {
+        localName: '빙어 튀김',
+        status: [{ name: '생명력', value: 30 }, { name: '체력', value: 15 }]
+      },
+      {
+        localName: '아브 네아 잉어 튀김',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 40 },
+          { name: '솜씨', value: -20 },
+          { name: '의지', value: 30 },
+          { name: '지력', value: -20 }
+        ]
+      },
+      {
+        localName: '아브 네아 잉어 채소 절임',
+        status: [
+          { name: '생명력', value: 30 },
+          { name: '마나', value: 20 },
+          { name: '지력', value: 10 }
+        ]
+      },
+      {
+        localName: '아브 네아 잉어 스튜',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '체력', value: 10 },
+          { name: '의지', value: 5 },
+          { name: '행운', value: 20 }
+        ]
+      },
+      {
+        localName: '메기 조개 찜',
+        status: [{ name: '생명력', value: 33 }, { name: '의지', value: 35 }]
+      },
+      {
+        localName: '메기구이',
+        status: [
+          { name: '생명력', value: 26 },
+          { name: '체력', value: 10 },
+          { name: '행운', value: 20 }
+        ]
+      },
+      {
+        localName: '메기 야채 샐러드',
+        status: [
+          { name: '생명력', value: 28 },
+          { name: '마나', value: 30 },
+          { name: '지력', value: 20 }
+        ]
+      },
+      {
+        localName: '은어 소금구이',
+        status: [
+          { name: '생명력', value: 25 },
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 10 }
+        ]
+      },
+      {
+        localName: '새우초밥',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '솜씨', value: 7 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '문어초밥',
+        status: [
+          { name: '생명력', value: 9 },
+          { name: '솜씨', value: 6 },
+          { name: '행운', value: 4 }
+        ]
+      },
+      {
+        localName: 'E.O. 그랑 블라고',
+        status: [
+          { name: '체력', value: 30 },
+          { name: '솜씨', value: -30 },
+          { name: '지력', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: 'E.O. 에란스 크뤼',
+        status: [
+          { name: '체력', value: -30 },
+          { name: '솜씨', value: 30 },
+          { name: '지력', value: 30 },
+          { name: '행운', value: 30 }
+        ]
+      },
+      {
+        localName: '어린이날 초록 솜사탕',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '솜씨', value: 14 },
+          { name: '행운', value: 10 }
+        ]
+      },
+      {
+        localName: '새우 부르스케타',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '마나', value: 10 },
+          { name: '스태미나', value: 10 },
+          { name: '행운', value: 23 }
+        ]
+      },
+      {
+        localName: '아이스 마끼아또',
+        status: [{ name: '생명력', value: 20 }, { name: '체력', value: 25 }]
+      },
+      {
+        localName: '아이스 카페 모카',
+        status: [
+          { name: '체력', value: 20 },
+          { name: '솜씨', value: 30 },
+          { name: '지력', value: 30 }
+        ]
+      },
+      {
+        localName: '장어 구이',
+        status: [
+          { name: '생명력', value: 20 },
+          { name: '체력', value: 30 },
+          { name: '행운', value: -5 }
+        ]
+      },
+      {
+        localName: '주니퍼 젤리',
+        status: [
+          { name: '생명력', value: 5 },
+          { name: '솜씨', value: 10 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      {
+        localName: '까르르 버섯 쿠키',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '솜씨', value: 7 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      {
+        localName: '눈물 우동',
+        status: [
+          { name: '마나', value: 12 },
+          { name: '솜씨', value: 8 },
+          { name: '지력', value: 5 }
+        ]
+      },
+      {
+        localName: '크레이지 초코볼',
+        status: [
+          { name: '스태미나', value: 15 },
+          { name: '의지', value: 10 },
+          { name: '행운', value: 6 }
+        ]
+      },
+      {
+        localName: '잘난체 스테이크',
+        status: [
+          { name: '생명력', value: 10 },
+          { name: '체력', value: 8 },
+          { name: '지력', value: 7 }
+        ]
+      },
+      {
+        localName: '두근두근 가토 오 쇼콜라',
+        status: [
+          { name: '생명력', value: 9 },
+          { name: '마나', value: 11 },
+          { name: '의지', value: 8 }
+        ]
+      },
+      {
+        localName: '우정의 새우볶음밥',
+        status: [
+          { name: '생명력', value: 9 },
+          { name: '체력', value: 8 },
+          { name: '솜씨', value: 8 }
+        ]
+      },
+      {
+        localName: '에스프레소',
+        status: [
+          { name: '솜씨', value: 5 },
+          { name: '의지', value: 15 },
+          { name: '행운', value: 15 }
+        ]
+      },
+      {
+        localName: '에스프레소 마끼아또',
+        status: [
+          { name: '생명력', value: 5 },
+          { name: '의지', value: 5 },
+          { name: '행운', value: 5 }
+        ]
+      },
+      { localName: '카푸치노', status: [{ name: '행운', value: 20 }] },
+      {
+        localName: '마끼아또',
+        status: [{ name: '생명력', value: 10 }, { name: '체력', value: 15 }]
+      },
+      {
+        localName: '카페 모카',
+        status: [
+          { name: '체력', value: 10 },
+          { name: '솜씨', value: 20 },
+          { name: '지력', value: 20 }
+        ]
+      },
+      {
+        localName: '토마토 페스카토레',
+        status: [{ name: '스태미나', value: 30 }, { name: '체력', value: 30 }]
+      }
+    ]
+
+for (const checkCooking of checkCookings) {
+  const findCooking = cookings.find(cooking => cooking.localName === checkCooking.localName)
+  if (typeof findCooking === typeof undefined) {
+    cookings.push(checkCooking)
+  } else {
+    findCooking.status = checkCooking.status
+  }
+}
+
 module.exports = {
   cookings
 }

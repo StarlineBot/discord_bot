@@ -18,6 +18,35 @@ module.exports = {
     .setDescription('단계별로 작성하면 파티모집 포럼에 섯다라인이 대신 작성해줌!')
     .addSubcommand(subcommand =>
       subcommand
+        .setName('브리레흐')
+        .setDescription('브리레흐 파티모집을 시작해~')
+        .addStringOption((option) =>
+          option.setName('dungeon_start_date').setDescription('먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
+            .addChoices({ name: '일', value: '일' },
+              { name: '월', value: '월' },
+              { name: '화', value: '화' },
+              { name: '수', value: '수' },
+              { name: '목', value: '목' },
+              { name: '금', value: '금' },
+              { name: '토', value: '토' })
+        )
+        .addIntegerOption((option) =>
+          option.setName('dungeon_start_time').setDescription(
+            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24시').setRequired(true)
+            .setMaxValue(24).setMinValue(1)
+        )
+        .addStringOption((option) =>
+          option.setName('dungeon_difficult').setDescription(
+            '어디까지 갈건지 골라볼까?').setRequired(true)
+            .addChoices(
+              { name: '1관트라이', value: '1관트라이' }
+              , { name: '1관클2관트라이', value: '1관클2관트라이' }
+              , { name: '1관클2관클', value: '1관클2관클' }
+            )
+        )
+    )
+    .addSubcommand(subcommand =>
+      subcommand
         .setName('글렌베르나')
         .setDescription('글렌베르나 파티모집을 시작해~')
         .addStringOption((option) =>
@@ -198,6 +227,9 @@ module.exports = {
     if (dungeonName === '보약팟') {
       dungeonDifficult = '엘리트'
     }
+    if (dungeonName === '브리레흐') {
+      dungeonHeadcount = 8
+    }
 
     const tagDungeon = partyChannel.availableTags.find(
       ({ name }) => name === dungeonName)
@@ -239,6 +271,9 @@ module.exports = {
           '\n보약이 지속되는 동안 40릴(혹은 32릴)을 돌아서 나오는' +
           '\n새도우위자드 완료보상 35,200 골드와 몬스터 드랍골드, 에린의정기, 알반훈련소 하드-중급 등의 유효보상을 노리는 파티로' +
           '\n1개 보약 사용시 보통 700만 ~ 1,000만원의 골드를 벌 수 있는 파티입니다.'
+    }
+    if (dungeonName === '브리레흐') {
+      contents += `\n<@${interaction.member.id}>브리레흐는 파티 목적에 따라 클리어 횟수를 따로 작성해주세요.`
     }
     contents += `\n### 하단에 댓글로 <@${botId}>을 맨션하면 자동으로 참여신청 돼요!`
     contents += `\n- <@${botId}>을 맨션하면 출발 10분전에 알림을 받을수 있어요!`

@@ -1,7 +1,7 @@
 // const guildModule = require('../../modules/getGuildInfo')
 
 // 슬래시커맨드를 삭제하고 다시 시작해야 할때
-const isDelete = false
+const isDelete = true
 module.exports = async (client) => {
   console.log(`server: ${process.env.NODE_ENV}, ${client.user.tag} is online!`)
 

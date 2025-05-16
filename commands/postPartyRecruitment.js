@@ -42,8 +42,21 @@ module.exports = {
               { name: '1관트라이', value: '1관트라이' }
               , { name: '1관클2관트라이', value: '1관클2관트라이' }
               , { name: '1관클2관클', value: '1관클2관클' }
+              , { name: '1관클2관클3관트라이', value: '1관클2관클3관트라이' }
+              , { name: '1관클2관클3관클', value: '1관클2관클3관클' }
+              , { name: '전관스피드런', value: '전관스피드런' }
             )
         )
+      .addIntegerOption((option) =>
+          option.setName('dungeon_headcount').setDescription(
+              '마지막으로 최소 출발 인원수를 적어줘!').setRequired(true)
+          .addChoices(
+              { name: '모바출', value: 0 }
+              , { name: '8명', value: 8 }
+              , { name: '6명', value: 6 }
+              , { name: '4명', value: 4 }
+          )
+      )
     )
     .addSubcommand(subcommand =>
       subcommand
@@ -226,9 +239,6 @@ module.exports = {
 
     if (dungeonName === '보약팟') {
       dungeonDifficult = '엘리트'
-    }
-    if (dungeonName === '브리레흐') {
-      dungeonHeadcount = 8
     }
 
     const tagDungeon = partyChannel.availableTags.find(

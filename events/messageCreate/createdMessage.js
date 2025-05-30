@@ -2,11 +2,7 @@ const guildModule = require('../../modules/getGuildInfo')
 const fs = require('fs')
 const botId = process.env.BOT_ID
 
-let userMessageCounts = {};
-// 파일에서 데이터 불러오기
-if (fs.existsSync('./static/json/userMessageCount.json')) {
-  userMessageCounts = JSON.parse(fs.readFileSync('./static/json/userMessageCount.json'));
-}
+
 module.exports = async (message, client) => {
   // 봇이 작성하지 않은 글에만 반응 해야함
   if (!message.author.bot) {
@@ -18,6 +14,11 @@ module.exports = async (message, client) => {
       const guildInfo = guildModule.getGuildInfo(guildId)
       // 마찬가지로 길드정보가 없으면 작업하지 않음
       if (typeof guildInfo !== typeof undefined) {
+        let userMessageCounts = {};
+        // 파일에서 데이터 불러오기
+        if (fs.existsSync('./static/json/userMessageCount.json')) {
+          userMessageCounts = JSON.parse(fs.readFileSync('./static/json/userMessageCount.json'));
+        }
         const userId = message.author.id;
         userMessageCounts[userId] = (userMessageCounts[userId] || 0) + 1;
         // 변경된 데이터 저장

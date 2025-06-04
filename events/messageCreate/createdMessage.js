@@ -20,7 +20,7 @@ module.exports = async (message, client) => {
           userMessageCounts = JSON.parse(fs.readFileSync('./static/json/userMessageCount.json'));
         }
         const userId = message.author.id;
-        userMessageCounts[userId] = (userMessageCounts[userId] || 0) + 1;
+        userMessageCounts[guildId][userId] = (userMessageCounts[userId] || 0) + 1;
         // 변경된 데이터 저장
         fs.writeFileSync('./static/json/userMessageCount.json', JSON.stringify(userMessageCounts, null, 2));
 

@@ -18,6 +18,7 @@ const dailyNewsChannelId = process.env.NODE_ENV === 'development'
   : process.env.DAILY_NEWS_CHANNEl_ID
 const otherChannelId = process.env.DEV_CHANNEL_ID
 const bugleHornChannelId = process.env.NODE_ENV === 'development' ? process.env.DEV_BUGLE_HORN_CHANNEL_ID : process.env.BUGLE_HORN_CHANNEL_ID
+const generalChannelId = process.env.NODE_ENV === 'development' ? process.env.DEV_GENERAL_CHANNEL_ID : process.env.GUILD_GENERAL_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 module.exports = async (client) => {
   // 봇 살아있는지 헬스체크
@@ -141,6 +142,72 @@ module.exports = async (client) => {
 
   console.log('dailyJob start!')
   dailyJob.start()
+
+  const weeklyCronSchedule = process.env.NODE_ENV === 'development'
+      ? '* * * * *'
+      : '0 0 * * 0'
+  const weeklyJob = new cron.CronJob(weeklyCronSchedule, async function () {
+    const generalChannel = client.channels.cache.get(generalChannelId)
+    let userMessageCounts = {};
+    // 파일에서 데이터 불러오기
+    if (!fs.existsSync('./static/json/userMessageCount.json')) {
+      return
+    }
+    userMessageCounts = JSON.parse(fs.readFileSync('./static/json/userMessageCount.json'));
+    client.guilds.cache.forEach(guild => {
+      const guildInfo = guildModule.getGuildInfo(guild.id)
+      if (!guildInfo) {
+        return
+      }
+      if (typeof userMessageCounts[guildInfo.guildId] === typeof undefined) {
+        return
+      }
+      let userTextRank = Object.entries(userMessageCounts[guildInfo.guildId]).sort((a,b) => b[1] - a[1])
+
+      if (userTextRank.length === 0) {
+        return
+      }
+      let embedList = []
+      userTextRank.forEach(([key, value], index) => {
+        if (index === 4) {
+          return
+        }
+        let rank = index + 1
+        let medal;
+        switch(rank) {
+          case 1:
+            medal = '🥇'
+            break;
+          case 2:
+            medal = '🥈'
+            break;
+          case 3:
+          default:
+            medal = '🥉'
+            break;
+        }
+        embedList.push(
+            new EmbedBuilder()
+            .setTitle(`🌟이주의 채팅 랭킹 TOP ${medal}`)
+            .setColor('#FFD9EC')
+            .setDescription(
+                `<@${key}> 님이 이 주에 ${value}번을 떠들었어요~.`)
+            .setTimestamp()
+        )
+      })
+
+      generalChannel.send({ embeds: embedList })
+
+      // 매주 한번 채팅 수집내역 초기화
+      userMessageCounts[guildInfo.guildId] = {};
+
+      // 변경된 데이터 저장
+      fs.writeFileSync('./static/json/userMessageCount.json', JSON.stringify(userMessageCounts, null, 2));
+    })
+  })
+
+  console.log('weeklyJob start!')
+  weeklyJob.start()
 
   const partyScheduleJob = new cron.CronJob('* * * * *', async function () {
     const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')

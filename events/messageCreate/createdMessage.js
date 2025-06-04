@@ -19,8 +19,14 @@ module.exports = async (message, client) => {
         if (fs.existsSync('./static/json/userMessageCount.json')) {
           userMessageCounts = JSON.parse(fs.readFileSync('./static/json/userMessageCount.json'));
         }
+
+        // 길드별로 데이터 구조 생성
+        if (!userMessageCounts[guildId]) {
+          userMessageCounts[guildId] = {};
+        }
+
         const userId = message.author.id;
-        userMessageCounts[userId] = (userMessageCounts[userId] || 0) + 1;
+        userMessageCounts[guildId][userId] = (userMessageCounts[guildId][userId] || 0) + 1;
         // 변경된 데이터 저장
         fs.writeFileSync('./static/json/userMessageCount.json', JSON.stringify(userMessageCounts, null, 2));
 

@@ -49,6 +49,7 @@ module.exports = async (message, client) => {
                 )
               })
               message.reply({ embeds: embedList })
+              
             }
           }
         }

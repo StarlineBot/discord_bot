@@ -168,8 +168,8 @@ module.exports = async (client) => {
       }
       let embedList = []
       userTextRank.forEach(([key, value], index) => {
-        if (index === 4) {
-          return
+        if (index === 3) {
+          return false
         }
         let rank = index + 1
         let medal;

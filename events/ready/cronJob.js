@@ -147,7 +147,6 @@ module.exports = async (client) => {
       ? '* * * * *'
       : '0 0 * * 0'
   const weeklyJob = new cron.CronJob(weeklyCronSchedule, async function () {
-    const generalChannel = client.channels.cache.get(generalChannelId)
     let userMessageCounts = {};
     // 파일에서 데이터 불러오기
     if (!fs.existsSync('./static/json/userMessageCount.json')) {
@@ -163,7 +162,7 @@ module.exports = async (client) => {
         return
       }
       let userTextRank = Object.entries(userMessageCounts[guildInfo.guildId]).sort((a,b) => b[1] - a[1])
-
+      let generalChannelId = guildInfo.generalChannelId
       if (userTextRank.length === 0) {
         return
       }
@@ -196,7 +195,8 @@ module.exports = async (client) => {
         )
       })
 
-      generalChannel.send({ embeds: embedList })
+      guild.channels.cache.find(channel => channel.id === guildInfo.generalChannelId).send(
+          { embeds: [embedList] })
 
       // 매주 한번 채팅 수집내역 초기화
       userMessageCounts[guildInfo.guildId] = {};
@@ -348,8 +348,10 @@ module.exports = async (client) => {
     }
   })
 
-  console.log('bugleHornJob start!')
-  bugleHornJob.start()
+  if (process.env.NODE_ENV !== 'development') {
+    console.log('bugleHornJob start!')
+    bugleHornJob.start()
+  }
 }
 
 const getRandomColor = function () {

@@ -22,7 +22,8 @@ module.exports = async (message, client) => {
             if (userTextRank.length !== 0) {
               let embedList = []
               userTextRank.forEach(([key, value], index) => {
-                if (index === 3) {
+                console.log(index)
+                if (index > 3) {
                   return false
                 }
                 let rank = index + 1

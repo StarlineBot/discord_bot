@@ -25,6 +25,7 @@ module.exports = async (message, client) => {
                 if (index === 4) {
                   return
                 }
+                console.log(index)
                 let rank = index + 1
                 let medal;
                 switch(rank) {
@@ -49,7 +50,6 @@ module.exports = async (message, client) => {
                 )
               })
               message.reply({ embeds: embedList })
-              
             }
           }
         }

@@ -22,10 +22,9 @@ module.exports = async (message, client) => {
             if (userTextRank.length !== 0) {
               let embedList = []
               userTextRank.forEach(([key, value], index) => {
-                if (index === 4) {
-                  return
+                if (index > 3) {
+                  return false
                 }
-                console.log(index)
                 let rank = index + 1
                 let medal;
                 switch(rank) {

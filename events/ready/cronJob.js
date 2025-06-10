@@ -233,7 +233,7 @@ module.exports = async (client) => {
           if (typeof startDateMessage === typeof undefined) {
             return
           }
-          const startDate = DateTime.fromFormat(`${now.get('year')}년 ${startDateMessage.content.split(':')[1].trim()} 00분`, 'yyyy년 MM월 dd일 cccc HH시 mm분', {
+          const startDate = DateTime.fromFormat(`${now.get('year')}년 ${startDateMessage.content.split(':')[1].trim()}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', {
             locale: 'ko'
           })
 

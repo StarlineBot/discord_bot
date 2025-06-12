@@ -1,63 +1,38 @@
 const { EmbedBuilder } = require('discord.js')
 const guildModule = require('../../modules/getGuildInfo')
 const fs = require('fs')
+const {
+  getUserMessageCounts,
+  getTopChatRanking,
+  createRankingEmbed,
+} = require('../../modules/RankingUtil');
 const prefix = '!'
-module.exports = async (message, client) => {
-  if (!message.author.bot) {
-    if (message.guildId !== null) {
-      const guildId = message.guildId
-      const guildInfo = guildModule.getGuildInfo(guildId)
-      if (typeof guildInfo !== typeof undefined) {
-        try {
-          const guildAdminRoleId = guildInfo.adminRole
-          const guild = client.guilds.cache.find(guild => guild.id === guildId)
-          const allowedRole = guild.roles.cache.find(role => role.id === guildAdminRoleId)
-          const member = guild.members.cache.find(member => member.id === message.author.id)
-          const isAllowed = !!member.roles.cache.find(role => role.id === allowedRole.id)
 
-          if (isAllowed && message.content.startsWith(prefix + '채팅랭킹')) {
-            // 파일에서 데이터 불러오기
-            if (fs.existsSync('./static/json/userMessageCount.json')) {
-              let userMessageCounts = JSON.parse(fs.readFileSync('./static/json/userMessageCount.json'));
-              let userTextRank = Object.entries(userMessageCounts[guildInfo.guildId]).sort((a,b) => b[1] - a[1])
-              if (userTextRank.length !== 0) {
-                let embedList = []
-                userTextRank.forEach(([key, value], index) => {
-                  console.log(index)
-                  if (index > 3) {
-                    return false
-                  }
-                  let rank = index + 1
-                  let medal;
-                  switch(rank) {
-                    case 1:
-                      medal = '🥇'
-                      break;
-                    case 2:
-                      medal = '🥈'
-                      break;
-                    case 3:
-                    default:
-                      medal = '🥉'
-                      break;
-                  }
-                  embedList.push(
-                      new EmbedBuilder()
-                      .setTitle(`🌟이주의 채팅 랭킹 TOP ${medal}`)
-                      .setColor('#FFD9EC')
-                      .setDescription(
-                          `<@${key}> 님이 이 주에 ${value}번을 떠들었어요~.`)
-                      .setTimestamp()
-                  )
-                })
-                message.reply({ embeds: embedList })
-              }
-            }
-          }
-        } catch (error) {
-          console.log(`${guildId}에 대한 정보 없음 : \n\n${error}`)
-        }
-      }
-    }
+module.exports = async (message, client) => {
+  if (message.author.bot || !message.guildId || !message.content.startsWith(prefix + '채팅랭킹')) return;
+
+  const guildId = message.guildId;
+  const guildInfo = guildModule.getGuildInfo(guildId);
+  if (!guildInfo) return;
+
+  try {
+    const guild = client.guilds.cache.get(guildId);
+    if (!guild) return;
+
+    const adminRoleId = guildInfo.adminRole;
+    const member = guild.members.cache.get(message.author.id);
+    if (!member || !member.roles.cache.has(adminRoleId)) return;
+
+    let userMessageCounts = getUserMessageCounts();
+    if (!userMessageCounts) return;
+
+    const userCounts = userMessageCounts[guildId];
+    const topRanks = getTopChatRanking(userCounts);
+    if (topRanks.length === 0) return;
+    const embeds = topRanks.map(createRankingEmbed);
+
+    message.reply({ embeds });
+  } catch (error) {
+    console.error(`Error while processing 채팅랭킹 for guild ${guildId}:`, error);
   }
 }

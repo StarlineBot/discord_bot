@@ -8,6 +8,12 @@ const { getDate } = require('../../modules/common')
 const nexonApiMainUrl = 'https://open.api.nexon.com'
 const nexonApiKey = process.env.NEXON_API_KEY
 const fs = require('fs')
+const {
+  getUserMessageCounts,
+  saveUserMessageCounts,
+  getTopChatRanking,
+  createRankingEmbed,
+} = require('../../modules/RankingUtil');
 
 const botId = process.env.BOT_ID
 const todayMissionChannelId = process.env.NODE_ENV === 'development'
@@ -147,64 +153,30 @@ module.exports = async (client) => {
       ? '* * * * *'
       : '0 0 * * 0'
   const weeklyJob = new cron.CronJob(weeklyCronSchedule, async function () {
-    let userMessageCounts = {};
-    // 파일에서 데이터 불러오기
-    if (!fs.existsSync('./static/json/userMessageCount.json')) {
-      return
-    }
-    userMessageCounts = JSON.parse(fs.readFileSync('./static/json/userMessageCount.json'));
-    client.guilds.cache.forEach(guild => {
-      const guildInfo = guildModule.getGuildInfo(guild.id)
-      if (!guildInfo) {
-        return
-      }
-      if (typeof userMessageCounts[guildInfo.guildId] === typeof undefined) {
-        return
-      }
-      let userTextRank = Object.entries(userMessageCounts[guildInfo.guildId]).sort((a,b) => b[1] - a[1])
-      let generalChannelId = guildInfo.generalChannelId
-      if (userTextRank.length === 0) {
-        return
-      }
-      let embedList = []
-      userTextRank.forEach(([key, value], index) => {
-        if (index > 3) {
-          return false
-        }
-        let rank = index + 1
-        let medal;
-        switch(rank) {
-          case 1:
-            medal = '🥇'
-            break;
-          case 2:
-            medal = '🥈'
-            break;
-          case 3:
-          default:
-            medal = '🥉'
-            break;
-        }
-        embedList.push(
-            new EmbedBuilder()
-            .setTitle(`🌟이주의 채팅 랭킹 TOP ${medal}`)
-            .setColor('#FFD9EC')
-            .setDescription(
-                `<@${key}> 님이 이 주에 ${value}번을 떠들었어요~.`)
-            .setTimestamp()
-        )
-      })
+    let userMessageCounts = getUserMessageCounts();
+    if (!userMessageCounts) return;
 
-      guild.channels.cache.find(channel => channel.id === guildInfo.generalChannelId).send(
-          { embeds: [embedList] })
+    for (const guild of client.guilds.cache.values()) {
+      const guildInfo = guildModule.getGuildInfo(guild.id);
+      if (!guildInfo || !userMessageCounts[guildInfo.guildId]) continue;
 
-      // 매주 한번 채팅 수집내역 초기화
+      const userCounts = userMessageCounts[guildInfo.guildId];
+      const topRanks = getTopChatRanking(userCounts);
+      if (topRanks.length === 0) continue;
+
+      const embedList = topRanks.map(createRankingEmbed);
+      const generalChannel = guild.channels.cache.get(guildInfo.generalChannelId);
+
+      if (generalChannel) {
+        await generalChannel.send({ embeds: embedList });
+      }
+
+      // 채팅 수 초기화
       userMessageCounts[guildInfo.guildId] = {};
+    }
 
-      // 변경된 데이터 저장
-      fs.writeFileSync('./static/json/userMessageCount.json', JSON.stringify(userMessageCounts, null, 2));
-    })
-  })
+    saveUserMessageCounts(userMessageCounts);
+  });
 
   console.log('weeklyJob start!')
   weeklyJob.start()

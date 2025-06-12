@@ -10,6 +10,12 @@ for (const weekDay of week) {
     name: weekDay, value: weekDay
   })
 }
+const maxHour = 24
+const minHour = 1
+const maxMin = 59
+const minMin = 0
+const maxHeadcount = 8
+const minHeadcount = 0
 
 // const devPartyChannelId = process.env.DEV_PARTY_RECRUITMENT
 module.exports = {
@@ -22,40 +28,34 @@ module.exports = {
         .setDescription('브리레흐 파티모집을 시작해~')
         .addStringOption((option) =>
           option.setName('dungeon_start_date').setDescription('먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
-            .addChoices({ name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' })
+            .addChoices(...weekOption)
         )
         .addIntegerOption((option) =>
-          option.setName('dungeon_start_time').setDescription(
+          option.setName('dungeon_start_hour').setDescription(
             '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
-            .setMaxValue(24).setMinValue(1)
+            .setMaxValue(maxHour).setMinValue(minHour)
         )
       .addIntegerOption((option) =>
-          option.setName('dungeon_start_time_min').setDescription(
+          option.setName('dungeon_start_minute').setDescription(
               '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
-          .setMaxValue(59).setMinValue(0)
+          .setMaxValue(maxMin).setMinValue(minMin)
       )
         .addStringOption((option) =>
           option.setName('dungeon_difficult').setDescription(
             '어디까지 갈건지 골라볼까?').setRequired(true)
             .addChoices(
-              { name: '1관트라이', value: '1관트라이' }
-              , { name: '1관클2관트라이', value: '1관클2관트라이' }
-              , { name: '1관클2관클', value: '1관클2관클' }
-              , { name: '1관클2관클3관트라이', value: '1관클2관클3관트라이' }
-              , { name: '1관클2관클3관클', value: '1관클2관클3관클' }
-              , { name: '전관스피드런', value: '전관스피드런' }
+               { name: '전관스피드런', value: '전관스피드런' },
+              { name: '1관클2관클3관클', value: '1관클2관클3관클' },
+              { name: '1관트라이', value: '1관트라이' },
+              { name: '1관클2관클3관트라이', value: '1관클2관클3관트라이' },
+              { name: '1관클2관클', value: '1관클2관클' },
+              { name: '1관클2관트라이', value: '1관클2관트라이' }
             )
         )
       .addIntegerOption((option) =>
           option.setName('dungeon_headcount').setDescription(
               '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
-          .setMaxValue(8).setMinValue(0)
+          .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
       )
     )
     .addSubcommand(subcommand =>
@@ -65,185 +65,47 @@ module.exports = {
         .addStringOption((option) =>
           option.setName('dungeon_start_date').setDescription(
             '먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
-            .addChoices(
-              { name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' }
-            )
+            .addChoices(...weekOption)
         )
         .addIntegerOption((option) =>
-          option.setName('dungeon_start_time').setDescription(
+          option.setName('dungeon_start_hour').setDescription(
             '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
-            .setMaxValue(24).setMinValue(1)
+            .setMaxValue(maxHour).setMinValue(minHour)
         )
+      .addIntegerOption((option) =>
+          option.setName('dungeon_start_minute').setDescription(
+              '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
+          .setMaxValue(maxMin).setMinValue(minMin)
+      )
         .addStringOption((option) =>
           option.setName('dungeon_difficult').setDescription(
             '다 왔다! 난이도를 골라줘~').setRequired(true)
             .addChoices(
               { name: '매우 어려움', value: '매우 어려움' }
               , { name: '어려움', value: '어려움' }
-              , { name: '도전자', value: '도전자' }
               , { name: '쉬움', value: '쉬움' }
             )
         )
-        .addIntegerOption((option) =>
+      .addIntegerOption((option) =>
           option.setName('dungeon_headcount').setDescription(
-            '마지막으로 최소 출발 인원수를 적어줘!').setRequired(true)
-            .addChoices(
-              { name: '모바출', value: 0 }
-              , { name: '4명', value: 4 }
-              , { name: '6명', value: 6 }
-              , { name: '8명', value: 8 }
-              , { name: '2명', value: 2 }
-            )
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('크롬바스')
-        .setDescription('크롬바스 파티모집을 시작해~')
-        .addStringOption((option) =>
-          option.setName('dungeon_start_date').setDescription(
-            '먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
-            .addChoices(
-              { name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' }
-            )
-        )
-        .addIntegerOption((option) =>
-          option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
-            .setMaxValue(24).setMinValue(1)
-        )
-        .addStringOption((option) =>
-          option.setName('dungeon_difficult').setDescription(
-            '다 왔다! 난이도를 골라줘~').setRequired(true)
-            .addChoices(
-              { name: '100', value: '100' }
-              , { name: '50', value: '50' }
-              , { name: '30', value: '30' }
-            )
-        )
-        .addIntegerOption((option) =>
-          option.setName('dungeon_headcount').setDescription(
-            '마지막으로 최소 출발 인원수를 적어줘!').setRequired(true)
-            .addChoices(
-              { name: '모바출', value: 0 }
-              , { name: '4명', value: 4 }
-              , { name: '2명', value: 2 }
-            )
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('테흐두인')
-        .setDescription('테흐두인 파티모집을 시작해~')
-        .addStringOption((option) =>
-          option.setName('dungeon_start_date').setDescription(
-            '먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
-            .addChoices(
-              { name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' }
-            )
-        )
-        .addIntegerOption((option) =>
-          option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
-            .setMaxValue(24).setMinValue(1)
-        )
-        .addStringOption((option) =>
-          option.setName('dungeon_difficult').setDescription(
-            '다 왔다! 난이도를 골라줘~').setRequired(true)
-            .addChoices(
-              { name: '어려움', value: '어려움' }
-              , { name: '쉬움', value: '쉬움' }
-            )
-        )
-        .addIntegerOption((option) =>
-          option.setName('dungeon_headcount').setDescription(
-            '마지막으로 최소 출발 인원수를 적어줘!').setRequired(true)
-            .addChoices(
-              { name: '모바출', value: 0 }
-              , { name: '4명', value: 4 }
-              , { name: '2명', value: 2 }
-            )
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('보약팟')
-        .setDescription('보약팟 파티모집을 시작해~')
-        .addStringOption((option) =>
-          option.setName('dungeon_start_date').setDescription(
-            '먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
-            .addChoices(
-              { name: '일', value: '일' },
-              { name: '월', value: '월' },
-              { name: '화', value: '화' },
-              { name: '수', value: '수' },
-              { name: '목', value: '목' },
-              { name: '금', value: '금' },
-              { name: '토', value: '토' }
-            )
-        )
-        .addIntegerOption((option) =>
-          option.setName('dungeon_start_time').setDescription(
-            '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
-            .setMaxValue(24).setMinValue(1)
-        )
+              '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
+          .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
+      )
     ),
   run: async ({ interaction }) => {
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
     const partyChannel = interaction.client.channels.cache.get(guildInfo.partyChannelId)
-    // const devPartyChannel = interaction.client.channels.cache.get(devPartyChannelId)
-    // console.log(devPartyChannel)
-
-    const targetMemberRole = interaction.member.guild.roles.cache.find(role => role.id === guildInfo.targetMemberRole)
 
     const dungeonName = interaction.options._subcommand
-    let dungeonStartDate
-    let dungeonDifficult
-    let dungeonStartTime
-    let dungeonStartTimeMin = 0
-    let dungeonHeadcount
-    for (const option of interaction.options._hoistedOptions) {
-      switch (option.name) {
-        case 'dungeon_start_date':
-          dungeonStartDate = option.value
-          break
-        case 'dungeon_start_time':
-          dungeonStartTime = option.value
-          break
-        case 'dungeon_start_time_min':
-          dungeonStartTimeMin = option.value
-          break
-        case 'dungeon_difficult':
-          dungeonDifficult = option.value
-          break
-        default:
-          dungeonHeadcount = option.value
-          break
-      }
-    }
+    const getOptionValue = (name) =>
+        interaction.options._hoistedOptions.find(opt => opt.name === name)?.value;
 
-    if (dungeonName === '보약팟') {
-      dungeonDifficult = '엘리트'
-    }
+    const dungeonStartDate = getOptionValue('dungeon_start_date');
+    const dungeonStartHour = getOptionValue('dungeon_start_hour');
+    const dungeonStartMinute = getOptionValue('dungeon_start_minute') ?? 0;
+    const dungeonDifficult = getOptionValue('dungeon_difficult');
+    const dungeonHeadcount = getOptionValue('dungeon_headcount');
 
     const tagDungeon = partyChannel.availableTags.find(
       ({ name }) => name === dungeonName)
@@ -254,7 +116,7 @@ module.exports = {
     const nowDate = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     const now = nowDate.startOf('day')
     // 당일인데 시간이 지금보다 이전이면 다음주로 미룸
-    const index = nowDate.get('hour') >= dungeonStartTime ? 1 : 0
+    const index = nowDate.get('hour') >= dungeonStartHour ? 1 : 0
     // 당일부터 요일을 체크함
     for (let i = index; i < 10; i++) {
       if (now.plus({ days: i }).toFormat('ccc') === dungeonStartDate) {
@@ -263,35 +125,13 @@ module.exports = {
       }
     }
 
-    const recruitmentDungeonName = dungeonName === '보약팟' ? dungeonName : `${dungeonName} ${dungeonDifficult}`
+    const recruitmentDungeonName = `${dungeonName} ${dungeonDifficult}`
     const recruitmentHeadcount = `${dungeonHeadcount}명`
 
-    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartTime}시${dungeonStartTimeMin  > 0 ? ' '+dungeonStartTimeMin + '분' : ''}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
-    const targetMember = dungeonDifficult === '도전자' ? `<@&${targetMemberRole.id}>` : '<@everyone>'
-    let contents = '## ' + targetMember + (dungeonDifficult === '도전자' ? '만 참여 가능한 연습팟 입니다.' : '제목과 태그로 던전을 먼저 확인해요.')
-    if (dungeonName === '보약팟') {
-      title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartTime}시, 8인 채워지면 출발!`
-      contents = targetMember + ' feat: 열정이' +
-          '\n### 1시간 40릴을 목표로 진행 합니다.' +
-          '\n전부 길원들로만 갈 거라서 8인이 모여야 출발 할 수 있습니다.' +
-          '\n' +
-          '\n- 준비물' +
-          '\n - `무제한 그림자 미션 통행증` 혹은 `엘리트 통행증 - 섀도우 위자드 퇴치` 5장' +
-          '\n - `만사형통의 보약` 1개' +
-          '\n - 성장 가이드에서 얻을 수 있는 `샛별 서포트 퍼핏` 혹은 경매장에서 구매 가능한 하루 2시간 제한 `서포트 퍼핏`(100만골 내외)' +
-          '\n\n### 보약팟이란?' +
-          '\n파티원 8명이 각자 `무제한 그림자 미션 통행증` 혹은 `엘리트 통행증 - 섀도우 위자드 퇴치` 를 5장(혹은 4장)씩 준비하여' +
-          '\n1시간 동안 지속되는 `만사형통의 보약`(몬스터 골드드랍과 퀘스트 완료 골드 보상 2배증가)을 먹고' +
-          '\n보약이 지속되는 동안 40릴(혹은 32릴)을 돌아서 나오는' +
-          '\n새도우위자드 완료보상 35,200 골드와 몬스터 드랍골드, 에린의정기, 알반훈련소 하드-중급 등의 유효보상을 노리는 파티로' +
-          '\n1개 보약 사용시 보통 700만 ~ 1,000만원의 골드를 벌 수 있는 파티입니다.'
-    }
-    if (dungeonName === '브리레흐') {
-      contents += `\n<@${interaction.member.id}>브리레흐는 파티 목적에 따라 클리어 횟수를 따로 작성해주세요.`
-    }
+    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartHour}시${dungeonStartMinute  > 0 ? ' '+dungeonStartMinute + '분' : ''}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
+    let contents = '## <@everyone>제목과 태그로 던전을 먼저 확인해요.'
     contents += `\n### 하단에 댓글로 <@${botId}>을 맨션하면 자동으로 참여신청 돼요!`
     contents += `\n- <@${botId}>을 맨션하면 출발 10분전에 알림을 받을수 있어요!`
-    // contents += `\n참여자는 파티 시작전 <@${botId}>이 알림을 드려요`
     contents += `\n\n### 현재 참가인원\n - <@${interaction.member.id}>`
 
     partyChannel.threads.create({
@@ -302,7 +142,7 @@ module.exports = {
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     }).then(partyThreadChannel => {
       partyThreadChannel.send(`모집던전: ${recruitmentDungeonName}`)
-      partyThreadChannel.send(`출발시간: ${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartTime}시 ${dungeonStartTimeMin  > 0 ? dungeonStartTimeMin + '분' : '00분'}`)
+      partyThreadChannel.send(`출발시간: ${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartHour}시 ${dungeonStartMinute  > 0 ? dungeonStartMinute + '분' : '00분'}`)
       partyThreadChannel.send(`모집인원: ${recruitmentHeadcount}`)
     })
 

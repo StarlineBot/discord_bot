@@ -8,12 +8,9 @@ const getHtml = async function () {
   const $ = cheerio.load(getBody.data)
 
   console.log(getBody)
-  $(".content").find("#result").find("tbody tr").each(function(i){
-    const isEven = i%2 === 0
-    const td = $(this).find("td")
-    if (isEven) {
-
-    }
+  $('.content').find('#result').find('tbody tr').each(function (i) {
+    const isEven = i % 2 === 0
+    const td = $(this).find('td')
     console.log(isEven, td.eq(0).text())
   })
 }

@@ -35,16 +35,16 @@ module.exports = {
             '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
             .setMaxValue(maxHour).setMinValue(minHour)
         )
-      .addIntegerOption((option) =>
+        .addIntegerOption((option) =>
           option.setName('dungeon_start_minute').setDescription(
-              '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
-          .setMaxValue(maxMin).setMinValue(minMin)
-      )
+            '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
+            .setMaxValue(maxMin).setMinValue(minMin)
+        )
         .addStringOption((option) =>
           option.setName('dungeon_difficult').setDescription(
             '어디까지 갈건지 골라볼까?').setRequired(true)
             .addChoices(
-               { name: '전관스피드런', value: '전관스피드런' },
+              { name: '전관스피드런', value: '전관스피드런' },
               { name: '1관클2관클3관클', value: '1관클2관클3관클' },
               { name: '1관트라이', value: '1관트라이' },
               { name: '1관클2관클3관트라이', value: '1관클2관클3관트라이' },
@@ -52,11 +52,11 @@ module.exports = {
               { name: '1관클2관트라이', value: '1관클2관트라이' }
             )
         )
-      .addIntegerOption((option) =>
+        .addIntegerOption((option) =>
           option.setName('dungeon_headcount').setDescription(
-              '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
-          .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
-      )
+            '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
+            .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
+        )
     )
     .addSubcommand(subcommand =>
       subcommand
@@ -72,11 +72,11 @@ module.exports = {
             '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
             .setMaxValue(maxHour).setMinValue(minHour)
         )
-      .addIntegerOption((option) =>
+        .addIntegerOption((option) =>
           option.setName('dungeon_start_minute').setDescription(
-              '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
-          .setMaxValue(maxMin).setMinValue(minMin)
-      )
+            '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
+            .setMaxValue(maxMin).setMinValue(minMin)
+        )
         .addStringOption((option) =>
           option.setName('dungeon_difficult').setDescription(
             '다 왔다! 난이도를 골라줘~').setRequired(true)
@@ -86,11 +86,11 @@ module.exports = {
               , { name: '쉬움', value: '쉬움' }
             )
         )
-      .addIntegerOption((option) =>
+        .addIntegerOption((option) =>
           option.setName('dungeon_headcount').setDescription(
-              '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
-          .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
-      )
+            '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
+            .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
+        )
     ),
   run: async ({ interaction }) => {
     const guildId = interaction.member.guild.id
@@ -99,13 +99,13 @@ module.exports = {
 
     const dungeonName = interaction.options._subcommand
     const getOptionValue = (name) =>
-        interaction.options._hoistedOptions.find(opt => opt.name === name)?.value;
+      interaction.options._hoistedOptions.find(opt => opt.name === name)?.value
 
-    const dungeonStartDate = getOptionValue('dungeon_start_date');
-    const dungeonStartHour = getOptionValue('dungeon_start_hour');
-    const dungeonStartMinute = getOptionValue('dungeon_start_minute') ?? 0;
-    const dungeonDifficult = getOptionValue('dungeon_difficult');
-    const dungeonHeadcount = getOptionValue('dungeon_headcount');
+    const dungeonStartDate = getOptionValue('dungeon_start_date')
+    const dungeonStartHour = getOptionValue('dungeon_start_hour')
+    const dungeonStartMinute = getOptionValue('dungeon_start_minute') ?? 0
+    const dungeonDifficult = getOptionValue('dungeon_difficult')
+    const dungeonHeadcount = getOptionValue('dungeon_headcount')
 
     const tagDungeon = partyChannel.availableTags.find(
       ({ name }) => name === dungeonName)
@@ -128,7 +128,7 @@ module.exports = {
     const recruitmentDungeonName = `${dungeonName} ${dungeonDifficult}`
     const recruitmentHeadcount = `${dungeonHeadcount}명`
 
-    let title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartHour}시${dungeonStartMinute  > 0 ? ' '+dungeonStartMinute + '분' : ''}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
+    const title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartHour}시${dungeonStartMinute > 0 ? ' ' + dungeonStartMinute + '분' : ''}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
     let contents = '## <@everyone>제목과 태그로 던전을 먼저 확인해요.'
     contents += `\n### 하단에 댓글로 <@${botId}>을 맨션하면 자동으로 참여신청 돼요!`
     contents += `\n- <@${botId}>을 맨션하면 출발 10분전에 알림을 받을수 있어요!`
@@ -142,7 +142,7 @@ module.exports = {
       appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
     }).then(partyThreadChannel => {
       partyThreadChannel.send(`모집던전: ${recruitmentDungeonName}`)
-      partyThreadChannel.send(`출발시간: ${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartHour}시 ${dungeonStartMinute  > 0 ? dungeonStartMinute + '분' : '00분'}`)
+      partyThreadChannel.send(`출발시간: ${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartHour}시 ${dungeonStartMinute > 0 ? dungeonStartMinute + '분' : '00분'}`)
       partyThreadChannel.send(`모집인원: ${recruitmentHeadcount}`)
     })
 

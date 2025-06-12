@@ -4,16 +4,15 @@ const { DateTime } = require('luxon')
 const axios = require('axios')
 const cheerio = require('cheerio')
 const guildModule = require('../../modules/getGuildInfo')
-const { getDate } = require('../../modules/common')
-const nexonApiMainUrl = 'https://open.api.nexon.com'
-const nexonApiKey = process.env.NEXON_API_KEY
-const fs = require('fs')
 const {
   getUserMessageCounts,
   saveUserMessageCounts,
-  getTopChatRanking,
+  getTopRanking,
   createRankingEmbed,
-} = require('../../modules/RankingUtil');
+  getUserVoiceCounts,
+  saveUserVoiceCount,
+  createVoiceRankingEmbed
+} = require('../../modules/RankingUtil')
 
 const botId = process.env.BOT_ID
 const todayMissionChannelId = process.env.NODE_ENV === 'development'
@@ -23,9 +22,8 @@ const dailyNewsChannelId = process.env.NODE_ENV === 'development'
   ? process.env.DEV_DAILY_NEWS_CHANNEl_ID
   : process.env.DAILY_NEWS_CHANNEl_ID
 const otherChannelId = process.env.DEV_CHANNEL_ID
-const bugleHornChannelId = process.env.NODE_ENV === 'development' ? process.env.DEV_BUGLE_HORN_CHANNEL_ID : process.env.BUGLE_HORN_CHANNEL_ID
-const generalChannelId = process.env.NODE_ENV === 'development' ? process.env.DEV_GENERAL_CHANNEL_ID : process.env.GUILD_GENERAL_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
+
 module.exports = async (client) => {
   // 봇 살아있는지 헬스체크
   const otherChannel = client.channels.cache.get(otherChannelId)
@@ -150,33 +148,61 @@ module.exports = async (client) => {
   dailyJob.start()
 
   const weeklyCronSchedule = process.env.NODE_ENV === 'development'
-      ? '* * * * *'
-      : '0 0 * * 0'
+    ? '* * * * *'
+    : '0 0 * * 0'
   const weeklyJob = new cron.CronJob(weeklyCronSchedule, async function () {
-    let userMessageCounts = getUserMessageCounts();
-    if (!userMessageCounts) return;
+    const userMessageCounts = getUserMessageCounts()
+    if (userMessageCounts) {
+      for (const guild of client.guilds.cache.values()) {
+        if (process.env.NODE_ENV === 'development' && guild.id !== '1126803872925634581') {
+          continue
+        }
+        const guildInfo = guildModule.getGuildInfo(guild.id)
+        if (!guildInfo || !userMessageCounts[guildInfo.guildId]) continue
 
-    for (const guild of client.guilds.cache.values()) {
-      const guildInfo = guildModule.getGuildInfo(guild.id);
-      if (!guildInfo || !userMessageCounts[guildInfo.guildId]) continue;
+        const userCounts = userMessageCounts[guildInfo.guildId]
+        const topRanks = getTopRanking(userCounts)
+        if (topRanks.length === 0) continue
 
-      const userCounts = userMessageCounts[guildInfo.guildId];
-      const topRanks = getTopChatRanking(userCounts);
-      if (topRanks.length === 0) continue;
+        const embedList = topRanks.map(createRankingEmbed)
+        const generalChannel = guild.channels.cache.get(guildInfo.generalChannelId)
 
-      const embedList = topRanks.map(createRankingEmbed);
-      const generalChannel = guild.channels.cache.get(guildInfo.generalChannelId);
+        if (generalChannel) {
+          await generalChannel.send({ embeds: embedList })
+        }
 
-      if (generalChannel) {
-        await generalChannel.send({ embeds: embedList });
+        // 채팅 수 초기화
+        userMessageCounts[guildInfo.guildId] = {}
       }
-
-      // 채팅 수 초기화
-      userMessageCounts[guildInfo.guildId] = {};
+      saveUserMessageCounts(userMessageCounts)
     }
 
-    saveUserMessageCounts(userMessageCounts);
-  });
+    const userVoiceCounts = getUserVoiceCounts()
+    if (userVoiceCounts) {
+      for (const guild of client.guilds.cache.values()) {
+        if (process.env.NODE_ENV === 'development' && guild.id !== '1126803872925634581') {
+          continue
+        }
+        const guildInfo = guildModule.getGuildInfo(guild.id)
+        if (!guildInfo || !userVoiceCounts[guildInfo.guildId]) continue
+
+        const userCounts = userVoiceCounts[guildInfo.guildId]
+        const topRanks = getTopRanking(userCounts)
+        if (topRanks.length === 0) continue
+
+        const embedList = topRanks.map(createVoiceRankingEmbed)
+        const generalChannel = guild.channels.cache.get(guildInfo.generalChannelId)
+
+        if (generalChannel) {
+          await generalChannel.send({ embeds: embedList })
+        }
+
+        // 음성채팅 수 초기화
+        userVoiceCounts[guildInfo.guildId] = {}
+      }
+      saveUserVoiceCount(userMessageCounts)
+    }
+  })
 
   console.log('weeklyJob start!')
   weeklyJob.start()
@@ -249,13 +275,4 @@ module.exports = async (client) => {
 
   console.log('partyScheduleJob start!')
   partyScheduleJob.start()
-}
-
-const getRandomColor = function () {
-  const letters = '0123456789ABCDEF'
-  let color = '#'
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)]
-  }
-  return color
 }

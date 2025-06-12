@@ -2,10 +2,9 @@ const guildModule = require('../../modules/getGuildInfo')
 const fs = require('fs')
 const botId = process.env.BOT_ID
 
-
 module.exports = async (message, client) => {
   // 메세지 작성자가 봇이거나 길드아이디가 없으면 작업하지 않음
-  if (message.author.bot || !message.guildId) return
+  if (message.author.bot || !message.guildId) return;
 
   const guildId = message.guildId;
   const userId = message.author.id;
@@ -14,31 +13,36 @@ module.exports = async (message, client) => {
   if (!guildInfo) return;
 
   updateUserMessageCount(guildId, userId);
+
   const partyChannel = client.channels.cache.get(guildInfo.partyChannelId);
   if (!partyChannel) return;
 
-  for (const thread of partyChannel.threads.cache.values()) {
-    const messages = await thread.messages.fetch();
+  const threads = [...partyChannel.threads.cache.values()];
 
-    const originMessage = messages.find(msg =>
-        msg.author.id === botId && msg.channelId === msg.id
-    );
-    if (!originMessage) continue;
+  await Promise.allSettled(
+      threads.map(async (thread) => {
+        try {
+          const messages = await thread.messages.fetch();
 
-    const participants = getParticipants(messages, createdMessageChannelId);
-    const newMentions = participants.filter(id => !originMessage.content.includes(id));
+          const originMessage = messages.find(msg =>
+              msg.author.id === botId && msg.channelId === msg.id
+          );
+          if (!originMessage) return;
 
-    if (newMentions.length > 0) {
-      const newContent = originMessage.content + newMentions.map(id => `\n - <@${id}>`).join('');
-      try {
-        await originMessage.edit({ content: newContent });
-        console.log('Updated message in thread:', thread.id);
-      } catch (err) {
-        console.error('Error updating message:', err);
-      }
-    }
-  }
-}
+          const participants = getParticipants(messages, createdMessageChannelId);
+          const newMentions = participants.filter(id => !originMessage.content.includes(id));
+
+          if (newMentions.length > 0) {
+            const newContent = originMessage.content + newMentions.map(id => `\n - <@${id}>`).join('');
+            await originMessage.edit({ content: newContent });
+            console.log(`✅ Updated message in thread: ${thread.id}`);
+          }
+        } catch (err) {
+          console.error(`❌ Error updating thread ${thread.id}:`, err);
+        }
+      })
+  );
+};
 
 function updateUserMessageCount(guildId, userId) {
   const filePath = './static/json/userMessageCount.json';

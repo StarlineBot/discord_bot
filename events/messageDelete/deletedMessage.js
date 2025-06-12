@@ -13,50 +13,52 @@ module.exports = async (message, client) => {
   const partyChannel = client.channels.cache.get(guildInfo.partyChannelId);
   if (!partyChannel) return;
 
-  for (const thread of partyChannel.threads.cache.values()) {
-    try {
-      const messages = await thread.messages.fetch();
-      const originMessage = messages.get(message.channelId);
+  const threads = [...partyChannel.threads.cache.values()];
 
-      // 원래 메세지가 없거나 봇이 작성한게 아니면 작업하지 않음
-      if (!originMessage || !originMessage.author.bot) continue;
+  await Promise.allSettled(
+      threads.map(async (thread) => {
+        try {
+          const messages = await thread.messages.fetch();
+          const originMessage = messages.get(message.channelId);
 
-      // 맨션을 봇을 지칭해야함
-      const mentionedBot = message.mentions.users.find(user => user.id === botId && user.bot);
-      if (!mentionedBot) continue;
+          // 원래 메세지가 없거나 봇이 작성한게 아니면 작업하지 않음
+          if (!originMessage || !originMessage.author.bot) return;
 
-      const updatedContent = buildUpdatedContent(originMessage.content, message.author.id);
-      if (!updatedContent) continue;
+          // 맨션으로 봇을 지칭해야함
+          const isBotMentioned = message.mentions.users.some(
+              (user) => user.id === botId && user.bot
+          );
+          if (!isBotMentioned) return;
 
-      await originMessage.edit({ content: updatedContent });
-      console.log('updated', thread.id);
+          const updatedContent = buildUpdatedContent(originMessage.content, message.author.id);
+          if (!updatedContent) return;
 
-    } catch (err) {
-      console.error('Error processing thread:', thread.id, err);
-    }
-  }
+          await originMessage.edit({ content: updatedContent });
+          console.log(`✅ Updated message in thread: ${thread.id}`);
+        } catch (err) {
+          console.error(`❌ Error updating thread ${thread.id}:`, err);
+        }
+      })
+  );
 };
 
 function buildUpdatedContent(originalContent, userIdToRemove) {
   const marker = '현재 참가인원';
-  const findIndex = originalContent.lastIndexOf(marker);
-  if (findIndex === -1) return null;
+  const markerIndex = originalContent.lastIndexOf(marker);
+  if (markerIndex === -1) return null;
 
-  let content = originalContent.substring(0, findIndex + marker.length);
-  const memberListText = originalContent.substring(findIndex + marker.length);
+  const header = originalContent.slice(0, markerIndex + marker.length);
+  const memberListText = originalContent.slice(markerIndex + marker.length);
+
   const participants = extractUserIds(memberListText).filter(id => id !== userIdToRemove);
 
-  for (const participant of participants) {
-    content += `\n - <@${participant}>`;
-  }
-
-  return content;
+  const lines = participants.map(id => `\n - <@${id}>`).join('');
+  return header + lines;
 }
 
 function extractUserIds(text) {
   return text
-  .replaceAll(' ', '')
   .split('-')
-  .map(segment => segment.replace(/\D/g, ''))
-  .filter(id => id.length > 0);
+  .map(segment => segment.replace(/\D/g, '')) // 숫자만 추출
+  .filter(Boolean); // 빈 문자열 제거
 }

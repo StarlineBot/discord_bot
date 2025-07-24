@@ -43,7 +43,9 @@ module.exports = (today, now) => {
         now.toISOString())
     return await axios.get(
         'https://mabi.world/missions.php?server=korea&locale=korea&from=' +
-        now.toISOString()).catch((e) => {
+        now.toISOString(), {
+          "User-Agent": "Mozilla/5.0",
+        }).catch((e) => {
           console.log(e.response.data)
     })
   }
@@ -52,7 +54,9 @@ module.exports = (today, now) => {
         now.addDays(1).toISOString())
     return await axios.get(
         'https://mabi.world/missions.php?server=korea&locale=korea&from=' +
-        now.addDays(1).toISOString()).catch((e) => {
+        now.addDays(1).toISOString(), {
+          "User-Agent": "Mozilla/5.0",
+        }).catch((e) => {
       console.log(e.response.data)
     })
   }

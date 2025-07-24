@@ -133,6 +133,7 @@ module.exports = async (client) => {
       .setTimestamp()
     todayMissionChannel.send({ embeds: [todayEmbed, tomorrowEmbed] })
 
+    /*
     const dailyNewsChannel = client.channels.cache.get(dailyNewsChannelId)
     if (!dailyNewsChannel) {
       return
@@ -142,6 +143,7 @@ module.exports = async (client) => {
     const content = '간추린뉴스 출처: https://quicknews.co.kr\n\n' + $('#news_0').text()
 
     dailyNewsChannel.send(content)
+    */
   })
 
   console.log('dailyJob start!')

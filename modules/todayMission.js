@@ -44,7 +44,14 @@ module.exports = (today, now) => {
     return await axios.get(
         'https://mabi.world/missions.php?server=korea&locale=korea&from=' +
         now.toISOString(), {
-          "User-Agent": "Mozilla/5.0",
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Referer": "https://www.google.com",
+            "Connection": "keep-alive"
+          },
+          withCredentials: true
         }).catch((e) => {
           console.log(e.response.data)
     })
@@ -55,7 +62,14 @@ module.exports = (today, now) => {
     return await axios.get(
         'https://mabi.world/missions.php?server=korea&locale=korea&from=' +
         now.addDays(1).toISOString(), {
-          "User-Agent": "Mozilla/5.0",
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Referer": "https://www.google.com",
+            "Connection": "keep-alive"
+          },
+          withCredentials: true
         }).catch((e) => {
       console.log(e.response.data)
     })

@@ -69,7 +69,16 @@ module.exports = {
       const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 
       const forecastWeatherObject = await axios.get(
-          `https://mabi.world/api/forecast/?from=${now.toISO().split('.')[0]}`)
+          `https://mabi.world/api/forecast/?from=${now.toISO().split('.')[0]}`, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+              "Referer": "https://www.google.com",
+              "Connection": "keep-alive"
+            },
+            withCredentials: true
+          })
       let forecastResult = ''
       let i = 0
       let separator = ' - '
@@ -93,12 +102,30 @@ module.exports = {
 
       const upcomingThunderWeatherObject = await axios.get(
           `https://mabi.world/api/forecast/?from=${now.toISO().split(
-              '.')[0]}&next=thunder&for=each&in=m`)
+              '.')[0]}&next=thunder&for=each&in=m`, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+              "Referer": "https://www.google.com",
+              "Connection": "keep-alive"
+            },
+            withCredentials: true
+          })
       const afterDateOfType7 = now.plus(
         { minute: upcomingThunderWeatherObject.data.next.for.type7 })
       const upcomingRainyWeatherObject = await axios.get(
           `https://mabi.world/api/forecast/?from=${now.toISO().split(
-              '.')[0]}&next=rain&for=each&in=m`)
+              '.')[0]}&next=rain&for=each&in=m`, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+              "Referer": "https://www.google.com",
+              "Connection": "keep-alive"
+            },
+            withCredentials: true
+          })
 
       const afterDateOfType10 = now.plus(
         { minute: upcomingRainyWeatherObject.data.next.for.type10 })

@@ -44,7 +44,7 @@ module.exports = (today, now) => {
     return await axios.get(
         'https://mabi.world/missions.php?server=korea&locale=korea&from=' +
         now.toISOString()).catch((e) => {
-          console.log(e)
+          console.log(e.response.data)
     })
   }
   const getTomorrowMission = async () => {
@@ -53,7 +53,7 @@ module.exports = (today, now) => {
     return await axios.get(
         'https://mabi.world/missions.php?server=korea&locale=korea&from=' +
         now.addDays(1).toISOString()).catch((e) => {
-      console.log(e)
+      console.log(e.response.data)
     })
   }
 

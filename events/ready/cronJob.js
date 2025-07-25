@@ -104,7 +104,7 @@ module.exports = async (client) => {
       .setTitle('오늘의 미션&베테랑')
       .setColor('#86E57F')
       .addFields(
-        { name: '베테랑 던전', value: `- ${todayVeteran.dungeon}` }
+        { name: '베테랑 던전', value: `- ${todayVeteran}` }
         , {
           name: '탈틴',
           value: `- ${todayMission.Taillteann.Normal}\n* (PC방) ${todayMission.Taillteann.VIP}`
@@ -120,7 +120,7 @@ module.exports = async (client) => {
       .setTitle('내일의 미션&베테랑')
       .setColor('#FFBB00')
       .addFields(
-        { name: '베테랑 던전', value: `- ${tomorrowVeteran.dungeon}` }
+        { name: '베테랑 던전', value: `- ${tomorrowVeteran}` }
         , {
           name: '탈틴',
           value: `- ${tomorrowMission.Taillteann.Normal}\n* (PC방) ${tomorrowMission.Taillteann.VIP}`

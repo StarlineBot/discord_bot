@@ -23,9 +23,15 @@ module.exports = async (message, client) => {
     threads.map(async (thread) => {
       try {
         const messages = await thread.messages.fetch()
+        console.log(messages)
 
         const originMessage = messages.find(msg =>
-          msg.author.id === botId && msg.channelId === msg.id
+        {
+          console.log(msg.author.id, botId)
+          console.log(msg.channelId, msg.id)
+          return msg.author.id === botId && msg.channelId === msg.id
+        }
+
         )
         console.log('??오는거야?')
         if (!originMessage) return

@@ -25,25 +25,13 @@ module.exports = async (message, client) => {
         const messages = await thread.messages.fetch({
           limit: 100
         })
-        console.log(messages)
 
-        const originMessage = messages.find(msg =>
-        {
-          console.log((msg.author.id === botId), msg.author.id)
-          console.log((msg.channelId === msg.id), msg.id)
-          return msg.author.id === botId && msg.channelId === msg.id
-        }
-
-        )
-        console.log('??오는거야?')
+        const originMessage = messages.find(msg => msg.author.id === botId && msg.channelId === msg.id)
         if (!originMessage) return
-        console.log('??오는거야??')
 
         const participants = getParticipants(messages, createdMessageChannelId)
         const newMentions = participants.filter(id => !originMessage.content.includes(id))
 
-        console.log(participants)
-        console.log(newMentions)
         if (newMentions.length > 0) {
           const newContent = originMessage.content + newMentions.map(id => `\n - <@${id}>`).join('')
           await originMessage.edit({ content: newContent })

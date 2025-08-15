@@ -18,7 +18,9 @@ module.exports = async (message, client) => {
   await Promise.allSettled(
     threads.map(async (thread) => {
       try {
-        const messages = await thread.messages.fetch()
+        const messages = await thread.messages.fetch({
+          limit: 100
+        })
         const originMessage = messages.get(message.channelId)
 
         // 원래 메세지가 없거나 봇이 작성한게 아니면 작업하지 않음

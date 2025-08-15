@@ -27,8 +27,8 @@ module.exports = async (message, client) => {
 
         const originMessage = messages.find(msg =>
         {
-          console.log(msg.author.id, botId)
-          console.log(msg.channelId, msg.id)
+          console.log((msg.author.id === botId), msg.author.id)
+          console.log((msg.channelId === msg.id), msg.id)
           return msg.author.id === botId && msg.channelId === msg.id
         }
 

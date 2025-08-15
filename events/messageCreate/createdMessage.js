@@ -27,11 +27,15 @@ module.exports = async (message, client) => {
         const originMessage = messages.find(msg =>
           msg.author.id === botId && msg.channelId === msg.id
         )
+        console.log('??오는거야?')
         if (!originMessage) return
+        console.log('??오는거야??')
 
         const participants = getParticipants(messages, createdMessageChannelId)
         const newMentions = participants.filter(id => !originMessage.content.includes(id))
 
+        console.log(participants)
+        console.log(newMentions)
         if (newMentions.length > 0) {
           const newContent = originMessage.content + newMentions.map(id => `\n - <@${id}>`).join('')
           await originMessage.edit({ content: newContent })

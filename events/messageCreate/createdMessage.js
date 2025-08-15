@@ -22,7 +22,9 @@ module.exports = async (message, client) => {
   await Promise.allSettled(
     threads.map(async (thread) => {
       try {
-        const messages = await thread.messages.fetch()
+        const messages = await thread.messages.fetch({
+          limit: 100
+        })
         console.log(messages)
 
         const originMessage = messages.find(msg =>

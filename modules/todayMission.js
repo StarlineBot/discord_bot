@@ -23,18 +23,22 @@ module.exports = (today, now) => {
   const getTodayMissionToBrowser = async () => {
     const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.toISOString()
     console.log(url)
-    const browser = await puppeteer.launch({
-      // 옵션으로 브라우저 엔진을 어디서 가져오는지 설정
-      executablePath: '/usr/bin/chromium-browser'
-    })
-    const page = await browser.newPage()
-    await page.goto(url)
-    const body = await page.content();
-    const $ = cheerio.load(body)
-    const data = JSON.parse($("pre").text());
-    console.log(data)
-    browser.close()
-    return data
+    try {
+      const browser = await puppeteer.launch({
+        // 옵션으로 브라우저 엔진을 어디서 가져오는지 설정
+        executablePath: '/usr/bin/chromium-browser'
+      })
+      const page = await browser.newPage()
+      await page.goto(url)
+      const body = await page.content();
+      const $ = cheerio.load(body)
+      const data = JSON.parse($("pre").text());
+      console.log(data)
+      browser.close()
+      return data
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   const getTodayMission = async () => {
@@ -58,18 +62,22 @@ module.exports = (today, now) => {
 
   const getTomorrowMissionToBrowser = async () => {
     const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.addDays(1).toISOString()
-    const browser = await puppeteer.launch({
-      // 옵션으로 브라우저 엔진을 어디서 가져오는지 설정
-      executablePath: '/usr/bin/chromium-browser'
-    })
-    const page = await browser.newPage()
-    await page.goto(url)
-    const body = await page.content();
-    const $ = cheerio.load(body)
-    const data = JSON.parse($("pre").text());
-    console.log(data)
-    browser.close()
-    return data
+    try {
+      const browser = await puppeteer.launch({
+        // 옵션으로 브라우저 엔진을 어디서 가져오는지 설정
+        executablePath: '/usr/bin/chromium-browser'
+      })
+      const page = await browser.newPage()
+      await page.goto(url)
+      const body = await page.content();
+      const $ = cheerio.load(body)
+      const data = JSON.parse($("pre").text());
+      console.log(data)
+      browser.close()
+      return data
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   const getTomorrowMission = async () => {

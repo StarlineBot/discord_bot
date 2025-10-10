@@ -24,9 +24,9 @@ function createRankingEmbed ([userId, count], index) {
   const medal = medals[index] || '🥉'
 
   return new EmbedBuilder()
-    .setTitle(`🌟 이주의 채팅 랭킹 TOP ${medal}`)
+    .setTitle(`🌟 이주의 활동 랭킹 TOP ${medal}`)
     .setColor(`${getRandomColor()}`)
-    .setDescription(`<@${userId}> 님이 이 주에 ${count}번을 떠들었어요~.`)
+    .setDescription(`<@${userId}> 님이 이 주에 ${count}번 활동했어요~`)
     .setTimestamp()
 }
 
@@ -46,7 +46,7 @@ function createVoiceRankingEmbed ([userId, durationMs], index) {
   return new EmbedBuilder()
     .setTitle(`🌟 이주의 보이스채팅 랭킹 TOP ${medal}`)
     .setColor(`${getRandomColor()}`)
-    .setDescription(`<@${userId}> 님이 이 주에 ${minute}분을 참여했어요~.`)
+    .setDescription(`<@${userId}> 님이 이 주에 ${minute}분을 참여했어요~`)
     .setTimestamp()
 }
 
@@ -59,6 +59,23 @@ const getRandomColor = function () {
   return color
 }
 
+const updateUserMessageCount = function (guildId, userId, isAdd) {
+  const delta = isAdd ? 1 : -1;
+  const filePath = './static/json/userMessageCount.json'
+  let userMessageCounts = {}
+
+  if (fs.existsSync(filePath)) {
+    userMessageCounts = JSON.parse(fs.readFileSync(filePath))
+  }
+
+  if (!userMessageCounts[guildId]) {
+    userMessageCounts[guildId] = {}
+  }
+
+  userMessageCounts[guildId][userId] = Math.max((userMessageCounts[guildId][userId] || 0) + delta, 0)
+  fs.writeFileSync(filePath, JSON.stringify(userMessageCounts, null, 2))
+}
+
 module.exports = {
   getUserMessageCounts,
   saveUserMessageCounts,
@@ -67,5 +84,6 @@ module.exports = {
 
   getUserVoiceCounts,
   saveUserVoiceCount,
-  createVoiceRankingEmbed
+  createVoiceRankingEmbed,
+  updateUserMessageCount
 }

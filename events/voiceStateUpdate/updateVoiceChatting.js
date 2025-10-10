@@ -5,7 +5,6 @@ const {
 
 const voiceTracking = {}
 module.exports = (oldState, newState) => {
-  console.log('updateVoiceChatting')
 
   let userVoiceCounts = getUserVoiceCounts()
   // 봇은 추적 대상에서 제외

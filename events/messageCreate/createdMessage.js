@@ -1,4 +1,5 @@
 const guildModule = require('../../modules/getGuildInfo')
+const { updateUserMessageCount } = require('../../modules/RankingUtil')
 const fs = require('fs')
 const botId = process.env.BOT_ID
 
@@ -12,7 +13,7 @@ module.exports = async (message, client) => {
   const guildInfo = guildModule.getGuildInfo(guildId)
   if (!guildInfo) return
 
-  updateUserMessageCount(guildId, userId)
+  updateUserMessageCount(guildId, userId, true)
 
   const partyChannel = client.channels.cache.get(guildInfo.partyChannelId)
   if (!partyChannel) return
@@ -42,22 +43,6 @@ module.exports = async (message, client) => {
       }
     })
   )
-}
-
-function updateUserMessageCount (guildId, userId) {
-  const filePath = './static/json/userMessageCount.json'
-  let userMessageCounts = {}
-
-  if (fs.existsSync(filePath)) {
-    userMessageCounts = JSON.parse(fs.readFileSync(filePath))
-  }
-
-  if (!userMessageCounts[guildId]) {
-    userMessageCounts[guildId] = {}
-  }
-
-  userMessageCounts[guildId][userId] = (userMessageCounts[guildId][userId] || 0) + 1
-  fs.writeFileSync(filePath, JSON.stringify(userMessageCounts, null, 2))
 }
 
 function getParticipants (messages, targetChannelId) {

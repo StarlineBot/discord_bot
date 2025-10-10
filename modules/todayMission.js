@@ -24,10 +24,8 @@ module.exports = (today, now) => {
     const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.toISOString()
     console.log(url)
     try {
-      const browser = await puppeteer.launch({
-        // 옵션으로 브라우저 엔진을 어디서 가져오는지 설정
-        executablePath: '/usr/bin/chromium-browser'
-      })
+      const puppeteerArgs = process.env.NODE_ENV !== 'development' ? { executablePath: '/usr/bin/chromium-browser' } : {}
+      const browser = await puppeteer.launch(puppeteerArgs)
       const page = await browser.newPage()
       const customUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36';
       await page.setUserAgent(customUA);
@@ -66,10 +64,8 @@ module.exports = (today, now) => {
   const getTomorrowMissionToBrowser = async () => {
     const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.addDays(1).toISOString()
     try {
-      const browser = await puppeteer.launch({
-        // 옵션으로 브라우저 엔진을 어디서 가져오는지 설정
-        executablePath: '/usr/bin/chromium-browser'
-      })
+      const puppeteerArgs = process.env.NODE_ENV !== 'development' ? { executablePath: '/usr/bin/chromium-browser' } : {}
+      const browser = await puppeteer.launch(puppeteerArgs)
       const page = await browser.newPage()
       const customUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36';
       await page.setUserAgent(customUA);

@@ -31,6 +31,7 @@ module.exports = (today, now) => {
       const page = await browser.newPage()
       await page.goto(url)
       const body = await page.content();
+      console.log(body)
       const $ = cheerio.load(body)
       const data = JSON.parse($("pre").text());
       console.log(data)
@@ -70,6 +71,7 @@ module.exports = (today, now) => {
       const page = await browser.newPage()
       await page.goto(url)
       const body = await page.content();
+      console.log(body)
       const $ = cheerio.load(body)
       const data = JSON.parse($("pre").text());
       console.log(data)

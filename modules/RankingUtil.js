@@ -42,7 +42,7 @@ function saveUserVoiceCount (data) {
 function createVoiceRankingEmbed ([userId, durationMs], index) {
   const medals = ['🥇', '🥈', '🥉']
   const medal = medals[index] || '🥉'
-  const minute = (durationMs / 60000).toFixed(1)
+  const minute = (durationMs / 1000 / 60).toFixed(1)
   return new EmbedBuilder()
     .setTitle(`🌟 이주의 보이스채팅 랭킹 TOP ${medal}`)
     .setColor(`${getRandomColor()}`)

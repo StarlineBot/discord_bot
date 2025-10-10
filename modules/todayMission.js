@@ -1,8 +1,10 @@
 const axios = require('axios')
 const { DateTime } = require('luxon')
 const veteran = ['알비', '키아', '라비', '마스', '피오드', '바리', '코일', '룬다', '페카']
-const startDate = DateTime.local(2024, 4, 20) // 기준일
-const today = DateTime.local();
+const start = new Date('2025-10-10');
+const diffDays = Math.floor((Date.now() - start.getTime()) / 86400000);
+const startIndex = veteran.indexOf('마스');
+const index = (startIndex + diffDays) % veteran.length;
 
 /* eslint-disable */
 Date.prototype.addDays = function (days) {
@@ -12,9 +14,6 @@ Date.prototype.addDays = function (days) {
 }
 /* eslint-disable */
 
-const veteranStartIndex = 5
-const daysSinceStart = Math.floor(today.diff(startDate, 'days').days)
-const index = (veteranStartIndex + daysSinceStart) % veteran.length
 const todayVeteran = veteran[index]
 const tomorrowVeteran = veteran[index+1]
 

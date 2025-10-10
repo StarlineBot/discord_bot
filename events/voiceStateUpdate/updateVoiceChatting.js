@@ -4,6 +4,7 @@ const {
 } = require('../../modules/RankingUtil')
 
 module.exports = (oldState, newState) => {
+  console.log('updateVoiceChatting')
   const voiceTracking = {}
   let userVoiceCounts = getUserVoiceCounts()
   // 봇은 추적 대상에서 제외

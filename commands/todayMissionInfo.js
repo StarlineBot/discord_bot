@@ -20,14 +20,14 @@ module.exports = {
     const today = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     const offset = new Date().getTimezoneOffset() * 60000
     const now = new Date(Date.now() - offset)
-    const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
+    const { todayVeteran, tomorrowVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser } = require(
       '../modules/todayMission')(today, now)
     try {
-      const todayMissionObject = await getTodayMission()
-      const todayMission = await todayMissionObject.data.missions[0]
+      const todayMissionObject = await getTodayMissionToBrowser()
+      const todayMission = await todayMissionObject.missions[0]
 
-      const tomorrowMissionObject = await getTomorrowMission()
-      const tomorrowMission = await tomorrowMissionObject.data.missions[0]
+      const tomorrowMissionObject = await getTomorrowMissionToBrowser()
+      const tomorrowMission = await tomorrowMissionObject.missions[0]
 
       const todayEmbed = new EmbedBuilder()
         .setAuthor(writer)

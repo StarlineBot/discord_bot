@@ -86,7 +86,7 @@ module.exports = async (client) => {
     const offset = new Date().getTimezoneOffset() * 60000
     const nowDate = new Date(Date.now() - offset)
     const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
-    const { todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission } = require(
+    const { todayVeteran, tomorrowVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser } = require(
       '../../modules/todayMission')(now, nowDate)
 
     const todayMissionChannel = client.channels.cache.get(todayMissionChannelId)
@@ -94,11 +94,11 @@ module.exports = async (client) => {
       return
     }
 
-    const todayMissionObject = await getTodayMission()
-    const todayMission = todayMissionObject.data.missions[0]
+    const todayMissionObject = await getTodayMissionToBrowser()
+    const todayMission = todayMissionObject.missions[0]
 
-    const tomorrowMissionObject = await getTomorrowMission()
-    const tomorrowMission = tomorrowMissionObject.data.missions[0]
+    const tomorrowMissionObject = await getTomorrowMissionToBrowser()
+    const tomorrowMission = tomorrowMissionObject.missions[0]
 
     const todayEmbed = new EmbedBuilder()
       .setTitle('오늘의 미션&베테랑')

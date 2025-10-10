@@ -1,4 +1,6 @@
 const axios = require('axios')
+const puppeteer = require("puppeteer")
+const cheerio = require('cheerio')
 const { DateTime } = require('luxon')
 const veteran = ['알비', '키아', '라비', '마스', '피오드', '바리', '코일', '룬다', '페카']
 const start = new Date('2025-10-10');
@@ -18,6 +20,20 @@ const todayVeteran = veteran[index]
 const tomorrowVeteran = veteran[index+1]
 
 module.exports = (today, now) => {
+  const getTodayMissionToBrowser = async () => {
+    const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.toISOString()
+    console.log(url)
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    await page.goto(url)
+    const body = await page.content();
+    const $ = cheerio.load(body)
+    const data = JSON.parse($("pre").text());
+    console.log(data)
+    browser.close()
+    return data
+  }
+
   const getTodayMission = async () => {
     console.log('https://mabi.world/missions.php?server=korea&locale=korea&from=' +
         now.toISOString())
@@ -36,6 +52,20 @@ module.exports = (today, now) => {
           console.log(e.response.data)
     })
   }
+
+  const getTomorrowMissionToBrowser = async () => {
+    const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.addDays(1).toISOString()
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    await page.goto(url)
+    const body = await page.content();
+    const $ = cheerio.load(body)
+    const data = JSON.parse($("pre").text());
+    console.log(data)
+    browser.close()
+    return data
+  }
+
   const getTomorrowMission = async () => {
     console.log('https://mabi.world/missions.php?server=korea&locale=korea&from=' +
         now.addDays(1).toISOString())
@@ -56,6 +86,6 @@ module.exports = (today, now) => {
   }
 
   return {
-    todayVeteran, tomorrowVeteran, getTodayMission, getTomorrowMission
+    todayVeteran, tomorrowVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser
   }
 }

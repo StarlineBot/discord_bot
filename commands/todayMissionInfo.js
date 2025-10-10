@@ -64,11 +64,13 @@ module.exports = {
         .setTimestamp()
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+      /*
       const replyContent = { content: `오늘의 미션을 <#${generalChannel.id}>에 작성했어~` }
       if (interaction.channelId === generalChannel.id) {
         replyContent.ephemeral = true
       }
       interaction.reply(replyContent)
+      */
 
       generalChannel.send(
         {

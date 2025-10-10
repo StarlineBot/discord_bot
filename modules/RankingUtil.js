@@ -31,9 +31,7 @@ function createRankingEmbed ([userId, count], index) {
 }
 
 function getUserVoiceCounts () {
-  console.log(VOICE_COUNT_PATH)
   if (!fs.existsSync(VOICE_COUNT_PATH)) return null
-  console.log("??")
   return JSON.parse(fs.readFileSync(VOICE_COUNT_PATH))
 }
 

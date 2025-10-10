@@ -3,9 +3,10 @@ const {
   saveUserVoiceCount
 } = require('../../modules/RankingUtil')
 
+const voiceTracking = {}
 module.exports = (oldState, newState) => {
   console.log('updateVoiceChatting')
-  const voiceTracking = {}
+
   let userVoiceCounts = getUserVoiceCounts()
   // 봇은 추적 대상에서 제외
   if (newState.member?.user?.bot) return
@@ -25,8 +26,6 @@ module.exports = (oldState, newState) => {
     if (!session) return
 
     const duration = Date.now() - session.joinedAt
-    console.log(duration)
-    console.log(duration)
     if (!userVoiceCounts) userVoiceCounts = {}
     if (!userVoiceCounts[guildId]) userVoiceCounts[guildId] = {}
     userVoiceCounts[guildId][userId] = (Number(userVoiceCounts[guildId][userId]) || 0) + duration

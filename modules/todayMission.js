@@ -29,6 +29,8 @@ module.exports = (today, now) => {
         executablePath: '/usr/bin/chromium-browser'
       })
       const page = await browser.newPage()
+      const customUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36';
+      await page.setUserAgent(customUA);
       await page.goto(url)
       const body = await page.content();
       console.log(body)
@@ -69,6 +71,8 @@ module.exports = (today, now) => {
         executablePath: '/usr/bin/chromium-browser'
       })
       const page = await browser.newPage()
+      const customUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36';
+      await page.setUserAgent(customUA);
       await page.goto(url)
       const body = await page.content();
       console.log(body)

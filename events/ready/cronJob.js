@@ -202,7 +202,7 @@ module.exports = async (client) => {
         // 음성채팅 수 초기화
         userVoiceCounts[guildInfo.guildId] = {}
       }
-      saveUserVoiceCount(userMessageCounts)
+      saveUserVoiceCount(userVoiceCounts)
     }
   })
 

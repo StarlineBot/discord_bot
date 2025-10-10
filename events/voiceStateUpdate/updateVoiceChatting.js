@@ -24,6 +24,8 @@ module.exports = (oldState, newState) => {
     if (!session) return
 
     const duration = Date.now() - session.joinedAt
+    console.log(duration)
+    console.log(duration)
     if (!userVoiceCounts) userVoiceCounts = {}
     if (!userVoiceCounts[guildId]) userVoiceCounts[guildId] = {}
     userVoiceCounts[guildId][userId] = (Number(userVoiceCounts[guildId][userId]) || 0) + duration

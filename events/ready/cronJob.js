@@ -86,7 +86,7 @@ module.exports = async (client) => {
     const offset = new Date().getTimezoneOffset() * 60000
     const nowDate = new Date(Date.now() - offset)
     const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
-    const { todayVeteran, tomorrowVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser } = require(
+    const { getVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser } = require(
       '../../modules/todayMission')(now, nowDate)
 
     const todayMissionChannel = client.channels.cache.get(todayMissionChannelId)
@@ -104,7 +104,7 @@ module.exports = async (client) => {
       .setTitle('오늘의 미션&베테랑')
       .setColor('#86E57F')
       .addFields(
-        { name: '베테랑 던전', value: `- ${todayVeteran}` }
+        { name: '베테랑 던전', value: `- ${getVeteran().today}` }
         , {
           name: '탈틴',
           value: `- ${todayMission.Taillteann.Normal}\n* (PC방) ${todayMission.Taillteann.VIP}`
@@ -120,7 +120,7 @@ module.exports = async (client) => {
       .setTitle('내일의 미션&베테랑')
       .setColor('#FFBB00')
       .addFields(
-        { name: '베테랑 던전', value: `- ${tomorrowVeteran}` }
+        { name: '베테랑 던전', value: `- ${getVeteran().tomorrow}` }
         , {
           name: '탈틴',
           value: `- ${tomorrowMission.Taillteann.Normal}\n* (PC방) ${tomorrowMission.Taillteann.VIP}`

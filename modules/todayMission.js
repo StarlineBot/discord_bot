@@ -4,9 +4,7 @@ const cheerio = require('cheerio')
 const { DateTime } = require('luxon')
 const veteran = ['알비', '키아', '라비', '마스', '피오드', '바리', '코일', '룬다', '페카']
 const start = new Date('2025-10-10');
-const diffDays = Math.floor((Date.now() - start.getTime()) / 86400000);
 const startIndex = veteran.indexOf('마스');
-const index = (startIndex + diffDays) % veteran.length;
 
 /* eslint-disable */
 Date.prototype.addDays = function (days) {
@@ -16,10 +14,16 @@ Date.prototype.addDays = function (days) {
 }
 /* eslint-disable */
 
-const todayVeteran = veteran[index]
-const tomorrowVeteran = veteran[index+1]
-
 module.exports = (today, now) => {
+
+  const getVeteran = function () {
+    const diffDays = Math.floor((Date.now() - start.getTime()) / 86400000)
+    const index = (startIndex + diffDays) % veteran.length
+    const today = veteran[index]
+    const tomorrow = veteran[index+1]
+    return { today, tomorrow }
+  }
+
   const getTodayMissionToBrowser = async () => {
     const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.toISOString()
     console.log(url)
@@ -31,10 +35,8 @@ module.exports = (today, now) => {
       await page.setUserAgent(customUA);
       await page.goto(url)
       const body = await page.content();
-      console.log(body)
       const $ = cheerio.load(body)
       const data = JSON.parse($("pre").text());
-      console.log(data)
       browser.close()
       return data
     } catch (e) {
@@ -71,10 +73,8 @@ module.exports = (today, now) => {
       await page.setUserAgent(customUA);
       await page.goto(url)
       const body = await page.content();
-      console.log(body)
       const $ = cheerio.load(body)
       const data = JSON.parse($("pre").text());
-      console.log(data)
       browser.close()
       return data
     } catch (e) {
@@ -102,6 +102,6 @@ module.exports = (today, now) => {
   }
 
   return {
-    todayVeteran, tomorrowVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser
+    getVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser
   }
 }

@@ -17,7 +17,7 @@ Date.prototype.addDays = function (days) {
 module.exports = (today, now) => {
 
   const getVeteran = function () {
-    const diffDays = Math.floor((Date.now() - start.getTime()) / 86400000)
+    const diffDays = Math.floor((now - start.getTime()) / 86400000)
     const index = (startIndex + diffDays) % veteran.length
     const today = veteran[index]
     const tomorrow = veteran[index+1]

@@ -24,6 +24,30 @@ module.exports = {
     .setDescription('단계별로 작성하면 파티모집 포럼에 섯다라인이 대신 작성해줌!')
     .addSubcommand(subcommand =>
       subcommand
+        .setName("믿음의균열")
+        .setDescription("브리레흐 4관 파티모집을 시작해~")
+        .addStringOption((option) =>
+            option.setName('dungeon_start_date').setDescription('먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
+            .addChoices(...weekOption)
+        )
+        .addIntegerOption((option) =>
+            option.setName('dungeon_start_hour').setDescription(
+                '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
+            .setMaxValue(maxHour).setMinValue(minHour)
+        )
+        .addIntegerOption((option) =>
+            option.setName('dungeon_start_minute').setDescription(
+                '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
+            .setMaxValue(maxMin).setMinValue(minMin)
+        )
+        .addIntegerOption((option) =>
+            option.setName('dungeon_headcount').setDescription(
+                '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
+            .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
+        )
+    )
+    .addSubcommand(subcommand =>
+      subcommand
         .setName('브리레흐')
         .setDescription('브리레흐 파티모집을 시작해~')
         .addStringOption((option) =>
@@ -81,14 +105,46 @@ module.exports = {
           option.setName('dungeon_difficult').setDescription(
             '다 왔다! 난이도를 골라줘~').setRequired(true)
             .addChoices(
-              { name: '매우 어려움', value: '매우 어려움' }
-              , { name: '어려움', value: '어려움' }
+              { name: '어려움', value: '어려움' }
               , { name: '쉬움', value: '쉬움' }
             )
         )
         .addIntegerOption((option) =>
           option.setName('dungeon_headcount').setDescription(
             '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
+            .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
+        )
+    )
+    .addSubcommand(subcommand =>
+        subcommand
+        .setName('크롬바스')
+        .setDescription('크롬바스 파티모집을 시작해~')
+        .addStringOption((option) =>
+            option.setName('dungeon_start_date').setDescription(
+                '먼저 출발 요일을 정해줘! 요일은 다가오는 요일이야!').setRequired(true)
+            .addChoices(...weekOption)
+        )
+        .addIntegerOption((option) =>
+            option.setName('dungeon_start_hour').setDescription(
+                '출발 시간을 24시간 기준으로 적어줘~ (예) 1~24(숫자로만 입력)').setRequired(true)
+            .setMaxValue(maxHour).setMinValue(minHour)
+        )
+        .addIntegerOption((option) =>
+            option.setName('dungeon_start_minute').setDescription(
+                '몇분 출발인지 알려줘~ (예) 0~59(숫자로만 입력)').setRequired(true)
+            .setMaxValue(maxMin).setMinValue(minMin)
+        )
+        .addStringOption((option) =>
+            option.setName('dungeon_difficult').setDescription(
+                '다 왔다! 난이도를 골라줘~').setRequired(true)
+            .addChoices(
+                { name: '어려움', value: '어려움' }
+                , { name: '쉬움', value: '쉬움' }
+            )
+        )
+        .addIntegerOption((option) =>
+            option.setName('dungeon_headcount').setDescription(
+                '마지막으로 출발 인원수를 적어줘! 0명으로 입력하면 모바출이야~').setRequired(true)
             .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
         )
     ),
@@ -104,7 +160,7 @@ module.exports = {
     const dungeonStartDate = getOptionValue('dungeon_start_date')
     const dungeonStartHour = getOptionValue('dungeon_start_hour')
     const dungeonStartMinute = getOptionValue('dungeon_start_minute') ?? 0
-    const dungeonDifficult = getOptionValue('dungeon_difficult')
+    const dungeonDifficult = dungeonName === "믿음의균열" ? "4관" : getOptionValue('dungeon_difficult')
     const dungeonHeadcount = getOptionValue('dungeon_headcount')
 
     const tagDungeon = partyChannel.availableTags.find(

@@ -1,10 +1,9 @@
 const axios = require('axios')
-const puppeteer = require("puppeteer")
+const puppeteer = require('puppeteer')
 const cheerio = require('cheerio')
-const { DateTime } = require('luxon')
 const veteran = ['알비', '키아', '라비', '마스', '피오드', '바리', '코일', '룬다', '페카']
-const start = new Date('2025-10-10');
-const startIndex = veteran.indexOf('마스');
+const start = new Date('2025-10-10')
+const startIndex = veteran.indexOf('마스')
 
 /* eslint-disable */
 Date.prototype.addDays = function (days) {

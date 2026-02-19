@@ -1,6 +1,5 @@
 const guildModule = require('../../modules/getGuildInfo')
 const { updateUserMessageCount } = require('../../modules/RankingUtil')
-const fs = require('fs')
 const botId = process.env.BOT_ID
 
 module.exports = async (message, client) => {

@@ -1,8 +1,6 @@
 const { EmbedBuilder } = require('discord.js')
 const cron = require('cron')
 const { DateTime } = require('luxon')
-const axios = require('axios')
-const cheerio = require('cheerio')
 const guildModule = require('../../modules/getGuildInfo')
 const {
   getUserMessageCounts,
@@ -18,9 +16,6 @@ const botId = process.env.BOT_ID
 const todayMissionChannelId = process.env.NODE_ENV === 'development'
   ? process.env.DEV_TODAY_MISSION_CHANNEL_ID
   : process.env.TODAY_MISSION_CHANNEL_ID
-const dailyNewsChannelId = process.env.NODE_ENV === 'development'
-  ? process.env.DEV_DAILY_NEWS_CHANNEl_ID
-  : process.env.DAILY_NEWS_CHANNEl_ID
 const otherChannelId = process.env.DEV_CHANNEL_ID
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 

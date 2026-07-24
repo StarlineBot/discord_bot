@@ -58,8 +58,6 @@ module.exports = {
     let keyword
     let sortCookings
     const getCookings = []
-    const embeds = []
-    const files = []
 
     // 재료는 상위 10개 목록을 어떻게 가져올지 고민, cookingType 하고 같이 가져온다던지
     if (subcommand === '재료') {
@@ -86,18 +84,21 @@ module.exports = {
       })
     }
 
-    // 상위 검색결과중 10개만 사용
-    const count = sortCookings.length < 10 ? sortCookings.length : 10
+    // Discord 제한: 한 메시지당 임베드/첨부 최대 10개.
+    // 이미지가 사전 생성되어 빠르므로 10개씩 나눠 여러 메시지로 보낸다.
+    const MAX_RESULTS = 20
+    const EMBEDS_PER_MESSAGE = 10
+    const count = Math.min(sortCookings.length, MAX_RESULTS)
+    const items = []
     for (let i = 0; i < count; i++) {
-      const cooking = sortCookings[i]
-      const obj = getEmbed(writer, cooking)
-      embeds.push(obj.subEmbed)
-      if (typeof obj.file !== typeof undefined) {
-        files.push(obj.file)
-      }
+      items.push(getEmbed(writer, sortCookings[i]))
     }
-
-    generalChannel.send({ embeds, files })
+    for (let i = 0; i < items.length; i += EMBEDS_PER_MESSAGE) {
+      const chunk = items.slice(i, i + EMBEDS_PER_MESSAGE)
+      const embeds = chunk.map(obj => obj.subEmbed)
+      const files = chunk.filter(obj => typeof obj.file !== typeof undefined).map(obj => obj.file)
+      await generalChannel.send({ embeds, files })
+    }
   }
 }
 

@@ -8,6 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      # CI에서는 Chromium이 필요 없으므로 puppeteer 설치 시 다운로드 생략(npm ci 대폭 단축)
+      PUPPETEER_SKIP_DOWNLOAD: "true"
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
     strategy:
       matrix:
         node-version: [18]

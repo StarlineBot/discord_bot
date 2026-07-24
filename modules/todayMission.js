@@ -17,9 +17,11 @@ module.exports = (today, now) => {
 
   const getVeteran = function () {
     const diffDays = Math.floor((now - start.getTime()) / 86400000)
-    const index = (startIndex + diffDays) % veteran.length
+    const len = veteran.length
+    // 음수(기준일 이전)에도 안전하도록 정규화
+    const index = (((startIndex + diffDays) % len) + len) % len
     const today = veteran[index]
-    const tomorrow = veteran[index+1]
+    const tomorrow = veteran[(index + 1) % len]
     return { today, tomorrow }
   }
 

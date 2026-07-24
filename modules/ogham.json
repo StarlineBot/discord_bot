@@ -1,0 +1,646 @@
+{
+  "arcanas": [
+    {
+      "id": 1,
+      "name": "엘레멘탈 나이트",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974455716.webp"
+    },
+    {
+      "id": 2,
+      "name": "세인트 바드",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974506104.webp"
+    },
+    {
+      "id": 3,
+      "name": "다크 메이지",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974539533.webp"
+    },
+    {
+      "id": 4,
+      "name": "알케믹 스팅어",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974562311.webp"
+    },
+    {
+      "id": 5,
+      "name": "세이크리드 가드",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974584004.webp"
+    },
+    {
+      "id": 6,
+      "name": "블래스트 랜서",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974606466.webp"
+    },
+    {
+      "id": 7,
+      "name": "배리어블 거너",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974664397.webp"
+    },
+    {
+      "id": 8,
+      "name": "포비든 알케미스트",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1761974686850.webp"
+    },
+    {
+      "id": 9,
+      "name": "멜로딕 퍼피티어",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1770440624569.webp"
+    },
+    {
+      "id": 10,
+      "name": "퓨리 파이터",
+      "thumbnail": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1770440758409.webp"
+    }
+  ],
+  "combinations": {
+    "1": [
+      {
+        "skill": "라이트닝 스매시",
+        "words": [
+          {
+            "name": "베헤",
+            "icon": "ᚁ"
+          },
+          {
+            "name": "콜",
+            "icon": "ᚉ"
+          },
+          {
+            "name": "케르트",
+            "icon": "ᚊ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782745535218.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "파이어 리프 어택",
+        "words": [
+          {
+            "name": "닌",
+            "icon": "ᚅ"
+          },
+          {
+            "name": "루스",
+            "icon": "ᚏ"
+          },
+          {
+            "name": "우르",
+            "icon": "ᚒ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782746427919.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "리스",
+            "icon": "ᚂ"
+          },
+          {
+            "name": "티너",
+            "icon": "ᚈ"
+          },
+          {
+            "name": "페헤",
+            "icon": "ᚚ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "2": [
+      {
+        "skill": "정화의 고동",
+        "words": [
+          {
+            "name": "살",
+            "icon": "ᚄ"
+          },
+          {
+            "name": "오르",
+            "icon": "ᚖ"
+          },
+          {
+            "name": "페헤",
+            "icon": "ᚚ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782748273000.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "음파의 세례",
+        "words": [
+          {
+            "name": "닌",
+            "icon": "ᚅ"
+          },
+          {
+            "name": "티너",
+            "icon": "ᚈ"
+          },
+          {
+            "name": "민",
+            "icon": "ᚋ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782748076296.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "페른",
+            "icon": "ᚃ"
+          },
+          {
+            "name": "콜",
+            "icon": "ᚉ"
+          },
+          {
+            "name": "일란드",
+            "icon": "ᚗ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "3": [
+      {
+        "skill": "스노우 스톰",
+        "words": [
+          {
+            "name": "베헤",
+            "icon": "ᚁ"
+          },
+          {
+            "name": "스트라프",
+            "icon": "ᚎ"
+          },
+          {
+            "name": "일란드",
+            "icon": "ᚗ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782749387445.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "익스플로전 런지",
+        "words": [
+          {
+            "name": "리스",
+            "icon": "ᚂ"
+          },
+          {
+            "name": "우흐",
+            "icon": "ᚆ"
+          },
+          {
+            "name": "온",
+            "icon": "ᚑ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782749490300.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "살",
+            "icon": "ᚄ"
+          },
+          {
+            "name": "고르트",
+            "icon": "ᚌ"
+          },
+          {
+            "name": "에만콜",
+            "icon": "ᚙ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "4": [
+      {
+        "skill": "트라이 어설트",
+        "words": [
+          {
+            "name": "페른",
+            "icon": "ᚃ"
+          },
+          {
+            "name": "이다드",
+            "icon": "ᚔ"
+          },
+          {
+            "name": "에바드",
+            "icon": "ᚕ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782823520396.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "하이드로 피어스",
+        "words": [
+          {
+            "name": "살",
+            "icon": "ᚄ"
+          },
+          {
+            "name": "다르",
+            "icon": "ᚇ"
+          },
+          {
+            "name": "에다드",
+            "icon": "ᚓ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782823954542.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "닌",
+            "icon": "ᚅ"
+          },
+          {
+            "name": "케르트",
+            "icon": "ᚊ"
+          },
+          {
+            "name": "에만콜",
+            "icon": "ᚙ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "5": [
+      {
+        "skill": "광휘의 단죄",
+        "words": [
+          {
+            "name": "리스",
+            "icon": "ᚂ"
+          },
+          {
+            "name": "티너",
+            "icon": "ᚈ"
+          },
+          {
+            "name": "온",
+            "icon": "ᚑ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782835338035.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "철벽 강타",
+        "words": [
+          {
+            "name": "살",
+            "icon": "ᚄ"
+          },
+          {
+            "name": "고르트",
+            "icon": "ᚌ"
+          },
+          {
+            "name": "이다드",
+            "icon": "ᚔ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782835547817.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "베헤",
+            "icon": "ᚁ"
+          },
+          {
+            "name": "게탈",
+            "icon": "ᚍ"
+          },
+          {
+            "name": "이핀",
+            "icon": "ᚘ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "6": [
+      {
+        "skill": "차지 어설트",
+        "words": [
+          {
+            "name": "닌",
+            "icon": "ᚅ"
+          },
+          {
+            "name": "다르",
+            "icon": "ᚇ"
+          },
+          {
+            "name": "페헤",
+            "icon": "ᚚ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782836374406.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "오버 드라이브",
+        "words": [
+          {
+            "name": "베헤",
+            "icon": "ᚁ"
+          },
+          {
+            "name": "에다드",
+            "icon": "ᚓ"
+          },
+          {
+            "name": "에바드",
+            "icon": "ᚕ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782836723448.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "리스",
+            "icon": "ᚂ"
+          },
+          {
+            "name": "루스",
+            "icon": "ᚏ"
+          },
+          {
+            "name": "알름",
+            "icon": "ᚐ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "7": [
+      {
+        "skill": "헤비 아틸러리",
+        "words": [
+          {
+            "name": "페른",
+            "icon": "ᚃ"
+          },
+          {
+            "name": "고르트",
+            "icon": "ᚌ"
+          },
+          {
+            "name": "오르",
+            "icon": "ᚖ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782837751189.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "트랜스뮤트 존",
+        "words": [
+          {
+            "name": "베헤",
+            "icon": "ᚁ"
+          },
+          {
+            "name": "우흐",
+            "icon": "ᚆ"
+          },
+          {
+            "name": "이핀",
+            "icon": "ᚘ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782838063465.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "살",
+            "icon": "ᚄ"
+          },
+          {
+            "name": "민",
+            "icon": "ᚋ"
+          },
+          {
+            "name": "이다드",
+            "icon": "ᚔ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "8": [
+      {
+        "skill": "스파이럴 이럽션",
+        "words": [
+          {
+            "name": "살",
+            "icon": "ᚄ"
+          },
+          {
+            "name": "알름",
+            "icon": "ᚐ"
+          },
+          {
+            "name": "에바드",
+            "icon": "ᚕ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782839006456.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "케미컬 카니발",
+        "words": [
+          {
+            "name": "리스",
+            "icon": "ᚂ"
+          },
+          {
+            "name": "콜",
+            "icon": "ᚉ"
+          },
+          {
+            "name": "우르",
+            "icon": "ᚒ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782839222619.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "페른",
+            "icon": "ᚃ"
+          },
+          {
+            "name": "루스",
+            "icon": "ᚏ"
+          },
+          {
+            "name": "온",
+            "icon": "ᚑ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "9": [
+      {
+        "skill": "인터루드 슬래시",
+        "words": [
+          {
+            "name": "리스",
+            "icon": "ᚂ"
+          },
+          {
+            "name": "게탈",
+            "icon": "ᚍ"
+          },
+          {
+            "name": "스트라프",
+            "icon": "ᚎ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782840551382.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "다운비트 악센트",
+        "words": [
+          {
+            "name": "페른",
+            "icon": "ᚃ"
+          },
+          {
+            "name": "민",
+            "icon": "ᚋ"
+          },
+          {
+            "name": "이핀",
+            "icon": "ᚘ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782840784984.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "닌",
+            "icon": "ᚅ"
+          },
+          {
+            "name": "다르",
+            "icon": "ᚇ"
+          },
+          {
+            "name": "우르",
+            "icon": "ᚒ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ],
+    "10": [
+      {
+        "skill": "게일 피어스",
+        "words": [
+          {
+            "name": "닌",
+            "icon": "ᚅ"
+          },
+          {
+            "name": "알름",
+            "icon": "ᚐ"
+          },
+          {
+            "name": "에만콜",
+            "icon": "ᚙ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782841606401.webp",
+        "disclosed": true
+      },
+      {
+        "skill": "얼티밋 스트라이크",
+        "words": [
+          {
+            "name": "페른",
+            "icon": "ᚃ"
+          },
+          {
+            "name": "케르트",
+            "icon": "ᚊ"
+          },
+          {
+            "name": "일란드",
+            "icon": "ᚗ"
+          }
+        ],
+        "image": "https://tacask-cdn.com/mabi-labanyu/web-upload/img-1782841801692.webp",
+        "disclosed": true
+      },
+      {
+        "skill": null,
+        "words": [
+          {
+            "name": "베헤",
+            "icon": "ᚁ"
+          },
+          {
+            "name": "우흐",
+            "icon": "ᚆ"
+          },
+          {
+            "name": "스트라프",
+            "icon": "ᚎ"
+          }
+        ],
+        "image": null,
+        "disclosed": false
+      }
+    ]
+  }
+}

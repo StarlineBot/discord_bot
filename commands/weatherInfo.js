@@ -71,11 +71,11 @@ module.exports = {
       const forecastWeatherObject = await axios.get(
           `https://mabi.world/api/forecast/?from=${now.toISO().split('.')[0]}`, {
             headers: {
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-              "Referer": "https://www.google.com",
-              "Connection": "keep-alive"
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+              Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+              'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+              Referer: 'https://www.google.com',
+              Connection: 'keep-alive'
             },
             withCredentials: true
           })
@@ -104,11 +104,11 @@ module.exports = {
           `https://mabi.world/api/forecast/?from=${now.toISO().split(
               '.')[0]}&next=thunder&for=each&in=m`, {
             headers: {
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-              "Referer": "https://www.google.com",
-              "Connection": "keep-alive"
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+              Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+              'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+              Referer: 'https://www.google.com',
+              Connection: 'keep-alive'
             },
             withCredentials: true
           })
@@ -118,11 +118,11 @@ module.exports = {
           `https://mabi.world/api/forecast/?from=${now.toISO().split(
               '.')[0]}&next=rain&for=each&in=m`, {
             headers: {
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-              "Referer": "https://www.google.com",
-              "Connection": "keep-alive"
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+              Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+              'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+              Referer: 'https://www.google.com',
+              Connection: 'keep-alive'
             },
             withCredentials: true
           })

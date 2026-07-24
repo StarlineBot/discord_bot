@@ -1,8 +1,14 @@
 const fs = require('fs')
+const path = require('path')
 const { EmbedBuilder } = require('discord.js')
 
 const USER_COUNT_PATH = './static/json/userMessageCount.json'
 const VOICE_COUNT_PATH = './static/json/voiceTimeCount.json'
+
+// 쓰기 전에 상위 디렉토리를 보장한다(static/json 미존재 시 ENOENT 크래시 방지)
+function ensureDir (filePath) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true })
+}
 
 function getUserMessageCounts () {
   if (!fs.existsSync(USER_COUNT_PATH)) return null
@@ -10,6 +16,7 @@ function getUserMessageCounts () {
 }
 
 function saveUserMessageCounts (data) {
+  ensureDir(USER_COUNT_PATH)
   fs.writeFileSync(USER_COUNT_PATH, JSON.stringify(data, null, 2))
 }
 
@@ -36,6 +43,7 @@ function getUserVoiceCounts () {
 }
 
 function saveUserVoiceCount (data) {
+  ensureDir(VOICE_COUNT_PATH)
   fs.writeFileSync(VOICE_COUNT_PATH, JSON.stringify(data, null, 2))
 }
 
@@ -60,12 +68,11 @@ const getRandomColor = function () {
 }
 
 const updateUserMessageCount = function (guildId, userId, isAdd) {
-  const delta = isAdd ? 1 : -1;
-  const filePath = './static/json/userMessageCount.json'
+  const delta = isAdd ? 1 : -1
   let userMessageCounts = {}
 
-  if (fs.existsSync(filePath)) {
-    userMessageCounts = JSON.parse(fs.readFileSync(filePath))
+  if (fs.existsSync(USER_COUNT_PATH)) {
+    userMessageCounts = JSON.parse(fs.readFileSync(USER_COUNT_PATH))
   }
 
   if (!userMessageCounts[guildId]) {
@@ -73,7 +80,8 @@ const updateUserMessageCount = function (guildId, userId, isAdd) {
   }
 
   userMessageCounts[guildId][userId] = Math.max((userMessageCounts[guildId][userId] || 0) + delta, 0)
-  fs.writeFileSync(filePath, JSON.stringify(userMessageCounts, null, 2))
+  ensureDir(USER_COUNT_PATH)
+  fs.writeFileSync(USER_COUNT_PATH, JSON.stringify(userMessageCounts, null, 2))
 }
 
 module.exports = {

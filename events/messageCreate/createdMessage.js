@@ -12,7 +12,12 @@ module.exports = async (message, client) => {
   const guildInfo = guildModule.getGuildInfo(guildId)
   if (!guildInfo) return
 
-  updateUserMessageCount(guildId, userId, true)
+  // 랭킹 집계 실패가 메시지 처리(및 봇 전체)를 죽이지 않도록 격리
+  try {
+    updateUserMessageCount(guildId, userId, true)
+  } catch (err) {
+    console.error('❌ updateUserMessageCount 실패:', err)
+  }
 
   const partyChannel = client.channels.cache.get(guildInfo.partyChannelId)
   if (!partyChannel) return

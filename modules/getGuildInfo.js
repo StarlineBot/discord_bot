@@ -11,8 +11,6 @@ const guildInfo = [
     partyChannelId: process.env.PARTY_RECRUITMENT,
     generalChannelId: process.env.GUILD_GENERAL_CHANNEL_ID,
     targetMemberRole: process.env.TARGET_MEMBER_ROLE_ID,
-    bugleHornChannelId: process.env.BUGLE_HORN_CHANNEL_ID,
-    dailyNewsChannelId: process.env.DAILY_NEWS_CHANNEl_ID,
     todayMissionChannelId: process.env.TODAY_MISSION_CHANNEL_ID
   },
   // 개발
@@ -27,8 +25,6 @@ const guildInfo = [
     partyChannelId: process.env.DEV_PARTY_RECRUITMENT,
     generalChannelId: process.env.DEV_GENERAL_CHANNEL_ID,
     targetMemberRole: process.env.DEV_TARGET_MEMBER_ROLE_ID,
-    bugleHornChannelId: process.env.DEV_BUGLE_HORN_CHANNEL_ID,
-    dailyNewsChannelId: process.env.DEV_DAILY_NEWS_CHANNEl_ID,
     todayMissionChannelId: process.env.DEV_TODAY_MISSION_CHANNEL_ID
   }
 ]

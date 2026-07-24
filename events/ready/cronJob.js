@@ -131,18 +131,6 @@ module.exports = async (client) => {
       )
       .setTimestamp()
     todayMissionChannel.send({ embeds: [todayEmbed, tomorrowEmbed] })
-
-    /*
-    const dailyNewsChannel = client.channels.cache.get(dailyNewsChannelId)
-    if (!dailyNewsChannel) {
-      return
-    }
-    const getBody = await axios.get('https://quicknews.co.kr/')
-    const $ = cheerio.load(getBody.data)
-    const content = '간추린뉴스 출처: https://quicknews.co.kr\n\n' + $('#news_0').text()
-
-    dailyNewsChannel.send(content)
-    */
   })
 
   console.log('dailyJob start!')

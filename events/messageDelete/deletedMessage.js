@@ -3,7 +3,8 @@ const botId = process.env.BOT_ID
 
 module.exports = async (message, client) => {
   // 봇이 작성하지 않은 글에만 반응, 길드에서 사용하기 때문에 길드 아이디가 없으면 작업하지 않음
-  if (message.author.bot || !message.guildId) return
+  // 캐시에 없는(오래된) 삭제 메시지는 author가 null → 건너뜀
+  if (!message.author || message.author.bot || !message.guildId) return
 
   const guildId = message.guildId
   const guildInfo = guildModule.getGuildInfo(guildId)

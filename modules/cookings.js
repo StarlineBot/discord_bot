@@ -17,16 +17,16 @@ const cookings = [
         value: 30
       },
       {
+        name: "행운",
+        value: 20
+      },
+      {
         name: "솜씨",
         value: -12
       },
       {
         name: "지력",
         value: -12
-      },
-      {
-        name: "행운",
-        value: 20
       }
     ],
     index: 130,
@@ -50,12 +50,12 @@ const cookings = [
         value: 3
       },
       {
-        name: "솜씨",
-        value: 5
-      },
-      {
         name: "지력",
         value: 10
+      },
+      {
+        name: "솜씨",
+        value: 5
       }
     ],
     index: 185,
@@ -75,12 +75,12 @@ const cookings = [
         value: 20
       },
       {
-        name: "솜씨",
-        value: 6
-      },
-      {
         name: "지력",
         value: 5
+      },
+      {
+        name: "솜씨",
+        value: 6
       }
     ],
     index: 341,
@@ -158,18 +158,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "계란 샐러드+소금",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "삶은달걀(77%) 마요네즈(15%) 소금(8%)",
-    thumbnail: null,
-    status: [],
-    index: 343,
-    isCatering: true
-  },
-  {
     originName: "Tamago Sushi",
     localName: "계란초밥",
     originCookingType: "Mixing",
@@ -179,31 +167,19 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10864.png",
     status: [
       {
-        name: "보호",
-        value: 1
+        name: "솜씨",
+        value: 40
       },
       {
         name: "스태미나",
         value: 30
       },
       {
-        name: "솜씨",
-        value: 40
+        name: "보호",
+        value: 1
       }
     ],
     index: 266,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "고기양념",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "소금(10%) 후추(10%) 마늘(80%)",
-    thumbnail: null,
-    status: [],
-    index: 344,
     isCatering: true
   },
   {
@@ -241,27 +217,15 @@ const cookings = [
         value: 30
       },
       {
-        name: "솜씨",
-        value: 3
-      },
-      {
         name: "지력",
         value: 5
+      },
+      {
+        name: "솜씨",
+        value: 3
       }
     ],
     index: 346,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "구운 콩물",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "구운 콩가루(75%) 물이 든 병(25%)",
-    thumbnail: null,
-    status: [],
-    index: 347,
     isCatering: true
   },
   {
@@ -283,18 +247,6 @@ const cookings = [
       }
     ],
     index: 348,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "껍질 벗긴 콩물",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "껍질 벗긴 콩가루(75%) 물이 든 병(25%)",
-    thumbnail: null,
-    status: [],
-    index: 349,
     isCatering: true
   },
   {
@@ -328,12 +280,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10869.png",
     status: [
       {
-        name: "마나",
-        value: 35
-      },
-      {
         name: "지력",
         value: 25
+      },
+      {
+        name: "마나",
+        value: 35
       },
       {
         name: "마법보호",
@@ -341,18 +293,6 @@ const cookings = [
       }
     ],
     index: 351,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "드래곤의 살덩어리",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "드래곤의 살점(33%) 드래곤의 살점(34%) 드래곤의 살점(33%)",
-    thumbnail: null,
-    status: [],
-    index: 352,
     isCatering: true
   },
   {
@@ -365,31 +305,19 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10872.png",
     status: [
       {
+        name: "지력",
+        value: 30
+      },
+      {
         name: "생명력",
         value: 20
       },
       {
         name: "마나",
         value: 30
-      },
-      {
-        name: "지력",
-        value: 30
       }
     ],
     index: 262,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "딸기 향 시럽",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "딸기(25%) 설탕(65%) 물이 든 병(10%)",
-    thumbnail: null,
-    status: [],
-    index: 353,
     isCatering: true
   },
   {
@@ -414,18 +342,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "라브의 밥",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "베이컨(50%) 밥(25%) 고기 조각(25%)",
-    thumbnail: null,
-    status: [],
-    index: 355,
-    isCatering: true
-  },
-  {
     originName: "Lassi",
     localName: "라씨",
     originCookingType: "Fermenting",
@@ -435,12 +351,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10867.png",
     status: [
       {
-        name: "마나",
-        value: 20
-      },
-      {
         name: "지력",
         value: 25
+      },
+      {
+        name: "마나",
+        value: 20
       },
       {
         name: "마법방어",
@@ -468,16 +384,16 @@ const cookings = [
         value: 20
       },
       {
+        name: "행운",
+        value: 15
+      },
+      {
         name: "솜씨",
         value: -8
       },
       {
         name: "지력",
         value: -8
-      },
-      {
-        name: "행운",
-        value: 15
       }
     ],
     index: 152,
@@ -501,16 +417,16 @@ const cookings = [
         value: 20
       },
       {
+        name: "행운",
+        value: 15
+      },
+      {
         name: "솜씨",
         value: -10
       },
       {
         name: "지력",
         value: -10
-      },
-      {
-        name: "행운",
-        value: 15
       }
     ],
     index: 205,
@@ -542,18 +458,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "레몬즙",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "레몬(85%) 물이 든 병(5%) 나무열매(10%)",
-    thumbnail: null,
-    status: [],
-    index: 356,
-    isCatering: true
-  },
-  {
     originName: "Reuben Sandwich",
     localName: "루벤 샌드위치",
     originCookingType: "Mixing",
@@ -563,20 +467,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10861.png",
     status: [
       {
-        name: "보호",
-        value: 2
-      },
-      {
-        name: "마법보호",
-        value: 1
-      },
-      {
         name: "방어",
         value: 3
       },
       {
+        name: "보호",
+        value: 2
+      },
+      {
         name: "마법방어",
         value: 3
+      },
+      {
+        name: "마법보호",
+        value: 1
       }
     ],
     index: 204,
@@ -634,39 +538,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10870.png",
     status: [
       {
-        name: "생명력",
-        value: 10
-      },
-      {
         name: "행운",
         value: 15
+      },
+      {
+        name: "생명력",
+        value: 10
       }
     ],
     index: 151,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "마요네즈",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "달걀(75%) 올리브유(20%)",
-    thumbnail: null,
-    status: [],
-    index: 359,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "매운 전골",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "커다란 고기덩어리(40%) 양배추(40%) 고춧가루(20%)",
-    thumbnail: null,
-    status: [],
-    index: 360,
     isCatering: true
   },
   {
@@ -704,20 +584,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10838.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "마법공격력",
-        value: 1
+        name: "스태미나",
+        value: 20
       },
       {
         name: "보호",
         value: 1
       },
       {
-        name: "스태미나",
-        value: 20
+        name: "최대대미지",
+        value: 1
+      },
+      {
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 47,
@@ -733,47 +613,23 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10839.png",
     status: [
       {
-        name: "최대대미지",
-        value: 2
-      },
-      {
-        name: "마법공격력",
-        value: 2
-      },
-      {
         name: "생명력",
         value: 35
       },
       {
         name: "마나",
         value: 25
+      },
+      {
+        name: "최대대미지",
+        value: 2
+      },
+      {
+        name: "마법공격력",
+        value: 2
       }
     ],
     index: 4,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "물에 불린 콩",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "콩(70%) 물이 든 병(25%) 소금(5%)",
-    thumbnail: null,
-    status: [],
-    index: 362,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "물에 불린 콩물",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "물에 불린 콩가루(75%) 물이 든 병(25%)",
-    thumbnail: null,
-    status: [],
-    index: 363,
     isCatering: true
   },
   {
@@ -786,11 +642,11 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30627.png",
     status: [
       {
-        name: "스태미나",
+        name: "의지",
         value: 30
       },
       {
-        name: "의지",
+        name: "스태미나",
         value: 30
       },
       {
@@ -819,16 +675,16 @@ const cookings = [
         value: 38
       },
       {
+        name: "행운",
+        value: 25
+      },
+      {
         name: "솜씨",
         value: -15
       },
       {
         name: "지력",
         value: -15
-      },
-      {
-        name: "행운",
-        value: 25
       }
     ],
     index: 276,
@@ -848,12 +704,12 @@ const cookings = [
         value: 18
       },
       {
-        name: "솜씨",
-        value: 3
-      },
-      {
         name: "행운",
         value: 10
+      },
+      {
+        name: "솜씨",
+        value: 3
       }
     ],
     index: 192,
@@ -923,39 +779,15 @@ const cookings = [
         value: 25
       },
       {
-        name: "솜씨",
-        value: -9
-      },
-      {
         name: "행운",
         value: 12
+      },
+      {
+        name: "솜씨",
+        value: -9
       }
     ],
     index: 364,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "볼살바토르의 특제 클럽 샌드위치",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "식빵(50%) 양배추(30%) 볼살바토르의 땅콩버터잼(20%)",
-    thumbnail: null,
-    status: [],
-    index: 365,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "볼살바토르의 특제 토마토 바질 샐러드",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "볼살바토르의 토마토(50%) 바질(30%) 삶은감자(20%)",
-    thumbnail: null,
-    status: [],
-    index: 366,
     isCatering: true
   },
   {
@@ -968,20 +800,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30624.png",
     status: [
       {
-        name: "마법공격력",
-        value: 5
-      },
-      {
-        name: "보호",
-        value: 2
-      },
-      {
         name: "지력",
         value: 50
       },
       {
         name: "행운",
         value: 30
+      },
+      {
+        name: "마법공격력",
+        value: 5
+      },
+      {
+        name: "보호",
+        value: 2
       }
     ],
     index: 311,
@@ -1005,16 +837,16 @@ const cookings = [
         value: 25
       },
       {
+        name: "행운",
+        value: 15
+      },
+      {
         name: "솜씨",
         value: -10
       },
       {
         name: "지력",
         value: -10
-      },
-      {
-        name: "행운",
-        value: 15
       }
     ],
     index: 126,
@@ -1030,16 +862,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10873.png",
     status: [
       {
+        name: "솜씨",
+        value: 30
+      },
+      {
         name: "마나",
         value: 20
       },
       {
         name: "스태미나",
         value: 35
-      },
-      {
-        name: "솜씨",
-        value: 30
       }
     ],
     index: 20,
@@ -1068,18 +900,6 @@ const cookings = [
       }
     ],
     index: 245,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "빵가루",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "식빵(100%)",
-    thumbnail: null,
-    status: [],
-    index: 367,
     isCatering: true
   },
   {
@@ -1171,11 +991,11 @@ const cookings = [
         value: 10
       },
       {
-        name: "마나",
+        name: "스태미나",
         value: 10
       },
       {
-        name: "스태미나",
+        name: "마나",
         value: 10
       },
       {
@@ -1246,16 +1066,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10899.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
+        name: "행운",
+        value: 10
       },
       {
         name: "보호",
         value: 1
       },
       {
-        name: "행운",
-        value: 10
+        name: "최대대미지",
+        value: 1
       }
     ],
     index: 39,
@@ -1279,55 +1099,19 @@ const cookings = [
         value: 26
       },
       {
+        name: "행운",
+        value: 18
+      },
+      {
         name: "솜씨",
         value: -8
       },
       {
         name: "지력",
         value: -8
-      },
-      {
-        name: "행운",
-        value: 18
       }
     ],
     index: 158,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "아르바이트용 레몬 주스",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "아르바이트용 레몬(60%) 아르바이트용 나무열매(30%) 아르바이트용 설탕(10%)",
-    thumbnail: null,
-    status: [],
-    index: 372,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "아르바이트용 사과 주스",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "아르바이트용 사과(80%) 아르바이트용 나무열매(20%) 아르바이트용 설탕(10%)",
-    thumbnail: null,
-    status: [],
-    index: 373,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "아르바이트용 오렌지 주스",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "아르바이트용 오렌지(80%) 아르바이트용 나무열매(20%) 아르바이트용 설탕(10%)",
-    thumbnail: null,
-    status: [],
-    index: 374,
     isCatering: true
   },
   {
@@ -1390,11 +1174,11 @@ const cookings = [
         value: 20
       },
       {
-        name: "솜씨",
+        name: "지력",
         value: 30
       },
       {
-        name: "지력",
+        name: "솜씨",
         value: 30
       }
     ],
@@ -1411,16 +1195,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30625.png",
     status: [
       {
-        name: "최대대미지",
-        value: 3
-      },
-      {
         name: "체력",
         value: 30
       },
       {
         name: "의지",
         value: 50
+      },
+      {
+        name: "최대대미지",
+        value: 3
       },
       {
         name: "마법보호",
@@ -1440,27 +1224,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10902.png",
     status: [
       {
-        name: "스태미나",
-        value: 20
-      },
-      {
         name: "지력",
         value: 5
+      },
+      {
+        name: "스태미나",
+        value: 20
       }
     ],
     index: 212,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "야채 모둠",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "당근(30%) 양파(35%) 샐러리(35%)",
-    thumbnail: null,
-    status: [],
-    index: 378,
     isCatering: true
   },
   {
@@ -1511,54 +1283,6 @@ const cookings = [
       }
     ],
     index: 379,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "연어 샐러드",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "연어(80%) 샐러리(15%)",
-    thumbnail: null,
-    status: [],
-    index: 380,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "연어 샐러드+설탕",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "연어(80%) 샐러리(15%) 설탕(5%)",
-    thumbnail: null,
-    status: [],
-    index: 381,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "연어 샐러드+소금",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "연어(80%) 샐러리(15%) 소금(5%)",
-    thumbnail: null,
-    status: [],
-    index: 382,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "연어 샐러드+후추",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "연어(80%) 샐러리(15%) 후추(5%)",
-    thumbnail: null,
-    status: [],
-    index: 383,
     isCatering: true
   },
   {
@@ -1616,30 +1340,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "오렌지 향 시럽",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "오렌지(25%) 설탕(65%) 물이 든 병(10%)",
-    thumbnail: null,
-    status: [],
-    index: 384,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "자파리 빵을 흉내낸 빵",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "재료 초콜릿(15%) 치즈 조각(15%) 빵(70%)",
-    thumbnail: null,
-    status: [],
-    index: 385,
-    isCatering: true
-  },
-  {
     originName: "Unagi Sushi",
     localName: "장어초밥",
     originCookingType: "Mixing",
@@ -1666,54 +1366,6 @@ const cookings = [
       }
     ],
     index: 320,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "참치 양파 무침",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "참다랑어(60%) 양파(30%)",
-    thumbnail: null,
-    status: [],
-    index: 386,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "참치 양파 무침+레몬",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "참다랑어(60%) 양파(30%) 레몬(10%)",
-    thumbnail: null,
-    status: [],
-    index: 387,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "참치 양파 무침+마늘",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "참다랑어(60%) 양파(30%) 마늘(10%)",
-    thumbnail: null,
-    status: [],
-    index: 388,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "참치 양파 무침+소금",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "참다랑어(60%) 양파(30%) 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 389,
     isCatering: true
   },
   {
@@ -1746,18 +1398,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "초장",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "식초(45%) 고추장(44%) 마늘(11%)",
-    thumbnail: null,
-    status: [],
-    index: 390,
-    isCatering: true
-  },
-  {
     originName: "Chocolate Crepe Cake",
     localName: "초코 크레이프 케이크",
     originCookingType: "Mixing",
@@ -1767,16 +1407,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10874.png",
     status: [
       {
+        name: "의지",
+        value: 30
+      },
+      {
         name: "마나",
         value: 30
       },
       {
         name: "스태미나",
         value: 20
-      },
-      {
-        name: "의지",
-        value: 30
       }
     ],
     index: 35,
@@ -1879,18 +1519,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "카레 페이스트",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "감자(15%) 고기 조각(15%) 카레가루(70%)",
-    thumbnail: null,
-    status: [],
-    index: 393,
-    isCatering: true
-  },
-  {
     originName: "Camellia Sling",
     localName: "카멜리아 슬링",
     originCookingType: "Mixing",
@@ -1908,31 +1536,19 @@ const cookings = [
         value: 10
       },
       {
+        name: "행운",
+        value: 10
+      },
+      {
         name: "솜씨",
         value: -3
       },
       {
         name: "지력",
         value: -3
-      },
-      {
-        name: "행운",
-        value: 10
       }
     ],
     index: 104,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "카카오 초콜릿 케익",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "카카오(33%) 밀가루 빵 반죽(34%) 설탕(33%)",
-    thumbnail: null,
-    status: [],
-    index: 394,
     isCatering: true
   },
   {
@@ -1949,11 +1565,11 @@ const cookings = [
         value: 10
       },
       {
-        name: "솜씨",
+        name: "지력",
         value: 20
       },
       {
-        name: "지력",
+        name: "솜씨",
         value: 20
       }
     ],
@@ -2012,12 +1628,12 @@ const cookings = [
         value: 15
       },
       {
-        name: "솜씨",
-        value: 4
-      },
-      {
         name: "행운",
         value: 20
+      },
+      {
+        name: "솜씨",
+        value: 4
       }
     ],
     index: 112,
@@ -2058,98 +1674,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10900.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
+        name: "행운",
+        value: 10
       },
       {
         name: "보호",
         value: 1
       },
       {
-        name: "행운",
-        value: 10
+        name: "최대대미지",
+        value: 1
       }
     ],
     index: 109,
     isCatering: true
-  },
-  {
-    originName: "Raw Chopped Kraken",
-    localName: "크라켄 탕탕이",
-    originCookingType: "Mixing",
-    localCookingType: "혼합",
-    originRecipe: "Kraken Leg Meat(80%) Garlic(20%)",
-    localRecipe: "크라켄 다리살(80%) 마늘(20%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/3/3a/Raw_Chopped_Kraken.png",
-    status: [
-      {
-        name: "생명력",
-        value: 200
-      }
-    ],
-    index: 144,
-    isCatering: false
-  },
-  {
-    originName: "Full Kraken Meal",
-    localName: "크라켄 한상 차림",
-    originCookingType: "Mixing",
-    localCookingType: "혼합",
-    originRecipe: "Spicy Kraken Stew(50%) Kraken Stirfry(50%)",
-    localRecipe: "크라켄 매운탕(50%) 크라켄 볶음 모둠(50%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/1/19/Full_Kraken_Meal.png",
-    status: [
-      {
-        name: "생명력",
-        value: 300
-      },
-      {
-        name: "마나",
-        value: 300
-      },
-      {
-        name: "스태미나",
-        value: 300
-      },
-      {
-        name: "체력",
-        value: 70
-      },
-      {
-        name: "지력",
-        value: 70
-      },
-      {
-        name: "솜씨",
-        value: 70
-      },
-      {
-        name: "의지",
-        value: 70
-      },
-      {
-        name: "행운",
-        value: 70
-      },
-      {
-        name: "방어",
-        value: 30
-      },
-      {
-        name: "보호",
-        value: 5
-      },
-      {
-        name: "마법방어",
-        value: 30
-      },
-      {
-        name: "마법보호",
-        value: 5
-      }
-    ],
-    index: 85,
-    isCatering: false
   },
   {
     originName: "Crepe Cake",
@@ -2161,31 +1699,19 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10871.png",
     status: [
       {
+        name: "체력",
+        value: 30
+      },
+      {
         name: "생명력",
         value: 30
       },
       {
         name: "마나",
         value: 20
-      },
-      {
-        name: "체력",
-        value: 30
       }
     ],
     index: 69,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "크리스마스 케이크",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "케이크 만들기 키트(100%)",
-    thumbnail: null,
-    status: [],
-    index: 398,
     isCatering: true
   },
   {
@@ -2223,16 +1749,16 @@ const cookings = [
         value: 26
       },
       {
+        name: "행운",
+        value: 18
+      },
+      {
         name: "솜씨",
         value: -8
       },
       {
         name: "지력",
         value: -8
-      },
-      {
-        name: "행운",
-        value: 18
       }
     ],
     index: 155,
@@ -2245,15 +1771,11 @@ const cookings = [
     localCookingType: "혼합",
     originRecipe: "",
     localRecipe: "마늘빵(35%) 소시지(35%) 양배추(30%)",
-    thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10316.png",
+    thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9980.png",
     status: [
       {
-        name: "솜씨",
-        value: 10
-      },
-      {
-        name: "지력",
-        value: 10
+        name: "체력",
+        value: 30
       }
     ],
     index: 399,
@@ -2269,16 +1791,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10069.png",
     status: [
       {
-        name: "솜씨",
-        value: -8
-      },
-      {
         name: "지력",
         value: 5
       },
       {
         name: "행운",
         value: 5
+      },
+      {
+        name: "솜씨",
+        value: -8
       }
     ],
     index: 290,
@@ -2294,27 +1816,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10906.png",
     status: [
       {
-        name: "마나",
-        value: 20
-      },
-      {
         name: "행운",
         value: 15
+      },
+      {
+        name: "마나",
+        value: 20
       }
     ],
     index: 154,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "포도 향 시럽",
-    originCookingType: "",
-    localCookingType: "혼합",
-    originRecipe: "",
-    localRecipe: "포도(25%) 설탕(65%) 물이 든 병(10%)",
-    thumbnail: null,
-    status: [],
-    index: 400,
     isCatering: true
   },
   {
@@ -2327,12 +1837,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10072.png",
     status: [
       {
-        name: "솜씨",
-        value: 5
-      },
-      {
         name: "행운",
         value: 20
+      },
+      {
+        name: "솜씨",
+        value: 5
       }
     ],
     index: 401,
@@ -2348,12 +1858,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10901.png",
     status: [
       {
-        name: "생명력",
-        value: 20
-      },
-      {
         name: "체력",
         value: 5
+      },
+      {
+        name: "생명력",
+        value: 20
       }
     ],
     index: 239,
@@ -2407,12 +1917,12 @@ const cookings = [
         value: 8
       },
       {
-        name: "의지",
-        value: 8
-      },
-      {
         name: "지력",
         value: 12
+      },
+      {
+        name: "의지",
+        value: 8
       }
     ],
     index: 140,
@@ -2428,20 +1938,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10875.png",
     status: [
       {
-        name: "최대대미지",
-        value: 2
-      },
-      {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "솜씨",
         value: 25
       },
       {
         name: "행운",
         value: 30
+      },
+      {
+        name: "보호",
+        value: 1
+      },
+      {
+        name: "최대대미지",
+        value: 2
       }
     ],
     index: 145,
@@ -2457,16 +1967,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10070.png",
     status: [
       {
-        name: "솜씨",
-        value: -7
-      },
-      {
         name: "의지",
         value: 5
       },
       {
         name: "행운",
         value: 5
+      },
+      {
+        name: "솜씨",
+        value: -7
       }
     ],
     index: 218,
@@ -2507,11 +2017,11 @@ const cookings = [
         value: 8
       },
       {
-        name: "솜씨",
+        name: "의지",
         value: 5
       },
       {
-        name: "의지",
+        name: "솜씨",
         value: 5
       }
     ],
@@ -2658,11 +2168,11 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10244.png",
     status: [
       {
-        name: "생명력",
+        name: "마나",
         value: 30
       },
       {
-        name: "마나",
+        name: "생명력",
         value: 30
       },
       {
@@ -2683,16 +2193,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10785.png",
     status: [
       {
-        name: "마나",
-        value: 30
+        name: "지력",
+        value: 15
       },
       {
         name: "의지",
         value: 50
       },
       {
-        name: "지력",
-        value: 15
+        name: "마나",
+        value: 30
       }
     ],
     index: 60,
@@ -2713,18 +2223,6 @@ const cookings = [
       }
     ],
     index: 275,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "구운 콩",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "콩(90%) 올리브유(5%) 소금(5%)",
-    thumbnail: null,
-    status: [],
-    index: 406,
     isCatering: true
   },
   {
@@ -2771,16 +2269,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10311.png",
     status: [
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 8
       },
       {
         name: "의지",
         value: 16
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 170,
@@ -2796,12 +2294,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30642.png",
     status: [
       {
-        name: "스태미나",
-        value: 30
-      },
-      {
         name: "솜씨",
         value: 20
+      },
+      {
+        name: "스태미나",
+        value: 30
       }
     ],
     index: 15,
@@ -2938,16 +2436,16 @@ const cookings = [
         value: 1
       },
       {
-        name: "마나",
-        value: 40
+        name: "마법방어",
+        value: 1
       },
       {
         name: "마법보호",
         value: 1
       },
       {
-        name: "마법방어",
-        value: 1
+        name: "마나",
+        value: 40
       }
     ],
     index: 321,
@@ -2984,16 +2482,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30626.png",
     status: [
       {
+        name: "행운",
+        value: 50
+      },
+      {
         name: "생명력",
         value: 45
       },
       {
         name: "마나",
         value: 45
-      },
-      {
-        name: "행운",
-        value: 50
       }
     ],
     index: 410,
@@ -3055,12 +2553,12 @@ const cookings = [
         value: 15
       },
       {
-        name: "솜씨",
-        value: 2
-      },
-      {
         name: "의지",
         value: 8
+      },
+      {
+        name: "솜씨",
+        value: 2
       }
     ],
     index: 246,
@@ -3097,12 +2595,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30640.png",
     status: [
       {
-        name: "마나",
-        value: 20
-      },
-      {
         name: "의지",
         value: 25
+      },
+      {
+        name: "마나",
+        value: 20
       }
     ],
     index: 150,
@@ -3131,18 +2629,6 @@ const cookings = [
       }
     ],
     index: 36,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "멧돼지 버섯 꼬치",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "개암버섯(45%) 커다란 고기덩어리(45%) 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 414,
     isCatering: true
   },
   {
@@ -3176,12 +2662,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30641.png",
     status: [
       {
-        name: "마나",
-        value: 50
-      },
-      {
         name: "지력",
         value: 20
+      },
+      {
+        name: "마나",
+        value: 50
       }
     ],
     index: 415,
@@ -3251,12 +2737,12 @@ const cookings = [
         value: 10
       },
       {
-        name: "솜씨",
-        value: 3
-      },
-      {
         name: "지력",
         value: 5
+      },
+      {
+        name: "솜씨",
+        value: 3
       }
     ],
     index: 98,
@@ -3272,12 +2758,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10243.png",
     status: [
       {
-        name: "체력",
-        value: -10
-      },
-      {
         name: "솜씨",
         value: 40
+      },
+      {
+        name: "체력",
+        value: -10
       }
     ],
     index: 417,
@@ -3302,18 +2788,6 @@ const cookings = [
       }
     ],
     index: 418,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "베이컨구이+소금",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "베이컨(90%) 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 419,
     isCatering: true
   },
   {
@@ -3356,30 +2830,6 @@ const cookings = [
       }
     ],
     index: 118,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "볶은 커피",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "쿠르클레 커피 열매(90%) 물이 든 병(10%)",
-    thumbnail: null,
-    status: [],
-    index: 421,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "볼살바토르의 특제 옥수수 구이",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "볼살바토르의 옥수수(95%) 버터(5%)",
-    thumbnail: null,
-    status: [],
-    index: 422,
     isCatering: true
   },
   {
@@ -3475,30 +2925,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "비프 스테이크+소금",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "쇠고기(65%) 마늘(26%) 소금(9%)",
-    thumbnail: null,
-    status: [],
-    index: 426,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "비프 스테이크+후추",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "쇠고기(65%) 마늘(26%) 후추(9%)",
-    thumbnail: null,
-    status: [],
-    index: 427,
-    isCatering: true
-  },
-  {
     originName: "Apple Souffle",
     localName: "사과 수플레",
     originCookingType: "Baking",
@@ -3508,7 +2934,7 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30629.png",
     status: [
       {
-        name: "마나",
+        name: "지력",
         value: 20
       },
       {
@@ -3516,7 +2942,7 @@ const cookings = [
         value: 30
       },
       {
-        name: "지력",
+        name: "마나",
         value: 20
       }
     ],
@@ -3554,16 +2980,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10776.png",
     status: [
       {
-        name: "스태미나",
-        value: 25
-      },
-      {
         name: "체력",
         value: 45
       },
       {
         name: "의지",
         value: 35
+      },
+      {
+        name: "스태미나",
+        value: 25
       }
     ],
     index: 162,
@@ -3600,37 +3026,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10783.png",
     status: [
       {
+        name: "행운",
+        value: 30
+      },
+      {
         name: "생명력",
         value: 30
       },
       {
         name: "마나",
         value: 30
-      },
-      {
-        name: "행운",
-        value: 30
       }
     ],
     index: 252,
     isCatering: true
-  },
-  {
-    originName: "Scuabtuinne Sucker Skewers",
-    localName: "스쿠압틴산 빨판 꼬치",
-    originCookingType: "Baking",
-    localCookingType: "굽기",
-    originRecipe: "Kraken Sucker(Ingredient)(70%) Salt(15%) Pepper(15%)",
-    localRecipe: "크라켄 빨판(70%) 소금(15%) 후추(15%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/e/e0/Scuabtuinne_Sucker_Skewers.png",
-    status: [
-      {
-        name: "의지",
-        value: 100
-      }
-    ],
-    index: 216,
-    isCatering: false
   },
   {
     originName: "Sliced Bread",
@@ -3655,54 +3064,6 @@ const cookings = [
   },
   {
     originName: "",
-    localName: "아르바이트용 로스트 치킨",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "아르바이트용 닭날개(80%) 아르바이트용 타임(20%) 아르바이트용 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 428,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "아르바이트용 버터 비스킷",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "아르바이트용 밀가루(50%) 아르바이트용 버터(30%) 아르바이트용 설탕(30%)",
-    thumbnail: null,
-    status: [],
-    index: 429,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "아르바이트용 브라우니",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "아르바이트용 밀가루(50%) 아르바이트용 초콜릿(50%) 아르바이트용 이스트(5%)",
-    thumbnail: null,
-    status: [],
-    index: 430,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "아르바이트용 크로크 무슈",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "아르바이트용 식빵(50%) 아르바이트용 고기 조각(30%) 아르바이트용 치즈 조각(30%)",
-    thumbnail: null,
-    status: [],
-    index: 431,
-    isCatering: true
-  },
-  {
-    originName: "",
     localName: "오믈렛",
     originCookingType: "",
     localCookingType: "굽기",
@@ -3719,16 +3080,16 @@ const cookings = [
         value: 18
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 4
       },
       {
         name: "의지",
         value: 12
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 432,
@@ -3769,16 +3130,16 @@ const cookings = [
         value: 15
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 15
       },
       {
         name: "의지",
         value: 10
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 90,
@@ -3802,16 +3163,16 @@ const cookings = [
         value: 16
       },
       {
+        name: "지력",
+        value: 12
+      },
+      {
         name: "솜씨",
         value: 8
       },
       {
         name: "의지",
         value: 8
-      },
-      {
-        name: "지력",
-        value: 12
       }
     ],
     index: 0,
@@ -3873,11 +3234,11 @@ const cookings = [
         value: 25
       },
       {
-        name: "체력",
+        name: "솜씨",
         value: 10
       },
       {
-        name: "솜씨",
+        name: "체력",
         value: 10
       }
     ],
@@ -3956,30 +3317,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "조개구이+소금",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "조개(90%) 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 437,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "조개구이+후추",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "조개(90%) 후추(10%)",
-    thumbnail: null,
-    status: [],
-    index: 438,
-    isCatering: true
-  },
-  {
     originName: "Curry-Roasted Red Sea Bream",
     localName: "참돔 카레구이",
     originCookingType: "Baking",
@@ -3998,31 +3335,6 @@ const cookings = [
       }
     ],
     index: 19,
-    isCatering: true
-  },
-  {
-    originName: "Bacon Wrapped Tuna",
-    localName: "참치 베이컨 말이",
-    originCookingType: "Baking",
-    localCookingType: "굽기",
-    originRecipe: "Bluefin Tuna(60%) Bacon(36%) Pepper(4%)",
-    localRecipe: "참다랑어(60%) 베이컨(35%) 후추(5%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/2/2d/Roasted_Bacon.png",
-    status: [
-      {
-        name: "생명력",
-        value: 20
-      },
-      {
-        name: "체력",
-        value: 20
-      },
-      {
-        name: "의지",
-        value: 5
-      }
-    ],
-    index: 106,
     isCatering: true
   },
   {
@@ -4156,12 +3468,12 @@ const cookings = [
         value: 5
       },
       {
-        name: "지력",
-        value: -10
-      },
-      {
         name: "행운",
         value: 10
+      },
+      {
+        name: "지력",
+        value: -10
       }
     ],
     index: 439,
@@ -4181,11 +3493,11 @@ const cookings = [
         value: 25
       },
       {
-        name: "솜씨",
+        name: "지력",
         value: 3
       },
       {
-        name: "지력",
+        name: "솜씨",
         value: 3
       }
     ],
@@ -4273,12 +3585,12 @@ const cookings = [
         value: 3
       },
       {
-        name: "솜씨",
-        value: 10
-      },
-      {
         name: "의지",
         value: 8
+      },
+      {
+        name: "솜씨",
+        value: 10
       }
     ],
     index: 3,
@@ -4323,45 +3635,16 @@ const cookings = [
         value: 28
       },
       {
-        name: "체력",
+        name: "행운",
         value: 13
       },
       {
-        name: "행운",
+        name: "체력",
         value: 13
       }
     ],
     index: 443,
     isCatering: true
-  },
-  {
-    originName: "",
-    localName: "코코넛 파운드 케익+달걀",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "야자열매(30%) 밀가루 빵 반죽(50%) 달걀(20%)",
-    thumbnail: null,
-    status: [],
-    index: 444,
-    isCatering: true
-  },
-  {
-    originName: "Kraken Skewer",
-    localName: "크라켄 호롱구이",
-    originCookingType: "Baking",
-    localCookingType: "굽기",
-    originRecipe: "Kraken Leg Meat(80%) Red Pepper Powder(20%)",
-    localRecipe: "크라켄 다리살(80%) 고춧가루(20%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/a/a9/Kraken_Skewer.png",
-    status: [
-      {
-        name: "스태미나",
-        value: 200
-      }
-    ],
-    index: 183,
-    isCatering: false
   },
   {
     originName: "",
@@ -4386,18 +3669,6 @@ const cookings = [
       }
     ],
     index: 445,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "크레이프",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "밀가루 빵 반죽(83%) 달걀(9%) 우유(8%)",
-    thumbnail: null,
-    status: [],
-    index: 446,
     isCatering: true
   },
   {
@@ -4431,16 +3702,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30631.png",
     status: [
       {
+        name: "체력",
+        value: 10
+      },
+      {
         name: "생명력",
         value: 50
       },
       {
         name: "마나",
         value: 50
-      },
-      {
-        name: "체력",
-        value: 10
       }
     ],
     index: 9,
@@ -4460,27 +3731,15 @@ const cookings = [
         value: 28
       },
       {
-        name: "체력",
-        value: 13
-      },
-      {
         name: "의지",
         value: 18
+      },
+      {
+        name: "체력",
+        value: 13
       }
     ],
     index: 447,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "토르티야",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "옥수수 빵 반죽(100%)",
-    thumbnail: null,
-    status: [],
-    index: 448,
     isCatering: true
   },
   {
@@ -4506,18 +3765,6 @@ const cookings = [
   },
   {
     originName: "",
-    localName: "토스트+설탕",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "식빵(72%) 버터(22%) 설탕(6%)",
-    thumbnail: null,
-    status: [],
-    index: 449,
-    isCatering: true
-  },
-  {
-    originName: "",
     localName: "통감자구이",
     originCookingType: "",
     localCookingType: "굽기",
@@ -4538,18 +3785,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "통감자구이+소금",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "감자(90%) 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 451,
-    isCatering: true
-  },
-  {
     originName: "Truffle Omelet",
     localName: "트뤼프 오믈렛",
     originCookingType: "Baking",
@@ -4559,12 +3794,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10782.png",
     status: [
       {
-        name: "스태미나",
-        value: 40
-      },
-      {
         name: "솜씨",
         value: 30
+      },
+      {
+        name: "스태미나",
+        value: 40
       }
     ],
     index: 265,
@@ -4588,16 +3823,16 @@ const cookings = [
         value: 15
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 8
       },
       {
         name: "의지",
         value: 16
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 213,
@@ -4613,31 +3848,19 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10787.png",
     status: [
       {
+        name: "행운",
+        value: 30
+      },
+      {
         name: "생명력",
         value: 25
       },
       {
         name: "마나",
         value: 25
-      },
-      {
-        name: "행운",
-        value: 30
       }
     ],
     index: 188,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "포춘쿠키",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "밀가루(50%) 달걀(15%) 버터(35%)",
-    thumbnail: null,
-    status: [],
-    index: 452,
     isCatering: true
   },
   {
@@ -4658,11 +3881,11 @@ const cookings = [
         value: 150
       },
       {
-        name: "의지",
+        name: "지력",
         value: 150
       },
       {
-        name: "지력",
+        name: "의지",
         value: 150
       },
       {
@@ -4759,12 +3982,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30630.png",
     status: [
       {
-        name: "마나",
-        value: 50
-      },
-      {
         name: "행운",
         value: 30
+      },
+      {
+        name: "마나",
+        value: 50
       },
       {
         name: "마법보호",
@@ -4797,42 +4020,6 @@ const cookings = [
       }
     ],
     index: 325,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "훈제 개복치+후추",
-    originCookingType: "",
-    localCookingType: "굽기",
-    originRecipe: "",
-    localRecipe: "개복치(80%) 소금(10%) 후추(10%)",
-    thumbnail: null,
-    status: [],
-    index: 453,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "단호박 퓌레",
-    originCookingType: "",
-    localCookingType: "삶기",
-    originRecipe: "",
-    localRecipe: "단호박(90%) 물이 든 병(10%)",
-    thumbnail: null,
-    status: [],
-    index: 454,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "볼살바토르의 특제 삶은 고구마",
-    originCookingType: "",
-    localCookingType: "삶기",
-    originRecipe: "",
-    localRecipe: "볼살바토르의 고구마(85%) 물이 든 병(15%)",
-    thumbnail: null,
-    status: [],
-    index: 455,
     isCatering: true
   },
   {
@@ -4963,18 +4150,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "삶은달걀+소금",
-    originCookingType: "",
-    localCookingType: "삶기",
-    originRecipe: "",
-    localRecipe: "달걀(36%) 물이 든 병(59%) 소금(5%)",
-    thumbnail: null,
-    status: [],
-    index: 456,
-    isCatering: true
-  },
-  {
     originName: "Chicken Soup",
     localName: "삼계탕",
     originCookingType: "Simmering",
@@ -4988,12 +4163,12 @@ const cookings = [
         value: 28
       },
       {
-        name: "솜씨",
-        value: -15
-      },
-      {
         name: "행운",
         value: 15
+      },
+      {
+        name: "솜씨",
+        value: -15
       }
     ],
     index: 18,
@@ -5017,112 +4192,19 @@ const cookings = [
         value: 20
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 8
       },
       {
         name: "의지",
         value: 10
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 310,
-    isCatering: true
-  },
-  {
-    originName: "Kraken Pulpo",
-    localName: "크라켄 뽈뽀",
-    originCookingType: "Simmering",
-    localCookingType: "삶기",
-    originRecipe: "Kraken Leg Meat(80%) Pepper(20%)",
-    localRecipe: "크라켄 다리살(80%) 후추(20%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/0/04/Kraken_Pulpo.png",
-    status: [
-      {
-        name: "방어",
-        value: 20
-      },
-      {
-        name: "마법방어",
-        value: 20
-      }
-    ],
-    index: 198,
-    isCatering: false
-  },
-  {
-    originName: "",
-    localName: "팥소",
-    originCookingType: "",
-    localCookingType: "삶기",
-    originRecipe: "",
-    localRecipe: "팥(85%) 물이 든 병(15%)",
-    thumbnail: null,
-    status: [],
-    index: 457,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "밀가루 빵 반죽",
-    originCookingType: "",
-    localCookingType: "반죽",
-    originRecipe: "",
-    localRecipe: "밀가루(75%) 이스트(14%) 물이 든 병(26%)",
-    thumbnail: null,
-    status: [],
-    index: 458,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "새우 조련 미끼",
-    originCookingType: "",
-    localCookingType: "반죽",
-    originRecipe: "",
-    localRecipe: "새우(30%) 설탕(38%) 마늘(32%)",
-    thumbnail: null,
-    status: [],
-    index: 459,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "옥수수 빵 반죽",
-    originCookingType: "",
-    localCookingType: "반죽",
-    originRecipe: "",
-    localRecipe: "옥수수 가루(35%) 밀가루(35%) 물이 든 병(30%)",
-    thumbnail: null,
-    status: [],
-    index: 460,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "은붕어 조련 미끼",
-    originCookingType: "",
-    localCookingType: "반죽",
-    originRecipe: "",
-    localRecipe: "은붕어(35%) 물엿(33%) 마늘(32%)",
-    thumbnail: null,
-    status: [],
-    index: 461,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "튀김옷",
-    originCookingType: "",
-    localCookingType: "반죽",
-    originRecipe: "",
-    localRecipe: "튀김가루(15%) 달걀(25%) 물이 든 병(60%)",
-    thumbnail: null,
-    status: [],
-    index: 462,
     isCatering: true
   },
   {
@@ -5168,30 +4250,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "개다래 차",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "개다래 열매(10%) 물이 든 병(85%)",
-    thumbnail: null,
-    status: [],
-    index: 463,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "개다래 차+타임",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "개다래 열매(10%) 물이 든 병(85%) 타임(5%)",
-    thumbnail: null,
-    status: [],
-    index: 464,
-    isCatering: true
-  },
-  {
     originName: "Egg Porridge",
     localName: "계란죽",
     originCookingType: "Boiling",
@@ -5222,12 +4280,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10792.png",
     status: [
       {
-        name: "생명력",
-        value: 40
-      },
-      {
         name: "체력",
         value: 35
+      },
+      {
+        name: "생명력",
+        value: 40
       },
       {
         name: "방어",
@@ -5276,7 +4334,7 @@ const cookings = [
         value: 30
       },
       {
-        name: "최소 공격력",
+        name: "최소대미지",
         value: 1
       }
     ],
@@ -5318,15 +4376,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30649.png",
     status: [
       {
-        name: "스태미나",
-        value: 20
-      },
-      {
         name: "의지",
         value: 15
       },
       {
         name: "행운",
+        value: 20
+      },
+      {
+        name: "스태미나",
         value: 20
       }
     ],
@@ -5372,15 +4430,15 @@ const cookings = [
         value: 10
       },
       {
+        name: "지력",
+        value: 10
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
         name: "의지",
-        value: 10
-      },
-      {
-        name: "지력",
         value: 10
       },
       {
@@ -5401,10 +4459,6 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10291.png",
     status: [
       {
-        name: "스태미나",
-        value: 300
-      },
-      {
         name: "체력",
         value: 100
       },
@@ -5415,6 +4469,10 @@ const cookings = [
       {
         name: "행운",
         value: 100
+      },
+      {
+        name: "스태미나",
+        value: 300
       }
     ],
     index: 57,
@@ -5430,10 +4488,6 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10290.png",
     status: [
       {
-        name: "마나",
-        value: 300
-      },
-      {
         name: "솜씨",
         value: 100
       },
@@ -5444,6 +4498,10 @@ const cookings = [
       {
         name: "행운",
         value: 100
+      },
+      {
+        name: "마나",
+        value: 300
       }
     ],
     index: 102,
@@ -5505,16 +4563,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10791.png",
     status: [
       {
-        name: "보호",
-        value: 1
+        name: "의지",
+        value: 30
       },
       {
         name: "스태미나",
         value: 40
       },
       {
-        name: "의지",
-        value: 30
+        name: "보호",
+        value: 1
       }
     ],
     index: 283,
@@ -5555,31 +4613,19 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30648.png",
     status: [
       {
-        name: "마나",
-        value: 20
-      },
-      {
         name: "솜씨",
         value: 20
       },
       {
         name: "의지",
         value: 15
+      },
+      {
+        name: "마나",
+        value: 20
       }
     ],
     index: 466,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "리파이 차",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "리파이 뿌리(30%) 물이 든 병(55%) 신선한 벌꿀(15%)",
-    thumbnail: null,
-    status: [],
-    index: 467,
     isCatering: true
   },
   {
@@ -5617,11 +4663,11 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10789.png",
     status: [
       {
-        name: "생명력",
+        name: "지력",
         value: 35
       },
       {
-        name: "지력",
+        name: "생명력",
         value: 35
       }
     ],
@@ -5638,27 +4684,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30633.png",
     status: [
       {
-        name: "마나",
-        value: 50
-      },
-      {
         name: "행운",
         value: 30
+      },
+      {
+        name: "마나",
+        value: 50
       }
     ],
     index: 322,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "물엿",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "물이 든 병(27%) 설탕(33%) 쌀(40%)",
-    thumbnail: null,
-    status: [],
-    index: 468,
     isCatering: true
   },
   {
@@ -5746,16 +4780,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30645.png",
     status: [
       {
-        name: "보호",
-        value: 1
+        name: "행운",
+        value: 30
       },
       {
         name: "마나",
         value: 30
       },
       {
-        name: "행운",
-        value: 30
+        name: "보호",
+        value: 1
       }
     ],
     index: 199,
@@ -5771,12 +4805,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30646.png",
     status: [
       {
-        name: "스태미나",
-        value: 30
-      },
-      {
         name: "지력",
         value: 25
+      },
+      {
+        name: "스태미나",
+        value: 30
       }
     ],
     index: 222,
@@ -5842,12 +4876,12 @@ const cookings = [
         value: 13
       },
       {
-        name: "의지",
-        value: 12
-      },
-      {
         name: "행운",
         value: 10
+      },
+      {
+        name: "의지",
+        value: 12
       }
     ],
     index: 469,
@@ -5963,11 +4997,11 @@ const cookings = [
         value: 10
       },
       {
-        name: "솜씨",
+        name: "의지",
         value: 5
       },
       {
-        name: "의지",
+        name: "솜씨",
         value: 5
       }
     ],
@@ -5992,16 +5026,16 @@ const cookings = [
         value: 15
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 8
       },
       {
         name: "의지",
         value: 16
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 470,
@@ -6033,18 +5067,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "아르바이트용 금은 매운탕",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "아르바이트용 금린어(45%) 아르바이트용 은붕어(45%) 아르바이트용 고추가루(10%)",
-    thumbnail: null,
-    status: [],
-    index: 472,
-    isCatering: true
-  },
-  {
     originName: "Abb Neagh Carp Stew",
     localName: "아브 네아 잉어 스튜",
     originCookingType: "Boiling",
@@ -6058,16 +5080,16 @@ const cookings = [
         value: 25
       },
       {
-        name: "체력",
-        value: 10
+        name: "행운",
+        value: 20
       },
       {
         name: "의지",
         value: 5
       },
       {
-        name: "행운",
-        value: 20
+        name: "체력",
+        value: 10
       }
     ],
     index: 23,
@@ -6083,12 +5105,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10790.png",
     status: [
       {
-        name: "스태미나",
-        value: 40
-      },
-      {
         name: "행운",
         value: 25
+      },
+      {
+        name: "스태미나",
+        value: 40
       }
     ],
     index: 221,
@@ -6108,11 +5130,11 @@ const cookings = [
         value: 15
       },
       {
-        name: "솜씨",
+        name: "지력",
         value: 10
       },
       {
-        name: "지력",
+        name: "솜씨",
         value: 10
       }
     ],
@@ -6138,18 +5160,6 @@ const cookings = [
       }
     ],
     index: 473,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "양송이스프+후추",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "양송이볶음(60%) 생크림(33%) 후추(7%)",
-    thumbnail: null,
-    status: [],
-    index: 474,
     isCatering: true
   },
   {
@@ -6216,16 +5226,16 @@ const cookings = [
         value: 8
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
         name: "의지",
         value: 10
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 475,
@@ -6241,39 +5251,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10071.png",
     status: [
       {
-        name: "솜씨",
-        value: -5
-      },
-      {
         name: "행운",
         value: 20
+      },
+      {
+        name: "솜씨",
+        value: -5
       }
     ],
     index: 25,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "우스터 소스",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "야채 모둠(55%) 물이 든 병(45%) 앤초비(20%)",
-    thumbnail: null,
-    status: [],
-    index: 476,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "육수",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "쇠고기(60%) 물이 든 병(40%)",
-    thumbnail: null,
-    status: [],
-    index: 477,
     isCatering: true
   },
   {
@@ -6311,12 +5297,12 @@ const cookings = [
         value: 10
       },
       {
-        name: "체력",
-        value: 5
-      },
-      {
         name: "의지",
         value: 8
+      },
+      {
+        name: "체력",
+        value: 5
       }
     ],
     index: 224,
@@ -6336,16 +5322,16 @@ const cookings = [
         value: 12
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
         name: "의지",
         value: 15
-      },
-      {
-        name: "지력",
-        value: 8
       },
       {
         name: "행운",
@@ -6369,16 +5355,16 @@ const cookings = [
         value: 28
       },
       {
-        name: "솜씨",
-        value: 5
+        name: "지력",
+        value: 8
       },
       {
         name: "의지",
         value: 5
       },
       {
-        name: "지력",
-        value: 8
+        name: "솜씨",
+        value: 5
       }
     ],
     index: 59,
@@ -6402,16 +5388,16 @@ const cookings = [
         value: 10
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 8
       },
       {
         name: "의지",
         value: 12
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 478,
@@ -6431,11 +5417,11 @@ const cookings = [
         value: 20
       },
       {
-        name: "체력",
+        name: "행운",
         value: 5
       },
       {
-        name: "행운",
+        name: "체력",
         value: 5
       }
     ],
@@ -6456,12 +5442,12 @@ const cookings = [
         value: 38
       },
       {
-        name: "체력",
-        value: 28
-      },
-      {
         name: "행운",
         value: 21
+      },
+      {
+        name: "체력",
+        value: 28
       }
     ],
     index: 479,
@@ -6485,56 +5471,19 @@ const cookings = [
         value: 8
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 12
       },
       {
         name: "의지",
         value: 12
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 480,
-    isCatering: true
-  },
-  {
-    originName: "Spicy Kraken Stew",
-    localName: "크라켄 매운탕",
-    originCookingType: "Boiling",
-    localCookingType: "끓이기",
-    originRecipe: "Raw Chopped Kraken(35%) Steamed Kraken(35%) Kraken Skewer(30%)",
-    localRecipe: "크라켄 탕탕이(35%) 자숙 크라켄(35%) 크라켄 호롱구이(30%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/a/a7/Spicy_Kraken_Stew.png",
-    status: [
-      {
-        name: "생명력",
-        value: 245
-      },
-      {
-        name: "마나",
-        value: 245
-      },
-      {
-        name: "스태미나",
-        value: 245
-      }
-    ],
-    index: 293,
-    isCatering: false
-  },
-  {
-    originName: "",
-    localName: "크림 소스",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "생크림(60%) 우유(30%)",
-    thumbnail: null,
-    status: [],
-    index: 481,
     isCatering: true
   },
   {
@@ -6589,18 +5538,6 @@ const cookings = [
   },
   {
     originName: "",
-    localName: "토마토 소스",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "토마토(70%) 고기 조각(20%)",
-    thumbnail: null,
-    status: [],
-    index: 483,
-    isCatering: true
-  },
-  {
-    originName: "",
     localName: "특대 떡국",
     originCookingType: "",
     localCookingType: "끓이기",
@@ -6608,10 +5545,6 @@ const cookings = [
     localRecipe: "떡국 곱빼기(80%) 하얀 떡(12%) 달걀(8%)",
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10296.png",
     status: [
-      {
-        name: "보호",
-        value: 1
-      },
       {
         name: "생명력",
         value: 10
@@ -6621,12 +5554,16 @@ const cookings = [
         value: 18
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 4
       },
       {
-        name: "지력",
-        value: 8
+        name: "보호",
+        value: 1
       }
     ],
     index: 484,
@@ -6642,15 +5579,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30647.png",
     status: [
       {
-        name: "생명력",
-        value: 20
-      },
-      {
         name: "체력",
         value: 15
       },
       {
         name: "지력",
+        value: 20
+      },
+      {
+        name: "생명력",
         value: 20
       }
     ],
@@ -6683,30 +5620,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "해물 소스",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "새우(60%) 마늘(20%)",
-    thumbnail: null,
-    status: [],
-    index: 486,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "해물 소스+후추",
-    originCookingType: "",
-    localCookingType: "끓이기",
-    originRecipe: "",
-    localRecipe: "새우(67%) 마늘(23%) 후추(10%)",
-    thumbnail: null,
-    status: [],
-    index: 487,
-    isCatering: true
-  },
-  {
     originName: "Black Tea",
     localName: "홍차",
     originCookingType: "Boiling",
@@ -6716,12 +5629,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30644.png",
     status: [
       {
-        name: "생명력",
-        value: 30
-      },
-      {
         name: "행운",
         value: 25
+      },
+      {
+        name: "생명력",
+        value: 30
       }
     ],
     index: 76,
@@ -6737,16 +5650,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10794.png",
     status: [
       {
-        name: "생명력",
-        value: 30
-      },
-      {
         name: "솜씨",
         value: 40
       },
       {
         name: "행운",
         value: 25
+      },
+      {
+        name: "생명력",
+        value: 30
       }
     ],
     index: 488,
@@ -6795,18 +5708,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "누들",
-    originCookingType: "",
-    localCookingType: "면 만들기",
-    originRecipe: "",
-    localRecipe: "밀가루(40%) 달걀(20%) 물이 든 병(40%)",
-    thumbnail: null,
-    status: [],
-    index: 489,
-    isCatering: true
-  },
-  {
     originName: "Chicken Chow Mein",
     localName: "닭고기 볶음면",
     originCookingType: "Noodle Making",
@@ -6816,16 +5717,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10321.png",
     status: [
       {
-        name: "스태미나",
-        value: -12
-      },
-      {
         name: "체력",
         value: 20
       },
       {
         name: "의지",
         value: 10
+      },
+      {
+        name: "스태미나",
+        value: -12
       }
     ],
     index: 81,
@@ -6838,7 +5739,7 @@ const cookings = [
     localCookingType: "면 만들기",
     originRecipe: "Somen Noodles(43%) Mashed Water-soaked Bean Flour Tofu(17%) Meat Broth(40%)",
     localRecipe: "소면(43%) 뭉개진 구운 콩가루 두부(17%) 육수(40%)",
-    thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10355.png",
+    thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10354.png",
     status: [
       {
         name: "생명력",
@@ -6862,10 +5763,6 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10793.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "체력",
         value: 55
       },
@@ -6876,6 +5773,10 @@ const cookings = [
       {
         name: "방어",
         value: 8
+      },
+      {
+        name: "보호",
+        value: 1
       }
     ],
     index: 33,
@@ -6928,18 +5829,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "소면",
-    originCookingType: "",
-    localCookingType: "면 만들기",
-    originRecipe: "",
-    localRecipe: "밀가루(45%) 소금(5%) 물이 든 병(50%)",
-    thumbnail: null,
-    status: [],
-    index: 490,
-    isCatering: true
-  },
-  {
     originName: "Festive Noodles",
     localName: "잔치국수",
     originCookingType: "Noodle Making",
@@ -6953,12 +5842,12 @@ const cookings = [
         value: 15
       },
       {
-        name: "솜씨",
-        value: 2
-      },
-      {
         name: "의지",
         value: 8
+      },
+      {
+        name: "솜씨",
+        value: 2
       }
     ],
     index: 43,
@@ -6999,12 +5888,12 @@ const cookings = [
         value: 15
       },
       {
-        name: "의지",
-        value: 20
-      },
-      {
         name: "지력",
         value: -30
+      },
+      {
+        name: "의지",
+        value: 20
       }
     ],
     index: 139,
@@ -7041,12 +5930,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10380.png",
     status: [
       {
-        name: "솜씨",
-        value: -25
-      },
-      {
         name: "행운",
         value: 35
+      },
+      {
+        name: "솜씨",
+        value: -25
       }
     ],
     index: 137,
@@ -7175,16 +6064,16 @@ const cookings = [
         value: 20
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
         name: "의지",
         value: 22
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 491,
@@ -7246,16 +6135,16 @@ const cookings = [
         value: 20
       },
       {
-        name: "체력",
-        value: 40
-      },
-      {
         name: "솜씨",
         value: -20
       },
       {
         name: "의지",
         value: 30
+      },
+      {
+        name: "체력",
+        value: 40
       },
       {
         name: "지력",
@@ -7283,31 +6172,19 @@ const cookings = [
         value: 22
       },
       {
+        name: "지력",
+        value: 4
+      },
+      {
         name: "솜씨",
         value: 4
       },
       {
         name: "의지",
         value: 20
-      },
-      {
-        name: "지력",
-        value: 4
       }
     ],
     index: 226,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "열빙어 튀김",
-    originCookingType: "",
-    localCookingType: "튀기기",
-    originRecipe: "",
-    localRecipe: "열빙어(60%) 튀김옷(30%)",
-    thumbnail: null,
-    status: [],
-    index: 493,
     isCatering: true
   },
   {
@@ -7328,41 +6205,20 @@ const cookings = [
         value: 8
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 12
       },
       {
         name: "의지",
         value: 12
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 89,
     isCatering: true
-  },
-  {
-    originName: "Spicy Fried Kraken",
-    localName: "타바스코 프라이드 크라켄",
-    originCookingType: "Deep-frying",
-    localCookingType: "튀기기",
-    originRecipe: "Kraken Leg Meat(75%) Fry Batter(15%) Lemon(10%)",
-    localRecipe: "크라켄 다리살(75%) 튀김옷(15%) 레몬(10%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/1/11/Spicy_Fried_Kraken.png",
-    status: [
-      {
-        name: "보호",
-        value: 4
-      },
-      {
-        name: "마법보호",
-        value: 4
-      }
-    ],
-    index: 330,
-    isCatering: false
   },
   {
     originName: "Fried Chicken",
@@ -7403,11 +6259,11 @@ const cookings = [
         value: 18
       },
       {
-        name: "솜씨",
+        name: "의지",
         value: 5
       },
       {
-        name: "의지",
+        name: "솜씨",
         value: 5
       }
     ],
@@ -7437,54 +6293,6 @@ const cookings = [
   },
   {
     originName: "",
-    localName: "개다래 도미 볶음",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "개다래 도미(50%) 라인산 진(35%)",
-    thumbnail: null,
-    status: [],
-    index: 494,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "개다래 도미 볶음+고춧가루",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "개다래 도미(50%) 라인산 진(35%) 고춧가루(15%)",
-    thumbnail: null,
-    status: [],
-    index: 495,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "개다래 도미 볶음+샐러리",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "개다래 도미(50%) 라인산 진(35%) 샐러리(15%)",
-    thumbnail: null,
-    status: [],
-    index: 496,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "개다래 도미 볶음+설탕",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "개다래 도미(50%) 라인산 진(35%) 설탕(15%)",
-    thumbnail: null,
-    status: [],
-    index: 497,
-    isCatering: true
-  },
-  {
-    originName: "",
     localName: "김치볶음밥",
     originCookingType: "",
     localCookingType: "볶기",
@@ -7493,12 +6301,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30635.png",
     status: [
       {
-        name: "스태미나",
-        value: 45
-      },
-      {
         name: "의지",
         value: 30
+      },
+      {
+        name: "스태미나",
+        value: 45
       }
     ],
     index: 498,
@@ -7543,16 +6351,16 @@ const cookings = [
         value: 15
       },
       {
+        name: "지력",
+        value: 4
+      },
+      {
         name: "솜씨",
         value: 8
       },
       {
         name: "의지",
         value: 20
-      },
-      {
-        name: "지력",
-        value: 4
       }
     ],
     index: 499,
@@ -7572,12 +6380,12 @@ const cookings = [
         value: 45
       },
       {
-        name: "지력",
-        value: -8
-      },
-      {
         name: "행운",
         value: 26
+      },
+      {
+        name: "지력",
+        value: -8
       }
     ],
     index: 500,
@@ -7601,16 +6409,16 @@ const cookings = [
         value: 12
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
         name: "의지",
         value: 18
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 501,
@@ -7634,27 +6442,15 @@ const cookings = [
         value: 10
       },
       {
-        name: "의지",
-        value: 15
-      },
-      {
         name: "지력",
         value: 10
+      },
+      {
+        name: "의지",
+        value: 15
       }
     ],
     index: 502,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "새우볶음밥+달걀",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "밥(65%) 새우(27%) 달걀(8%)",
-    thumbnail: null,
-    status: [],
-    index: 503,
     isCatering: true
   },
   {
@@ -7713,16 +6509,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30634.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "생명력",
         value: 40
       },
       {
         name: "마나",
         value: 40
+      },
+      {
+        name: "보호",
+        value: 1
       }
     ],
     index: 333,
@@ -7750,18 +6546,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "양송이볶음+소금",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "양송이(63%) 마늘(27%) 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 505,
-    isCatering: true
-  },
-  {
     originName: "Fried Onion",
     localName: "양파볶음",
     originCookingType: "Stir-frying",
@@ -7783,18 +6567,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "양파볶음+소금",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "양파(47%) 마늘(40%) 소금(13%)",
-    thumbnail: null,
-    status: [],
-    index: 506,
-    isCatering: true
-  },
-  {
     originName: "Omurice",
     localName: "오므라이스",
     originCookingType: "Stir-frying",
@@ -7804,12 +6576,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10903.png",
     status: [
       {
-        name: "생명력",
-        value: 30
-      },
-      {
         name: "체력",
         value: 7
+      },
+      {
+        name: "생명력",
+        value: 30
       }
     ],
     index: 142,
@@ -7850,65 +6622,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30637.png",
     status: [
       {
-        name: "스태미나",
-        value: 40
-      },
-      {
         name: "솜씨",
         value: 20
+      },
+      {
+        name: "스태미나",
+        value: 40
       }
     ],
     index: 508,
     isCatering: true
-  },
-  {
-    originName: "Kraken Stirfry",
-    localName: "크라켄 볶음 모둠",
-    originCookingType: "Stir-frying",
-    localCookingType: "볶기",
-    originRecipe: "Kraken Pulpo(35%) Spicy Fried Kraken(35%) Kraken Ink Pasta(30%)",
-    localRecipe: "크라켄 뽈뽀(35%) 타바스코 프라이드 크라켄(35%) 크라켄 먹물 파스타(30%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/d/df/Kraken_Stirfry.png",
-    status: [
-      {
-        name: "체력",
-        value: 59
-      },
-      {
-        name: "지력",
-        value: 59
-      },
-      {
-        name: "솜씨",
-        value: 59
-      },
-      {
-        name: "의지",
-        value: 59
-      },
-      {
-        name: "행운",
-        value: 59
-      },
-      {
-        name: "방어",
-        value: 24
-      },
-      {
-        name: "보호",
-        value: 3
-      },
-      {
-        name: "마법방어",
-        value: 24
-      },
-      {
-        name: "마법보호",
-        value: 3
-      }
-    ],
-    index: 179,
-    isCatering: false
   },
   {
     originName: "Tomato Egg Stir-Fry",
@@ -7920,12 +6643,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30651.png",
     status: [
       {
-        name: "생명력",
-        value: 30
-      },
-      {
         name: "솜씨",
         value: 35
+      },
+      {
+        name: "생명력",
+        value: 30
       },
       {
         name: "마법보호",
@@ -7945,27 +6668,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30636.png",
     status: [
       {
-        name: "마법공격력",
-        value: 1
-      },
-      {
         name: "지력",
         value: 35
+      },
+      {
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 317,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "파스타 재료 모둠",
-    originCookingType: "",
-    localCookingType: "볶기",
-    originRecipe: "",
-    localRecipe: "양파(45%) 마늘(15%) 베이컨(40%)",
-    thumbnail: null,
-    status: [],
-    index: 509,
     isCatering: true
   },
   {
@@ -7978,12 +6689,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10810.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "생명력",
         value: 60
+      },
+      {
+        name: "보호",
+        value: 1
       },
       {
         name: "마법보호",
@@ -8011,15 +6722,15 @@ const cookings = [
         value: 10
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
         name: "의지",
-        value: 8
-      },
-      {
-        name: "지력",
         value: 8
       }
     ],
@@ -8036,27 +6747,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10364.png",
     status: [
       {
-        name: "마나",
-        value: -10
-      },
-      {
         name: "스태미나",
         value: 15
+      },
+      {
+        name: "마나",
+        value: -10
       }
     ],
     index: 63,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "롱 파스타",
-    originCookingType: "",
-    localCookingType: "파스타 만들기",
-    originRecipe: "",
-    localRecipe: "파스타 반죽(20%) 물이 든 병(80%)",
-    thumbnail: null,
-    status: [],
-    index: 510,
     isCatering: true
   },
   {
@@ -8102,18 +6801,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "쇼트 파스타",
-    originCookingType: "",
-    localCookingType: "파스타 만들기",
-    originRecipe: "",
-    localRecipe: "파스타 반죽(20%) 물이 든 병(80%) 달걀(5%)",
-    thumbnail: null,
-    status: [],
-    index: 511,
-    isCatering: true
-  },
-  {
     originName: "Amatriciana",
     localName: "아마트리치아나",
     originCookingType: "Pasta Making",
@@ -8144,49 +6831,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10363.png",
     status: [
       {
-        name: "생명력",
-        value: -10
-      },
-      {
         name: "마나",
         value: 17
+      },
+      {
+        name: "생명력",
+        value: -10
       }
     ],
     index: 301,
     isCatering: true
-  },
-  {
-    originName: "Kraken Ink Pasta",
-    localName: "크라켄 먹물 파스타",
-    originCookingType: "Pasta Making",
-    localCookingType: "파스타 만들기",
-    originRecipe: "Kraken Ink(75%) Garlic(15%) Olive Oil(10%)",
-    localRecipe: "크라켄 먹물(75%) 마늘(15%) 올리브유(10%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/e/ec/Kraken_Ink_Pasta.png",
-    status: [
-      {
-        name: "체력",
-        value: -50
-      },
-      {
-        name: "지력",
-        value: -50
-      },
-      {
-        name: "솜씨",
-        value: -50
-      },
-      {
-        name: "의지",
-        value: -50
-      },
-      {
-        name: "행운",
-        value: -50
-      }
-    ],
-    index: 171,
-    isCatering: false
   },
   {
     originName: "",
@@ -8206,16 +6860,16 @@ const cookings = [
         value: 8
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 20
       },
       {
         name: "의지",
         value: 20
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 512,
@@ -8239,31 +6893,19 @@ const cookings = [
         value: 10
       },
       {
+        name: "지력",
+        value: 4
+      },
+      {
         name: "솜씨",
         value: 30
       },
       {
         name: "의지",
         value: 10
-      },
-      {
-        name: "지력",
-        value: 4
       }
     ],
     index: 513,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "토마토 스파게티+후추",
-    originCookingType: "",
-    localCookingType: "파스타 만들기",
-    originRecipe: "",
-    localRecipe: "롱 파스타(63%) 토마토 소스(32%) 후추(5%)",
-    thumbnail: null,
-    status: [],
-    index: 514,
     isCatering: true
   },
   {
@@ -8276,27 +6918,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10223.png",
     status: [
       {
-        name: "스태미나",
+        name: "체력",
         value: 30
       },
       {
-        name: "체력",
+        name: "스태미나",
         value: 30
       }
     ],
     index: 515,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "파스타 반죽",
-    originCookingType: "",
-    localCookingType: "파스타 만들기",
-    originRecipe: "",
-    localRecipe: "밀가루(60%) 달걀(30%)",
-    thumbnail: null,
-    status: [],
-    index: 516,
     isCatering: true
   },
   {
@@ -8317,31 +6947,19 @@ const cookings = [
         value: 5
       },
       {
+        name: "지력",
+        value: 12
+      },
+      {
         name: "솜씨",
         value: 25
       },
       {
         name: "의지",
         value: 15
-      },
-      {
-        name: "지력",
-        value: 12
       }
     ],
     index: 233,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "해물 스파게티+후추",
-    originCookingType: "",
-    localCookingType: "파스타 만들기",
-    originRecipe: "",
-    localRecipe: "롱 파스타(63%) 해물 소스(32%) 후추(5%)",
-    thumbnail: null,
-    status: [],
-    index: 517,
     isCatering: true
   },
   {
@@ -8359,43 +6977,6 @@ const cookings = [
       }
     ],
     index: 309,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "딸기잼",
-    originCookingType: "",
-    localCookingType: "잼 만들기",
-    originRecipe: "",
-    localRecipe: "딸기(60%) 설탕(35%) 레몬즙(5%)",
-    thumbnail: null,
-    status: [],
-    index: 518,
-    isCatering: true
-  },
-  {
-    originName: "Peanut Butter Jam",
-    localName: "땅콩버터잼",
-    originCookingType: "Jam Making",
-    localCookingType: "잼 만들기",
-    originRecipe: "Peanuts(65%) Olive Oil(30%) Salt / Sugar(5%)",
-    localRecipe: "땅콩(65%) 올리브유(30%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/e/ea/Peanut_Butter_Jam.png",
-    status: [
-      {
-        name: "스태미나",
-        value: 2
-      },
-      {
-        name: "지력",
-        value: 4
-      },
-      {
-        name: "솜씨",
-        value: 5
-      }
-    ],
-    index: 249,
     isCatering: true
   },
   {
@@ -8429,27 +7010,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10827.png",
     status: [
       {
-        name: "생명력",
+        name: "체력",
         value: 10
       },
       {
-        name: "체력",
+        name: "생명력",
         value: 10
       }
     ],
     index: 128,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "민트 시럽",
-    originCookingType: "",
-    localCookingType: "잼 만들기",
-    originRecipe: "",
-    localRecipe: "박하(65%) 물이 든 병(20%) 설탕(15%)",
-    thumbnail: null,
-    status: [],
-    index: 519,
     isCatering: true
   },
   {
@@ -8471,18 +7040,6 @@ const cookings = [
       }
     ],
     index: 8,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "사과잼",
-    originCookingType: "",
-    localCookingType: "잼 만들기",
-    originRecipe: "",
-    localRecipe: "사과(65%) 설탕(30%) 소금(5%)",
-    thumbnail: null,
-    status: [],
-    index: 520,
     isCatering: true
   },
   {
@@ -8520,12 +7077,12 @@ const cookings = [
         value: 5
       },
       {
-        name: "솜씨",
-        value: 10
-      },
-      {
         name: "행운",
         value: 15
+      },
+      {
+        name: "솜씨",
+        value: 10
       }
     ],
     index: 521,
@@ -8554,18 +7111,6 @@ const cookings = [
       }
     ],
     index: 119,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "포도잼",
-    originCookingType: "",
-    localCookingType: "잼 만들기",
-    originRecipe: "",
-    localRecipe: "포도(50%) 설탕(45%)",
-    thumbnail: null,
-    status: [],
-    index: 522,
     isCatering: true
   },
   {
@@ -8638,18 +7183,6 @@ const cookings = [
       }
     ],
     index: 259,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "호박잼",
-    originCookingType: "",
-    localCookingType: "잼 만들기",
-    originRecipe: "",
-    localRecipe: "청둥호박(70%) 설탕(30%)",
-    thumbnail: null,
-    status: [],
-    index: 523,
     isCatering: true
   },
   {
@@ -8805,12 +7338,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30638.png",
     status: [
       {
-        name: "생명력",
-        value: 25
-      },
-      {
         name: "체력",
         value: 15
+      },
+      {
+        name: "생명력",
+        value: 25
       },
       {
         name: "방어",
@@ -8842,18 +7375,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "타르트 틀",
-    originCookingType: "",
-    localCookingType: "파이 만들기",
-    originRecipe: "",
-    localRecipe: "밀가루(60%) 버터(30%) 달걀(10%)",
-    thumbnail: null,
-    status: [],
-    index: 525,
-    isCatering: true
-  },
-  {
     originName: "Truffle Pie",
     localName: "트뤼프 파이",
     originCookingType: "Pie Making",
@@ -8871,12 +7392,12 @@ const cookings = [
         value: 10
       },
       {
-        name: "솜씨",
-        value: -17
-      },
-      {
         name: "행운",
         value: 8
+      },
+      {
+        name: "솜씨",
+        value: -17
       }
     ],
     index: 274,
@@ -8892,10 +7413,6 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10299.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "생명력",
         value: 15
       },
@@ -8904,27 +7421,19 @@ const cookings = [
         value: 10
       },
       {
+        name: "지력",
+        value: 12
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
-        name: "지력",
-        value: 12
+        name: "보호",
+        value: 1
       }
     ],
     index: 254,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "파이 틀",
-    originCookingType: "",
-    localCookingType: "파이 만들기",
-    originRecipe: "",
-    localRecipe: "밀가루(70%) 우유(20%) 달걀(10%)",
-    thumbnail: null,
-    status: [],
-    index: 526,
     isCatering: true
   },
   {
@@ -9089,16 +7598,16 @@ const cookings = [
         value: 28
       },
       {
-        name: "솜씨",
-        value: 5
+        name: "지력",
+        value: 8
       },
       {
         name: "의지",
         value: 5
       },
       {
-        name: "지력",
-        value: 8
+        name: "솜씨",
+        value: 5
       }
     ],
     index: 194,
@@ -9126,18 +7635,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "버섯 조개 찜",
-    originCookingType: "",
-    localCookingType: "찌기",
-    originRecipe: "",
-    localRecipe: "개암버섯(45%) 조개(45%) 소금(10%)",
-    thumbnail: null,
-    status: [],
-    index: 530,
-    isCatering: true
-  },
-  {
     originName: "Steamed Mushroom",
     localName: "버섯찜",
     originCookingType: "Steaming",
@@ -9151,11 +7648,11 @@ const cookings = [
         value: 18
       },
       {
-        name: "솜씨",
+        name: "행운",
         value: 5
       },
       {
-        name: "행운",
+        name: "솜씨",
         value: 5
       }
     ],
@@ -9218,15 +7715,15 @@ const cookings = [
         value: 22
       },
       {
-        name: "솜씨",
-        value: 5
-      },
-      {
         name: "지력",
         value: 7
       },
       {
         name: "행운",
+        value: 5
+      },
+      {
+        name: "솜씨",
         value: 5
       }
     ],
@@ -9322,18 +7819,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "자숙 크라켄",
-    originCookingType: "",
-    localCookingType: "찌기",
-    originRecipe: "",
-    localRecipe: "크라켄 다리살(80%) 레몬즙(20%)",
-    thumbnail: null,
-    status: [],
-    index: 535,
-    isCatering: true
-  },
-  {
     originName: "Steamed Dumplings",
     localName: "찐만두",
     originCookingType: "Steaming",
@@ -9377,12 +7862,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10846.png",
     status: [
       {
-        name: "마나",
-        value: 60
-      },
-      {
         name: "지력",
         value: 10
+      },
+      {
+        name: "마나",
+        value: 60
       },
       {
         name: "마법방어",
@@ -9390,18 +7875,6 @@ const cookings = [
       }
     ],
     index: 120,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "담백한 피자 도우",
-    originCookingType: "",
-    localCookingType: "피자 만들기",
-    originRecipe: "",
-    localRecipe: "밀가루 빵 반죽(100%)",
-    thumbnail: null,
-    status: [],
-    index: 536,
     isCatering: true
   },
   {
@@ -9414,16 +7887,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10847.png",
     status: [
       {
+        name: "솜씨",
+        value: 35
+      },
+      {
         name: "생명력",
         value: 35
       },
       {
         name: "마나",
         value: 20
-      },
-      {
-        name: "솜씨",
-        value: 35
       }
     ],
     index: 174,
@@ -9439,15 +7912,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10858.png",
     status: [
       {
+        name: "솜씨",
+        value: 30
+      },
+      {
         name: "생명력",
         value: 55
       },
       {
         name: "스태미나",
-        value: 30
-      },
-      {
-        name: "솜씨",
         value: 30
       }
     ],
@@ -9464,12 +7937,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10853.png",
     status: [
       {
-        name: "마나",
-        value: 50
-      },
-      {
         name: "의지",
         value: 30
+      },
+      {
+        name: "마나",
+        value: 50
       }
     ],
     index: 134,
@@ -9485,12 +7958,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10849.png",
     status: [
       {
-        name: "마나",
-        value: 60
-      },
-      {
         name: "솜씨",
         value: 10
+      },
+      {
+        name: "마나",
+        value: 60
       }
     ],
     index: 326,
@@ -9506,16 +7979,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10854.png",
     status: [
       {
-        name: "마법공격력",
-        value: 1
+        name: "지력",
+        value: 10
       },
       {
         name: "마나",
         value: 55
       },
       {
-        name: "지력",
-        value: 10
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 273,
@@ -9531,15 +8004,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10852.png",
     status: [
       {
-        name: "생명력",
-        value: 50
-      },
-      {
         name: "체력",
         value: 15
       },
       {
-        name: "최소 공격력",
+        name: "생명력",
+        value: 50
+      },
+      {
+        name: "최소대미지",
         value: 1
       }
     ],
@@ -9556,16 +8029,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10848.png",
     status: [
       {
+        name: "체력",
+        value: 35
+      },
+      {
         name: "생명력",
         value: 40
       },
       {
         name: "마나",
         value: 15
-      },
-      {
-        name: "체력",
-        value: 35
       }
     ],
     index: 34,
@@ -9581,16 +8054,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10859.png",
     status: [
       {
-        name: "생명력",
-        value: 20
-      },
-      {
         name: "체력",
         value: 40
       },
       {
         name: "행운",
         value: 10
+      },
+      {
+        name: "생명력",
+        value: 20
       },
       {
         name: "방어",
@@ -9610,31 +8083,19 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10857.png",
     status: [
       {
-        name: "보호",
-        value: 1
+        name: "지력",
+        value: 25
       },
       {
         name: "스태미나",
         value: 40
       },
       {
-        name: "지력",
-        value: 25
+        name: "보호",
+        value: 1
       }
     ],
     index: 272,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "토마토 소스 피자 도우",
-    originCookingType: "",
-    localCookingType: "피자 만들기",
-    originRecipe: "",
-    localRecipe: "밀가루 빵 반죽(88%) 토마토 소스(12%)",
-    thumbnail: null,
-    status: [],
-    index: 537,
     isCatering: true
   },
   {
@@ -9647,12 +8108,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10850.png",
     status: [
       {
-        name: "스태미나",
-        value: 55
-      },
-      {
         name: "의지",
         value: 30
+      },
+      {
+        name: "스태미나",
+        value: 55
       },
       {
         name: "방어",
@@ -9672,12 +8133,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10855.png",
     status: [
       {
-        name: "생명력",
-        value: 55
-      },
-      {
         name: "행운",
         value: 30
+      },
+      {
+        name: "생명력",
+        value: 55
       }
     ],
     index: 30,
@@ -9730,18 +8191,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "",
-    localName: "고추장",
-    originCookingType: "",
-    localCookingType: "발효",
-    originRecipe: "",
-    localRecipe: "물이 든 병(69%) 엿기름(12%) 고춧가루(19%)",
-    thumbnail: null,
-    status: [],
-    index: 538,
-    isCatering: true
-  },
-  {
     originName: "Kimchi",
     localName: "김치",
     originCookingType: "Fermenting",
@@ -9776,16 +8225,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10808.png",
     status: [
       {
+        name: "체력",
+        value: 30
+      },
+      {
         name: "생명력",
         value: 55
       },
       {
         name: "스태미나",
         value: 25
-      },
-      {
-        name: "체력",
-        value: 30
       },
       {
         name: "방어",
@@ -9805,16 +8254,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10797.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "생명력",
         value: 60
       },
       {
         name: "방어",
         value: 3
+      },
+      {
+        name: "보호",
+        value: 1
       }
     ],
     index: 255,
@@ -9830,12 +8279,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10801.png",
     status: [
       {
-        name: "생명력",
-        value: 65
-      },
-      {
         name: "의지",
         value: 25
+      },
+      {
+        name: "생명력",
+        value: 65
       },
       {
         name: "방어",
@@ -9843,31 +8292,6 @@ const cookings = [
       }
     ],
     index: 335,
-    isCatering: true
-  },
-  {
-    originName: "Strawberry Mochi",
-    localName: "딸기 찹살떡",
-    originCookingType: "Fermenting",
-    localCookingType: "발효",
-    originRecipe: "White Rice Cake(65%) Strawberry(25%) Bean Stuffing(10%)",
-    localRecipe: "하얀 떡(65%) 딸기(25%) 팥소(10%)",
-    thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30639.png",
-    status: [
-      {
-        name: "마나",
-        value: 30
-      },
-      {
-        name: "지력",
-        value: 10
-      },
-      {
-        name: "마법방어",
-        value: 2
-      }
-    ],
-    index: 277,
     isCatering: true
   },
   {
@@ -9880,16 +8304,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10800.png",
     status: [
       {
+        name: "지력",
+        value: 25
+      },
+      {
         name: "마나",
         value: 55
       },
       {
         name: "스태미나",
         value: 15
-      },
-      {
-        name: "지력",
-        value: 25
       }
     ],
     index: 147,
@@ -9905,12 +8329,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10802.png",
     status: [
       {
-        name: "마나",
-        value: 65
-      },
-      {
         name: "솜씨",
         value: 25
+      },
+      {
+        name: "마나",
+        value: 65
       },
       {
         name: "방어",
@@ -9930,12 +8354,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10805.png",
     status: [
       {
-        name: "마나",
-        value: 45
-      },
-      {
         name: "지력",
         value: 30
+      },
+      {
+        name: "마나",
+        value: 45
       },
       {
         name: "마법방어",
@@ -9943,42 +8367,6 @@ const cookings = [
       }
     ],
     index: 210,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "살라미",
-    originCookingType: "",
-    localCookingType: "발효",
-    originRecipe: "",
-    localRecipe: "고기 조각(80%) 소금(10%) 고기양념(10%)",
-    thumbnail: null,
-    status: [],
-    index: 539,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "식초",
-    originCookingType: "",
-    localCookingType: "발효",
-    originRecipe: "",
-    localRecipe: "물이 든 병(70%) 설탕(15%) 사과(15%)",
-    thumbnail: null,
-    status: [],
-    index: 540,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "앤초비",
-    originCookingType: "",
-    localCookingType: "발효",
-    originRecipe: "",
-    localRecipe: "청어(85%) 소금(9%) 올리브유(6%)",
-    thumbnail: null,
-    status: [],
-    index: 541,
     isCatering: true
   },
   {
@@ -9991,31 +8379,19 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10798.png",
     status: [
       {
-        name: "마나",
-        value: 60
+        name: "마법방어",
+        value: 2
       },
       {
         name: "마법보호",
         value: 1
       },
       {
-        name: "마법방어",
-        value: 2
+        name: "마나",
+        value: 60
       }
     ],
     index: 209,
-    isCatering: true
-  },
-  {
-    originName: "",
-    localName: "와인 식초",
-    originCookingType: "",
-    localCookingType: "발효",
-    originRecipe: "",
-    localRecipe: "물이 든 병(70%) 이멘 마하산 와인(20%) 포도(10%)",
-    thumbnail: null,
-    status: [],
-    index: 542,
     isCatering: true
   },
   {
@@ -10053,12 +8429,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10799.png",
     status: [
       {
-        name: "스태미나",
-        value: 60
-      },
-      {
         name: "행운",
         value: 25
+      },
+      {
+        name: "스태미나",
+        value: 60
       }
     ],
     index: 247,
@@ -10074,12 +8450,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10807.png",
     status: [
       {
-        name: "스태미나",
-        value: 10
-      },
-      {
         name: "의지",
         value: 100
+      },
+      {
+        name: "스태미나",
+        value: 10
       }
     ],
     index: 115,
@@ -10095,16 +8471,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10820.png",
     status: [
       {
-        name: "생명력",
-        value: 25
-      },
-      {
         name: "체력",
         value: 30
       },
       {
         name: "솜씨",
         value: 15
+      },
+      {
+        name: "생명력",
+        value: 25
       }
     ],
     index: 175,
@@ -10120,16 +8496,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10817.png",
     status: [
       {
-        name: "스태미나",
-        value: 45
+        name: "지력",
+        value: 30
       },
       {
         name: "솜씨",
         value: 15
       },
       {
-        name: "지력",
-        value: 30
+        name: "스태미나",
+        value: 45
       }
     ],
     index: 11,
@@ -10224,16 +8600,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10814.png",
     status: [
       {
-        name: "마나",
-        value: 30
-      },
-      {
         name: "솜씨",
         value: 55
       },
       {
         name: "행운",
         value: 25
+      },
+      {
+        name: "마나",
+        value: 30
       }
     ],
     index: 543,
@@ -10249,15 +8625,15 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10823.png",
     status: [
       {
-        name: "생명력",
-        value: 20
-      },
-      {
         name: "체력",
         value: 10
       },
       {
         name: "지력",
+        value: 20
+      },
+      {
+        name: "생명력",
         value: 20
       }
     ],
@@ -10274,16 +8650,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10819.png",
     status: [
       {
+        name: "의지",
+        value: 35
+      },
+      {
         name: "생명력",
         value: 40
       },
       {
         name: "마나",
         value: 20
-      },
-      {
-        name: "의지",
-        value: 35
       }
     ],
     index: 294,
@@ -10299,12 +8675,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10826.png",
     status: [
       {
-        name: "생명력",
-        value: 40
-      },
-      {
         name: "체력",
         value: 25
+      },
+      {
+        name: "생명력",
+        value: 40
       },
       {
         name: "방어",
@@ -10336,23 +8712,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "Scuabtuinne Sucker Sous Vide",
-    localName: "스쿠압틴산 빨판 다이어트 수비드",
-    originCookingType: "Sous Vide",
-    localCookingType: "수비드",
-    originRecipe: "Kraken Sucker(Ingredient)(70%) Lemon Juice(15%) Pepper(15%)",
-    localRecipe: "크라켄 빨판(70%) 레몬즙(15%) 후추(15%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/6/69/Scuabtuinne_Sucker_Sous_Vide.png",
-    status: [
-      {
-        name: "솜씨",
-        value: 100
-      }
-    ],
-    index: 223,
-    isCatering: false
-  },
-  {
     originName: "Salmon Oyakodon",
     localName: "연어 오야코동",
     originCookingType: "Sous Vide",
@@ -10362,16 +8721,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10825.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "생명력",
         value: 30
       },
       {
         name: "마나",
         value: 40
+      },
+      {
+        name: "보호",
+        value: 1
       }
     ],
     index: 242,
@@ -10408,12 +8767,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10815.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
         name: "생명력",
         value: 35
+      },
+      {
+        name: "최대대미지",
+        value: 1
       }
     ],
     index: 303,
@@ -10429,12 +8788,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10812.png",
     status: [
       {
-        name: "스태미나",
-        value: 25
-      },
-      {
         name: "의지",
         value: 30
+      },
+      {
+        name: "스태미나",
+        value: 25
       },
       {
         name: "마법방어",
@@ -10454,20 +8813,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10822.png",
     status: [
       {
-        name: "마나",
-        value: 10
-      },
-      {
-        name: "스태미나",
-        value: 30
+        name: "지력",
+        value: 20
       },
       {
         name: "솜씨",
         value: 30
       },
       {
-        name: "지력",
-        value: 20
+        name: "마나",
+        value: 10
+      },
+      {
+        name: "스태미나",
+        value: 30
       }
     ],
     index: 99,
@@ -10483,12 +8842,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10811.png",
     status: [
       {
-        name: "마법공격력",
-        value: 1
-      },
-      {
         name: "마나",
         value: 45
+      },
+      {
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 143,
@@ -10575,16 +8934,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10834.png",
     status: [
       {
-        name: "보호",
-        value: 1
+        name: "의지",
+        value: 30
       },
       {
         name: "마나",
         value: 40
       },
       {
-        name: "의지",
-        value: 30
+        name: "보호",
+        value: 1
       }
     ],
     index: 51,
@@ -10600,12 +8959,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10843.png",
     status: [
       {
-        name: "스태미나",
-        value: 50
-      },
-      {
         name: "체력",
         value: 25
+      },
+      {
+        name: "스태미나",
+        value: 50
       },
       {
         name: "방어",
@@ -10650,12 +9009,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10842.png",
     status: [
       {
-        name: "마나",
-        value: 30
-      },
-      {
         name: "솜씨",
         value: 40
+      },
+      {
+        name: "마나",
+        value: 30
       },
       {
         name: "마법보호",
@@ -10696,12 +9055,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10840.png",
     status: [
       {
-        name: "생명력",
-        value: 40
-      },
-      {
         name: "행운",
         value: 30
+      },
+      {
+        name: "생명력",
+        value: 40
       },
       {
         name: "방어",
@@ -10721,10 +9080,6 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10831.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
         name: "생명력",
         value: 20
       },
@@ -10735,6 +9090,10 @@ const cookings = [
       {
         name: "방어",
         value: 3
+      },
+      {
+        name: "보호",
+        value: 1
       }
     ],
     index: 182,
@@ -10771,16 +9130,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10841.png",
     status: [
       {
+        name: "지력",
+        value: 35
+      },
+      {
         name: "생명력",
         value: 50
       },
       {
         name: "마나",
         value: 25
-      },
-      {
-        name: "지력",
-        value: 35
       }
     ],
     index: 168,
@@ -10837,31 +9196,6 @@ const cookings = [
     isCatering: true
   },
   {
-    originName: "Assorted Shellfish Sashimi",
-    localName: "모듬 조개회",
-    originCookingType: "Julienning",
-    localCookingType: "저미기",
-    originRecipe: "Scallop(45%) Fan Mussel(45%) Chojang(10%)",
-    localRecipe: "가리비(45%) 키조개(45%) 초장(10%)",
-    thumbnail: "https://wiki.mabinogiworld.com/images/0/0a/Assorted_Shellfish_Sashimi.png",
-    status: [
-      {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "방어",
-        value: 1
-      },
-      {
-        name: "보호",
-        value: 1
-      }
-    ],
-    index: 42,
-    isCatering: true
-  },
-  {
     originName: "Grilled Scallop with Cheese",
     localName: "가리비 치즈구이",
     originCookingType: "Baking",
@@ -10879,7 +9213,7 @@ const cookings = [
         value: 10
       },
       {
-        name: "최소 공격력",
+        name: "최소대미지",
         value: 1
       }
     ],
@@ -10942,12 +9276,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30675.png",
     status: [
       {
-        name: "스태미나",
-        value: 30
-      },
-      {
         name: "의지",
         value: 10
+      },
+      {
+        name: "스태미나",
+        value: 30
       }
     ],
     index: 190,
@@ -10963,12 +9297,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30673.png",
     status: [
       {
-        name: "스태미나",
-        value: 30
-      },
-      {
         name: "체력",
         value: 10
+      },
+      {
+        name: "스태미나",
+        value: 30
       }
     ],
     index: 323,
@@ -11013,11 +9347,11 @@ const cookings = [
         value: 3
       },
       {
-        name: "마법보호",
+        name: "마법방어",
         value: 1
       },
       {
-        name: "마법방어",
+        name: "마법보호",
         value: 1
       }
     ],
@@ -11038,11 +9372,11 @@ const cookings = [
         value: 1
       },
       {
-        name: "보호",
+        name: "방어",
         value: 1
       },
       {
-        name: "방어",
+        name: "보호",
         value: 1
       }
     ],
@@ -11059,28 +9393,28 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30658.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "마법공격력",
-        value: 1
+        name: "방어",
+        value: 5
       },
       {
         name: "보호",
         value: 2
       },
       {
+        name: "마법방어",
+        value: 5
+      },
+      {
         name: "마법보호",
         value: 2
       },
       {
-        name: "방어",
-        value: 5
+        name: "최대대미지",
+        value: 1
       },
       {
-        name: "마법방어",
-        value: 5
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 546,
@@ -11116,11 +9450,11 @@ const cookings = [
         value: 60
       },
       {
-        name: "의지",
+        name: "지력",
         value: 60
       },
       {
-        name: "지력",
+        name: "의지",
         value: 60
       },
       {
@@ -11162,16 +9496,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10529.png",
     status: [
       {
-        name: "생명력",
-        value: 100
-      },
-      {
         name: "체력",
         value: 40
       },
       {
         name: "지력",
         value: 40
+      },
+      {
+        name: "생명력",
+        value: 100
       },
       {
         name: "방어",
@@ -11253,12 +9587,12 @@ const cookings = [
         value: 40
       },
       {
-        name: "솜씨",
-        value: 4
-      },
-      {
         name: "지력",
         value: 9
+      },
+      {
+        name: "솜씨",
+        value: 4
       }
     ],
     index: 552,
@@ -11390,12 +9724,12 @@ const cookings = [
         value: 46
       },
       {
-        name: "솜씨",
-        value: 11
-      },
-      {
         name: "지력",
         value: 16
+      },
+      {
+        name: "솜씨",
+        value: 11
       }
     ],
     index: 557,
@@ -11452,11 +9786,11 @@ const cookings = [
         value: 50
       },
       {
-        name: "의지",
+        name: "지력",
         value: 50
       },
       {
-        name: "지력",
+        name: "의지",
         value: 50
       },
       {
@@ -11477,16 +9811,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10483.png",
     status: [
       {
-        name: "보호",
-        value: 5
-      },
-      {
         name: "생명력",
         value: 150
       },
       {
         name: "스태미나",
         value: 120
+      },
+      {
+        name: "보호",
+        value: 5
       }
     ],
     index: 560,
@@ -11536,16 +9870,16 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10394.png",
     status: [
       {
-        name: "보호",
-        value: 2
-      },
-      {
         name: "스태미나",
         value: 35
       },
       {
         name: "방어",
         value: 4
+      },
+      {
+        name: "보호",
+        value: 2
       }
     ],
     index: 563,
@@ -11607,12 +9941,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30660.png",
     status: [
       {
-        name: "생명력",
-        value: 10
-      },
-      {
         name: "행운",
         value: 15
+      },
+      {
+        name: "생명력",
+        value: 10
       }
     ],
     index: 566,
@@ -11648,11 +9982,11 @@ const cookings = [
         value: 30
       },
       {
-        name: "의지",
+        name: "지력",
         value: 30
       },
       {
-        name: "지력",
+        name: "의지",
         value: 30
       },
       {
@@ -11693,11 +10027,11 @@ const cookings = [
         value: 30
       },
       {
-        name: "의지",
+        name: "지력",
         value: 30
       },
       {
-        name: "지력",
+        name: "의지",
         value: 30
       },
       {
@@ -11738,11 +10072,11 @@ const cookings = [
         value: 30
       },
       {
-        name: "의지",
+        name: "지력",
         value: 30
       },
       {
-        name: "지력",
+        name: "의지",
         value: 30
       },
       {
@@ -11763,11 +10097,11 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30667.png",
     status: [
       {
-        name: "최대대미지",
+        name: "최소대미지",
         value: 1
       },
       {
-        name: "최소 공격력",
+        name: "최대대미지",
         value: 1
       }
     ],
@@ -11801,12 +10135,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30669.png",
     status: [
       {
-        name: "보호",
-        value: 2
-      },
-      {
         name: "방어",
         value: 20
+      },
+      {
+        name: "보호",
+        value: 2
       }
     ],
     index: 572,
@@ -11822,28 +10156,28 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30710.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "마법공격력",
-        value: 1
+        name: "방어",
+        value: 5
       },
       {
         name: "보호",
         value: 2
       },
       {
+        name: "마법방어",
+        value: 5
+      },
+      {
         name: "마법보호",
         value: 2
       },
       {
-        name: "방어",
-        value: 5
+        name: "최대대미지",
+        value: 1
       },
       {
-        name: "마법방어",
-        value: 5
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 573,
@@ -11859,28 +10193,28 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30711.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "마법공격력",
-        value: 1
+        name: "방어",
+        value: 5
       },
       {
         name: "보호",
         value: 2
       },
       {
+        name: "마법방어",
+        value: 5
+      },
+      {
         name: "마법보호",
         value: 2
       },
       {
-        name: "방어",
-        value: 5
+        name: "최대대미지",
+        value: 1
       },
       {
-        name: "마법방어",
-        value: 5
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 574,
@@ -11896,28 +10230,28 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30712.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "마법공격력",
-        value: 1
+        name: "방어",
+        value: 5
       },
       {
         name: "보호",
         value: 2
       },
       {
+        name: "마법방어",
+        value: 5
+      },
+      {
         name: "마법보호",
         value: 2
       },
       {
-        name: "방어",
-        value: 5
+        name: "최대대미지",
+        value: 1
       },
       {
-        name: "마법방어",
-        value: 5
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 575,
@@ -11933,28 +10267,28 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30713.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "마법공격력",
-        value: 1
+        name: "방어",
+        value: 5
       },
       {
         name: "보호",
         value: 2
       },
       {
+        name: "마법방어",
+        value: 5
+      },
+      {
         name: "마법보호",
         value: 2
       },
       {
-        name: "방어",
-        value: 5
+        name: "최대대미지",
+        value: 1
       },
       {
-        name: "마법방어",
-        value: 5
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 576,
@@ -11970,28 +10304,28 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30717.png",
     status: [
       {
-        name: "최대대미지",
-        value: 1
-      },
-      {
-        name: "마법공격력",
-        value: 1
+        name: "방어",
+        value: 5
       },
       {
         name: "보호",
         value: 2
       },
       {
+        name: "마법방어",
+        value: 5
+      },
+      {
         name: "마법보호",
         value: 2
       },
       {
-        name: "방어",
-        value: 5
+        name: "최대대미지",
+        value: 1
       },
       {
-        name: "마법방어",
-        value: 5
+        name: "마법공격력",
+        value: 1
       }
     ],
     index: 577,
@@ -12011,11 +10345,11 @@ const cookings = [
         value: 1
       },
       {
-        name: "마법공격력",
+        name: "최소대미지",
         value: 1
       },
       {
-        name: "최소 공격력",
+        name: "마법공격력",
         value: 1
       }
     ],
@@ -12040,16 +10374,16 @@ const cookings = [
         value: 8
       },
       {
+        name: "지력",
+        value: 8
+      },
+      {
         name: "솜씨",
         value: 10
       },
       {
         name: "의지",
         value: 10
-      },
-      {
-        name: "지력",
-        value: 8
       }
     ],
     index: 579,
@@ -12094,19 +10428,19 @@ const cookings = [
         value: 10
       },
       {
-        name: "솜씨",
-        value: 10
-      },
-      {
         name: "의지",
         value: 10
       },
       {
-        name: "지력",
+        name: "행운",
         value: 10
       },
       {
-        name: "행운",
+        name: "솜씨",
+        value: 10
+      },
+      {
+        name: "지력",
         value: 10
       }
     ],
@@ -12144,11 +10478,11 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30685.png",
     status: [
       {
-        name: "의지",
+        name: "지력",
         value: 5
       },
       {
-        name: "지력",
+        name: "의지",
         value: 5
       }
     ],
@@ -12165,12 +10499,12 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30670.png",
     status: [
       {
-        name: "마법보호",
-        value: 2
-      },
-      {
         name: "마법방어",
         value: 20
+      },
+      {
+        name: "마법보호",
+        value: 2
       }
     ],
     index: 584,
@@ -12194,11 +10528,11 @@ const cookings = [
         value: 30
       },
       {
-        name: "의지",
+        name: "지력",
         value: 30
       },
       {
-        name: "지력",
+        name: "의지",
         value: 30
       },
       {
@@ -12244,20 +10578,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30679.png",
     status: [
       {
-        name: "최대대미지",
+        name: "최소대미지",
         value: 2
       },
       {
-        name: "보호",
-        value: 1
+        name: "최대대미지",
+        value: 2
       },
       {
         name: "방어",
         value: 10
       },
       {
-        name: "최소 공격력",
-        value: 2
+        name: "보호",
+        value: 1
       }
     ],
     index: 587,
@@ -12277,12 +10611,12 @@ const cookings = [
         value: 5
       },
       {
-        name: "마법보호",
-        value: 1
-      },
-      {
         name: "마법방어",
         value: 10
+      },
+      {
+        name: "마법보호",
+        value: 1
       }
     ],
     index: 588,
@@ -12306,11 +10640,11 @@ const cookings = [
         value: 10
       },
       {
-        name: "의지",
+        name: "지력",
         value: 10
       },
       {
-        name: "지력",
+        name: "의지",
         value: 10
       },
       {
@@ -12331,20 +10665,20 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-34583.png",
     status: [
       {
-        name: "보호",
-        value: 1
-      },
-      {
-        name: "마법보호",
-        value: 1
-      },
-      {
         name: "방어",
         value: 10
       },
       {
+        name: "보호",
+        value: 1
+      },
+      {
         name: "마법방어",
         value: 10
+      },
+      {
+        name: "마법보호",
+        value: 1
       }
     ],
     index: 590,
@@ -12372,19 +10706,19 @@ const cookings = [
         value: 14
       },
       {
-        name: "솜씨",
-        value: 14
-      },
-      {
-        name: "의지",
-        value: 14
-      },
-      {
         name: "지력",
         value: 14
       },
       {
         name: "행운",
+        value: 14
+      },
+      {
+        name: "솜씨",
+        value: 14
+      },
+      {
+        name: "의지",
         value: 14
       }
     ],
@@ -12434,11 +10768,11 @@ const cookings = [
         value: 15
       },
       {
-        name: "의지",
+        name: "지력",
         value: 15
       },
       {
-        name: "지력",
+        name: "의지",
         value: 15
       },
       {
@@ -12467,11 +10801,11 @@ const cookings = [
         value: 15
       },
       {
-        name: "의지",
+        name: "지력",
         value: 15
       },
       {
-        name: "지력",
+        name: "의지",
         value: 15
       },
       {
@@ -12500,11 +10834,11 @@ const cookings = [
         value: -10
       },
       {
-        name: "의지",
+        name: "지력",
         value: -10
       },
       {
-        name: "지력",
+        name: "의지",
         value: -10
       },
       {
@@ -12533,11 +10867,11 @@ const cookings = [
         value: -10
       },
       {
-        name: "의지",
+        name: "지력",
         value: -10
       },
       {
-        name: "지력",
+        name: "의지",
         value: -10
       },
       {
@@ -12599,11 +10933,11 @@ const cookings = [
         value: 40
       },
       {
-        name: "의지",
+        name: "지력",
         value: 40
       },
       {
-        name: "지력",
+        name: "의지",
         value: 40
       },
       {
@@ -12624,10 +10958,6 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-30623.png",
     status: [
       {
-        name: "보호",
-        value: 2
-      },
-      {
         name: "체력",
         value: 90
       },
@@ -12636,11 +10966,11 @@ const cookings = [
         value: 90
       },
       {
-        name: "의지",
+        name: "지력",
         value: 90
       },
       {
-        name: "지력",
+        name: "의지",
         value: 90
       },
       {
@@ -12648,12 +10978,16 @@ const cookings = [
         value: 90
       },
       {
-        name: "마법보호",
+        name: "보호",
         value: 2
       },
       {
         name: "방어",
         value: 4
+      },
+      {
+        name: "마법보호",
+        value: 2
       },
       {
         name: "마법방어",
@@ -12719,11 +11053,11 @@ const cookings = [
         value: 20
       },
       {
-        name: "솜씨",
+        name: "지력",
         value: 30
       },
       {
-        name: "지력",
+        name: "솜씨",
         value: 30
       }
     ],
@@ -12765,11 +11099,11 @@ const cookings = [
         value: 36
       },
       {
-        name: "마나",
+        name: "스태미나",
         value: 36
       },
       {
-        name: "스태미나",
+        name: "마나",
         value: 36
       },
       {
@@ -12794,19 +11128,11 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-9958.png",
     status: [
       {
-        name: "생명력",
-        value: 100
-      },
-      {
-        name: "마나",
-        value: 100
-      },
-      {
-        name: "스태미나",
-        value: 100
-      },
-      {
         name: "체력",
+        value: 100
+      },
+      {
+        name: "지력",
         value: 100
       },
       {
@@ -12818,11 +11144,19 @@ const cookings = [
         value: 100
       },
       {
-        name: "지력",
+        name: "행운",
         value: 100
       },
       {
-        name: "행운",
+        name: "생명력",
+        value: 100
+      },
+      {
+        name: "스태미나",
+        value: 100
+      },
+      {
+        name: "마나",
         value: 100
       }
     ],
@@ -12843,11 +11177,11 @@ const cookings = [
         value: 36
       },
       {
-        name: "마나",
+        name: "스태미나",
         value: 36
       },
       {
-        name: "스태미나",
+        name: "마나",
         value: 36
       },
       {
@@ -12876,11 +11210,11 @@ const cookings = [
         value: 40
       },
       {
-        name: "마나",
+        name: "스태미나",
         value: 40
       },
       {
-        name: "스태미나",
+        name: "마나",
         value: 40
       },
       {
@@ -12909,11 +11243,11 @@ const cookings = [
         value: 44
       },
       {
-        name: "마나",
+        name: "스태미나",
         value: 44
       },
       {
-        name: "스태미나",
+        name: "마나",
         value: 44
       },
       {
@@ -13132,12 +11466,12 @@ const cookings = [
         value: 16
       },
       {
-        name: "솜씨",
-        value: -6
-      },
-      {
         name: "행운",
         value: 6
+      },
+      {
+        name: "솜씨",
+        value: -6
       }
     ],
     index: 615,
@@ -13161,12 +11495,12 @@ const cookings = [
         value: 10
       },
       {
-        name: "솜씨",
-        value: -4
-      },
-      {
         name: "행운",
         value: 4
+      },
+      {
+        name: "솜씨",
+        value: -4
       }
     ],
     index: 616,
@@ -13190,12 +11524,12 @@ const cookings = [
         value: 15
       },
       {
-        name: "솜씨",
-        value: -6
-      },
-      {
         name: "행운",
         value: 6
+      },
+      {
+        name: "솜씨",
+        value: -6
       }
     ],
     index: 617,
@@ -13219,12 +11553,12 @@ const cookings = [
         value: 7
       },
       {
-        name: "솜씨",
-        value: -2
-      },
-      {
         name: "행운",
         value: 2
+      },
+      {
+        name: "솜씨",
+        value: -2
       }
     ],
     index: 618,
@@ -13269,12 +11603,12 @@ const cookings = [
         value: 5
       },
       {
-        name: "솜씨",
-        value: -2
-      },
-      {
         name: "행운",
         value: 9
+      },
+      {
+        name: "솜씨",
+        value: -2
       }
     ],
     index: 620,
@@ -13319,16 +11653,16 @@ const cookings = [
         value: 30
       },
       {
-        name: "솜씨",
-        value: -30
+        name: "행운",
+        value: 30
       },
       {
         name: "지력",
         value: 30
       },
       {
-        name: "행운",
-        value: 30
+        name: "솜씨",
+        value: -30
       }
     ],
     index: 622,
@@ -13344,11 +11678,11 @@ const cookings = [
     thumbnail: "https://tacask-cdn.com/mabi-labanyu/item-base-data/thumbnail/item-10184.png",
     status: [
       {
-        name: "체력",
-        value: -30
+        name: "솜씨",
+        value: 30
       },
       {
-        name: "솜씨",
+        name: "행운",
         value: 30
       },
       {
@@ -13356,8 +11690,8 @@ const cookings = [
         value: 30
       },
       {
-        name: "행운",
-        value: 30
+        name: "체력",
+        value: -30
       }
     ],
     index: 623,

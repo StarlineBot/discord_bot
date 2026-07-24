@@ -60,9 +60,10 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             cd ~/project/discord_bot
             git fetch --all
-            git reset --hard origin/main   # 원격과 강제 동기화(로컬 충돌 방지, .env/static/json 은 gitignore라 보존)
-            npm ci --omit=dev              # 프로덕션 의존성만 설치(puppeteer=devDep → 크로미움 미설치)
-            npx pm2 stop discord-bot || true
-            npx pm2 delete discord-bot || true
-            npx pm2 start npm --name discord-bot -- start
-            npx pm2 save
+            git reset --hard origin/main   # 원격과 강제 동기화(.env/static/json/node_modules 는 gitignore라 보존)
+            # node_modules 는 건드리지 않는다(npx pm2가 그 안의 pm2를 사용하므로 npm ci로 지우면 pm2가 깨짐).
+            # 의존성이 바뀐 경우엔 VM에서 npm install 을 수동 실행.
+            npx --yes pm2 stop discord-bot || true
+            npx --yes pm2 delete discord-bot || true       # 항목만 정리(데몬 kill 아님) → 같은 이름 start 충돌 방지
+            npx --yes pm2 start npm --name discord-bot -- start
+            npx --yes pm2 save

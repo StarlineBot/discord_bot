@@ -89,7 +89,13 @@ module.exports = async (client) => {
       return
     }
 
-    const { today: todayMissionObject, tomorrow: tomorrowMissionObject } = await getMissions()
+    let todayMissionObject, tomorrowMissionObject
+    try {
+      ({ today: todayMissionObject, tomorrow: tomorrowMissionObject } = await getMissions())
+    } catch (error) {
+      otherChannel.send('데일리 미션 조회 에러: ' + error)
+      return
+    }
     const todayMission = todayMissionObject.missions[0]
     const tomorrowMission = tomorrowMissionObject.missions[0]
 

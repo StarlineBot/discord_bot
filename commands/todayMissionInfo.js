@@ -22,6 +22,10 @@ module.exports = {
     const now = new Date(Date.now() - offset)
     const { getVeteran, getMissions } = require(
       '../modules/todayMission')(today, now)
+
+    // 미션 조회에 수 초가 걸려 3초 내 응답을 못 하면 디스코드가 "응답 없음" 에러를 띄운다.
+    // 먼저 인터랙션을 defer로 확보한다.
+    await interaction.deferReply({ ephemeral: true })
     try {
       const { today: todayMissionObject, tomorrow: tomorrowMissionObject } = await getMissions()
       const todayMission = todayMissionObject.missions[0]
@@ -76,8 +80,9 @@ module.exports = {
           embeds: [todayEmbed, tomorrowEmbed]
         }
       )
+      await interaction.editReply(`오미를 <#${generalChannelId}>에 안내했어~`)
     } catch (error) {
-      interaction.reply(basicErrorMessage)
+      await interaction.editReply(basicErrorMessage)
       interaction.client.channels.cache.get(devChannelId).send(
         '오미 에러' + error)
     }

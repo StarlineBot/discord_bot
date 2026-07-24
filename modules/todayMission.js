@@ -25,23 +25,26 @@ module.exports = (today, now) => {
     return { today, tomorrow }
   }
 
-  const getTodayMissionToBrowser = async () => {
-    const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.toISOString()
-    console.log(url)
+  // today/tomorrow 미션을 브라우저 1개로 조회(브라우저 기동 1회, 에러 시에도 finally로 종료)
+  const getMissions = async () => {
+    const customUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
+    const puppeteerArgs = process.env.NODE_ENV !== 'development' ? { executablePath: '/usr/bin/chromium-browser' } : {}
+    const browser = await puppeteer.launch(puppeteerArgs)
     try {
-      const puppeteerArgs = process.env.NODE_ENV !== 'development' ? { executablePath: '/usr/bin/chromium-browser' } : {}
-      const browser = await puppeteer.launch(puppeteerArgs)
       const page = await browser.newPage()
-      const customUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36';
-      await page.setUserAgent(customUA);
-      await page.goto(url)
-      const body = await page.content();
-      const $ = cheerio.load(body)
-      const data = JSON.parse($("pre").text());
-      browser.close()
-      return data
-    } catch (e) {
-      console.log(e)
+      await page.setUserAgent(customUA)
+      const fetchAt = async (iso) => {
+        const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + iso
+        console.log(url)
+        await page.goto(url)
+        const body = await page.content()
+        return JSON.parse(cheerio.load(body)('pre').text())
+      }
+      const today = await fetchAt(now.toISOString())
+      const tomorrow = await fetchAt(now.addDays(1).toISOString())
+      return { today, tomorrow }
+    } finally {
+      await browser.close()
     }
   }
 
@@ -64,25 +67,6 @@ module.exports = (today, now) => {
     })
   }
 
-  const getTomorrowMissionToBrowser = async () => {
-    const url = 'https://mabi.world/missions.php?server=korea&locale=korea&from=' + now.addDays(1).toISOString()
-    try {
-      const puppeteerArgs = process.env.NODE_ENV !== 'development' ? { executablePath: '/usr/bin/chromium-browser' } : {}
-      const browser = await puppeteer.launch(puppeteerArgs)
-      const page = await browser.newPage()
-      const customUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36';
-      await page.setUserAgent(customUA);
-      await page.goto(url)
-      const body = await page.content();
-      const $ = cheerio.load(body)
-      const data = JSON.parse($("pre").text());
-      browser.close()
-      return data
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
   const getTomorrowMission = async () => {
     console.log('https://mabi.world/missions.php?server=korea&locale=korea&from=' +
         now.addDays(1).toISOString())
@@ -103,6 +87,6 @@ module.exports = (today, now) => {
   }
 
   return {
-    getVeteran, getTodayMissionToBrowser, getTomorrowMissionToBrowser
+    getVeteran, getMissions
   }
 }

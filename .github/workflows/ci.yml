@@ -45,18 +45,24 @@ jobs:
       - run: npm run lint
       - run: npm run test
 
-      - name: zip file
-        run: zip -r discord_bot.zip ./ -x '*node_modules*'
-
-      - name: AWS configure credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      # main 브랜치에 푸시될 때만 GCP VM으로 배포(PR에서는 테스트만)
+      - name: deploy to Google Cloud (SSH)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v1.2.0
         with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY_ID}}
-          aws-region: ap-northeast-2
-
-      - name: upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./discord_bot.zip s3://discord-bot-build
-
-      - name: deploy with AWS codeDeploy
-        run: aws deploy create-deployment --application-name StarlineBot-CodeDeploy --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name GROUP --ignore-application-stop-failures --s3-location bucket=discord-bot-build,bundleType=zip,key=discord_bot.zip
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_SSH_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            set -e
+            # 비대화형 SSH 셸에서도 node/npm/pm2 를 찾도록 nvm 로드
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            cd ~/project/discord_bot
+            git fetch --all
+            git reset --hard origin/main   # 원격과 강제 동기화(로컬 충돌 방지, .env/static/json 은 gitignore라 보존)
+            npm ci --omit=dev              # 프로덕션 의존성만 설치(puppeteer=devDep → 크로미움 미설치)
+            npx pm2 stop discord-bot || true
+            npx pm2 delete discord-bot || true
+            npx pm2 start npm --name discord-bot -- start
+            npx pm2 save

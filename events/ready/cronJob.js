@@ -11,12 +11,21 @@ const {
   saveUserVoiceCount,
   createVoiceRankingEmbed
 } = require('../../modules/RankingUtil')
+const axios = require('axios')
+const fs = require('node:fs')
+const { getDate } = require('../../modules/common')
 
 const botId = process.env.BOT_ID
 const todayMissionChannelId = process.env.NODE_ENV === 'development'
   ? process.env.DEV_TODAY_MISSION_CHANNEL_ID
   : process.env.TODAY_MISSION_CHANNEL_ID
 const otherChannelId = process.env.DEV_CHANNEL_ID
+const nexonApiKey = process.env.NEXON_API_KEY
+const nexonApiMainUrl = 'https://open.api.nexon.com'
+const bugleHornChannelId = process.env.NODE_ENV === 'development'
+  ? process.env.DEV_BUGLE_HORN_CHANNEL_ID
+  : process.env.BUGLE_HORN_CHANNEL_ID
+const partyRecruitStatePath = './static/json/partyRecruitBoard.json'
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 
 module.exports = async (client) => {
@@ -264,4 +273,99 @@ module.exports = async (client) => {
 
   console.log('partyScheduleJob start!')
   partyScheduleJob.start()
+
+  // 파티모집 현황 보드: 거뿔(#) 최근 5개를 한 메시지에 계속 갱신(edit-in-place → 누적/노이즈 없음)
+  const partyRecruitBoardJob = new cron.CronJob('*/10 * * * * *', async function () {
+    const boardChannel = client.channels.cache.get(bugleHornChannelId)
+    if (!boardChannel) return
+
+    let hornBugleList
+    try {
+      const getBody = await axios.get(
+        nexonApiMainUrl + '/mabinogi/v1/horn-bugle-world/history?server_name=하프',
+        { headers: { 'x-nxopen-api-key': nexonApiKey } }
+      )
+      hornBugleList = getBody.data.horn_bugle_world_history || []
+    } catch (error) {
+      console.error('거뿔 조회 에러:', error.message)
+      return
+    }
+
+    // 파티모집(#)만 → 중복 제거(캐릭명+내용) → 최신순 상위 5
+    const recruit = hornBugleList
+      .filter(b => b.message && b.message.startsWith(b.character_name + ' : #'))
+      .sort((a, b) => new Date(b.date_send) - new Date(a.date_send))
+    // 사람당 최신 1건만(같은 사람이 인원 채우며 반복 외치는 것 제외) → 서로 다른 5명
+    const seen = new Set()
+    const top5 = []
+    for (const b of recruit) {
+      const key = b.character_name
+      if (seen.has(key)) continue
+      seen.add(key)
+      top5.push(b)
+      if (top5.length >= 5) break
+    }
+
+    // 카드형: 모집마다 임베드 1장(사람·채널 = 제목으로 크게, 내용 = 설명, 인원·시각 = 푸터)
+    let embeds
+    if (top5.length === 0) {
+      embeds = [new EmbedBuilder().setTitle('📢 파티모집 현황').setColor('#B2BEC3').setDescription('현재 모집 중인 파티가 없어요~').setTimestamp()]
+    } else {
+      embeds = top5.map(b => {
+        const raw = b.message.replace(b.character_name + ' : ', '') // "#[채널7] 내용 [1/4명]"
+        const chMatch = raw.match(/#\[채널(\d+)\]/)
+        const hcMatch = raw.match(/\[(\d+)\/(\d+)명\](완)?/)
+        const channel = chMatch ? chMatch[1] : '?'
+        const done = hcMatch ? (hcMatch[3] === '완' || hcMatch[1] === hcMatch[2]) : false
+        const headcount = hcMatch ? `👥 ${hcMatch[1]}/${hcMatch[2]}명${done ? ' ✅완료' : ''}` : ''
+        let body = raw
+        if (chMatch) body = body.replace(chMatch[0], '')
+        if (hcMatch) body = body.replace(hcMatch[0], '')
+        body = body.trim() || '(내용 없음)'
+        // 30분 이상 지난 외침은 '오래됨'으로 강조(이미 마감됐을 수 있음). instant 비교라 서버 TZ 무관
+        const ageMin = Math.floor(DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes)
+        const isOld = ageMin >= 30
+        let color = done ? '#B2BEC3' : '#00B894'
+        if (isOld && !done) color = '#E67E22'
+        let agePart = ''
+        if (isOld) agePart = `  ·  ⏰ ${ageMin}분 전 (오래됨)` // 30분+ 강조
+        else if (ageMin >= 10) agePart = `  ·  ${ageMin}분 전` // 10분+ 경과 표시
+        return new EmbedBuilder()
+          .setTitle(`${isOld ? '⏰ ' : ''}${b.character_name}  ·  📢 채널 ${channel}`)
+          .setColor(color)
+          .setDescription(body)
+          .setFooter({ text: `${headcount}${headcount ? '  ·  ' : ''}${getDate(new Date(b.date_send))}${agePart}` })
+      })
+    }
+
+    // 내용 서명: 변경 없으면 편집 스킵(불필요한 Discord 호출/rate limit 방지)
+    const signature = top5.map(b => b.character_name + '|' + b.date_send + '|' + b.message).join('||')
+    let state = {}
+    if (fs.existsSync(partyRecruitStatePath)) {
+      try { state = JSON.parse(fs.readFileSync(partyRecruitStatePath)) } catch (e) { state = {} }
+    }
+    const saveState = (messageId) => {
+      fs.mkdirSync('./static/json', { recursive: true })
+      fs.writeFileSync(partyRecruitStatePath, JSON.stringify({ messageId, channelId: boardChannel.id, signature }))
+    }
+    try {
+      let msg = null
+      if (state.messageId && state.channelId === boardChannel.id) {
+        msg = await boardChannel.messages.fetch(state.messageId).catch(() => null)
+      }
+      if (msg && state.signature === signature) return // 메시지 존재 + 내용 동일 → 스킵
+      if (msg) {
+        await msg.edit({ embeds })
+        saveState(msg.id)
+      } else {
+        const sent = await boardChannel.send({ embeds })
+        saveState(sent.id)
+      }
+    } catch (error) {
+      console.error('파티모집 보드 갱신 에러:', error.message)
+    }
+  })
+
+  console.log('partyRecruitBoardJob start!')
+  partyRecruitBoardJob.start()
 }

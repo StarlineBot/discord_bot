@@ -1,0 +1,198 @@
+{
+  "_comment": "mabi.zip 경매장 대분류 정리(2026-07-27). subCategories는 넥슨 오픈API의 실제 item_category 값으로 채워야 함(현재 미확보 → 트리 펼쳐서 추가 예정). use=true 인 7개가 봇에서 실제 사용할 대분류.",
+  "source": "https://mabi.zip/auction-history",
+  "categories": [
+    {
+      "key": "melee",
+      "name": "근거리 장비",
+      "use": true,
+      "subCategories": [
+        "한손 장비",
+        "양손 장비",
+        "검",
+        "도끼",
+        "둔기",
+        "랜스",
+        "핸들",
+        "너클",
+        "체인 블레이드"
+      ]
+    },
+    {
+      "key": "ranged",
+      "name": "원거리 장비",
+      "use": true,
+      "subCategories": [
+        "활",
+        "석궁",
+        "듀얼건",
+        "수리검",
+        "아틀라틀",
+        "원거리 소모품"
+      ]
+    },
+    {
+      "key": "magic",
+      "name": "마법 장비",
+      "use": true,
+      "subCategories": [
+        "실린더",
+        "스태프",
+        "원드",
+        "마도서",
+        "오브"
+      ]
+    },
+    {
+      "key": "armor",
+      "name": "갑옷 장비",
+      "use": true,
+      "subCategories": [
+        "중갑옷",
+        "경갑옷",
+        "천옷"
+      ]
+    },
+    {
+      "key": "defense",
+      "name": "방어 장비",
+      "use": true,
+      "subCategories": [
+        "장갑",
+        "신발",
+        "모자/가발",
+        "방패",
+        "로브"
+      ]
+    },
+    {
+      "key": "accessory",
+      "name": "액세서리",
+      "use": true,
+      "subCategories": [
+        "얼굴 장식",
+        "액세서리",
+        "날개",
+        "꼬리"
+      ]
+    },
+    {
+      "key": "special",
+      "name": "특수 장비",
+      "use": true,
+      "subCategories": [
+        "악기",
+        "생활 도구",
+        "마리오네트",
+        "에코스톤",
+        "에이도스",
+        "유물",
+        "기타 장비"
+      ]
+    },
+    {
+      "key": "installation",
+      "name": "설치물",
+      "use": false,
+      "subCategories": [
+        "의자/사물",
+        "낭만농장/달빛섬"
+      ]
+    },
+    {
+      "key": "enchant",
+      "name": "인챈트 용품",
+      "use": false,
+      "subCategories": [
+        "인챈트 스크롤",
+        "마법가루"
+      ]
+    },
+    {
+      "key": "scroll",
+      "name": "스크롤",
+      "use": false,
+      "subCategories": [
+        "도면",
+        "옷본",
+        "마족 스크롤",
+        "기타 스크롤"
+      ]
+    },
+    {
+      "key": "magigraph",
+      "name": "마기그래프 용품",
+      "use": false,
+      "subCategories": [
+        "마기그래프",
+        "마기그래프 도안",
+        "기타 재료"
+      ]
+    },
+    {
+      "key": "book",
+      "name": "서적",
+      "use": false,
+      "subCategories": [
+        "책",
+        "마비노벨",
+        "페이지"
+      ]
+    },
+    {
+      "key": "consumable",
+      "name": "소모품",
+      "use": false,
+      "subCategories": [
+        "포션",
+        "음식",
+        "허브",
+        "던전 통행증",
+        "알반 훈련석",
+        "개조석",
+        "보석",
+        "변신 메달",
+        "염색 앰플",
+        "스케치",
+        "핀즈비즈",
+        "기타 소모품"
+      ]
+    },
+    {
+      "key": "totem",
+      "name": "토템",
+      "use": false,
+      "subCategories": [
+        "애뮬릿",
+        "토템"
+      ]
+    },
+    {
+      "key": "material",
+      "name": "생활 재료",
+      "use": false,
+      "subCategories": [
+        "주머니",
+        "천옷/방직",
+        "제련/블랙스미스",
+        "힐웬 공학",
+        "매직 크래프트"
+      ]
+    },
+    {
+      "key": "etc",
+      "name": "기타",
+      "use": false,
+      "subCategories": [
+        "제스처",
+        "말풍선 스티커",
+        "피니 펫",
+        "불타래",
+        "퍼퓸",
+        "분양 메달",
+        "뷰티 쿠폰",
+        "기타"
+      ]
+    }
+  ]
+}

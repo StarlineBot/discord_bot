@@ -24,6 +24,13 @@ new CommandHandler({
 })
 /* eslint-disable */
 
+// 안전망: 이벤트 핸들러 하나에서 던진 예외가 봇 프로세스 전체를 죽이지 않도록 최상위에서 흡수한다.
+// (discord.js Client는 리스너 없는 'error' 방출 시 Node가 그대로 크래시함 → 반드시 리스너 등록)
+client.on('error', (error) => console.error('[client error]', error))
+client.on('shardError', (error) => console.error('[shard error]', error))
+process.on('unhandledRejection', (error) => console.error('[unhandledRejection]', error))
+process.on('uncaughtException', (error) => console.error('[uncaughtException]', error))
+
 client.login(process.env.TOKEN)
 
 /**

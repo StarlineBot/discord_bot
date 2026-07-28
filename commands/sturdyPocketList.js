@@ -90,7 +90,7 @@ module.exports = {
       : interaction.options._hoistedOptions.find(option => option.name === 'pocket').value
 
     try {
-      const replyContent = { content: `튼튼한 주머니 목록을 <#${generalChannel.id}>에 작성중이야~` }
+      const replyContent = { content: `튼튼한 주머니 목록을 <#${generalChannel.id}>에 작성중이야~`, ephemeral: true }
       interaction.reply(replyContent)
 
       await generalChannel.sendTyping()

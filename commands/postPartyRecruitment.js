@@ -67,7 +67,7 @@ module.exports = {
     const guildInfo = guildModule.getGuildInfo(guildId)
     const partyChannel = guildInfo && interaction.client.channels.cache.get(guildInfo.partyChannelId)
 
-    await interaction.deferReply()
+    await interaction.deferReply({ ephemeral: true })
 
     if (!partyChannel) {
       await interaction.editReply('파티모집 채널을 찾을 수 없어 😢')

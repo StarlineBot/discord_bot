@@ -49,9 +49,7 @@ module.exports = {
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
     const replyContent = { content: `입력한 요리정보는 <#${generalChannel.id}>에 작성중이야~` }
-    if (interaction.channelId === generalChannel.id) {
-      replyContent.ephemeral = true
-    }
+    replyContent.ephemeral = true
     interaction.reply(replyContent)
 
     const subcommand = interaction.options._subcommand

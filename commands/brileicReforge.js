@@ -63,9 +63,7 @@ module.exports = {
     }
 
     const replyContent = { content: `**${type}** 주화깡 결과를 <#${generalChannel.id}>에 만들었어~🎲` }
-    if (interaction.channelId === generalChannel.id) {
-      replyContent.ephemeral = true
-    }
+    replyContent.ephemeral = true
     interaction.reply(replyContent)
 
     const stats = roll()

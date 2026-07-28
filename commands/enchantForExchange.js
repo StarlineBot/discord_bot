@@ -51,9 +51,7 @@ module.exports = {
 
     const generalChannel = interaction.client.channels.cache.get(generalChannelId)
     const replyContent = { content: `오늘 기준 교환가능 인챈트는 <#${generalChannel.id}>에 작성했어~` }
-    if (interaction.channelId === generalChannel.id) {
-      replyContent.ephemeral = true
-    }
+    replyContent.ephemeral = true
     interaction.reply(replyContent)
 
     const embed = new EmbedBuilder()

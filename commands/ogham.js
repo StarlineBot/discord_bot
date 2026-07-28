@@ -29,9 +29,7 @@ module.exports = {
     }
 
     const replyContent = { content: `**${arcana.name}** 오검 조합을 <#${generalChannel.id}>에 작성했어~😎` }
-    if (interaction.channelId === generalChannel.id) {
-      replyContent.ephemeral = true
-    }
+    replyContent.ephemeral = true
     interaction.reply(replyContent)
 
     const embeds = combos.map((combo, idx) => {

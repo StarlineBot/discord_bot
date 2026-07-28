@@ -154,9 +154,7 @@ module.exports = {
 
       const generalChannel = interaction.client.channels.cache.get(generalChannelId)
       const replyContent = { content: `현재 시간 기준 에린날씨를 <#${generalChannel.id}>에 작성했어~` }
-      if (interaction.channelId === generalChannel.id) {
-        replyContent.ephemeral = true
-      }
+      replyContent.ephemeral = true
       interaction.reply(replyContent)
 
       generalChannel.send({ embeds: [embed] })

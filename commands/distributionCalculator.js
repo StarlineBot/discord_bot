@@ -89,9 +89,7 @@ module.exports = {
     const generalChannel = interaction.client.channels.cache.get(
       generalChannelId)
     const replyContent = { content: `입력한 내용은 <#${generalChannel.id}>에 계산 해 놨어~` }
-    if (interaction.channelId === generalChannel.id) {
-      replyContent.ephemeral = true
-    }
+    replyContent.ephemeral = true
     interaction.reply(replyContent)
 
     generalChannel.send(

@@ -14,6 +14,9 @@ const {
 const axios = require('axios')
 const fs = require('node:fs')
 const { getDate } = require('../../modules/common')
+const auctionFav = require('../../modules/auctionFavorites')
+const { getCategoryItems, filterItems, resolveLeafCategories } = require('../../modules/auction')
+const { buildEquipEmbed, buildEchostoneEmbed } = require('../../modules/auctionEmbeds')
 
 const botId = process.env.BOT_ID
 const todayMissionChannelId = process.env.NODE_ENV === 'development'
@@ -368,4 +371,79 @@ module.exports = async (client) => {
 
   console.log('partyRecruitBoardJob start!')
   partyRecruitBoardJob.start()
+
+  // 경매장 즐겨찾기: 5분마다 즐겨찾기 조건에 맞는 새 매물을 찾아 등록자에게 DM
+  // dev: 30초마다 / prod: 5분마다
+  const auctionFavoriteSchedule = process.env.NODE_ENV === 'development' ? '*/30 * * * * *' : '*/5 * * * *'
+  const auctionFavoriteJob = new cron.CronJob(auctionFavoriteSchedule, async function () {
+    const data = auctionFav.read()
+    if (!data.favorites.length) return
+
+    // 점검/장애 감지: 허브(채집물)는 상시 수백건 → 0이면 게임 점검 or API 장애로 보고 사이클 스킵.
+    // 넥슨 API는 점검 때 에러코드가 아니라 200+빈배열을 주므로, 카나리가 유일한 신뢰 신호.
+    let canary
+    try {
+      canary = await getCategoryItems('허브')
+    } catch (error) {
+      console.error('[경매장즐겨찾기] 카나리 조회 에러:', error.message)
+      return
+    }
+    if (!canary.length) {
+      console.warn('[경매장즐겨찾기] 허브 카나리 0건 → 점검·장애로 간주, 이번 사이클 스킵')
+      return
+    }
+
+    // 즐겨찾기 대분류를 넥슨 API 소분류(leaf)로 펼쳐 중복 없이 한 번씩만 조회
+    const leavesByCat = {}
+    const leafSet = new Set()
+    for (const cat of new Set(data.favorites.map(f => f.category))) {
+      const leaves = resolveLeafCategories(cat)
+      leavesByCat[cat] = leaves
+      leaves.forEach(l => leafSet.add(l))
+    }
+    const itemsByLeaf = {}
+    for (const leaf of leafSet) {
+      try {
+        itemsByLeaf[leaf] = await getCategoryItems(leaf)
+      } catch (error) {
+        console.error(`[경매장즐겨찾기] '${leaf}' 조회 에러:`, error.message)
+      }
+    }
+
+    for (const fav of data.favorites) {
+      // 이 클라이언트가 속한 길드의 즐겨찾기만 처리(dev/prod 자연 분리)
+      if (!client.guilds.cache.has(fav.guildId)) continue
+      let items = []
+      for (const leaf of leavesByCat[fav.category] || []) {
+        if (itemsByLeaf[leaf]) items = items.concat(itemsByLeaf[leaf])
+      }
+      if (!items.length) continue
+
+      let matches = filterItems(items, { keyword: fav.keyword, metalwares: fav.metalwares || [] })
+      if (fav.maxPrice) matches = matches.filter(it => it.auction_price_per_unit <= fav.maxPrice)
+      if (!matches.length) continue
+
+      const fresh = auctionFav.pickNewMatches(data, fav.id, matches)
+      if (!fresh.length) continue
+
+      let user
+      try {
+        user = await client.users.fetch(fav.userId)
+      } catch (error) {
+        continue
+      }
+
+      // 아이템 정보는 경매장 명령어와 동일한 임베드 사용
+      const buildEmbed = fav.category === '에코스톤' ? buildEchostoneEmbed : buildEquipEmbed
+      const embeds = fresh.slice(0, 5).map(buildEmbed)
+      const header = `🔔 즐겨찾기 **${fav.label}** 조건에 맞는 새 매물 ${fresh.length}건!` +
+        (fresh.length > 5 ? ' (가격순 5건)' : '') + '\n※ 데이터는 실제보다 ~10분 지연이라 접속하면 이미 팔렸을 수 있어~'
+      user.send({ content: header, embeds }).catch(() => {})
+    }
+
+    auctionFav.write(data)
+  })
+
+  console.log('auctionFavoriteJob start!')
+  auctionFavoriteJob.start()
 }

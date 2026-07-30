@@ -2,6 +2,9 @@ const axios = require('axios')
 
 const mainUrl = 'https://open.api.nexon.com'
 const nexonApiKey = process.env.NEXON_API_KEY
+const categoryData = require('./auctionCategories.json')
+// 특수 장비 대분류는 세공 검색 대상(악기·생활 도구)만 (경매장 명령어와 동일)
+const SPECIAL_ALLOWED_SUBS = ['악기', '생활 도구']
 
 // 세공 옵션 파싱: "옵션명(N레벨:X 증가)" → { name, level, raw }
 const metalwarePattern = /^(.*?)\((\d+)레벨/
@@ -90,4 +93,19 @@ function filterEchostones (items, { keyword, awakening, minAwakeningLevel, innat
   return r.sort((a, b) => a.auction_price_per_unit - b.auction_price_per_unit)
 }
 
-module.exports = { getCategoryItems, filterItems, parseMetalwares, metalwareLevel, koreanGold, parseEchostone, filterEchostones }
+// 즐겨찾기 카테고리 후보: 경매장 명령어가 쓰는 대분류(use=true) + 에코스톤
+function favoriteCategories () {
+  const majors = categoryData.categories.filter(c => c.use).map(c => c.name)
+  return [...majors, '에코스톤']
+}
+
+// 대분류명 → 넥슨 API가 받는 실제 소분류(leaf) 목록. 배치는 이걸로 펼쳐서 조회.
+function resolveLeafCategories (major) {
+  if (major === '에코스톤') return ['에코스톤']
+  const cat = categoryData.categories.find(c => c.name === major)
+  if (!cat) return []
+  if (major === '특수 장비') return cat.subCategories.filter(s => SPECIAL_ALLOWED_SUBS.includes(s))
+  return cat.subCategories.filter(s => s !== '에코스톤')
+}
+
+module.exports = { getCategoryItems, filterItems, parseMetalwares, metalwareLevel, koreanGold, parseEchostone, filterEchostones, favoriteCategories, resolveLeafCategories }

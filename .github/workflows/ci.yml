@@ -66,7 +66,7 @@ jobs:
             git fetch --all
             git reset --hard origin/main   # 원격과 강제 동기화(.env/static/json/node_modules 는 gitignore라 보존)
             # 런타임 의존성만 설치(--omit=dev): puppeteer 등 devDep 제외 → 크로미움 다운로드 없음.
-            # npm install은 additive라 node_modules를 지우지 않음 → npx pm2(node_modules 내부)도 안 깨짐(npm ci와 다름).
+            # pm2는 dependencies에 있으므로 --omit=dev로도 설치·유지됨(prune 대상 아님).
             npm install --omit=dev
             npx --yes pm2 stop discord-bot || true
             npx --yes pm2 delete discord-bot || true       # 항목만 정리(데몬 kill 아님) → 같은 이름 start 충돌 방지

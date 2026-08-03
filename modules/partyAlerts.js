@@ -1,0 +1,74 @@
+const fs = require('node:fs')
+
+const filePath = './static/json/partyAlerts.json'
+const MAX_PER_USER = 5
+const TTL_MS = 5 * 60 * 1000 // 5분 무외침 → 모집 끝으로 간주(재알림 허용)
+
+// { keywords: [{guildId, userId, keyword, createdAt}], seen: { [userId]: { [signature]: lastSeenMs } } }
+function read () {
+  try {
+    const d = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+    return { keywords: d.keywords || [], seen: d.seen || {} }
+  } catch (e) {
+    return { keywords: [], seen: {} }
+  }
+}
+
+function write (data) {
+  fs.mkdirSync('./static/json', { recursive: true })
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+}
+
+function listByUser (guildId, userId) {
+  return read().keywords.filter(k => k.guildId === guildId && k.userId === userId)
+}
+
+function add ({ guildId, userId, keyword }) {
+  const data = read()
+  const mine = data.keywords.filter(k => k.guildId === guildId && k.userId === userId)
+  if (mine.length >= MAX_PER_USER) return { ok: false, error: `키워드는 최대 ${MAX_PER_USER}개까지야~ 먼저 삭제해줘` }
+  if (mine.some(k => k.keyword === keyword)) return { ok: false, error: `'${keyword}'는 이미 등록돼 있어~` }
+  data.keywords.push({ guildId, userId, keyword, createdAt: new Date().toISOString() })
+  write(data)
+  return { ok: true }
+}
+
+function removeByKeyword (guildId, userId, keyword) {
+  const data = read()
+  const before = data.keywords.length
+  data.keywords = data.keywords.filter(k => !(k.guildId === guildId && k.userId === userId && k.keyword === keyword))
+  if (data.keywords.length === before) return { ok: false }
+  write(data)
+  return { ok: true }
+}
+
+// 거뿔 파티모집 메시지 파싱: "캐릭명 : #[채널7] 내용 [2/4명]완"
+// content=매칭용 제목(채널·인원·완 제거), signature=캐릭명+채널+정규화내용
+function parseRecruit (b) {
+  let body = b.message
+  const prefix = b.character_name + ' : '
+  if (body.startsWith(prefix)) body = body.slice(prefix.length)
+  const chMatch = body.match(/#\[채널(\d+)\]/)
+  const channelToken = chMatch ? chMatch[0] : ''
+  const channelNum = chMatch ? chMatch[1] : '?'
+  const content = body
+    .replace(/#\[채널\d+\]/, '')
+    .replace(/\[\d+\/\d+명\]완?/g, '')
+    .trim()
+  const signature = b.character_name + '|' + channelToken + '|' + content.replace(/\s+/g, '')
+  return { characterName: b.character_name, channelNum, content, signature }
+}
+
+// 알림 여부(슬라이딩 TTL): 만료된 서명 정리 후, 없으면 알림. 매 호출마다 시각 갱신.
+// data는 read()결과, 저장은 호출측에서.
+function shouldAlert (data, userId, signature, nowMs) {
+  const seen = data.seen[userId] || (data.seen[userId] = {})
+  for (const sig of Object.keys(seen)) {
+    if (nowMs - seen[sig] > TTL_MS) delete seen[sig]
+  }
+  const isNew = seen[signature] == null
+  seen[signature] = nowMs // 계속 외치면 갱신돼서 재알림 안 됨(파티당 1회)
+  return isNew
+}
+
+module.exports = { read, write, listByUser, add, removeByKeyword, parseRecruit, shouldAlert, MAX_PER_USER, TTL_MS }

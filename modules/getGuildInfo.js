@@ -11,7 +11,8 @@ const guildInfo = [
     partyChannelId: process.env.PARTY_RECRUITMENT,
     generalChannelId: process.env.GUILD_GENERAL_CHANNEL_ID,
     targetMemberRole: process.env.TARGET_MEMBER_ROLE_ID,
-    todayMissionChannelId: process.env.TODAY_MISSION_CHANNEL_ID
+    todayMissionChannelId: process.env.TODAY_MISSION_CHANNEL_ID,
+    weeklyMemberChannelId: process.env.WEEKLY_MEMBER_CHANNEL_ID
   },
   // 개발
   {
@@ -25,7 +26,8 @@ const guildInfo = [
     partyChannelId: process.env.DEV_PARTY_RECRUITMENT,
     generalChannelId: process.env.DEV_GENERAL_CHANNEL_ID,
     targetMemberRole: process.env.DEV_TARGET_MEMBER_ROLE_ID,
-    todayMissionChannelId: process.env.DEV_TODAY_MISSION_CHANNEL_ID
+    todayMissionChannelId: process.env.DEV_TODAY_MISSION_CHANNEL_ID,
+    weeklyMemberChannelId: process.env.DEV_WEEKLY_MEMBER_CHANNEL_ID
   }
 ]
 // guildId 별로 길드 권한이나 채널등의 아이디를 가져옴

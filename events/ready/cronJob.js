@@ -17,6 +17,7 @@ const { getDate } = require('../../modules/common')
 const auctionFav = require('../../modules/auctionFavorites')
 const { getCategoryItems, filterItems, resolveLeafCategories } = require('../../modules/auction')
 const { buildEquipEmbed, buildEchostoneEmbed } = require('../../modules/auctionEmbeds')
+const partyAlerts = require('../../modules/partyAlerts')
 
 const botId = process.env.BOT_ID
 const todayMissionChannelId = process.env.NODE_ENV === 'development'
@@ -29,6 +30,7 @@ const bugleHornChannelId = process.env.NODE_ENV === 'development'
   ? process.env.DEV_BUGLE_HORN_CHANNEL_ID
   : process.env.BUGLE_HORN_CHANNEL_ID
 const partyRecruitStatePath = './static/json/partyRecruitBoard.json'
+const weeklyMemberStatePath = './static/json/weeklyMemberBoard.json'
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 
 module.exports = async (client) => {
@@ -153,56 +155,59 @@ module.exports = async (client) => {
     : '0 0 * * 0'
   const weeklyJob = new cron.CronJob(weeklyCronSchedule, async function () {
     const userMessageCounts = getUserMessageCounts()
-    if (userMessageCounts) {
-      for (const guild of client.guilds.cache.values()) {
-        if (process.env.NODE_ENV === 'development' && guild.id !== '1126803872925634581') {
-          continue
-        }
-        const guildInfo = guildModule.getGuildInfo(guild.id)
-        if (!guildInfo || !userMessageCounts[guildInfo.guildId]) continue
-
-        const userCounts = userMessageCounts[guildInfo.guildId]
-        const topRanks = getTopRanking(userCounts)
-        if (topRanks.length === 0) continue
-
-        const embedList = topRanks.map(createRankingEmbed)
-        const generalChannel = guild.channels.cache.get(guildInfo.generalChannelId)
-
-        if (generalChannel) {
-          await generalChannel.send({ embeds: embedList })
-        }
-
-        // 채팅 수 초기화
-        userMessageCounts[guildInfo.guildId] = {}
-      }
-      saveUserMessageCounts(userMessageCounts)
-    }
-
     const userVoiceCounts = getUserVoiceCounts()
-    if (userVoiceCounts) {
-      for (const guild of client.guilds.cache.values()) {
-        if (process.env.NODE_ENV === 'development' && guild.id !== '1126803872925634581') {
-          continue
-        }
-        const guildInfo = guildModule.getGuildInfo(guild.id)
-        if (!guildInfo || !userVoiceCounts[guildInfo.guildId]) continue
 
-        const userCounts = userVoiceCounts[guildInfo.guildId]
-        const topRanks = getTopRanking(userCounts)
-        if (topRanks.length === 0) continue
-
-        const embedList = topRanks.map(createVoiceRankingEmbed)
-        const generalChannel = guild.channels.cache.get(guildInfo.generalChannelId)
-
-        if (generalChannel) {
-          await generalChannel.send({ embeds: embedList })
-        }
-
-        // 음성채팅 수 초기화
-        userVoiceCounts[guildInfo.guildId] = {}
-      }
-      saveUserVoiceCount(userVoiceCounts)
+    // 기존 메시지 수정(edit-in-place)용 상태 로드
+    let weeklyState = {}
+    if (fs.existsSync(weeklyMemberStatePath)) {
+      try { weeklyState = JSON.parse(fs.readFileSync(weeklyMemberStatePath)) } catch (e) { weeklyState = {} }
     }
+
+    for (const guild of client.guilds.cache.values()) {
+      if (process.env.NODE_ENV === 'development' && guild.id !== '1126803872925634581') {
+        continue
+      }
+      const guildInfo = guildModule.getGuildInfo(guild.id)
+      if (!guildInfo) continue
+
+      // 채팅 + 보이스 랭킹을 한 메시지에 모음
+      const embeds = []
+      if (userMessageCounts && userMessageCounts[guildInfo.guildId]) {
+        embeds.push(...getTopRanking(userMessageCounts[guildInfo.guildId]).map(createRankingEmbed))
+        userMessageCounts[guildInfo.guildId] = {} // 채팅 수 초기화
+      }
+      if (userVoiceCounts && userVoiceCounts[guildInfo.guildId]) {
+        embeds.push(...getTopRanking(userVoiceCounts[guildInfo.guildId]).map(createVoiceRankingEmbed))
+        userVoiceCounts[guildInfo.guildId] = {} // 음성채팅 수 초기화
+      }
+      if (embeds.length === 0) continue
+
+      // WEEKLY_MEMBER_CHANNEL_ID 채널로 전송
+      const memberChannel = guild.channels.cache.get(guildInfo.weeklyMemberChannelId)
+      if (!memberChannel) continue
+
+      // 파티보드처럼 기존 메시지 있으면 수정, 없으면 새로 전송
+      try {
+        const st = weeklyState[guild.id]
+        let msg = null
+        if (st && st.channelId === memberChannel.id) {
+          msg = await memberChannel.messages.fetch(st.messageId).catch(() => null)
+        }
+        if (msg) {
+          await msg.edit({ embeds })
+        } else {
+          msg = await memberChannel.send({ embeds })
+        }
+        weeklyState[guild.id] = { channelId: memberChannel.id, messageId: msg.id }
+      } catch (error) {
+        console.error('이주의 멤버 랭킹 갱신 에러:', error.message)
+      }
+    }
+
+    if (userMessageCounts) saveUserMessageCounts(userMessageCounts)
+    if (userVoiceCounts) saveUserVoiceCount(userVoiceCounts)
+    fs.mkdirSync('./static/json', { recursive: true })
+    fs.writeFileSync(weeklyMemberStatePath, JSON.stringify(weeklyState, null, 2))
   })
 
   console.log('weeklyJob start!')
@@ -298,6 +303,40 @@ module.exports = async (client) => {
     const recruit = hornBugleList
       .filter(b => b.message && b.message.startsWith(b.character_name + ' : #'))
       .sort((a, b) => new Date(b.date_send) - new Date(a.date_send))
+
+    // 키워드 알림: 등록 키워드가 파티모집 제목에 뜨면 DM (사람+채널+내용 서명, 5분 슬라이딩 TTL → 파티당 1회)
+    try {
+      const alertData = partyAlerts.read()
+      if (alertData.keywords.length) {
+        const nowMs = Date.now()
+        // 5분 넘은 외침은 스킵(시작 시 과거 히스토리 스팸 방지 + '5분=끝' 일관), 오래된→최신 순 처리
+        const freshRecruit = recruit
+          .filter(b => DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes <= 5)
+          .sort((a, b) => new Date(a.date_send) - new Date(b.date_send))
+        for (const b of freshRecruit) {
+          const parsed = partyAlerts.parseRecruit(b)
+          for (const kw of alertData.keywords) {
+            if (!client.guilds.cache.has(kw.guildId)) continue
+            if (!parsed.content.includes(kw.keyword)) continue
+            if (!partyAlerts.shouldAlert(alertData, kw.userId, parsed.signature, nowMs)) continue
+            const embed = new EmbedBuilder()
+              .setTitle(`🔔 파티모집 알림 · '${kw.keyword}'`)
+              .setColor('#00B894')
+              .setDescription(parsed.content || '(내용 없음)')
+              .addFields(
+                { name: '모집자', value: parsed.characterName, inline: true },
+                { name: '채널', value: `채널 ${parsed.channelNum}`, inline: true }
+              )
+              .setFooter({ text: `${getDate(new Date(b.date_send))} · 하프서버 거뿔` })
+            client.users.fetch(kw.userId).then(user => user.send({ embeds: [embed] })).catch(() => {})
+          }
+        }
+        partyAlerts.write(alertData)
+      }
+    } catch (error) {
+      console.error('파티 키워드 알림 에러:', error.message)
+    }
+
     // 사람당 최신 1건만(같은 사람이 인원 채우며 반복 외치는 것 제외) → 서로 다른 5명
     const seen = new Set()
     const top5 = []
@@ -325,14 +364,14 @@ module.exports = async (client) => {
         if (chMatch) body = body.replace(chMatch[0], '')
         if (hcMatch) body = body.replace(hcMatch[0], '')
         body = body.trim() || '(내용 없음)'
-        // 30분 이상 지난 외침은 '오래됨'으로 강조(이미 마감됐을 수 있음). instant 비교라 서버 TZ 무관
+        // 파티모집은 수동이라 5분 안 올라오면 끝난 것으로 봄. 10분+는 '오래됨' 강조. instant 비교라 서버 TZ 무관
         const ageMin = Math.floor(DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes)
-        const isOld = ageMin >= 30
+        const isOld = ageMin >= 10
         let color = done ? '#B2BEC3' : '#00B894'
         if (isOld && !done) color = '#E67E22'
         let agePart = ''
-        if (isOld) agePart = `  ·  ⏰ ${ageMin}분 전 (오래됨)` // 30분+ 강조
-        else if (ageMin >= 10) agePart = `  ·  ${ageMin}분 전` // 10분+ 경과 표시
+        if (isOld) agePart = `  ·  ⏰ ${ageMin}분 전 (오래됨)` // 10분+ 강조
+        else if (ageMin >= 5) agePart = `  ·  ${ageMin}분 전` // 5분+ 경과 표시
         return new EmbedBuilder()
           .setTitle(`${isOld ? '⏰ ' : ''}${b.character_name}  ·  📢 채널 ${channel}`)
           .setColor(color)

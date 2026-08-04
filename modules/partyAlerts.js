@@ -8,9 +8,9 @@ const TTL_MS = 5 * 60 * 1000 // 5분 무외침 → 모집 끝으로 간주(재�
 function read () {
   try {
     const d = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-    return { keywords: d.keywords || [], seen: d.seen || {} }
+    return { keywords: d.keywords || [], seen: d.seen || {}, windows: d.windows || {} }
   } catch (e) {
-    return { keywords: [], seen: {} }
+    return { keywords: [], seen: {}, windows: {} }
   }
 }
 
@@ -71,4 +71,33 @@ function shouldAlert (data, userId, signature, nowMs) {
   return isNew
 }
 
-module.exports = { read, write, listByUser, add, removeByKeyword, parseRecruit, shouldAlert, MAX_PER_USER, TTL_MS }
+// 알림 시간대: hour(0~23)가 [start, end) 범위 안인지. start>end면 자정 넘김(wrap), start===end면 24시간.
+function inWindow (hour, start, end) {
+  if (start < end) return hour >= start && hour < end
+  if (start > end) return hour >= start || hour < end
+  return true
+}
+
+function getWindow (userId) {
+  return read().windows[userId] || null
+}
+
+function setWindow (userId, start, end) {
+  const data = read()
+  data.windows[userId] = { start, end }
+  write(data)
+}
+
+function clearWindow (userId) {
+  const data = read()
+  if (data.windows[userId]) { delete data.windows[userId]; write(data) }
+}
+
+// 현재 시각(hour, KST)에 이 유저가 알림 받을 수 있나. 미설정=항상.
+function isAlertableNow (data, userId, hour) {
+  const w = data.windows[userId]
+  if (!w) return true
+  return inWindow(hour, w.start, w.end)
+}
+
+module.exports = { read, write, listByUser, add, removeByKeyword, parseRecruit, shouldAlert, inWindow, getWindow, setWindow, clearWindow, isAlertableNow, MAX_PER_USER, TTL_MS }

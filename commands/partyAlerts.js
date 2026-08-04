@@ -1,6 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const alertStore = require('../modules/partyAlerts')
 
+function windowLabel (start, end) {
+  if (start === end) return '24시간 (항상)'
+  return start > end ? `${start}시 ~ 다음날 ${end}시` : `${start}시 ~ ${end}시`
+}
+
 const data = new SlashCommandBuilder()
   .setName('파티알림')
   .setDescription('키워드를 등록하면 거뿔 파티모집 제목에 그 단어가 뜰 때 DM으로 알려줘~')
@@ -19,6 +24,16 @@ data.addSubcommand(sub => {
   sub.addStringOption(o => o.setName('키워드').setDescription('삭제할 키워드 (자동완성)').setRequired(true).setAutocomplete(true))
   return sub
 })
+
+data.addSubcommand(sub => {
+  sub.setName('시간설정').setDescription('알림 받을 시간대를 정해~ (범위 밖 시간엔 알림 안 옴)')
+  sub.addIntegerOption(o => o.setName('시작').setDescription('시작 시각 0~23 (예: 19)').setRequired(true).setMinValue(0).setMaxValue(23))
+  sub.addIntegerOption(o => o.setName('끝').setDescription('끝 시각 0~23, 이 시각부터 안 옴 (예: 1 → 다음날 1시까지)').setRequired(true).setMinValue(0).setMaxValue(23))
+  return sub
+})
+
+data.addSubcommand(sub =>
+  sub.setName('시간해제').setDescription('시간대 제한을 풀어 24시간 받기로~'))
 
 module.exports = {
   data,
@@ -61,10 +76,12 @@ module.exports = {
         await interaction.reply({ content: '아직 등록한 키워드가 없어~ `/파티알림 등록` 으로 추가해줘', ephemeral: true })
         return
       }
+      const w = alertStore.getWindow(userId)
       const embed = new EmbedBuilder()
         .setTitle(`🔔 내 파티 알림 키워드 (${mine.length}/${alertStore.MAX_PER_USER})`)
         .setColor('#00B894')
         .setDescription(mine.map(k => `• **${k.keyword}**`).join('\n'))
+        .setFooter({ text: `⏰ 알림 시간대: ${w ? windowLabel(w.start, w.end) : '24시간 (제한 없음)'}` })
       await interaction.reply({ embeds: [embed], ephemeral: true })
       return
     }
@@ -77,6 +94,21 @@ module.exports = {
         return
       }
       await interaction.reply({ content: `🗑️ '${keyword}' 키워드를 삭제했어~`, ephemeral: true })
+      return
+    }
+
+    if (sub === '시간설정') {
+      const start = interaction.options.getInteger('시작')
+      const end = interaction.options.getInteger('끝')
+      alertStore.setWindow(userId, start, end)
+      const extra = start === end ? ' (시작=끝이라 24시간 받기)' : ' 범위 밖 시간엔 파티 알림이 안 와.'
+      await interaction.reply({ content: `⏰ 알림 시간대를 **${windowLabel(start, end)}** 로 설정했어~${extra}`, ephemeral: true })
+      return
+    }
+
+    if (sub === '시간해제') {
+      alertStore.clearWindow(userId)
+      await interaction.reply({ content: '⏰ 시간대 제한을 풀었어~ 이제 24시간 알림 받아.', ephemeral: true })
     }
   }
 }

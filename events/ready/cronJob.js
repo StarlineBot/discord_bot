@@ -309,6 +309,7 @@ module.exports = async (client) => {
       const alertData = partyAlerts.read()
       if (alertData.keywords.length) {
         const nowMs = Date.now()
+        const kstHour = DateTime.now().setZone('Asia/Seoul').hour
         // 5분 넘은 외침은 스킵(시작 시 과거 히스토리 스팸 방지 + '5분=끝' 일관), 오래된→최신 순 처리
         const freshRecruit = recruit
           .filter(b => DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes <= 5)
@@ -318,6 +319,7 @@ module.exports = async (client) => {
           for (const kw of alertData.keywords) {
             if (!client.guilds.cache.has(kw.guildId)) continue
             if (!parsed.content.includes(kw.keyword)) continue
+            if (!partyAlerts.isAlertableNow(alertData, kw.userId, kstHour)) continue // 알림 시간대 밖 → seen 표시 없이 스킵
             if (!partyAlerts.shouldAlert(alertData, kw.userId, parsed.signature, nowMs)) continue
             const embed = new EmbedBuilder()
               .setTitle(`🔔 파티모집 알림 · '${kw.keyword}'`)

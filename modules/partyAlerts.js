@@ -43,7 +43,11 @@ function removeByKeyword (guildId, userId, keyword) {
 }
 
 // 거뿔 파티모집 메시지 파싱: "캐릭명 : #[채널7] 내용 [2/4명]완"
-// content=매칭용 제목(채널·인원·완 제거), signature=캐릭명+채널+정규화내용
+// content=화면표시용 제목(채널·인원·완 제거)
+// signature=채널+정규화내용. 중복 알림을 줄이려고 아래 두 가지를 서명에서 뺀다:
+//  - 모든 숫자: 남은 인원이 줄며 "딜러2모집"→"딜러1모집"처럼 텍스트가 바뀌어도 같은 파티로 인식
+//  - 캐릭터명: 같은 파티를 여러 모집자가 동시에 올려도(공동모집) 한 번만 알림
+// 트레이드오프: 채널·문구가 완전히 같고 숫자만 다른 '별개' 파티가 5분 내 올라오면 하나는 억제될 수 있음(드묾).
 function parseRecruit (b) {
   let body = b.message
   const prefix = b.character_name + ' : '
@@ -55,7 +59,8 @@ function parseRecruit (b) {
     .replace(/#\[채널\d+\]/, '')
     .replace(/\[\d+\/\d+명\]완?/g, '')
     .trim()
-  const signature = b.character_name + '|' + channelToken + '|' + content.replace(/\s+/g, '')
+  const sigContent = content.replace(/\d+/g, '').replace(/\s+/g, '')
+  const signature = channelToken + '|' + sigContent
   return { characterName: b.character_name, channelNum, content, signature }
 }
 

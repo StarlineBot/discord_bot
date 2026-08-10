@@ -2,14 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = 
 const guildModule = require('../modules/getGuildInfo')
 const settings = require('../modules/guildSettings')
 const { developerId } = require('../config/bot')
-
-// 관리자(adminRole 보유) 또는 서버장만 허용 — buttonReaction.js와 동일한 기준
-async function isAdmin (interaction, guildInfo) {
-  if (!guildInfo) return false
-  if (interaction.member.roles.cache.has(guildInfo.adminRole)) return true
-  const owner = await interaction.guild.fetchOwner()
-  return owner.id === guildInfo.ownerId
-}
+const perm = require('../modules/perm')
 
 // 설정이 바뀌면 봇 제작자(config/bot.js developerId)에게 "누가 뭘 바꿨는지" DM.
 async function notifyDeveloper (interaction, summary) {
@@ -109,6 +102,13 @@ data.addSubcommand(sub => {
   return sub
 })
 
+// 관리자역할: 봇 관리 명령어(설정·랭킹·메시지삭제)를 쓸 수 있는 역할 지정 (서버장·제작자만)
+data.addSubcommand(sub => {
+  sub.setName('관리자역할').setDescription('봇 관리 명령어를 쓸 수 있는 역할 지정 (서버장·제작자만)')
+  sub.addRoleOption(o => o.setName('역할').setDescription('관리자 역할').setRequired(true))
+  return sub
+})
+
 data.addSubcommand(sub =>
   sub.setName('목록').setDescription('이 서버의 현재 설정을 봐~'))
 
@@ -118,7 +118,7 @@ module.exports = {
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
 
-    if (!(await isAdmin(interaction, guildInfo))) {
+    if (!perm.isBotAdmin(interaction.member, interaction.guild)) {
       await interaction.reply({ content: '이 명령어는 관리자만 쓸 수 있어~', ephemeral: true })
       return
     }
@@ -197,6 +197,19 @@ module.exports = {
       return
     }
 
+    if (sub === '관리자역할') {
+      // 관리자역할 지정은 서버장·제작자만(adminRole 보유자가 스스로 관리자 역할을 바꾸는 것 방지)
+      if (!perm.isOwnerOrDev(interaction.member, interaction.guild)) {
+        await interaction.reply({ content: '관리자 역할 지정은 서버장(또는 제작자)만 할 수 있어~', ephemeral: true })
+        return
+      }
+      const role = interaction.options.getRole('역할')
+      settings.set(guildId, 'adminRole', role.id)
+      await interaction.reply({ content: `✅ 관리자 역할을 <@&${role.id}> 로 지정했어~\n이 역할이면 설정·랭킹·메시지삭제 명령어를 쓸 수 있어.`, ephemeral: true })
+      await notifyDeveloper(interaction, `관리자역할 → <@&${role.id}>`)
+      return
+    }
+
     if (sub === '목록') {
       const gi = guildInfo
       const chOf = (skey) => settings.get(guildId, skey, null) || (gi && gi[skey])
@@ -210,7 +223,9 @@ module.exports = {
       const boardOn = settings.get(guildId, 'bugleBoardEnabled', false)
       const weeklyOn = settings.get(guildId, 'weeklyEnabled', false)
       const missionOn = settings.get(guildId, 'dailyMissionEnabled', false)
+      const adminRole = settings.get(guildId, 'adminRole', null) || (gi && gi.adminRole)
       const lines = [
+        `👑 **관리자 역할** — ${adminRole ? `<@&${adminRole}>` : '미지정 (서버장·제작자만 관리)'}`,
         `${dot(autoGuestRole)} **손님권한 자동부여** — ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
         `${dot(auditLog)} **감사로그** — ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}`,
         `${dot(partyOn)} **파티모집(포럼 자동관리)** — ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,

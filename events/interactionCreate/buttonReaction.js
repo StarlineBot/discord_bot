@@ -1,5 +1,6 @@
 const guildModule = require('../../modules/getGuildInfo')
 const settings = require('../../modules/guildSettings')
+const perm = require('../../modules/perm')
 const timeout = 3000
 module.exports = async (interaction, client) => {
   if (!interaction.isButton()) return
@@ -11,9 +12,7 @@ module.exports = async (interaction, client) => {
   const memberId = buttonInfo.memberId
   const clickMember = interaction.member
 
-  const owner = await clickMember.guild.fetchOwner()
-  const isAllowed = !!clickMember.roles.cache.find(
-    role => role.id === guildInfo.adminRole) || owner.user.id === guildInfo.ownerId
+  const isAllowed = perm.isBotAdmin(clickMember, clickMember.guild)
 
   let message
   switch (action) {

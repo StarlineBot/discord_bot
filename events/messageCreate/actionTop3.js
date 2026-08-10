@@ -1,4 +1,5 @@
 const guildModule = require('../../modules/getGuildInfo')
+const perm = require('../../modules/perm')
 const {
   getUserMessageCounts,
   getTopRanking,
@@ -19,9 +20,8 @@ module.exports = async (message, client) => {
     const guild = client.guilds.cache.get(guildId)
     if (!guild) return
 
-    const adminRoleId = guildInfo.adminRole
     const member = guild.members.cache.get(message.author.id)
-    if (!member || !member.roles.cache.has(adminRoleId)) return
+    if (!perm.isBotAdmin(member, guild)) return
 
     let embeds = []
     const isChatRank = message.content.startsWith(prefix + '채팅랭킹')

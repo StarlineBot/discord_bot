@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require('discord.js')
 const guildModule = require('../../modules/getGuildInfo')
+const perm = require('../../modules/perm')
 const prefix = '!'
 module.exports = async (message, client) => {
   if (!message.author.bot) {
@@ -8,11 +9,9 @@ module.exports = async (message, client) => {
       const guildInfo = guildModule.getGuildInfo(guildId)
       if (typeof guildInfo !== typeof undefined) {
         try {
-          const guildAdminRoleId = guildInfo.adminRole
-          const guild = client.guilds.cache.find(guild => guild.id === guildId)
-          const allowedRole = guild.roles.cache.find(role => role.id === guildAdminRoleId)
-          const member = guild.members.cache.find(member => member.id === message.author.id)
-          const isAllowed = !!member.roles.cache.find(role => role.id === allowedRole.id)
+          const guild = client.guilds.cache.get(guildId)
+          const member = guild && guild.members.cache.get(message.author.id)
+          const isAllowed = perm.isBotAdmin(member, guild)
 
           // FIXME: 메세지 삭제가 포함되는지는 더 위에서 확인해야 할거 같음
           if (isAllowed && message.content.startsWith(prefix + '메세지삭제')) {

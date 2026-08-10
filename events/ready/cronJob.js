@@ -219,6 +219,7 @@ module.exports = async (client) => {
         return
       }
       const partyChannel = client.channels.cache.get(guildInfo.partyChannelId)
+      if (!partyChannel) return // partyChannelId 미설정/채널 없음(신규 서버 등) → 스킵
       partyChannel.threads.cache.forEach(thread => {
         thread.messages.fetch().then(messages => {
           const originMessage = messages.find(message => message.author.id === botId && message.channelId === message.id)

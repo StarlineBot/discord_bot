@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -43,9 +43,6 @@ module.exports = {
         : interaction.member.nickname,
       iconURL: interaction.member.user.displayAvatarURL()
     }
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannelId = guildInfo.generalChannelId
 
     const distribution = interaction.options._subcommand
 
@@ -86,8 +83,7 @@ module.exports = {
         .setTimestamp()
     }
 
-    const generalChannel = interaction.client.channels.cache.get(
-      generalChannelId)
+    const generalChannel = resolveGeneralChannel(interaction)
     const replyContent = { content: `입력한 내용은 <#${generalChannel.id}>에 계산 해 놨어~` }
     replyContent.ephemeral = true
     interaction.reply(replyContent)

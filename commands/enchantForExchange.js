@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 
 const week = ['일', '월', '화', '수', '목', '금', '토']
 const oddMonth = [
@@ -35,9 +35,6 @@ module.exports = {
         : interaction.member.nickname,
       iconURL: interaction.member.user.displayAvatarURL()
     }
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannelId = guildInfo.generalChannelId
 
     const now = new Date()
     const year = now.getFullYear()
@@ -49,7 +46,7 @@ module.exports = {
       ? oddMonth.find(({ weekDay }) => weekDay === getWeekDay)
       : evenMonth.find(({ weekDay }) => weekDay === getWeekDay)
 
-    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    const generalChannel = resolveGeneralChannel(interaction)
     const replyContent = { content: `오늘 기준 교환가능 인챈트는 <#${generalChannel.id}>에 작성했어~` }
     replyContent.ephemeral = true
     interaction.reply(replyContent)

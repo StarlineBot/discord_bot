@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const fs = require('node:fs')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 
 const THUMB_PATH = './static/img/brileic-coin.png'
 
@@ -47,9 +47,7 @@ module.exports = {
         )
     ),
   run: async ({ interaction }) => {
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannel = guildInfo && interaction.client.channels.cache.get(guildInfo.generalChannelId)
+    const generalChannel = resolveGeneralChannel(interaction)
 
     const type = interaction.options.getString('종류')
     const roll = ROLLS[type]

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 const { cookings } = require('../modules/cookings')
 const fs = require('node:fs')
 
@@ -43,11 +43,8 @@ module.exports = {
     // console.log(interaction.member.guild.id)
 
     const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannelId = guildInfo.generalChannelId
 
-    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    const generalChannel = resolveGeneralChannel(interaction)
     const replyContent = { content: `입력한 요리정보는 <#${generalChannel.id}>에 작성중이야~` }
     replyContent.ephemeral = true
     interaction.reply(replyContent)

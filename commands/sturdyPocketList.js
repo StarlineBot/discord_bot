@@ -1,9 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { text } = require('@kokr/text')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 const { getDate } = require('../modules/common')
 const axios = require('axios')
-const devChannelId = guildModule.getMonitorChannelId()
+const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 const nexonApiKey = process.env.NEXON_API_KEY
 const mainUrl = 'https://open.api.nexon.com'
@@ -73,11 +73,8 @@ module.exports = {
     ),
   run: async ({ interaction }) => {
     const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannelId = guildInfo.generalChannelId
 
-    const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+    const generalChannel = resolveGeneralChannel(interaction)
     const subcommand = interaction.options._subcommand
     const channel = typeof interaction.options._hoistedOptions.find(option => option.name === 'channel') === typeof undefined
       ? ''

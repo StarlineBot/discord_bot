@@ -1,10 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js')
 const { getCategoryItems, filterItems, filterEchostones } = require('../modules/auction')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 const categoryData = require('../modules/auctionCategories.json')
 const searchOptions = require('../modules/auctionSearchOptions.json')
 
-const devChannelId = guildModule.getMonitorChannelId()
+const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 const basicErrorMessage = '경매장 조회 중 문제가 생겼어 😢'
 const MAX_EMBEDS = 10
 const METALWARE_SLOTS = 3
@@ -75,8 +75,7 @@ data.addSubcommand(sub => {
 const { buildEquipEmbed, buildEchostoneEmbed } = require('../modules/auctionEmbeds')
 
 async function post (interaction, header, embeds) {
-  const guildInfo = guildModule.getGuildInfo(interaction.member.guild.id)
-  const botChannel = guildInfo && interaction.client.channels.cache.get(guildInfo.generalChannelId)
+  const botChannel = resolveGeneralChannel(interaction)
   if (!botChannel) { await interaction.editReply(embeds.length ? { content: header, embeds } : header); return }
   if (embeds.length) await botChannel.send({ content: header, embeds })
   else await botChannel.send(header)

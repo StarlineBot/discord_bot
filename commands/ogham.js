@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 const { arcanas, combinations } = require('../modules/ogham.json')
 
 module.exports = {
@@ -11,9 +11,7 @@ module.exports = {
         .addChoices(...arcanas.map(a => ({ name: a.name, value: String(a.id) })))
     ),
   run: async ({ interaction }) => {
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannel = guildInfo && interaction.client.channels.cache.get(guildInfo.generalChannelId)
+    const generalChannel = resolveGeneralChannel(interaction)
 
     const arcanaId = interaction.options.getString('아르카나')
     const arcana = arcanas.find(a => String(a.id) === arcanaId)

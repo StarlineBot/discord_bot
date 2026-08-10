@@ -109,6 +109,13 @@ data.addSubcommand(sub => {
   return sub
 })
 
+// 기본채널: 명령어 결과(오미/날씨/경매장 등)를 올릴 채널. 미설정 시 명령어 친 채널에 게시.
+data.addSubcommand(sub => {
+  sub.setName('기본채널').setDescription('명령어 결과를 모아 올릴 채널 지정 (미설정 시 명령어 친 채널)')
+  sub.addChannelOption(channelOption([ChannelType.GuildText], '결과를 올릴 채널'))
+  return sub
+})
+
 data.addSubcommand(sub =>
   sub.setName('목록').setDescription('이 서버의 현재 설정을 봐~'))
 
@@ -210,6 +217,18 @@ module.exports = {
       return
     }
 
+    if (sub === '기본채널') {
+      const channel = interaction.options.getChannel('채널')
+      if (!channel) {
+        await interaction.reply({ content: '올릴 채널을 지정해줘~', ephemeral: true })
+        return
+      }
+      settings.set(guildId, 'generalChannelId', channel.id)
+      await interaction.reply({ content: `✅ 명령어 결과를 <#${channel.id}> 에 올리도록 지정했어~`, ephemeral: true })
+      await notifyDeveloper(interaction, `기본채널 → <#${channel.id}>`)
+      return
+    }
+
     if (sub === '목록') {
       const gi = guildInfo
       const chOf = (skey) => settings.get(guildId, skey, null) || (gi && gi[skey])
@@ -224,8 +243,10 @@ module.exports = {
       const weeklyOn = settings.get(guildId, 'weeklyEnabled', false)
       const missionOn = settings.get(guildId, 'dailyMissionEnabled', false)
       const adminRole = settings.get(guildId, 'adminRole', null) || (gi && gi.adminRole)
+      const generalCh = settings.get(guildId, 'generalChannelId', null) || (gi && gi.generalChannelId)
       const lines = [
         `👑 **관리자 역할** — ${adminRole ? `<@&${adminRole}>` : '미지정 (서버장·제작자만 관리)'}`,
+        `#️⃣ **기본채널** — ${generalCh ? `<#${generalCh}>` : '미지정 (명령어 친 채널에 게시)'}`,
         `${dot(autoGuestRole)} **손님권한 자동부여** — ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
         `${dot(auditLog)} **감사로그** — ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}`,
         `${dot(partyOn)} **파티모집(포럼 자동관리)** — ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,

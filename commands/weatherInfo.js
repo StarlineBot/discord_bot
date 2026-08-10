@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const axios = require('axios')
 const { DateTime } = require('luxon')
-const guildModule = require('../modules/getGuildInfo')
-const devChannelId = guildModule.getMonitorChannelId()
+const { resolveGeneralChannel } = require('../modules/generalChannel')
+const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 const local = [
   { type: 'type1', names: ['티르코네일', '두갈드 아일', '두갈드 아일 거주지 + 성터'] },
@@ -61,9 +61,6 @@ module.exports = {
     // console.log(interaction.member.guild.id)
 
     const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannelId = guildInfo.generalChannelId
 
     try {
       const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
@@ -152,7 +149,7 @@ module.exports = {
         )
         .setTimestamp()
 
-      const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+      const generalChannel = resolveGeneralChannel(interaction)
       const replyContent = { content: `현재 시간 기준 에린날씨를 <#${generalChannel.id}>에 작성했어~` }
       replyContent.ephemeral = true
       interaction.reply(replyContent)

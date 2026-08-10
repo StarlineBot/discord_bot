@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
-const guildModule = require('../modules/getGuildInfo')
+const { resolveGeneralChannel } = require('../modules/generalChannel')
 const { DateTime } = require('luxon')
-const devChannelId = guildModule.getMonitorChannelId()
+const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 
 module.exports = {
@@ -13,9 +13,6 @@ module.exports = {
     // console.log(interaction.member.guild.id)
 
     const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
-    const guildId = interaction.member.guild.id
-    const guildInfo = guildModule.getGuildInfo(guildId)
-    const generalChannelId = guildInfo.generalChannelId
 
     const today = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     const offset = new Date().getTimezoneOffset() * 60000
@@ -65,7 +62,7 @@ module.exports = {
         )
         .setTimestamp()
 
-      const generalChannel = interaction.client.channels.cache.get(generalChannelId)
+      const generalChannel = resolveGeneralChannel(interaction)
       /*
       const replyContent = { content: `오늘의 미션을 <#${generalChannel.id}>에 작성했어~` }
       if (interaction.channelId === generalChannel.id) {
@@ -80,7 +77,7 @@ module.exports = {
           embeds: [todayEmbed, tomorrowEmbed]
         }
       )
-      await interaction.editReply(`오미를 <#${generalChannelId}>에 안내했어~`)
+      await interaction.editReply(`오미를 <#${generalChannel.id}>에 안내했어~`)
     } catch (error) {
       await interaction.editReply(basicErrorMessage)
       interaction.client.channels.cache.get(devChannelId).send(

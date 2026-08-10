@@ -10,11 +10,8 @@ const getGuildInfo = (guildId) => {
   return registry.get(guildId) || undefined
 }
 
-// 봇 헬스체크·에러 로그를 보내는 모니터 채널 = 개발 길드의 logChannelId (기존 DEV_CHANNEL_ID 동작 유지)
-const getMonitorChannelId = () => {
-  const dev = guilds.find(guild => guild.env === 'development')
-  return dev ? dev.logChannelId : null
-}
+// 봇 헬스체크·에러 로그를 보내는 모니터 채널 (config/bot.js, 서버 무관 봇 전역)
+const getMonitorChannelId = () => bot.logChannelId || null
 
 // 개발(테스트) 길드 ID — config/bot.js에서. dev모드 cron이 이 서버만 건드리게.
 const getDevGuildId = () => bot.devGuildId || null

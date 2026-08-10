@@ -8,5 +8,8 @@ module.exports = {
   // devGuildId: 개발(테스트) 서버 길드 ID.
   //   NODE_ENV=development(로컬)로 돌 때, cron이 이 서버만 건드리게 하는 기준.
   //   (길드마다 env 라벨 다는 대신 "테스트 서버는 이거다" 단일 값으로 dev/prod 구분)
-  devGuildId: '1126803872925634581'
+  devGuildId: '1126803872925634581',
+  // logChannelId: 봇 헬스체크·에러 로그를 보내는 모니터 채널(서버 무관 봇 전역).
+  //   비어 있으면 로그 전송을 건너뛴다.
+  logChannelId: '1126803873458303039'
 }

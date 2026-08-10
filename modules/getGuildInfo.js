@@ -1,7 +1,14 @@
 const guilds = require('../config/guilds')
+const registry = require('./guildRegistry')
+const bot = require('../config/bot')
 
-// guildId로 해당 길드의 채널·역할 설정을 가져옴 (없으면 undefined)
-const getGuildInfo = (guildId) => guilds.find(guild => guild.guildId === guildId)
+// config/guilds.js(엄선) 우선 → 없으면 런타임 레지스트리(자동등록: guildId+ownerId+name)
+// 자동등록 서버는 adminRole/채널이 없어 오너 부트스트랩만 되고, 나머진 /섯다라인설정으로 지정.
+const getGuildInfo = (guildId) => {
+  const base = guilds.find(guild => guild.guildId === guildId)
+  if (base) return base
+  return registry.get(guildId) || undefined
+}
 
 // NODE_ENV(development/production)에 해당하는 길드.
 // cron 싱글턴 잡(오늘의미션 게시·거뿔보드)이 "어느 길드 채널에 올릴지" 고를 때 사용.
@@ -16,10 +23,7 @@ const getMonitorChannelId = () => {
   return dev ? dev.logChannelId : null
 }
 
-// 개발용 길드 ID (cron dev 게이팅에서 사용)
-const getDevGuildId = () => {
-  const dev = guilds.find(guild => guild.env === 'development')
-  return dev ? dev.guildId : null
-}
+// 개발(테스트) 길드 ID — config/bot.js에서. dev모드 cron이 이 서버만 건드리게.
+const getDevGuildId = () => bot.devGuildId || null
 
 module.exports = { getGuildInfo, getActiveGuild, getMonitorChannelId, getDevGuildId }

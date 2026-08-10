@@ -3,8 +3,11 @@
 //
 // ▶ 서버를 추가하려면: 아래 배열에 객체 하나만 추가하면 된다.
 //   - env: cron 싱글턴 잡(오늘의미션/거뿔보드)이 NODE_ENV로 대상 길드를 고를 때 매칭 키.
-//           'production' / 'development' 두 가지. (같은 봇이 여러 길드에 있어도 한 곳에만 게시)
+//           'production' / 'development' 두 가지.
 //   - 길드별 순회 기능(랭킹/스레드정리/파티알림/경매장즐겨찾기)은 guildId로 자동 매칭돼 새 서버도 바로 동작.
+//
+// ※ 손님권한·감사로그(손님역할/길드원역할/감사채널)는 여기 없다.
+//    기본 OFF이고 서버마다 `/섯다라인설정` 명령어로 켜고 역할·채널을 지정한다(guildSettings.json 저장).
 const guilds = [
   {
     name: '향내나는실크',
@@ -12,12 +15,8 @@ const guilds = [
     guildId: '1114121990408773712',
     ownerId: '386478163682918400',
     adminRole: '1114154979691855872',
-    guestRole: '1126152888079630406',
-    guildMemberRole: '1124637362467647548',
-    targetMemberRole: '1242476583521095794',
     channelId: '1114121990949834865',
     partyChannelId: '1167792216425627699',
-    roleAuditingChannelId: '1126029758006833183',
     generalChannelId: '1234196678408536215',
     todayMissionChannelId: '1319831360549945455',
     bugleHornChannelId: '1530113048503779369',
@@ -29,12 +28,8 @@ const guilds = [
     guildId: '1126803872925634581',
     ownerId: '280290004926857216',
     adminRole: '1232591254244687886',
-    guestRole: '1232225039781335102',
-    guildMemberRole: '1127036669200187464',
-    targetMemberRole: '1232225039781335102',
     channelId: '1126803873458303039',
     partyChannelId: '1230356497704423426',
-    roleAuditingChannelId: '1127036673239285820',
     generalChannelId: '1238382982922764358',
     todayMissionChannelId: '1319825743689154610',
     bugleHornChannelId: '1530114468393123991',

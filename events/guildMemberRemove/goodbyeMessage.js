@@ -1,10 +1,14 @@
 const { EmbedBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../../modules/getGuildInfo')
+const settings = require('../../modules/guildSettings')
 const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 module.exports = (member) => {
   const guildId = member.guild.id
   const guildInfo = guildModule.getGuildInfo(guildId)
+  if (!guildInfo || !settings.get(guildId, 'auditLog', false)) return
+  const auditChannelId = settings.get(guildId, 'roleAuditingChannelId', null)
+  if (!auditChannelId) return
   const embed = new EmbedBuilder()
     .setColor('#FF0000')
     .setAuthor({
@@ -16,6 +20,6 @@ module.exports = (member) => {
     .setFooter(
       { text: `ID: ${member.user.id} ${now.toFormat('yyyy-MM-dd HH:mm cccc')}` })
 
-  member.guild.channels.cache.find(channel => channel.id === guildInfo.roleAuditingChannelId).send(
-    { embeds: [embed] })
+  const auditChannel = member.guild.channels.cache.get(auditChannelId)
+  if (auditChannel) auditChannel.send({ embeds: [embed] })
 }

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = require('discord.js')
 const guildModule = require('../modules/getGuildInfo')
 const settings = require('../modules/guildSettings')
+const { developerId } = require('../config/bot')
 
 // 관리자(adminRole 보유) 또는 서버장만 허용 — buttonReaction.js와 동일한 기준
 async function isAdmin (interaction, guildInfo) {
@@ -8,6 +9,17 @@ async function isAdmin (interaction, guildInfo) {
   if (interaction.member.roles.cache.has(guildInfo.adminRole)) return true
   const owner = await interaction.guild.fetchOwner()
   return owner.id === guildInfo.ownerId
+}
+
+// 설정이 바뀌면 봇 제작자(config/bot.js developerId)에게 "누가 뭘 바꿨는지" DM.
+// 제작자 본인이 바꿨거나 developerId 미설정이면 스킵.
+async function notifyDeveloper (interaction, summary) {
+  if (!developerId || developerId === interaction.user.id) return
+  try {
+    const dev = await interaction.client.users.fetch(developerId)
+    const who = `${interaction.user.username} (<@${interaction.user.id}>)`
+    await dev.send(`⚙️ **${interaction.guild.name}** 설정 변경 알림\n🧑 실행자: ${who}\n📝 ${summary}`)
+  } catch (e) { /* DM 막힘/유저 조회 실패는 무시 */ }
 }
 
 const stateOption = (o) => {
@@ -60,6 +72,7 @@ module.exports = {
       if (!on) {
         settings.set(guildId, 'autoGuestRole', false)
         await interaction.reply({ content: '✅ **손님권한 자동부여**를 **껐어**~', ephemeral: true })
+        await notifyDeveloper(interaction, '손님권한 자동부여 → **끄기**')
         return
       }
       const role = interaction.options.getRole('역할')
@@ -74,6 +87,7 @@ module.exports = {
       }
       settings.set(guildId, 'autoGuestRole', true)
       await interaction.reply({ content: `✅ **손님권한 자동부여**를 **켰어**~ 손님 역할: <@&${effective}>`, ephemeral: true })
+      await notifyDeveloper(interaction, `손님권한 자동부여 → **켜기** (손님역할 <@&${effective}>)`)
       return
     }
 
@@ -82,6 +96,7 @@ module.exports = {
       if (!on) {
         settings.set(guildId, 'auditLog', false)
         await interaction.reply({ content: '✅ **감사로그**를 **껐어**~ (입장 승인·역할변경·퇴장 로그 중지)', ephemeral: true })
+        await notifyDeveloper(interaction, '감사로그 → **끄기**')
         return
       }
       const channel = interaction.options.getChannel('채널')
@@ -103,6 +118,7 @@ module.exports = {
         ? `\n입장 승인 역할: <@&${effectiveRole}> (입장 로그에 부여 버튼 표시)`
         : '\n※ 승인역할 미지정 → 입장 로그만 뜨고 부여 버튼은 없어.'
       await interaction.reply({ content: `✅ **감사로그**를 **켰어**~ 로그 채널: <#${effectiveCh}>${roleNote}`, ephemeral: true })
+      await notifyDeveloper(interaction, `감사로그 → **켜기** (채널 <#${effectiveCh}>${effectiveRole ? `, 승인역할 <@&${effectiveRole}>` : ''})`)
       return
     }
 

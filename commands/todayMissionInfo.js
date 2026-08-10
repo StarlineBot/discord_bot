@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const guildModule = require('../modules/getGuildInfo')
 const { DateTime } = require('luxon')
-const devChannelId = process.env.DEV_CHANNEL_ID
+const devChannelId = guildModule.getMonitorChannelId()
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 
 module.exports = {

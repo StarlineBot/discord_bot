@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const axios = require('axios')
 const { DateTime } = require('luxon')
 const guildModule = require('../modules/getGuildInfo')
-const devChannelId = process.env.DEV_CHANNEL_ID
+const devChannelId = guildModule.getMonitorChannelId()
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 const local = [
   { type: 'type1', names: ['티르코네일', '두갈드 아일', '두갈드 아일 거주지 + 성터'] },

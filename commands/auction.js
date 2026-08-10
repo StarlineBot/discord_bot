@@ -4,7 +4,7 @@ const guildModule = require('../modules/getGuildInfo')
 const categoryData = require('../modules/auctionCategories.json')
 const searchOptions = require('../modules/auctionSearchOptions.json')
 
-const devChannelId = process.env.DEV_CHANNEL_ID
+const devChannelId = guildModule.getMonitorChannelId()
 const basicErrorMessage = '경매장 조회 중 문제가 생겼어 😢'
 const MAX_EMBEDS = 10
 const METALWARE_SLOTS = 3

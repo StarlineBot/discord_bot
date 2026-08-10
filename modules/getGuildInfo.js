@@ -1,36 +1,25 @@
-const guildInfo = [
-  // 향내나는실크
-  {
-    guildId: process.env.GUILD_ID,
-    adminRole: process.env.GUILD_ADMIN_ROLE_ID,
-    ownerId: process.env.GUILD_OWNER_ID,
-    guestRole: process.env.GUILD_GUEST_ROLE_ID,
-    guildMemberRole: process.env.GUILD_ROLE,
-    roleAuditingChannelId: process.env.ROLE_AUDITING_CHANNEL_ID,
-    channelId: process.env.CHANNEL_ID,
-    partyChannelId: process.env.PARTY_RECRUITMENT,
-    generalChannelId: process.env.GUILD_GENERAL_CHANNEL_ID,
-    targetMemberRole: process.env.TARGET_MEMBER_ROLE_ID,
-    todayMissionChannelId: process.env.TODAY_MISSION_CHANNEL_ID,
-    weeklyMemberChannelId: process.env.WEEKLY_MEMBER_CHANNEL_ID
-  },
-  // 개발
-  {
-    guildId: process.env.DEV_GUILD_ID,
-    adminRole: process.env.DEV_GUILD_ADMIN_ROLE_ID,
-    ownerId: process.env.DEV_GUILD_OWNER_ID,
-    guestRole: process.env.DEV_GUILD_GUEST_ROLE_ID,
-    guildMemberRole: process.env.DEV_GUILD_ROLE,
-    roleAuditingChannelId: process.env.DEV_ROLE_AUDITING_CHANNEL_ID,
-    channelId: process.env.DEV_CHANNEL_ID,
-    partyChannelId: process.env.DEV_PARTY_RECRUITMENT,
-    generalChannelId: process.env.DEV_GENERAL_CHANNEL_ID,
-    targetMemberRole: process.env.DEV_TARGET_MEMBER_ROLE_ID,
-    todayMissionChannelId: process.env.DEV_TODAY_MISSION_CHANNEL_ID,
-    weeklyMemberChannelId: process.env.DEV_WEEKLY_MEMBER_CHANNEL_ID
-  }
-]
-// guildId 별로 길드 권한이나 채널등의 아이디를 가져옴
-module.exports.getGuildInfo = (guildId) => {
-  return guildInfo.find(guild => guild.guildId === guildId)
+const guilds = require('../config/guilds')
+
+// guildId로 해당 길드의 채널·역할 설정을 가져옴 (없으면 undefined)
+const getGuildInfo = (guildId) => guilds.find(guild => guild.guildId === guildId)
+
+// NODE_ENV(development/production)에 해당하는 길드.
+// cron 싱글턴 잡(오늘의미션 게시·거뿔보드)이 "어느 길드 채널에 올릴지" 고를 때 사용.
+const getActiveGuild = () => {
+  const env = process.env.NODE_ENV === 'development' ? 'development' : 'production'
+  return guilds.find(guild => guild.env === env) || guilds[0]
 }
+
+// 봇 헬스체크·에러 로그를 보내는 모니터 채널 = 개발 길드의 메인 채널(기존 DEV_CHANNEL_ID 동작 유지)
+const getMonitorChannelId = () => {
+  const dev = guilds.find(guild => guild.env === 'development')
+  return dev ? dev.channelId : null
+}
+
+// 개발용 길드 ID (cron dev 게이팅에서 사용)
+const getDevGuildId = () => {
+  const dev = guilds.find(guild => guild.env === 'development')
+  return dev ? dev.guildId : null
+}
+
+module.exports = { getGuildInfo, getActiveGuild, getMonitorChannelId, getDevGuildId }

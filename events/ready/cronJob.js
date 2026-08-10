@@ -20,15 +20,13 @@ const { buildEquipEmbed, buildEchostoneEmbed } = require('../../modules/auctionE
 const partyAlerts = require('../../modules/partyAlerts')
 
 const botId = process.env.BOT_ID
-const todayMissionChannelId = process.env.NODE_ENV === 'development'
-  ? process.env.DEV_TODAY_MISSION_CHANNEL_ID
-  : process.env.TODAY_MISSION_CHANNEL_ID
-const otherChannelId = process.env.DEV_CHANNEL_ID
+// cron 싱글턴 채널: NODE_ENV에 맞는 길드(config/guilds.js)에서 가져옴 (기존 DEV_* 분기 대체)
+const activeGuild = guildModule.getActiveGuild()
+const todayMissionChannelId = activeGuild.todayMissionChannelId
+const bugleHornChannelId = activeGuild.bugleHornChannelId
+const otherChannelId = guildModule.getMonitorChannelId()
 const nexonApiKey = process.env.NEXON_API_KEY
 const nexonApiMainUrl = 'https://open.api.nexon.com'
-const bugleHornChannelId = process.env.NODE_ENV === 'development'
-  ? process.env.DEV_BUGLE_HORN_CHANNEL_ID
-  : process.env.BUGLE_HORN_CHANNEL_ID
 const partyRecruitStatePath = './static/json/partyRecruitBoard.json'
 const weeklyMemberStatePath = './static/json/weeklyMemberBoard.json'
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
@@ -164,7 +162,7 @@ module.exports = async (client) => {
     }
 
     for (const guild of client.guilds.cache.values()) {
-      if (process.env.NODE_ENV === 'development' && guild.id !== '1126803872925634581') {
+      if (process.env.NODE_ENV === 'development' && guild.id !== guildModule.getDevGuildId()) {
         continue
       }
       const guildInfo = guildModule.getGuildInfo(guild.id)

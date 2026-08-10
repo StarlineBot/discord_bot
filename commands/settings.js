@@ -70,11 +70,11 @@ data.addSubcommand(sub => {
   return sub
 })
 
-// 파티모집: 디스코드 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off + 포럼 채널
+// 파티모집: 디스코드 파티모집 자동관리(스레드 정리·출발 알림) on/off + 채널
 data.addSubcommand(sub => {
-  sub.setName('파티모집').setDescription('디스코드 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off')
+  sub.setName('파티모집').setDescription('디스코드 파티모집 자동관리(스레드 정리·출발 알림) on/off')
   sub.addStringOption(stateOption)
-  sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '디스코드 파티모집 포럼 채널 (켤 때 지정)'))
+  sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '디스코드 파티모집 채널 (켤 때 지정)'))
   return sub
 })
 
@@ -188,7 +188,7 @@ module.exports = {
     }
 
     if (sub === '파티모집') {
-      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집(포럼 자동관리)', flag: 'partyRecruitEnabled', key: 'partyChannelId' })
+      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집(자동관리)', flag: 'partyRecruitEnabled', key: 'partyChannelId' })
       return
     }
     if (sub === '인게임파티모집현황') {
@@ -249,7 +249,7 @@ module.exports = {
         `#️⃣ **기본채널** — ${generalCh ? `<#${generalCh}>` : '미지정 (명령어 친 채널에 게시)'}`,
         `${dot(autoGuestRole)} **손님권한 자동부여** — ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
         `${dot(auditLog)} **감사로그** — ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}`,
-        `${dot(partyOn)} **파티모집(포럼 자동관리)** — ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
+        `${dot(partyOn)} **파티모집(자동관리)** — ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
         `${dot(boardOn)} **인게임파티모집현황** — ${boardOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('bugleHornChannelId'))}`,
         `${dot(weeklyOn)} **주간랭킹** — ${weeklyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('weeklyMemberChannelId'))}`,
         `${dot(missionOn)} **오늘의미션 게시** — ${missionOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('todayMissionChannelId'))}`

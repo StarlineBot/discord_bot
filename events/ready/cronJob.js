@@ -18,12 +18,10 @@ const auctionFav = require('../../modules/auctionFavorites')
 const { getCategoryItems, filterItems, resolveLeafCategories } = require('../../modules/auction')
 const { buildEquipEmbed, buildEchostoneEmbed } = require('../../modules/auctionEmbeds')
 const partyAlerts = require('../../modules/partyAlerts')
+const settings = require('../../modules/guildSettings')
 
 const botId = process.env.BOT_ID
-// cron 싱글턴 채널: NODE_ENV에 맞는 길드(config/guilds.js)에서 가져옴 (기존 DEV_* 분기 대체)
-const activeGuild = guildModule.getActiveGuild()
-const todayMissionChannelId = activeGuild.todayMissionChannelId
-const bugleHornChannelId = activeGuild.bugleHornChannelId
+// 봇 로그·헬스체크 모니터 채널 (오미·거뿔보드는 이제 per-guild라 싱글턴 채널 없음)
 const otherChannelId = guildModule.getMonitorChannelId()
 const nexonApiKey = process.env.NEXON_API_KEY
 const nexonApiMainUrl = 'https://open.api.nexon.com'
@@ -58,8 +56,10 @@ module.exports = async (client) => {
       if (!guildInfo) {
         return
       }
-
-      const partyChannel = guild.channels.cache.get(guildInfo.partyChannelId)
+      // 파티모집(포럼 자동관리) 기능 on + 포럼 채널(설정 우선 → config 폴백)
+      if (!settings.get(guild.id, 'partyRecruitEnabled', false)) return
+      const partyChannelId = settings.get(guild.id, 'partyChannelId', null) || guildInfo.partyChannelId
+      const partyChannel = partyChannelId && guild.channels.cache.get(partyChannelId)
       if (!partyChannel) {
         return
       }
@@ -96,10 +96,16 @@ module.exports = async (client) => {
     const { getVeteran, getMissions } = require(
       '../../modules/todayMission')(now, nowDate)
 
-    const todayMissionChannel = client.channels.cache.get(todayMissionChannelId)
-    if (!todayMissionChannel) {
-      return
+    // 오늘의미션 켜진 길드 수집(설정 우선 → config 폴백)
+    const missionChannels = []
+    for (const guild of client.guilds.cache.values()) {
+      if (!settings.get(guild.id, 'dailyMissionEnabled', false)) continue
+      const gi = guildModule.getGuildInfo(guild.id)
+      const chId = settings.get(guild.id, 'todayMissionChannelId', null) || (gi && gi.todayMissionChannelId)
+      const channel = chId && client.channels.cache.get(chId)
+      if (channel) missionChannels.push(channel)
     }
+    if (missionChannels.length === 0) return // 켠 길드 없음 → 미션 조회 스킵
 
     let todayMissionObject, tomorrowMissionObject
     try {
@@ -142,7 +148,8 @@ module.exports = async (client) => {
         }
       )
       .setTimestamp()
-    todayMissionChannel.send({ embeds: [todayEmbed, tomorrowEmbed] })
+    // 거뿔보드처럼 미션 데이터는 게임 공통 → 임베드 1벌을 켠 길드마다 게시
+    for (const channel of missionChannels) channel.send({ embeds: [todayEmbed, tomorrowEmbed] })
   })
 
   console.log('dailyJob start!')
@@ -167,6 +174,7 @@ module.exports = async (client) => {
       }
       const guildInfo = guildModule.getGuildInfo(guild.id)
       if (!guildInfo) continue
+      if (!settings.get(guild.id, 'weeklyEnabled', false)) continue // 주간랭킹 기능 off면 스킵
 
       // 채팅 + 보이스 랭킹을 한 메시지에 모음
       const embeds = []
@@ -180,8 +188,9 @@ module.exports = async (client) => {
       }
       if (embeds.length === 0) continue
 
-      // WEEKLY_MEMBER_CHANNEL_ID 채널로 전송
-      const memberChannel = guild.channels.cache.get(guildInfo.weeklyMemberChannelId)
+      // 랭킹 채널(설정 우선 → config 폴백)
+      const memberChannelId = settings.get(guild.id, 'weeklyMemberChannelId', null) || guildInfo.weeklyMemberChannelId
+      const memberChannel = memberChannelId && guild.channels.cache.get(memberChannelId)
       if (!memberChannel) continue
 
       // 파티보드처럼 기존 메시지 있으면 수정, 없으면 새로 전송
@@ -218,7 +227,10 @@ module.exports = async (client) => {
       if (typeof guildInfo === typeof undefined) {
         return
       }
-      const partyChannel = client.channels.cache.get(guildInfo.partyChannelId)
+      // 파티모집(포럼 자동관리) 기능 on + 포럼 채널(설정 우선 → config 폴백)
+      if (!settings.get(guild.id, 'partyRecruitEnabled', false)) return
+      const partyChannelId = settings.get(guild.id, 'partyChannelId', null) || guildInfo.partyChannelId
+      const partyChannel = partyChannelId && client.channels.cache.get(partyChannelId)
       if (!partyChannel) return // partyChannelId 미설정/채널 없음(신규 서버 등) → 스킵
       partyChannel.threads.cache.forEach(thread => {
         thread.messages.fetch().then(messages => {
@@ -281,10 +293,22 @@ module.exports = async (client) => {
   console.log('partyScheduleJob start!')
   partyScheduleJob.start()
 
-  // 파티모집 현황 보드: 거뿔(#) 최근 5개를 한 메시지에 계속 갱신(edit-in-place → 누적/노이즈 없음)
+  // 인게임파티모집현황(거뿔보드): 켠 길드마다 거뿔(#) 최근 5개를 한 메시지에 계속 갱신(edit-in-place)
   const partyRecruitBoardJob = new cron.CronJob('*/10 * * * * *', async function () {
-    const boardChannel = client.channels.cache.get(bugleHornChannelId)
-    if (!boardChannel) return
+    // 인게임파티모집현황 켜진 길드 수집(설정 우선 → config 폴백)
+    const boardGuilds = []
+    for (const guild of client.guilds.cache.values()) {
+      if (!settings.get(guild.id, 'bugleBoardEnabled', false)) continue
+      const gi = guildModule.getGuildInfo(guild.id)
+      const chId = settings.get(guild.id, 'bugleHornChannelId', null) || (gi && gi.bugleHornChannelId)
+      const channel = chId && client.channels.cache.get(chId)
+      if (channel) boardGuilds.push({ guildId: guild.id, channel })
+    }
+    // 키워드 알림은 인게임파티모집현황이 on인 길드에서만 → 필요 여부 판단
+    const alertData = partyAlerts.read()
+    const needKeywords = alertData.keywords.some(kw =>
+      client.guilds.cache.has(kw.guildId) && settings.get(kw.guildId, 'bugleBoardEnabled', false))
+    if (boardGuilds.length === 0 && !needKeywords) return // 켠 길드·키워드 없음 → 거뿔 API 호출 스킵
 
     let hornBugleList
     try {
@@ -303,10 +327,9 @@ module.exports = async (client) => {
       .filter(b => b.message && b.message.startsWith(b.character_name + ' : #'))
       .sort((a, b) => new Date(b.date_send) - new Date(a.date_send))
 
-    // 키워드 알림: 등록 키워드가 파티모집 제목에 뜨면 DM (사람+채널+내용 서명, 5분 슬라이딩 TTL → 파티당 1회)
-    try {
-      const alertData = partyAlerts.read()
-      if (alertData.keywords.length) {
+    // 키워드 알림: 인게임파티모집현황이 on인 길드에서만 (사람+채널+내용 서명, 5분 슬라이딩 TTL → 파티당 1회)
+    if (needKeywords) {
+      try {
         const nowMs = Date.now()
         const kstHour = DateTime.now().setZone('Asia/Seoul').hour
         // 5분 넘은 외침은 스킵(시작 시 과거 히스토리 스팸 방지 + '5분=끝' 일관), 오래된→최신 순 처리
@@ -317,6 +340,7 @@ module.exports = async (client) => {
           const parsed = partyAlerts.parseRecruit(b)
           for (const kw of alertData.keywords) {
             if (!client.guilds.cache.has(kw.guildId)) continue
+            if (!settings.get(kw.guildId, 'bugleBoardEnabled', false)) continue // 인게임파티모집현황 on일 때만
             if (!parsed.content.includes(kw.keyword)) continue
             if (!partyAlerts.isAlertableNow(alertData, kw.userId, kstHour)) continue // 알림 시간대 밖 → seen 표시 없이 스킵
             if (!partyAlerts.shouldAlert(alertData, kw.userId, parsed.signature, nowMs)) continue
@@ -333,10 +357,12 @@ module.exports = async (client) => {
           }
         }
         partyAlerts.write(alertData)
+      } catch (error) {
+        console.error('파티 키워드 알림 에러:', error.message)
       }
-    } catch (error) {
-      console.error('파티 키워드 알림 에러:', error.message)
     }
+
+    if (boardGuilds.length === 0) return // 보드 켠 길드 없음 → 게시 스킵(키워드만 처리하고 끝)
 
     // 사람당 최신 1건만(같은 사람이 인원 채우며 반복 외치는 것 제외) → 서로 다른 5명
     const seen = new Set()
@@ -383,29 +409,36 @@ module.exports = async (client) => {
 
     // 내용 서명: 변경 없으면 편집 스킵(불필요한 Discord 호출/rate limit 방지)
     const signature = top5.map(b => b.character_name + '|' + b.date_send + '|' + b.message).join('||')
+
+    // 길드별 상태로 edit-in-place (거뿔 내용은 하프서버 공통 → 임베드 동일, 서버마다 메시지 1개 유지)
     let state = {}
     if (fs.existsSync(partyRecruitStatePath)) {
       try { state = JSON.parse(fs.readFileSync(partyRecruitStatePath)) } catch (e) { state = {} }
     }
-    const saveState = (messageId) => {
-      fs.mkdirSync('./static/json', { recursive: true })
-      fs.writeFileSync(partyRecruitStatePath, JSON.stringify({ messageId, channelId: boardChannel.id, signature }))
+    if (state.messageId) state = {} // 구 flat 포맷 → guildId 키 구조로 초기화
+    let changed = false
+    for (const { guildId, channel } of boardGuilds) {
+      try {
+        const st = state[guildId]
+        let msg = null
+        if (st && st.channelId === channel.id) {
+          msg = await channel.messages.fetch(st.messageId).catch(() => null)
+        }
+        if (msg && st.signature === signature) continue // 존재 + 내용 동일 → 스킵
+        if (msg) {
+          await msg.edit({ embeds })
+        } else {
+          msg = await channel.send({ embeds })
+        }
+        state[guildId] = { messageId: msg.id, channelId: channel.id, signature }
+        changed = true
+      } catch (error) {
+        console.error('파티모집 보드 갱신 에러:', error.message)
+      }
     }
-    try {
-      let msg = null
-      if (state.messageId && state.channelId === boardChannel.id) {
-        msg = await boardChannel.messages.fetch(state.messageId).catch(() => null)
-      }
-      if (msg && state.signature === signature) return // 메시지 존재 + 내용 동일 → 스킵
-      if (msg) {
-        await msg.edit({ embeds })
-        saveState(msg.id)
-      } else {
-        const sent = await boardChannel.send({ embeds })
-        saveState(sent.id)
-      }
-    } catch (error) {
-      console.error('파티모집 보드 갱신 에러:', error.message)
+    if (changed) {
+      fs.mkdirSync('./static/json', { recursive: true })
+      fs.writeFileSync(partyRecruitStatePath, JSON.stringify(state, null, 2))
     }
   })
 

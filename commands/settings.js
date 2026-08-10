@@ -12,7 +12,6 @@ async function isAdmin (interaction, guildInfo) {
 }
 
 // 설정이 바뀌면 봇 제작자(config/bot.js developerId)에게 "누가 뭘 바꿨는지" DM.
-// 제작자 본인이 바꿨거나 developerId 미설정이면 스킵.
 async function notifyDeveloper (interaction, summary) {
   if (!developerId || developerId === interaction.user.id) return
   try {
@@ -22,9 +21,36 @@ async function notifyDeveloper (interaction, summary) {
   } catch (e) { /* DM 막힘/유저 조회 실패는 무시 */ }
 }
 
+// "토글 + 채널" 형태 기능 공용 처리 (파티모집/인게임파티모집현황/주간랭킹)
+// key = 설정 키(config guildInfo 폴백 키와 동일), flag = on/off 키
+async function setChannelFeature (interaction, guildInfo, { sub, label, flag, key }) {
+  const guildId = interaction.member.guild.id
+  const on = interaction.options.getString('상태') === 'on'
+  if (!on) {
+    settings.set(guildId, flag, false)
+    await interaction.reply({ content: `✅ **${label}** 기능을 **껐어**~`, ephemeral: true })
+    await notifyDeveloper(interaction, `${label} → **끄기**`)
+    return
+  }
+  const channel = interaction.options.getChannel('채널')
+  if (channel) settings.set(guildId, key, channel.id)
+  const eff = settings.get(guildId, key, null) || (guildInfo && guildInfo[key])
+  if (!eff) {
+    await interaction.reply({ content: `⚠️ 켜려면 채널을 지정해줘~\n예: \`/섯다라인설정 ${sub} 상태:켜기 채널:#채널\``, ephemeral: true })
+    return
+  }
+  settings.set(guildId, flag, true)
+  await interaction.reply({ content: `✅ **${label}** 기능을 **켰어**~ 채널: <#${eff}>`, ephemeral: true })
+  await notifyDeveloper(interaction, `${label} → **켜기** (채널 <#${eff}>)`)
+}
+
 const stateOption = (o) => {
   o.setName('상태').setDescription('켜기 / 끄기').setRequired(true)
   o.addChoices({ name: '켜기', value: 'on' }, { name: '끄기', value: 'off' })
+  return o
+}
+const channelOption = (types, desc) => (o) => {
+  o.setName('채널').setDescription(desc).addChannelTypes(...types)
   return o
 }
 
@@ -48,6 +74,38 @@ data.addSubcommand(sub => {
   sub.addChannelOption(o =>
     o.setName('채널').setDescription('로그를 올릴 텍스트 채널 (켤 때 지정)').addChannelTypes(ChannelType.GuildText))
   sub.addRoleOption(o => o.setName('승인역할').setDescription('입장 승인 버튼으로 부여할 정식 길드원 역할 (선택)'))
+  return sub
+})
+
+// 파티모집: 거뿔 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off + 포럼 채널
+data.addSubcommand(sub => {
+  sub.setName('파티모집').setDescription('거뿔 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off')
+  sub.addStringOption(stateOption)
+  sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '거뿔 파티모집 포럼 채널 (켤 때 지정)'))
+  return sub
+})
+
+// 인게임파티모집현황: 거뿔 파티보드 게시 on/off + 채널 (파티 키워드 알림도 이게 on일 때만 동작)
+data.addSubcommand(sub => {
+  sub.setName('인게임파티모집현황').setDescription('거뿔 파티모집 보드 게시 on/off (파티 키워드 알림도 켜짐)')
+  sub.addStringOption(stateOption)
+  sub.addChannelOption(channelOption([ChannelType.GuildText], '파티보드를 올릴 채널 (켤 때 지정)'))
+  return sub
+})
+
+// 주간랭킹: 주간 활동/보이스 랭킹 게시 on/off + 채널
+data.addSubcommand(sub => {
+  sub.setName('주간랭킹').setDescription('주간 활동/보이스 랭킹 게시 on/off')
+  sub.addStringOption(stateOption)
+  sub.addChannelOption(channelOption([ChannelType.GuildText], '랭킹을 올릴 채널 (켤 때 지정)'))
+  return sub
+})
+
+// 오늘의미션: 매일 아침 오늘/내일 미션·베테랑 게시 on/off + 채널
+data.addSubcommand(sub => {
+  sub.setName('오늘의미션').setDescription('매일 아침 오늘/내일 미션·베테랑 게시 on/off')
+  sub.addStringOption(stateOption)
+  sub.addChannelOption(channelOption([ChannelType.GuildText], '미션을 올릴 채널 (켤 때 지정)'))
   return sub
 })
 
@@ -122,20 +180,48 @@ module.exports = {
       return
     }
 
+    if (sub === '파티모집') {
+      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집(포럼 자동관리)', flag: 'partyRecruitEnabled', key: 'partyChannelId' })
+      return
+    }
+    if (sub === '인게임파티모집현황') {
+      await setChannelFeature(interaction, guildInfo, { sub, label: '인게임파티모집현황', flag: 'bugleBoardEnabled', key: 'bugleHornChannelId' })
+      return
+    }
+    if (sub === '주간랭킹') {
+      await setChannelFeature(interaction, guildInfo, { sub, label: '주간랭킹', flag: 'weeklyEnabled', key: 'weeklyMemberChannelId' })
+      return
+    }
+    if (sub === '오늘의미션') {
+      await setChannelFeature(interaction, guildInfo, { sub, label: '오늘의미션 게시', flag: 'dailyMissionEnabled', key: 'todayMissionChannelId' })
+      return
+    }
+
     if (sub === '목록') {
+      const gi = guildInfo
+      const chOf = (skey) => settings.get(guildId, skey, null) || (gi && gi[skey])
+      const fmtCh = (v) => v ? ` (채널 <#${v}>)` : ''
+      const dot = (on) => on ? '🟢' : '🔴'
+      const guestRole = settings.get(guildId, 'guestRole', null)
+      const memberRole = settings.get(guildId, 'guildMemberRole', null)
       const autoGuestRole = settings.get(guildId, 'autoGuestRole', false)
       const auditLog = settings.get(guildId, 'auditLog', false)
-      const guestRole = settings.get(guildId, 'guestRole', null)
-      const auditCh = settings.get(guildId, 'roleAuditingChannelId', null)
-      const memberRole = settings.get(guildId, 'guildMemberRole', null)
+      const partyOn = settings.get(guildId, 'partyRecruitEnabled', false)
+      const boardOn = settings.get(guildId, 'bugleBoardEnabled', false)
+      const weeklyOn = settings.get(guildId, 'weeklyEnabled', false)
+      const missionOn = settings.get(guildId, 'dailyMissionEnabled', false)
+      const lines = [
+        `${dot(autoGuestRole)} **손님권한 자동부여** — ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
+        `${dot(auditLog)} **감사로그** — ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}`,
+        `${dot(partyOn)} **파티모집(포럼 자동관리)** — ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
+        `${dot(boardOn)} **인게임파티모집현황** — ${boardOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('bugleHornChannelId'))}`,
+        `${dot(weeklyOn)} **주간랭킹** — ${weeklyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('weeklyMemberChannelId'))}`,
+        `${dot(missionOn)} **오늘의미션 게시** — ${missionOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('todayMissionChannelId'))}`
+      ]
       const embed = new EmbedBuilder()
         .setTitle(`⚙️ ${interaction.guild.name} 설정`)
         .setColor('#5865F2')
-        .setDescription(
-          `${autoGuestRole ? '🟢' : '🔴'} **손님권한 자동부여** — ${autoGuestRole ? '켜짐' : '꺼짐'}` +
-          `${guestRole ? ` (역할 <@&${guestRole}>)` : ''}\n> 입장 시 손님 역할 자동 부여\n\n` +
-          `${auditLog ? '🟢' : '🔴'} **감사로그** — ${auditLog ? '켜짐' : '꺼짐'}` +
-          `${auditCh ? ` (채널 <#${auditCh}>)` : ''}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}\n> 입장 승인·역할변경·퇴장 로그`)
+        .setDescription(lines.join('\n'))
       await interaction.reply({ embeds: [embed], ephemeral: true })
     }
   }

@@ -15,7 +15,6 @@ const guilds = [
     guildId: '1114121990408773712',
     ownerId: '386478163682918400',
     adminRole: '1114154979691855872',
-    channelId: '1114121990949834865',
     partyChannelId: '1167792216425627699',
     generalChannelId: '1234196678408536215',
     todayMissionChannelId: '1319831360549945455',
@@ -28,7 +27,9 @@ const guilds = [
     guildId: '1126803872925634581',
     ownerId: '280290004926857216',
     adminRole: '1232591254244687886',
-    channelId: '1126803873458303039',
+    // 봇 로그·헬스체크·에러 모니터 채널. getMonitorChannelId()가 '개발' 길드의 이 값만 읽는다.
+    // → 개발 길드엔 반드시 필요, 다른 서버엔 없어도 됨.
+    logChannelId: '1126803873458303039',
     partyChannelId: '1230356497704423426',
     generalChannelId: '1238382982922764358',
     todayMissionChannelId: '1319825743689154610',

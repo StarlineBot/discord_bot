@@ -10,10 +10,10 @@ const getActiveGuild = () => {
   return guilds.find(guild => guild.env === env) || guilds[0]
 }
 
-// 봇 헬스체크·에러 로그를 보내는 모니터 채널 = 개발 길드의 메인 채널(기존 DEV_CHANNEL_ID 동작 유지)
+// 봇 헬스체크·에러 로그를 보내는 모니터 채널 = 개발 길드의 logChannelId (기존 DEV_CHANNEL_ID 동작 유지)
 const getMonitorChannelId = () => {
   const dev = guilds.find(guild => guild.env === 'development')
-  return dev ? dev.channelId : null
+  return dev ? dev.logChannelId : null
 }
 
 // 개발용 길드 ID (cron dev 게이팅에서 사용)

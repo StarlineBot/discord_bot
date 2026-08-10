@@ -70,11 +70,11 @@ data.addSubcommand(sub => {
   return sub
 })
 
-// 파티모집: 거뿔 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off + 포럼 채널
+// 파티모집: 디스코드 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off + 포럼 채널
 data.addSubcommand(sub => {
-  sub.setName('파티모집').setDescription('거뿔 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off')
+  sub.setName('파티모집').setDescription('디스코드 파티모집 포럼 자동관리(스레드 정리·출발 알림) on/off')
   sub.addStringOption(stateOption)
-  sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '거뿔 파티모집 포럼 채널 (켤 때 지정)'))
+  sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '디스코드 파티모집 포럼 채널 (켤 때 지정)'))
   return sub
 })
 

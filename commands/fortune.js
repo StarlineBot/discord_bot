@@ -13,6 +13,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle(`🔮 오늘의 운세 · ${today.toFormat('MM월 dd일 (ccc)')}`)
+      .setDescription(`오늘의 키워드 · **${f.mood}**`)
       .setColor('#B39DDB')
       .setAuthor({ name: interaction.user.displayName, iconURL: interaction.user.displayAvatarURL() })
       .addFields(
@@ -20,7 +21,7 @@ module.exports = {
         { name: `❤️ 애정운 ${starBar(f.love.star)}`, value: f.love.msg },
         { name: `💰 금전운 ${starBar(f.money.star)}`, value: f.money.msg },
         { name: `💼 일·학업운 ${starBar(f.work.star)}`, value: f.work.msg },
-        { name: '🍀 행운', value: `숫자 **${f.luckyNumber}** · 색 **${f.luckyColor}** · 방위 **${f.luckyDirection}**` }
+        { name: '🍀 행운', value: `숫자 **${f.luckyNumber}** · 색 **${f.luckyColor}** · 방위 **${f.luckyDirection}**\n아이템 **${f.luckyItem}** · 시간 **${f.luckyTime}**` }
       )
       .setFooter({ text: `💬 ${f.advice}  ·  재미로만 봐주세요~` })
 

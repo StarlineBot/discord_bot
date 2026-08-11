@@ -76,9 +76,11 @@ const { buildEquipEmbed, buildEchostoneEmbed } = require('../modules/auctionEmbe
 
 async function post (interaction, header, embeds) {
   const botChannel = resolveGeneralChannel(interaction)
-  if (!botChannel) { await interaction.editReply(embeds.length ? { content: header, embeds } : header); return }
-  if (embeds.length) await botChannel.send({ content: header, embeds })
-  else await botChannel.send(header)
+  const who = (interaction.member && interaction.member.displayName) || interaction.user.username
+  const body = `${header}\n-# 🔎 요청: ${who}`
+  if (!botChannel) { await interaction.editReply(embeds.length ? { content: body, embeds } : body); return }
+  if (embeds.length) await botChannel.send({ content: body, embeds })
+  else await botChannel.send(body)
   await interaction.editReply(`경매장 조회 결과를 <#${botChannel.id}>에 보냈어~ 😎`)
 }
 

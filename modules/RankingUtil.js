@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { EmbedBuilder } = require('discord.js')
+const { DateTime } = require('luxon')
 
 const USER_COUNT_PATH = './static/json/userMessageCount.json'
 const VOICE_COUNT_PATH = './static/json/voiceTimeCount.json'
@@ -26,14 +27,21 @@ function getTopRanking (userCounts, limit = 3) {
     .slice(0, limit)
 }
 
+// 집계 대상은 '직전 한 주'라, 게시 시점(일요일 0시)에서 하루 빼 그 주에 들어가게 한 뒤 몇째 주인지 계산
+function getWeekLabel () {
+  const d = DateTime.now().setZone('Asia/Seoul').minus({ days: 1 })
+  const weekOfMonth = Math.ceil(d.day / 7)
+  return `${d.month}월 ${weekOfMonth}번째 주`
+}
+
 function createRankingEmbed ([userId, count], index) {
   const medals = ['🥇', '🥈', '🥉']
   const medal = medals[index] || '🥉'
 
   return new EmbedBuilder()
-    .setTitle(`🌟 이주의 활동 랭킹 TOP ${medal}`)
+    .setTitle(`🌟 ${getWeekLabel()} 활동 랭킹 TOP ${medal}`)
     .setColor(`${getRandomColor()}`)
-    .setDescription(`<@${userId}> 님이 이 주에 ${count}번 활동했어요~`)
+    .setDescription(`<@${userId}> 님이 한 주간 ${count}번 활동했어요~`)
     .setTimestamp()
 }
 
@@ -52,9 +60,9 @@ function createVoiceRankingEmbed ([userId, durationMs], index) {
   const medal = medals[index] || '🥉'
   const minute = (durationMs / 1000 / 60).toFixed(1)
   return new EmbedBuilder()
-    .setTitle(`🌟 이주의 보이스채팅 랭킹 TOP ${medal}`)
+    .setTitle(`🌟 ${getWeekLabel()} 보이스채팅 랭킹 TOP ${medal}`)
     .setColor(`${getRandomColor()}`)
-    .setDescription(`<@${userId}> 님이 이 주에 ${minute}분을 참여했어요~`)
+    .setDescription(`<@${userId}> 님이 한 주간 ${minute}분을 참여했어요~`)
     .setTimestamp()
 }
 

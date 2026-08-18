@@ -26,7 +26,6 @@ const otherChannelId = guildModule.getMonitorChannelId()
 const nexonApiKey = process.env.NEXON_API_KEY
 const nexonApiMainUrl = 'https://open.api.nexon.com'
 const partyRecruitStatePath = './static/json/partyRecruitBoard.json'
-const weeklyMemberStatePath = './static/json/weeklyMemberBoard.json'
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
 
 module.exports = async (client) => {
@@ -162,12 +161,6 @@ module.exports = async (client) => {
     const userMessageCounts = getUserMessageCounts()
     const userVoiceCounts = getUserVoiceCounts()
 
-    // 기존 메시지 수정(edit-in-place)용 상태 로드
-    let weeklyState = {}
-    if (fs.existsSync(weeklyMemberStatePath)) {
-      try { weeklyState = JSON.parse(fs.readFileSync(weeklyMemberStatePath)) } catch (e) { weeklyState = {} }
-    }
-
     for (const guild of client.guilds.cache.values()) {
       if (process.env.NODE_ENV === 'development' && guild.id !== guildModule.getDevGuildId()) {
         continue
@@ -193,28 +186,16 @@ module.exports = async (client) => {
       const memberChannel = memberChannelId && guild.channels.cache.get(memberChannelId)
       if (!memberChannel) continue
 
-      // 파티보드처럼 기존 메시지 있으면 수정, 없으면 새로 전송
+      // 주간랭킹은 매주 새 메시지로 누적(수정 아님) → 지난 주 기록 보존 + 새 알림
       try {
-        const st = weeklyState[guild.id]
-        let msg = null
-        if (st && st.channelId === memberChannel.id) {
-          msg = await memberChannel.messages.fetch(st.messageId).catch(() => null)
-        }
-        if (msg) {
-          await msg.edit({ embeds })
-        } else {
-          msg = await memberChannel.send({ embeds })
-        }
-        weeklyState[guild.id] = { channelId: memberChannel.id, messageId: msg.id }
+        await memberChannel.send({ embeds })
       } catch (error) {
-        console.error('이주의 멤버 랭킹 갱신 에러:', error.message)
+        console.error('이주의 멤버 랭킹 게시 에러:', error.message)
       }
     }
 
     if (userMessageCounts) saveUserMessageCounts(userMessageCounts)
     if (userVoiceCounts) saveUserVoiceCount(userVoiceCounts)
-    fs.mkdirSync('./static/json', { recursive: true })
-    fs.writeFileSync(weeklyMemberStatePath, JSON.stringify(weeklyState, null, 2))
   })
 
   console.log('weeklyJob start!')

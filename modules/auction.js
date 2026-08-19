@@ -116,10 +116,10 @@ function filterEnchants (items, { keyword, affix } = {}) {
   return r.sort((a, b) => a.auction_price_per_unit - b.auction_price_per_unit)
 }
 
-// 즐겨찾기 카테고리 후보: 경매장 명령어가 쓰는 대분류(use=true) + 에코스톤 + 인챈트
+// 일반 등록(세공계열=장비·액세서리) 카테고리 후보: 경매장 명령어가 쓰는 대분류(use=true)만
+// (에코스톤·인챈트는 옵션 구성이 달라 /경매장알림 전용 서브커맨드로 분리)
 function favoriteCategories () {
-  const majors = categoryData.categories.filter(c => c.use).map(c => c.name)
-  return [...majors, '에코스톤', '인챈트']
+  return categoryData.categories.filter(c => c.use).map(c => c.name)
 }
 
 // 대분류명 → 넥슨 API가 받는 실제 소분류(leaf) 목록. 배치는 이걸로 펼쳐서 조회.
@@ -135,8 +135,20 @@ function resolveLeafCategories (major) {
 // 알림(즐겨찾기) 한 건에 대한 매물 필터 공통 진입점(장비·에코스톤·인챈트)
 function matchFavorite (items, fav) {
   let matches
-  if (fav.category === '인챈트') matches = filterEnchants(items, { keyword: fav.keyword, affix: fav.affix })
-  else matches = filterItems(items, { keyword: fav.keyword, metalwares: fav.metalwares || [] })
+  if (fav.category === '인챈트') {
+    matches = filterEnchants(items, { keyword: fav.keyword, affix: fav.affix })
+  } else if (fav.category === '에코스톤') {
+    matches = filterEchostones(items, {
+      keyword: fav.keyword,
+      minGrade: fav.minGrade,
+      innateStat: fav.innateStat,
+      minInnateValue: fav.minInnateValue,
+      awakening: fav.awakening,
+      minAwakeningLevel: fav.minAwakeningLevel
+    })
+  } else {
+    matches = filterItems(items, { keyword: fav.keyword, metalwares: fav.metalwares || [] })
+  }
   if (fav.maxPrice) matches = matches.filter(it => it.auction_price_per_unit <= fav.maxPrice)
   return matches
 }

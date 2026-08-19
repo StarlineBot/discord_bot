@@ -15,8 +15,8 @@ const axios = require('axios')
 const fs = require('node:fs')
 const { getDate } = require('../../modules/common')
 const auctionFav = require('../../modules/auctionFavorites')
-const { getCategoryItems, filterItems, resolveLeafCategories } = require('../../modules/auction')
-const { buildEquipEmbed, buildEchostoneEmbed } = require('../../modules/auctionEmbeds')
+const { getCategoryItems, resolveLeafCategories, matchFavorite } = require('../../modules/auction')
+const { embedFor } = require('../../modules/auctionEmbeds')
 const partyAlerts = require('../../modules/partyAlerts')
 const settings = require('../../modules/guildSettings')
 
@@ -473,8 +473,7 @@ module.exports = async (client) => {
       }
       if (!items.length) continue
 
-      let matches = filterItems(items, { keyword: fav.keyword, metalwares: fav.metalwares || [] })
-      if (fav.maxPrice) matches = matches.filter(it => it.auction_price_per_unit <= fav.maxPrice)
+      const matches = matchFavorite(items, fav)
       if (!matches.length) continue
 
       const fresh = auctionFav.pickNewMatches(data, fav.id, matches)
@@ -488,7 +487,7 @@ module.exports = async (client) => {
       }
 
       // 아이템 정보는 경매장 명령어와 동일한 임베드 사용
-      const buildEmbed = fav.category === '에코스톤' ? buildEchostoneEmbed : buildEquipEmbed
+      const buildEmbed = embedFor(fav.category)
       const embeds = fresh.slice(0, 5).map(buildEmbed)
       const header = `🔔 즐겨찾기 **${fav.label}** 조건에 맞는 새 매물 ${fresh.length}건!` +
         (fresh.length > 5 ? ' (가격순 5건)' : '') + '\n※ 데이터는 실제보다 ~10분 지연이라 접속하면 이미 팔렸을 수 있어~'

@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
-const { koreanGold, parseEchostone } = require('./auction')
+const { koreanGold, parseEchostone, parseEnchant } = require('./auction')
 
 // 경매장 명령어/즐겨찾기 알림이 공유하는 매물 임베드 빌더 (모양 통일)
 const SHORT = { 크리티컬: '크리', 방어력: '방어', '마법 방어력': '마방', '마법 보호': '마보' }
@@ -54,4 +54,22 @@ function buildEchostoneEmbed (item) {
   return embed
 }
 
-module.exports = { buildEquipEmbed, buildEchostoneEmbed, formatExpire }
+function buildEnchantEmbed (item) {
+  const e = parseEnchant(item) || {}
+  const embed = baseEmbed(item)
+  const meta = []
+  if (e.affix) meta.push(e.affix) // 접두/접미
+  if (e.rank) meta.push(`랭크 ${e.rank}`)
+  if (meta.length) embed.addFields({ name: '✨ 인챈트', value: meta.join(' · '), inline: true })
+  if (e.durability) embed.addFields({ name: '🛡️ 내구도', value: `${e.durability}`, inline: true })
+  return embed
+}
+
+// 카테고리별 임베드 빌더 선택
+function embedFor (category) {
+  if (category === '에코스톤') return buildEchostoneEmbed
+  if (category === '인챈트') return buildEnchantEmbed
+  return buildEquipEmbed
+}
+
+module.exports = { buildEquipEmbed, buildEchostoneEmbed, buildEnchantEmbed, embedFor, formatExpire }

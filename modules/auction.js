@@ -93,19 +93,52 @@ function filterEchostones (items, { keyword, awakening, minAwakeningLevel, innat
   return r.sort((a, b) => a.auction_price_per_unit - b.auction_price_per_unit)
 }
 
-// 즐겨찾기 카테고리 후보: 경매장 명령어가 쓰는 대분류(use=true) + 에코스톤
+// ── 인챈트 스크롤 전용 파싱/필터 ──
+// item_option: { option_type:'인챈트 종류', option_sub_type:'접두'|'접미', option_value:'기억의 (랭크 6)' } + { option_type:'내구도', option_value:'100%' }
+function parseEnchant (item) {
+  const o = (item.item_option || []).find(x => x.option_type === '인챈트 종류')
+  if (!o) return null
+  const m = (o.option_value || '').match(/^(.*?)\s*\(랭크\s*([^)]+)\)/) // 랭크는 1~9·A~F 있어 문자열로 둔다
+  const dur = (item.item_option || []).find(x => x.option_type === '내구도')
+  return {
+    affix: o.option_sub_type || null, // 접두/접미
+    name: m ? m[1].trim() : (o.option_value || '').trim(),
+    rank: m ? m[2].trim() : null,
+    durability: dur ? dur.option_value : null
+  }
+}
+
+// 이름(keyword) + 접두/접미(affix) 필터. 이름은 item_display_name 기준(전용 인챈트 스크롤도 함께 매칭됨)
+function filterEnchants (items, { keyword, affix } = {}) {
+  let r = items
+  if (keyword) r = r.filter(it => it.item_display_name.includes(keyword))
+  if (affix) r = r.filter(it => { const e = parseEnchant(it); return e && e.affix === affix })
+  return r.sort((a, b) => a.auction_price_per_unit - b.auction_price_per_unit)
+}
+
+// 즐겨찾기 카테고리 후보: 경매장 명령어가 쓰는 대분류(use=true) + 에코스톤 + 인챈트
 function favoriteCategories () {
   const majors = categoryData.categories.filter(c => c.use).map(c => c.name)
-  return [...majors, '에코스톤']
+  return [...majors, '에코스톤', '인챈트']
 }
 
 // 대분류명 → 넥슨 API가 받는 실제 소분류(leaf) 목록. 배치는 이걸로 펼쳐서 조회.
 function resolveLeafCategories (major) {
   if (major === '에코스톤') return ['에코스톤']
+  if (major === '인챈트') return ['인챈트 스크롤']
   const cat = categoryData.categories.find(c => c.name === major)
   if (!cat) return []
   if (major === '특수 장비') return cat.subCategories.filter(s => SPECIAL_ALLOWED_SUBS.includes(s))
   return cat.subCategories.filter(s => s !== '에코스톤')
 }
 
-module.exports = { getCategoryItems, filterItems, parseMetalwares, metalwareLevel, koreanGold, parseEchostone, filterEchostones, favoriteCategories, resolveLeafCategories }
+// 알림(즐겨찾기) 한 건에 대한 매물 필터 공통 진입점(장비·에코스톤·인챈트)
+function matchFavorite (items, fav) {
+  let matches
+  if (fav.category === '인챈트') matches = filterEnchants(items, { keyword: fav.keyword, affix: fav.affix })
+  else matches = filterItems(items, { keyword: fav.keyword, metalwares: fav.metalwares || [] })
+  if (fav.maxPrice) matches = matches.filter(it => it.auction_price_per_unit <= fav.maxPrice)
+  return matches
+}
+
+module.exports = { getCategoryItems, filterItems, parseMetalwares, metalwareLevel, koreanGold, parseEchostone, filterEchostones, parseEnchant, filterEnchants, favoriteCategories, resolveLeafCategories, matchFavorite }

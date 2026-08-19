@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js')
-const { getCategoryItems, filterItems, filterEchostones } = require('../modules/auction')
+const { getCategoryItems, filterItems, filterEchostones, filterEnchants } = require('../modules/auction')
 const { resolveGeneralChannel } = require('../modules/generalChannel')
 const categoryData = require('../modules/auctionCategories.json')
 const searchOptions = require('../modules/auctionSearchOptions.json')
@@ -72,7 +72,16 @@ data.addSubcommand(sub => {
   return sub
 })
 
-const { buildEquipEmbed, buildEchostoneEmbed } = require('../modules/auctionEmbeds')
+// 인챈트: 이름 입력 + 접두/접미 선택(미선택 시 둘 다)
+data.addSubcommand(sub => {
+  sub.setName('인챈트').setDescription('인챈트 스크롤을 이름·접두/접미로 조회해~')
+  sub.addStringOption(o => o.setName('이름').setDescription('인챈트 이름 (예: 기억의, 편린)').setRequired(true))
+  sub.addStringOption(o => o.setName('종류').setDescription('접두/접미 (선택 안 하면 둘 다)')
+    .addChoices({ name: '접두', value: '접두' }, { name: '접미', value: '접미' }))
+  return sub
+})
+
+const { buildEquipEmbed, buildEchostoneEmbed, buildEnchantEmbed } = require('../modules/auctionEmbeds')
 
 async function post (interaction, header, embeds) {
   const botChannel = resolveGeneralChannel(interaction)
@@ -125,6 +134,18 @@ module.exports = {
         if (opt('각성능력')) cond.push(`각성 ${opt('각성능력')}${optI('각성레벨') ? ' ' + optI('각성레벨') + '레벨+' : ''}`)
         const header = `🔍 ${cond.join(' · ')}\n전체 ${items.length}건 중 매칭 **${results.length}건**` + (results.length > MAX_EMBEDS ? ` (가격순 ${MAX_EMBEDS}건)` : '')
         await post(interaction, results.length ? header : `${header}\n\n조건에 맞는 매물이 없어~ 😢`, results.slice(0, MAX_EMBEDS).map(buildEchostoneEmbed))
+        return
+      }
+
+      if (sub === '인챈트') {
+        const items = await getCategoryItems('인챈트 스크롤')
+        const keyword = interaction.options.getString('이름')
+        const affix = interaction.options.getString('종류')
+        const results = filterEnchants(items, { keyword, affix })
+        const cond = ['인챈트', `'${keyword}'`]
+        if (affix) cond.push(affix)
+        const header = `🔍 ${cond.join(' · ')}\n전체 ${items.length}건 중 매칭 **${results.length}건**` + (results.length > MAX_EMBEDS ? ` (가격순 ${MAX_EMBEDS}건)` : '')
+        await post(interaction, results.length ? header : `${header}\n\n조건에 맞는 매물이 없어~ 😢`, results.slice(0, MAX_EMBEDS).map(buildEnchantEmbed))
         return
       }
 

@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const favStore = require('../modules/auctionFavorites')
-const { koreanGold, favoriteCategories, getCategoryItems, filterItems, resolveLeafCategories } = require('../modules/auction')
-const { buildEquipEmbed, buildEchostoneEmbed } = require('../modules/auctionEmbeds')
+const { koreanGold, favoriteCategories, getCategoryItems, resolveLeafCategories, matchFavorite } = require('../modules/auction')
+const { embedFor } = require('../modules/auctionEmbeds')
 const searchOptions = require('../modules/auctionSearchOptions.json')
 
 const METALWARE_SLOTS = 3
@@ -42,6 +42,7 @@ function readMetalwares (interaction) {
 
 function favSummary (f) {
   const parts = [`\`${f.category}\``]
+  if (f.affix) parts.push(f.affix)
   if (f.keyword) parts.push(`키워드 '${f.keyword}'`)
   if (f.maxPrice) parts.push(`최대 ${koreanGold(f.maxPrice)}G`)
   for (const mw of f.metalwares || []) parts.push(`세공 '${mw.name}' ${mw.minLevel}레벨+`)
@@ -57,8 +58,7 @@ async function runFavoriteNow (fav) {
   for (const leaf of resolveLeafCategories(fav.category)) {
     items = items.concat(await getCategoryItems(leaf))
   }
-  let matches = filterItems(items, { keyword: fav.keyword, metalwares: fav.metalwares || [] })
-  if (fav.maxPrice) matches = matches.filter(it => it.auction_price_per_unit <= fav.maxPrice)
+  const matches = matchFavorite(items, fav)
   const data = favStore.read()
   const fresh = favStore.pickNewMatches(data, fav.id, matches)
   favStore.write(data)
@@ -66,14 +66,16 @@ async function runFavoriteNow (fav) {
 }
 
 const data = new SlashCommandBuilder()
-  .setName('경매장즐겨찾기')
-  .setDescription('경매장 매물을 즐겨찾기로 등록하면 새 매물이 뜰 때 DM으로 알려줘~ (5분 주기)')
+  .setName('경매장알림')
+  .setDescription('경매장 매물을 알림 등록하면 새 매물이 뜰 때 DM으로 알려줘~ (5분 주기)')
 
 data.addSubcommand(sub => {
-  sub.setName('등록').setDescription('즐겨찾기를 추가해~ (인당 최대 5개)')
-  sub.addStringOption(o => o.setName('이름').setDescription('즐겨찾기 별칭 (예: 마공파볼트지팡이)').setRequired(true))
-  sub.addStringOption(o => o.setName('카테고리').setDescription('감시할 대분류 (자동완성: 근거리/마법/액세서리/에코스톤 등)').setRequired(true).setAutocomplete(true))
-  sub.addStringOption(o => o.setName('키워드').setDescription('아이템 이름에 포함될 단어 (예: 소울)'))
+  sub.setName('등록').setDescription('알림을 추가해~ (인당 최대 5개)')
+  sub.addStringOption(o => o.setName('이름').setDescription('알림 별칭 (예: 마공파볼트지팡이)').setRequired(true))
+  sub.addStringOption(o => o.setName('카테고리').setDescription('감시할 대분류 (자동완성: 근거리/마법/액세서리/에코스톤/인챈트 등)').setRequired(true).setAutocomplete(true))
+  sub.addStringOption(o => o.setName('키워드').setDescription('검색할 상품 이름에 포함된 단어 (예: 소울, 기억의)'))
+  sub.addStringOption(o => o.setName('종류').setDescription('인챈트 접두/접미 (인챈트 카테고리만)')
+    .addChoices({ name: '접두', value: '접두' }, { name: '접미', value: '접미' }))
   sub.addStringOption(o => o.setName('최대가격').setDescription('이 금액 이하만 알림 (예: 5억, 3000만)'))
   for (let i = 0; i < METALWARE_SLOTS; i++) {
     sub.addStringOption(o => o.setName(metalOptName(i)).setDescription(`세공 옵션명 ${i + 1} (자동완성)`).setAutocomplete(true))
@@ -83,11 +85,11 @@ data.addSubcommand(sub => {
 })
 
 data.addSubcommand(sub =>
-  sub.setName('목록').setDescription('내 즐겨찾기 목록을 봐~'))
+  sub.setName('목록').setDescription('내 알림 목록을 봐~'))
 
 data.addSubcommand(sub => {
-  sub.setName('삭제').setDescription('즐겨찾기를 삭제해~')
-  sub.addStringOption(o => o.setName('이름').setDescription('삭제할 즐겨찾기 (자동완성)').setRequired(true).setAutocomplete(true))
+  sub.setName('삭제').setDescription('알림을 삭제해~')
+  sub.addStringOption(o => o.setName('이름').setDescription('삭제할 알림 (자동완성)').setRequired(true).setAutocomplete(true))
   return sub
 })
 
@@ -132,6 +134,7 @@ module.exports = {
         label: interaction.options.getString('이름'),
         category,
         keyword: interaction.options.getString('키워드') || null,
+        affix: interaction.options.getString('종류') || null, // 인챈트 접두/접미
         maxPrice: maxPrice || null,
         metalwares: readMetalwares(interaction)
       }
@@ -142,7 +145,7 @@ module.exports = {
       }
       // 등록 응답은 그대로(등록 확인만) — 즉시 뜨게 defer 없이 바로 reply
       const embed = new EmbedBuilder()
-        .setTitle(`⭐ 즐겨찾기 등록: ${res.fav.label}`)
+        .setTitle(`⭐ 알림 등록: ${res.fav.label}`)
         .setColor('#F4B400')
         .setDescription(favSummary(res.fav))
         .setFooter({ text: '새 매물이 뜨면 DM으로 알려줄게~ (5분 주기 · 데이터 ~10분 지연)' })
@@ -151,26 +154,26 @@ module.exports = {
       // 등록 즉시 1회 조회는 백그라운드로 → 매물 있으면 개인 DM으로 알림(seen 기록해 배치 중복 방지)
       runFavoriteNow(res.fav).then(chk => {
         if (chk.maintenance || !chk.fresh.length) return
-        const build = res.fav.category === '에코스톤' ? buildEchostoneEmbed : buildEquipEmbed
+        const build = embedFor(res.fav.category)
         const dmEmbeds = chk.fresh.slice(0, 5).map(build)
-        const header = `🔔 방금 등록한 즐겨찾기 **${res.fav.label}** 조건에 맞는 매물이 지금 ${chk.fresh.length}건 있어!` +
+        const header = `🔔 방금 등록한 알림 **${res.fav.label}** 조건에 맞는 매물이 지금 ${chk.fresh.length}건 있어!` +
           (chk.fresh.length > 5 ? ' (가격순 5건)' : '') + '\n※ 데이터 ~10분 지연이라 접속하면 이미 팔렸을 수 있어~'
         return interaction.user.send({ content: header, embeds: dmEmbeds }).catch(() =>
           // DM이 막혀있으면 등록 응답에 이어 알려줌
-          interaction.followUp({ content: `🔔 즐겨찾기 '${res.fav.label}' 조건에 지금 ${chk.fresh.length}건 있는데 DM이 막혀있어~`, embeds: dmEmbeds, ephemeral: true }).catch(() => {})
+          interaction.followUp({ content: `🔔 알림 '${res.fav.label}' 조건에 지금 ${chk.fresh.length}건 있는데 DM이 막혀있어~`, embeds: dmEmbeds, ephemeral: true }).catch(() => {})
         )
-      }).catch(err => console.error('[경매장즐겨찾기] 즉시 조회 에러:', err.message))
+      }).catch(err => console.error('[경매장알림] 즉시 조회 에러:', err.message))
       return
     }
 
     if (sub === '목록') {
       const mine = favStore.listByUser(guildId, userId)
       if (!mine.length) {
-        await interaction.reply({ content: '아직 등록한 즐겨찾기가 없어~ `/경매장즐겨찾기 등록` 으로 추가해줘', ephemeral: true })
+        await interaction.reply({ content: '아직 등록한 알림이 없어~ `/경매장알림 등록` 으로 추가해줘', ephemeral: true })
         return
       }
       const embed = new EmbedBuilder()
-        .setTitle(`⭐ 내 경매장 즐겨찾기 (${mine.length}/${favStore.MAX_PER_USER})`)
+        .setTitle(`⭐ 내 경매장 알림 (${mine.length}/${favStore.MAX_PER_USER})`)
         .setColor('#F4B400')
         .addFields(mine.map(f => ({ name: f.label, value: favSummary(f) })))
       await interaction.reply({ embeds: [embed], ephemeral: true })
@@ -184,7 +187,7 @@ module.exports = {
         await interaction.reply({ content: `'${label}' 즐겨찾기를 못 찾았어~`, ephemeral: true })
         return
       }
-      await interaction.reply({ content: `🗑️ '${label}' 즐겨찾기를 삭제했어~`, ephemeral: true })
+      await interaction.reply({ content: `🗑️ '${label}' 알림을 삭제했어~`, ephemeral: true })
     }
   }
 }

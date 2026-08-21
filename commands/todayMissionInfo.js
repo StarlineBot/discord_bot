@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { resolveGeneralChannel } = require('../modules/generalChannel')
+const { startLoading } = require('../modules/loading')
 const { DateTime } = require('luxon')
 const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
@@ -21,8 +22,8 @@ module.exports = {
       '../modules/todayMission')(today, now)
 
     // 미션 조회에 수 초가 걸려 3초 내 응답을 못 하면 디스코드가 "응답 없음" 에러를 띄운다.
-    // 먼저 인터랙션을 defer로 확보한다.
-    await interaction.deferReply({ ephemeral: true })
+    // defer("생각 중...") 대신 커스텀 로딩 문구로 먼저 응답을 확보하고, 조회 끝나면 editReply로 교체한다.
+    await startLoading(interaction, '📜 오늘의 미션을 확인하는 중...')
     try {
       const { today: todayMissionObject, tomorrow: tomorrowMissionObject } = await getMissions()
       const todayMission = todayMissionObject.missions[0]

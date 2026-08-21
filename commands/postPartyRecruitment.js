@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../modules/getGuildInfo')
+const { startLoading } = require('../modules/loading')
 const botId = process.env.BOT_ID
 
 const week = ['일', '월', '화', '수', '목', '금', '토']
@@ -67,7 +68,7 @@ module.exports = {
     const guildInfo = guildModule.getGuildInfo(guildId)
     const partyChannel = guildInfo && interaction.client.channels.cache.get(guildInfo.partyChannelId)
 
-    await interaction.deferReply({ ephemeral: true })
+    await startLoading(interaction, '📢 파티모집 글을 올리는 중...')
 
     if (!partyChannel) {
       await interaction.editReply('파티모집 채널을 찾을 수 없어 😢')

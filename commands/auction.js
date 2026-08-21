@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js')
 const { getCategoryItems, filterItems, filterEchostones, filterEnchants } = require('../modules/auction')
 const { resolveGeneralChannel } = require('../modules/generalChannel')
+const { startLoading } = require('../modules/loading')
 const categoryData = require('../modules/auctionCategories.json')
 const searchOptions = require('../modules/auctionSearchOptions.json')
 
@@ -114,7 +115,7 @@ module.exports = {
   run: async ({ interaction }) => {
     const group = interaction.options.getSubcommandGroup(false)
     const sub = interaction.options.getSubcommand()
-    await interaction.deferReply({ ephemeral: true })
+    await startLoading(interaction, '🔍 경매장을 뒤지는 중...')
     try {
       if (sub === '에코스톤') {
         const items = await getCategoryItems('에코스톤')

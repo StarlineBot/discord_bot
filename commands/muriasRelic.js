@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const fs = require('node:fs')
 const { resolveGeneralChannel } = require('../modules/generalChannel')
+const { startLoading } = require('../modules/loading')
 const { getCategoryItems, koreanGold } = require('../modules/auction')
 const { groupBySkill, rollGroup, appraise, grade, pickRandom } = require('../modules/muriasRelic')
 
@@ -17,7 +18,7 @@ module.exports = {
       interaction.reply({ content: '봇 출력 채널을 찾을 수 없어 😢', ephemeral: true })
       return
     }
-    await interaction.deferReply({ ephemeral: true })
+    await startLoading(interaction, '🎲 무리아스의 유물을 복원하는 중...')
     try {
       // 유물 카테고리 한 번 조회로 유물 매물 + 이데아 시세 둘 다 확보
       const items = await getCategoryItems('유물')

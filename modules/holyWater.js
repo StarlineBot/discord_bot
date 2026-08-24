@@ -71,7 +71,7 @@ function rarityEmoji (p) {
 function buildEmbed (state, current) {
   const hasUnit = Number.isFinite(state.unit)
   const e = new EmbedBuilder().setTitle('💧 무리아스의 성수').setColor('#4FC3F7')
-  e.addFields({ name: '주인', value: `<@${state.memberId}>`, inline: false })
+  e.addFields({ name: '​', value: `<@${state.memberId}> 가 장비에 성수 바르는 중..`, inline: false })
   if (current) {
     const unit = PERCENT.has(current.name) ? '%' : ''
     const valStr = ` ${current.value}${unit}` // 1-1 옵션(음벞·세트효과·피어싱저항)도 값 표시

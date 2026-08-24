@@ -41,6 +41,9 @@ const OPTIONS = [
 // 자료상 총 102종 — 어긋나면 데이터 입력 실수이므로 로드 시 바로 드러나게 한다.
 if (OPTIONS.length !== 102) console.warn(`[holyWater] 옵션 수 ${OPTIONS.length} (기대 102)`)
 
+// 수치에 % 단위가 붙는 옵션들 (나머지는 정수 수치)
+const PERCENT = new Set(['힐링 효과', '크리티컬', '크리티컬 대미지', '생명력 자연 회복량', '마나 자연 회복량', '스태미나 자연 회복량'])
+
 const randInt = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
 
@@ -70,9 +73,10 @@ function buildEmbed (state, current) {
   const e = new EmbedBuilder().setTitle('💧 무리아스의 성수').setColor('#4FC3F7')
   e.addFields({ name: '주인', value: `<@${state.memberId}>`, inline: false })
   if (current) {
-    const valStr = current.max === current.min ? '' : ` (${current.value})`
+    const unit = PERCENT.has(current.name) ? '%' : ''
+    const valStr = current.max === current.min ? '' : ` ${current.value}${unit}`
     const p = rollProbability(current)
-    e.setDescription(`이번 효과: **${current.name} ${current.tier}**${valStr}\n${rarityEmoji(p)} 이 수치 이상 뜰 확률 **${(p * 100).toFixed(2)}%**`)
+    e.setDescription(`이번 효과: **${current.name}**${valStr}\n${rarityEmoji(p)} 이 수치 이상 뜰 확률 **${(p * 100).toFixed(2)}%**`)
   } else {
     e.setDescription('아직 효과가 없어~ 아래 **💧 성수 사용**을 눌러봐!')
   }

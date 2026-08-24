@@ -74,7 +74,7 @@ function buildEmbed (state, current) {
   e.addFields({ name: '주인', value: `<@${state.memberId}>`, inline: false })
   if (current) {
     const unit = PERCENT.has(current.name) ? '%' : ''
-    const valStr = current.max === current.min ? '' : ` ${current.value}${unit}`
+    const valStr = ` ${current.value}${unit}` // 1-1 옵션(음벞·세트효과·피어싱저항)도 값 표시
     const p = rollProbability(current)
     e.setDescription(`이번 효과: **${current.name}**${valStr}\n${rarityEmoji(p)} 이 수치 이상 뜰 확률 **${(p * 100).toFixed(2)}%**`)
   } else {

@@ -1,6 +1,7 @@
 const guildModule = require('../../modules/getGuildInfo')
 const settings = require('../../modules/guildSettings')
 const perm = require('../../modules/perm')
+const holyWater = require('../../modules/holyWater')
 const timeout = 3000
 module.exports = async (interaction, client) => {
   if (!interaction.isButton()) return
@@ -11,6 +12,9 @@ module.exports = async (interaction, client) => {
   const action = buttonInfo.action
   const memberId = buttonInfo.memberId
   const clickMember = interaction.member
+
+  // 성수깡 버튼은 자체 처리(같은 메시지 update) 후 종료 — 아래 공용 로직/ reply 흐름을 타지 않음
+  if (action === 'holyWater') { return holyWater.handleButton(interaction, buttonInfo) }
 
   const isAllowed = perm.isBotAdmin(clickMember, clickMember.guild)
 

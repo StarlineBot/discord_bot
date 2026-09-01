@@ -83,7 +83,7 @@ const TITLE_DESC = {
   가시돋힌: '받은딜 5% 반사', 전설의: '물/마공+20%·크리+15%p·턴-1·받는딜-15%',
   저주받은: '모든딜-15%', 허약한: '받는딜+15%', 둔한: '턴주기+15%', 무지한: '적응형 딜↓', 드러난: '마법회피-15%p'
 }
-const titleTag = (name) => `'*${name}*'${TITLE_DESC[name] ? ` (${TITLE_DESC[name]})` : ''}`
+const titleTag = (name) => `*${name}*${TITLE_DESC[name] ? `(${TITLE_DESC[name]})` : ''}`
 const GALE = TITLES.find(t => t.name === '질풍의')
 const COMMON = TITLES.filter(t => t.name !== '질풍의')
 const pickTitle = () => { const r = rand()
@@ -501,8 +501,8 @@ function buildResultEmbed (res, meName, oppName, memberId, oppAI) {
   if (lines.length > 26) body = lines.slice(0, 10).concat(['', `⋯ *(중략 ${lines.length - 22}턴)* ⋯`, ''], lines.slice(-12)).join('\n')
   else body = lines.join('\n')
 
-  const meHead = `${CHARS[meName].emoji} **${meName}** ${titleTag(res.meTitle)} <@${memberId}>`
-  const oppHead = `${CHARS[oppName].emoji} **${oppName}** ${titleTag(res.oppTitle)} **${res.oppNick}** · ${oppAI} AI`
+  const meHead = `${CHARS[meName].emoji} **${meName}**: ${titleTag(res.meTitle)} <@${memberId}>`
+  const oppHead = `${CHARS[oppName].emoji} **${oppName}**: ${titleTag(res.oppTitle)} **${res.oppNick}** · ${oppAI} AI`
   let banner
   if (res.winner === 'draw') banner = '⏳ **무승부!** 시간 초과로 승부가 나지 않았다…'
   else if (res.winner === 'me') banner = `🏆 **승리!** ${CHARS[meName].emoji} **${meName}** '*${res.meTitle}*' <@${memberId}> 님의 승리!`
@@ -549,9 +549,9 @@ function buildBattleEmbed (state) {
   const recent = state.log.slice(-8).map(ev => narrateLine(ev, meName, oppName))
   const meS = statusTags(A), oppS = statusTags(B)
   const desc =
-    `${CHARS[meName].emoji} **${meName}** ${titleTag(meTitle)} <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
+    `${CHARS[meName].emoji} **${meName}**: ${titleTag(meTitle)} <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
     `\`${hpBar(A.hp, state.maxA)}\`\n` +
-    `${CHARS[oppName].emoji} **${oppName}** ${titleTag(oppTitle)} **${oppNick}** · ${oppAI} AI${oppS ? ' · ' + oppS : ''}\n` +
+    `${CHARS[oppName].emoji} **${oppName}**: ${titleTag(oppTitle)} **${oppNick}**${oppS ? ' · ' + oppS : ''} · ${oppAI} AI\n` +
     `\`${hpBar(B.hp, state.maxB)}\`\n\n` +
     (recent.length ? recent.join('\n') + '\n\n' : '') +
     '🎯 **네 차례!** 행동을 골라줘'

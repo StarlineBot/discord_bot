@@ -135,6 +135,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     d *= gutsMul(dD, D.hp, dD)
     if (D.vuln > 0) d *= 2.0
     if (D.instVuln > 0) d *= 1.5
+    if (D.cast > 0) d *= 0.6
     if (A.nextAmp) { d *= A.nextAmp; A.nextAmp = 0 }
     if (A.tFury && A.hp < dA.maxhp * 0.5) d *= 1.22
     if (D.tWall) d *= 0.90
@@ -163,6 +164,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     d *= gutsMul(dD, D.hp, dD)
     if (D.vuln > 0) d *= 2.0
     if (D.instVuln > 0) d *= 1.5
+    if (D.cast > 0) d *= 0.6
     if (A.tFury && A.hp < dA.maxhp * 0.5) d *= 1.22
     if (D.tWall) d *= 0.90
     if (D.tLegend) d *= 0.85
@@ -198,6 +200,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   dmg *= gutsMul(dD, D.hp, dD)
   if (D.vuln > 0) dmg *= 2.0
   if (D.instVuln > 0) dmg *= 1.5
+  if (D.cast > 0) dmg *= 0.6   // 메테오 시전 중 받는뎀 40%↓
   if (A.tFury && A.hp < dA.maxhp * 0.5) dmg *= 1.22
   if (D.tWall) dmg *= 0.90
   if (D.tLegend) dmg *= 0.85
@@ -245,7 +248,8 @@ const SKILLS = {
   ],
   마법사: [
     { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && x.safe, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { s.cast = 4; s.note = '시전' } },
-    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => ds.메테오 * 1.1, exec: (s, f, ds, df) => { f.hp -= Math.round(ds.메테오 * 0.6 * guts(1, f, df)); s.cd[1] = 15; s.instVuln = 3 } }
+    // 인스턴트 캐스팅: 시전시간 0 = 즉시 메테오(풀댐) 발사. 반응성 있는 한방
+    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[1] === 0 && s.cast === 0, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { f.hp -= Math.round(guts(ds.메테오, f, df)); s.cd[1] = 10; s.note = '즉시시전' } }
   ],
   도적: [
     { name: '암습', ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + x.foeTurn * 2, exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.cd[0] = 10; s.note = '기절' } },
@@ -269,7 +273,7 @@ const SKILLS = {
   ]
 }
 // 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
-const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 메테오: '시전', 인스턴트캐스팅: 15, 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2 }
+const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 메테오: '시전', 인스턴트캐스팅: 10, 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2 }
 function decideDefend (self, foe, ds, df) {
   const est = (df.물공 > df.마공 ? df.물공 : df.마공) * 0.5
   if (self.noDefend > 0) return false
@@ -281,7 +285,7 @@ function mkFighter (d, name, ai) {
   // 게이지에 랜덤 미세오프셋 → 속도 동률 시 선공을 공정하게(플레이어 선공 고정 방지)
   return { name, hp: d.maxhp, gauge: d.턴 + Math.random() * 0.3, ai, defending: false, defCombo: 0, defendedLast: false,
     shield: d.마나경감 ? Math.round(d.maxhp * 0.22) : 0, vuln: 0, cd: startCd(name), rage: 0, sunder: 0, luckBuff: 0,
-    cast: 0, instVuln: 0, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, nextAmp: 0,
+    cast: 0, instVuln: 0, instCast: false, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, nextAmp: 0,
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
     sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, revive: d.sigTank ? 1 : 0 }
 }

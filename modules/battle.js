@@ -13,7 +13,7 @@ const CHARS = {
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 45, 민첩: 40, 솜씨: 60, 행운: 40, id: '마법 딜' },
   도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 40, 민첩: 100, 솜씨: 55, 행운: 55, id: '스피드/회피/암살' },
   명사수: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, id: '명중/크리/저격' },
-  행운아: { emoji: '🍀', 힘: 25, 지능: 20, 체력: 40, 민첩: 85, 솜씨: 35, 행운: 100, id: '고속 도박' },
+  타짜: { emoji: '🃏', 힘: 25, 지능: 20, 체력: 40, 민첩: 85, 솜씨: 35, 행운: 100, id: '고속 도박' },
   세이지: { emoji: '📖', 힘: 60, 지능: 65, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, id: '혼합 하이브리드' },
   마검사: { emoji: '⚡', 힘: 65, 지능: 60, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, id: '융합/CC 하이브리드' }
 }
@@ -27,7 +27,7 @@ const TUNE = { hpScale: 1, skillStart: 0 } // HP×1.6(순삭 완화, 밸런스 �
 // 각 캐릭 슬롯별 "첫 사용까지 대기" 쿨 (perskill 모드). 스킬 실제 쿨과 유사, 장쿨(암습10/인캐15)은 완화.
 const CDINIT = {
   전사: [3, 5], 광전사: [3, 5], 기사: [3, 5], 마법사: [3, 6], 도적: [6, 5],
-  명사수: [4, 4], 마검사: [3, 5], 세이지: [3, 4], 행운아: [3, 3]
+  명사수: [4, 4], 마검사: [3, 5], 세이지: [3, 4], 타짜: [3, 3]
 }
 function startCd (name) {
   if (TUNE.skillStart === 'perskill') return CDINIT[name].slice()
@@ -277,7 +277,7 @@ const SKILLS = {
     { name: '오토스펠', ready: (s, f, ds, df) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => x.est * 2.2, exec: (s, f, ds, df) => { s.autoSpell = 4; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[0] = 3; s.note = '주문각인' } },
     { name: '연환주문', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => x.est * 2, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 2); d = absorb(f, d); f.hp -= d; s.cd[1] = 4 } }
   ],
-  행운아: [
+  타짜: [
     { name: '행운폭발', ready: (s, f, ds, df) => s.cd[0] === 0 && s.luckBuff === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.5, exec: (s, f, ds, df) => { s.luckBuff = 3; const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.note = '폭발' } },
     { name: '동전던지기', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => ds.물공 * 4.25 * (1 - df.물방) * (s.hp < f.hp ? 1.3 : 1), exec: (s, f, ds, df) => { const m = rand() < 0.5 ? 8 : 0.5; const d = guts(ds.물공 * m * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 2; s.note = m > 1 ? '대박' : '꽝' } }
   ]

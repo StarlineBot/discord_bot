@@ -120,24 +120,29 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   const ls = { used: false }, lsD = { used: false }
   let dmg, 고정 = 0
   A.hitPh = null; A.hitMg = null; A.boltName = null   // 혼합 타격 물리/마법 내역 + 볼트명(세이지)
-  if (dD.sigDodge && rand() < 0.30) return 0
+  if (dD.sigDodge && !dA.hybrid && rand() < 0.30) return 0
   if (dA.hybrid) {
-    if (luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤))) return 0
-    let block = 0; 고정 = 0
-    if (dD.방패막기 && rand() < dD.방패막기) { block = 0.30; 고정 = dD.방패고정 }
-    const wBlk = (!block && dD.무기막기 && rand() < dD.무기막기) ? 0.50 : 1
-    let crit = luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
-    if (A.echoReady) { crit = true; A.echoReady = 0 }
-    const cP = crit ? (dA.물크기본 + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1) : 1
-    const cM = crit ? (dA.마크기본 + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1) : 1
-    let ph = dA.물공 * 0.68 * (block ? (1 - block) : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
-    let mg = dA.마공 * 0.68 * (block ? (1 - block) : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
+    // 본 공격 회피 판정(천운/리롤) — 볼트는 별개로 무조건 명중
+    const evaded = (dD.sigDodge && rand() < 0.30) || luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤))
     let bolt = 0, pendingAmp = 0
-    if (A.autoSpell > 0 && rand() < 0.10) {
+    if (A.autoSpell > 0 && rand() < 0.30) {   // 볼트: 마법이라 발동 시 회피 무관 명중
       const r = rand()
-      if (r < 1 / 3) { bolt = dA.base.지능 * 1.5; pendingAmp = 1.1; A.boltName = '파이어볼트' } else if (r < 2 / 3) { bolt = dA.base.지능 * 1.0; A.boltName = '아이스볼트' } else { bolt = dA.base.지능 * 1.2; pendingAmp = 1.2; A.boltName = '라이트닝볼트' }
-      bolt *= (1 - dD.마방 * (A.tMPen ? 0.75 : 1)); A.lastBolt = true
+      if (r < 1 / 3) { bolt = dA.base.지능 * 0.5; pendingAmp = 1.1; A.boltName = '파이어볼트' } else if (r < 2 / 3) { bolt = dA.base.지능 * 0.35; A.boltName = '아이스볼트' } else { bolt = dA.base.지능 * 0.45; pendingAmp = 1.2; A.boltName = '라이트닝볼트' }
+      bolt *= (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * magicGraze(); A.lastBolt = true
     }
+    let ph = 0, mg = 0, crit = false; 고정 = 0
+    if (!evaded) {
+      let block = 0
+      if (dD.방패막기 && rand() < dD.방패막기) { block = 0.30; 고정 = dD.방패고정 }
+      const wBlk = (!block && dD.무기막기 && rand() < dD.무기막기) ? 0.50 : 1
+      crit = luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
+      if (A.echoReady) { crit = true; A.echoReady = 0 }
+      const cP = crit ? (dA.물크기본 + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1) : 1
+      const cM = crit ? (dA.마크기본 + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1) : 1
+      ph = dA.물공 * 0.68 * (block ? (1 - block) : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
+      mg = dA.마공 * 0.68 * (block ? (1 - block) : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
+    }
+    if (evaded && bolt <= 0) return 0   // 완전회피 + 볼트 미발동 → 무피해
     let d = ph + mg + bolt - 고정
     if (D.sunder > 0) d *= 1.15
     if (rand() < 0.30 && rand() >= (dA.비껴무효 + (A.luckBuff > 0 ? 0.2 : 0))) d *= 0.70
@@ -205,7 +210,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (dD.방패막기 && rand() < dD.방패막기) { dmg *= 0.30; 고정 = dD.방패고정 }
     dmg *= (1 - dD.마방 * (A.tMPen ? 0.75 : 1))
     if (D.sunder > 0) dmg *= 1.15
-    const gr = rand(); if (gr >= 0.30) { dmg *= (gr < 0.70 ? 0.80 : 0.40); if (gr >= 0.70) A.lastGraze = true }   // 마법 빗맞힘 구간: 30% 풀딜 / 40% 80% / 30% 40%
+    dmg *= magicGraze()   // 마법 빗맞힘 구간(공유 헬퍼)
     if (rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0))) { dmg *= (dA.마크기본 + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1); A.lastCrit = true; if (dA.sigEye) A.shield = Math.min(Math.round(dA.maxhp * 0.22), A.shield + Math.round(dA.maxhp * 0.03)) }
   }
   dmg -= 고정
@@ -227,6 +232,8 @@ function attack (A, D, dA, dD, defending, guaranteed) {
 function guts (dmg, foe, df) { const p = foe.hp / df.maxhp; if (p < 0.5) dmg *= (1 - df.근성 * ((0.5 - p) / 0.5)); return dmg }
 // 물리 딜 변수: 솜씨 기반 풀댐 확률, 빗맞으면 70~100% 유동 (예측성↓, 명중형=일관/난동형=도박)
 function physSwing (d) { const pFull = 0.5 + Math.floor(d.base.솜씨 / 10) * 0.04; return rand() < pFull ? 1 : (0.70 + rand() * 0.30) }
+// 마법 빗맞힘 구간(공유): 30% 풀댐 / 40% 80% / 30% 40% (평균 74%). 마법사 마법 + 볼트 공통
+function magicGraze () { const gr = rand(); return gr < 0.30 ? 1 : (gr < 0.70 ? 0.80 : 0.40) }
 function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; foe.vuln = 1; return r } } return dmg }
 function applyCC (foe, field, dur) { foe[field] = Math.max(foe[field], foe.sigTank ? Math.max(dur - 1, 0) : dur) }
 function applyAdaptiveCC (foe, df) {
@@ -297,7 +304,7 @@ const SKILL_DESC = {
   암습: '상대 2턴 기절 + 진입딜', 처형: '상대 HP25%↓면 물공×5 대박딜',
   약점간파: '확정 크리 + 방어 대부분 무시', 견제사격: '딜 + 상대 2턴 명중-20%',
   약점봉인: '상대 최고 스탯에 맞는 CC + 딜', 중력베기: '완전명중 + 상대 3턴 둔화',
-  오토스펠: '공격 시 10% 확률로 볼트 마법 자동시전(추가 마법딜)', 연환주문: '혼합 타격 ×2 한방기',
+  오토스펠: '공격 시 30% 확률로 볼트 마법 자동시전(추가 마법딜)', 연환주문: '혼합 타격 ×2 한방기',
   행운폭발: '3턴 크리·리롤·비껴무효 대폭↑', 동전던지기: '50% 물공×8 / 50% ×0.5 도박'
 }
 function skillsBlock (name) {

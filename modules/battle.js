@@ -284,6 +284,24 @@ const SKILLS = {
 }
 // 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
 const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 메테오: '시전', 인스턴트캐스팅: 10, 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2 }
+// 스킬 효과 요약(매치업 표시용)
+const SKILL_DESC = {
+  방어파괴: '상대 2턴 받는뎀+15% + 고정딜', 돌진: '딜+1턴 스턴 (나 반동)',
+  광폭화: '3턴 공격력↑ + 턴 빨라짐', 재생의광기: '즉시 25% 회복+3턴 재생 (공격도 함)',
+  방패가격: '방어 기반 강력한 한 방', 도발: '상대 2턴 방어행동 불가 + 딜',
+  메테오: '4턴 시전 → 마공×4 방어무시 폭딜', 인스턴트캐스팅: '즉시 메테오 풀댐 발사',
+  암습: '상대 2턴 기절 + 진입딜', 처형: '상대 HP25%↓면 물공×5 대박딜',
+  약점간파: '확정 크리 + 방어 대부분 무시', 견제사격: '딜 + 상대 2턴 명중-20%',
+  약점봉인: '상대 최고 스탯에 맞는 CC + 딜', 중력베기: '완전명중 + 상대 3턴 둔화',
+  오토스펠: '공격마다 10% 볼트(추가 마법딜)', 연환주문: '혼합 타격 ×2 한방기',
+  행운폭발: '3턴 크리·리롤·비껴무효 대폭↑', 동전던지기: '50% 물공×8 / 50% ×0.5 도박'
+}
+function skillsBlock (name) {
+  return SKILLS[name].map((sk, i) => {
+    const cd = SKILL_CD[sk.name]
+    return `${i + 1}) **${sk.name}** — ${SKILL_DESC[sk.name] || ''} (${typeof cd === 'number' ? `쿨${cd}` : cd})`
+  }).join('\n')
+}
 function decideDefend (self, foe, ds, df) {
   const est = (df.물공 > df.마공 ? df.물공 : df.마공) * 0.5
   if (self.noDefend > 0) return false
@@ -459,7 +477,9 @@ function buildMatchupEmbed (me, opp, ai, memberId) {
   return new EmbedBuilder()
     .setTitle('⚔️ 매치업 성립!')
     .setColor(0xe67e22)
-    .setDescription(`${fighterBlock(me, `<@${memberId}>`)}\n\n${fighterBlock(opp, `· ${ai} AI`)}`)
+    .setDescription(
+      `${fighterBlock(me, `<@${memberId}>`)}\n📜 **내 스킬**\n${skillsBlock(me)}\n\n` +
+      `${fighterBlock(opp, `· ${ai} AI`)}\n🆚 **상대 스킬**\n${skillsBlock(opp)}`)
     .setFooter({ text: '전투 시작을 누르면 타이틀이 부여되고 승부가 펼쳐진다! · 🎲로 상대 다시' })
 }
 function buildMatchupRow (me, opp, ai, memberId) {

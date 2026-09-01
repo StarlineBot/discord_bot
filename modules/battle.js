@@ -23,7 +23,7 @@ const AIS = ['공격적', '방어적', '판단형']
 const NICKS = ['아르덴', '던컨', '리시타', '카록', '벨루가', '이멘', '루에리', '나오', '마리', '아이라', '퍼거스', '트리아나', '제이머스', '엘리자', '칼릭스', '란딜', '피오나', '에반', '제노', '아리아', '케이', '로란', '델리아', '무마']
 
 // ── 전투 길이 튜닝 노브 (기본값 = 현재 동작) ──
-const TUNE = { hpScale: 1.3, skillStart: 0 } // HP×1.3 + 스킬 시작쿨 0(원래 시뮬처럼). 길이↑ 재밸런스판
+const TUNE = { hpScale: 1, skillStart: 0 } // HP×1.6(순삭 완화, 밸런스 유지)
 // 각 캐릭 슬롯별 "첫 사용까지 대기" 쿨 (perskill 모드). 스킬 실제 쿨과 유사, 장쿨(암습10/인캐15)은 완화.
 const CDINIT = {
   전사: [3, 5], 광전사: [3, 5], 기사: [3, 5], 마법사: [3, 6], 도적: [6, 5],
@@ -86,14 +86,14 @@ function derive (c) {
   return {
     물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     물방: (step(c.힘, 3) + step(c.체력, 1)) / 100, 마방: Math.min(30 + step(c.지능, 3), 70) / 100,
-    maxhp: Math.round((50 + c.체력 * 1.1 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3) * TUNE.hpScale),
+    maxhp: Math.round((200 + c.체력 * 1.5 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3) * TUNE.hpScale),
     명중: Math.min(28 + step(c.솜씨, 5), c.솜씨 === 100 ? 90 : 80) / 100, 물회: Math.min(10 + step(c.민첩, 2.5), 50) / 100, 마회: step(c.민첩, 3) / 100,
     sigPen: c.힘 === 100, sigDodge: c.행운 === 100, sigTank: c.체력 === 100, sigEcho: c.민첩 === 100, sigEye: c.지능 === 100, base: c,
     hybrid: (c.힘 === 60 && c.지능 === 65 && c.체력 === 55),
     fusion: (c.힘 === 65 && c.지능 === 60 && c.체력 === 55),
     크리: Math.min(10 + step(c.솜씨, 1) + step(c.행운, 3.5), 70) / 100, 리롤: Math.min(step(c.행운, 4), 50) / 100,
     근성: step(c.체력, 4) / 100,
-    방패가격: Math.round(Math.round(c.힘 * (1 + step(c.힘, 10) / 100)) * 0.5 + c.체력 * 1.2 + (step(c.힘, 3) + step(c.체력, 1)) * 2),
+    방패가격: Math.round(Math.round(c.힘 * (1 + step(c.힘, 10) / 100)) * 0.5 + c.체력 * 1.8 + (step(c.힘, 3) + step(c.체력, 1)) * 2),
     힘절반: Math.round(c.힘 / 2), 돌진딜: Math.round(Math.round(c.힘 * (1 + step(c.힘, 10) / 100)) * 1.5),
     메테오: Math.round(Math.round(c.지능 * (1 + step(c.지능, 10) / 100)) * 4), 회복: Math.min(10 + step(c.체력, 1), 30),
     물크기본: 2.5, 마크기본: 1.5, 크랜폭: step(c.행운, 0.15) * 2, 비껴무효: step(c.행운, 3) / 100, 턴: Math.max(10 - step(c.민첩, 0.7), 2),
@@ -119,8 +119,8 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (A.echoReady) { crit = true; A.echoReady = 0 }
     const cP = crit ? (dA.물크기본 + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1) : 1
     const cM = crit ? (dA.마크기본 + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1) : 1
-    let ph = dA.물공 * 0.78 * (block ? (1 - block) : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
-    let mg = dA.마공 * 0.78 * (block ? (1 - block) : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
+    let ph = dA.물공 * 0.68 * (block ? (1 - block) : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
+    let mg = dA.마공 * 0.68 * (block ? (1 - block) : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
     let bolt = 0, pendingAmp = 0
     if (A.autoSpell > 0 && rand() < 0.10) {
       const r = rand()
@@ -228,7 +228,7 @@ function applyAdaptiveCC (foe, df) {
   applyCC(foe, 'noDefend', 2); applyCC(foe, 'healBlock', 2); return '봉쇄'
 }
 function estAtk (a, d) {
-  if (a.hybrid) return (a.물공 * 0.78 * (1 - d.물방) * Math.max(a.명중, 0.3)) + (a.마공 * 0.78 * (1 - d.마방))
+  if (a.hybrid) return (a.물공 * 0.68 * (1 - d.물방) * Math.max(a.명중, 0.3)) + (a.마공 * 0.68 * (1 - d.마방))
   if (a.fusion) return (a.물공 + a.마공) * (1 - Math.max(d.물방, d.마방)) * Math.max(a.명중, 0.3)
   if (a.마공 > a.물공) return a.마공 * (1 - d.마방)
   return a.물공 * (1 - d.물방) * Math.max(a.명중, 0.3)
@@ -256,7 +256,7 @@ const SKILLS = {
     { name: '처형', ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => ds.물공 * 5 * (1 - df.물방), exec: (s, f, ds, df) => { const d = guts(ds.물공 * 5 * physSwing(ds) * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 5; s.note = '처형' } }
   ],
   명사수: [
-    { name: '약점간파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * 1.2 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.물공 * 1.2 * (ds.물크기본 + rand() * ds.크랜폭) * (1 - df.물방); if (df.마나경감) d *= (1 - df.마나경감); if (f.instVuln > 0) d *= 1.5; d = guts(d, f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '크리' } },
+    { name: '약점간파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * 1.4 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.물공 * 1.4 * (ds.물크기본 + rand() * ds.크랜폭) * (1 - df.물방); if (df.마나경감) d *= (1 - df.마나경감); if (f.instVuln > 0) d *= 1.5; d = guts(d, f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '크리' } },
     { name: '견제사격', ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.1, exec: (s, f, ds, df) => { const d = attack(s, f, ds, df, f.defending); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } }
   ],
   마검사: [
@@ -420,7 +420,7 @@ const eul = (w) => hasBatchim(w) ? '을' : '를'
 function preview (name) {
   const c = CHARS[name]
   return {
-    hp: Math.round((50 + c.체력 * 1.1 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3) * TUNE.hpScale),
+    hp: Math.round((200 + c.체력 * 1.5 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3) * TUNE.hpScale),
     물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     턴: Math.max(10 - step(c.민첩, 0.7), 2)
   }

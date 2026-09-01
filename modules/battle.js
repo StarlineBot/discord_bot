@@ -514,7 +514,8 @@ function narrateLine (ev, meName, oppName) {
     case 'skill': {
       const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
       if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}`
-      return head
+      if (ev.name === '메테오') return head // 시전 시작(딜 없음)
+      return `${head} 하지만 공격은 빗나갔다 💨` // 공격형 스킬인데 회피됨
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
     case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.`

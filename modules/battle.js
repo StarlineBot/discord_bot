@@ -342,14 +342,18 @@ function runBattle (meName, oppName, meAI, oppAI) {
 // ── UI + 내레이션 ──
 const BAR = 12
 function hpBar (cur, max) {
+  cur = Math.max(0, Math.round(cur))
   const pct = Math.max(0, Math.min(1, cur / max))
   const fill = Math.round(pct * BAR)
-  return '█'.repeat(fill) + '░'.repeat(BAR - fill) + ` ${Math.round(pct * 100)}%`
+  return '█'.repeat(fill) + '░'.repeat(BAR - fill) + ` ${cur}/${max} (${Math.round(pct * 100)}%)`
 }
+// 한글 받침 판별 → 조사 자동 선택
+function hasBatchim (w) { if (!w) return false; const c = w.charCodeAt(w.length - 1); if (c < 0xac00 || c > 0xd7a3) return false; return (c - 0xac00) % 28 !== 0 }
+const iga = (w) => hasBatchim(w) ? '이' : '가'
 function preview (name) {
   const c = CHARS[name]
   return {
-    hp: Math.round(50 + c.체력 * 1.1 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3),
+    hp: Math.round((50 + c.체력 * 1.1 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3) * TUNE.hpScale),
     물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     턴: Math.max(10 - step(c.민첩, 0.7), 2)
   }
@@ -370,15 +374,15 @@ function buildSelectRows (memberId) {
   for (let i = 0; i < NAMES.length; i += 5) rows.push(new ActionRowBuilder().addComponents(NAMES.slice(i, i + 5).map(btn)))
   return rows
 }
-function fighterLine (name, tail) {
+function fighterBlock (name, tail) {
   const c = CHARS[name]; const p = preview(name)
-  return { name: `${c.emoji} ${name} ${tail}`, value: `${c.id}\n힘 ${c.힘}·지능 ${c.지능}·체력 ${c.체력}·민첩 ${c.민첩}·솜씨 ${c.솜씨}·행운 ${c.행운}\nHP ${p.hp} · 물공 ${p.물공} · 마공 ${p.마공} · 턴 ${p.턴}초` }
+  return `${c.emoji} **${name}** ${tail}\n${c.id} · 힘 ${c.힘}·지능 ${c.지능}·체력 ${c.체력}·민첩 ${c.민첩}·솜씨 ${c.솜씨}·행운 ${c.행운}\nHP ${p.hp} · 물공 ${p.물공} · 마공 ${p.마공} · 턴 ${p.턴}초`
 }
 function buildMatchupEmbed (me, opp, ai, memberId) {
   return new EmbedBuilder()
     .setTitle('⚔️ 매치업 성립!')
     .setColor(0xe67e22)
-    .addFields(fighterLine(me, `<@${memberId}>`), fighterLine(opp, `· ${ai} AI`))
+    .setDescription(`${fighterBlock(me, `<@${memberId}>`)}\n\n${fighterBlock(opp, `· ${ai} AI`)}`)
     .setFooter({ text: '전투 시작을 누르면 타이틀이 부여되고 승부가 펼쳐진다! · 🎲로 상대 다시' })
 }
 function buildMatchupRow (me, opp, ai, memberId) {
@@ -416,7 +420,7 @@ function buildResultEmbed (res, meName, oppName, memberId, oppAI) {
   const oppHead = `${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' · ${oppAI} AI`
   let banner
   if (res.winner === 'draw') banner = '⏳ **무승부!** 시간 초과로 승부가 나지 않았다…'
-  else if (res.winner === 'me') banner = `🏆 **승리!** <@${memberId}>의 ${meName} '*${res.meTitle}*'가 이겼다!`
+  else if (res.winner === 'me') banner = `🏆 **승리!** <@${memberId}>의 ${meName} '*${res.meTitle}*'${iga(res.meTitle)} 이겼다!`
   else banner = `💀 **패배…** ${oppName} '*${res.oppTitle}*'(${oppAI})에게 당했다.`
 
   const desc = `${meHead}\n${oppHead}\n\n${body}\n\n` +

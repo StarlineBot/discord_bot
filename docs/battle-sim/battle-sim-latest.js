@@ -13,6 +13,41 @@ const CHARS = {
   '행운아': { 힘: 25, 지능: 20, 체력: 40, 민첩: 85, 솜씨: 35, 행운: 100 }
 }
 const AIS = ['공격적','방어적','판단형']; const pickAI=()=>AIS[Math.floor(rand()*3)]
+// ── 타이틀: 캐릭 선택 시 랜덤 1개. 파생 능력치에 직접 랜덤 보정(= 의도된 매판 변수) ──
+const clampT=(v,mx)=>Math.min(v,mx)
+const TITLES=[
+  {name:'튼튼한', d:d=>{d.물방+=0.10; d.마방=clampT(d.마방+0.10,0.75)}},        // 물/마방 +10%p
+  {name:'럭키',   d:d=>{d.리롤=clampT(d.리롤+0.10,0.60)}},                       // 행운굴림 +10%p
+  {name:'불주먹', d:d=>{d.크리=clampT(d.크리+0.05,0.80); d.물공=Math.round(d.물공*1.05)}}, // 크리+5%p·물리+5%
+  {name:'괴력의', d:d=>{d.물공=Math.round(d.물공*1.12)}},                        // 물리딜 +12%
+  {name:'현자',   d:d=>{d.마공=Math.round(d.마공*1.12); d.마방=clampT(d.마방+0.05,0.75)}}, // 마법딜+12%·마방+5%p
+  {name:'매의눈', d:d=>{d.명중=clampT(d.명중+0.12,0.95)}},                       // 명중 +12%p
+  {name:'암살자', d:d=>{d.물크기본+=0.6; d.마크기본+=0.6}},                       // 크리배율 +0.6
+  {name:'날렵한', d:d=>{d.물회=clampT(d.물회+0.10,0.55)}},                       // 물리회피 +10%p
+  {name:'질풍의', d:d=>{d.턴=Math.max(Math.round(d.턴*0.85*10)/10,2)}},          // 턴주기 -15%(빠른/느린 공평)
+  {name:'거인',   d:d=>{d.maxhp=Math.round(d.maxhp*1.12)}},                     // 최대HP +12%
+  {name:'살이돋아나는', flag:'tRegen'}, // 매턴 HP +3% 재생
+  {name:'뱀파이어', flag:'tLeech'},   // 가한 딜 12% 흡혈(attack 경유분)
+  {name:'광전사', flag:'tFury'},    // HP 50%↓ 시 딜 +22%
+  {name:'철벽',   flag:'tWall'},    // 받는 딜 -10%
+  {name:'가시돋힌', flag:'tThorns'},// 받은 딜 5% 반사
+]
+// 대박 타이틀(0.1%): 갓롤 — 물/마공+20%, 크리+15%p, 턴-1, 받는딜-15%
+const JACKPOT={name:'전설의', d:d=>{d.물공=Math.round(d.물공*1.2); d.마공=Math.round(d.마공*1.2); d.크리=clampT(d.크리+0.15,0.90); d.턴=Math.max(d.턴-1,2)}, flag:'tLegend'}
+// 꽝 타이틀(좋은 타이틀의 거울상): 합쳐서 20% 등장
+const DUDS=[
+  {name:'저주받은', d:d=>{d.물공=Math.round(d.물공*0.85); d.마공=Math.round(d.마공*0.85)}}, // 딜 -15%
+  {name:'허약한',   flag:'tFrail'},                                                          // 받는딜 +15%
+  {name:'둔한',     d:d=>{d.턴=Math.round(d.턴*1.15*10)/10}},                                // 턴주기 +15%(느려짐)
+]
+// 가중 뽑기: 전설의 0.1%, 질풍의 0.5%, 꽝 20%, 나머지 14개 균등(~79.4%)
+const GALE=TITLES.find(t=>t.name==='질풍의')
+const COMMON=TITLES.filter(t=>t.name!=='질풍의')
+const pickTitle=()=>{ const r=rand()
+  if(r<0.001)return JACKPOT
+  if(r<0.006)return GALE
+  if(r<0.206)return DUDS[Math.floor(rand()*DUDS.length)]
+  return COMMON[Math.floor(rand()*COMMON.length)] }
 function derive (c) {
   return {
     물공: Math.round(c.힘*(1+step(c.힘,10)/100)), 마공: Math.round(c.지능*(1+step(c.지능,10)/100)),
@@ -67,7 +102,14 @@ function attack (A, D, dA, dD, defending) {
   dmg *= gutsMul(dD, D.hp, dD)
   if (D.vuln>0) dmg*=2.0
   if (D.instVuln>0) dmg*=1.5   // 마법사 인스턴트캐스팅 취약
-  return Math.max(Math.round(dmg),1)
+  if (A.tFury && A.hp < dA.maxhp*0.5) dmg*=1.22   // 타이틀 광란
+  if (D.tWall) dmg*=0.90                           // 타이틀 철벽
+  if (D.tLegend) dmg*=0.85                          // 대박 전설의: 받는딜 -15%
+  if (D.tFrail) dmg*=1.15                           // 꽝 허약한: 받는딜 +15%
+  const fin = Math.max(Math.round(dmg),1)
+  if (A.tLeech) A.hp=Math.min(dA.maxhp, A.hp+Math.round(fin*0.12))   // 타이틀 흡혈
+  if (D.tThorns) A.hp-=Math.max(Math.round(fin*0.05),1)              // 타이틀 가시돋힌 반사
+  return fin
 }
 // ── 공통 헬퍼 ──
 function guts(dmg, foe, df){ const p=foe.hp/df.maxhp; if(p<0.5)dmg*=(1-df.근성*((0.5-p)/0.5)); return dmg }
@@ -169,11 +211,15 @@ function mkFighter(d, name){
 function reviveCheck(f, d){ if(f.hp<=0 && f.revive>0){ f.hp=Math.round(d.maxhp*0.20); f.revive--; f.stun=0; f.noDefend=0 } }
 function battle (cA, cB) {
   const dA=derive(CHARS[cA]), dB=derive(CHARS[cB])
+  const tA=pickTitle(), tB=pickTitle()
+  if(tA.d)tA.d(dA); if(tB.d)tB.d(dB)   // 스탯형 타이틀은 파생치에 직접 반영
   const A=mkFighter(dA,cA), B=mkFighter(dB,cB)
+  if(tA.flag)A[tA.flag]=true; if(tB.flag)B[tB.flag]=true   // 효과형 타이틀 플래그
   let t=0; const DT=0.1
   const act=(self,foe,ds,df)=>{
     self.defending=false
     self.cd[0]=Math.max(0,self.cd[0]-1); self.cd[1]=Math.max(0,self.cd[1]-1)
+    if(self.tRegen)self.hp=Math.min(ds.maxhp,self.hp+Math.round(ds.maxhp*0.03))   // 타이틀 재생
     if(self.stun>0){ self.stun--; self.defCombo=0; self.defendedLast=false; return }
     if(self.instVuln>0)self.instVuln--
     if(self.noDefend>0)self.noDefend--
@@ -209,16 +255,24 @@ function battle (cA, cB) {
   while(A.hp>0&&B.hp>0&&t<600){ A.gauge-=DT;B.gauge-=DT;t+=DT
     if(A.gauge<=0){A.gauge=Math.max(dA.턴-(A.rage>0?2:0),2);act(A,B,dA,dB); reviveCheck(B,dB)} if(B.hp<=0)break
     if(B.gauge<=0){B.gauge=Math.max(dB.턴-(B.rage>0?2:0),2);act(B,A,dB,dA); reviveCheck(A,dA)} }
-  if(t>=600)return 'draw'
-  return A.hp>0?cA:cB
+  if(t>=600){ TS[tA.name].g++; TS[tB.name].g++; return 'draw' }
+  const win=A.hp>0?cA:cB
+  TS[tA.name].g++; TS[tB.name].g++
+  if(win===cA)TS[tA.name].w++; else TS[tB.name].w++
+  return win
 }
+const TS={}; for(const t of [...TITLES,JACKPOT,...DUDS])TS[t.name]={g:0,w:0}
 const names=Object.keys(CHARS); const overall={}; let draws=0
-console.log('=== V41: 태그 기반 AI (딜/제어/조건부) ===')
+console.log('=== V43: 타이틀(랜덤 매판 변수) + 대박 전설의(0.1%) ===')
 for(const a of names){ const row=[];let tot=0,cnt=0
   for(const b of names){ if(a===b){row.push(' - ');continue} let win=0
     for(let i=0;i<2000;i++){const w=i%2===0?battle(a,b):battle(b,a); if(w===a)win++; else if(w==='draw')draws++}
     const p=Math.round(win/20);row.push((p+'%').padStart(4));tot+=p;cnt++ }
   overall[a]=Math.round(tot/cnt); console.log(a.padEnd(6),'|',row.join(' | ')) }
 console.log('열:',names.join(' / '))
-console.log('--- 종합 ---'); for(const n of names)console.log('  '+n.padEnd(6)+': '+overall[n]+'%')
+console.log('--- 종합(캐릭) ---'); for(const n of names)console.log('  '+n.padEnd(6)+': '+overall[n]+'%')
 console.log('무승부:',draws)
+console.log('--- 타이틀별 승률(밸런스 점검: 50% 근처면 건강) ---')
+const trows=[...TITLES,JACKPOT,...DUDS].map(t=>({n:t.name,g:TS[t.name].g,p:TS[t.name].g?TS[t.name].w/TS[t.name].g*100:0}))
+trows.sort((a,b)=>b.p-a.p)
+for(const r of trows)console.log('  '+r.n.padEnd(8)+': '+r.p.toFixed(1)+'%  ('+r.g+'판)')

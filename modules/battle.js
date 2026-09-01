@@ -281,62 +281,105 @@ function mkFighter (d, name, ai) {
 }
 function reviveCheck (f, d) { if (f.hp <= 0 && f.revive > 0) { f.hp = Math.round(d.maxhp * 0.20); f.revive--; f.stun = 0; f.noDefend = 0; return true } return false }
 
-// ── 전투 실행 + 내레이션 로그 ──
-function runBattle (meName, oppName, meAI, oppAI) {
+// ── 스텝형 전투 엔진 (자동 runBattle + 인터랙티브 공용) ──
+function resetGauge (f, d) { return Math.max(d.턴 - (f.rage > 0 ? 2 : 0), 2) + (f.slow > 0 ? f.slowSec : 0) }
+// 턴 시작 처리(쿨/상태 감소, 기절·시전). 턴이 소모되는 강제 이벤트면 그 이벤트, 아니면 null
+function upkeep (self, foe, ds, df) {
+  self.defending = false; self.note = null; self.lastCrit = false; self.lastBolt = false
+  self.cd[0] = Math.max(0, self.cd[0] - 1); self.cd[1] = Math.max(0, self.cd[1] - 1)
+  if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.maxhp * 0.03))
+  if (self.autoSpell > 0) self.autoSpell--
+  if (self.slow > 0) self.slow--; if (self.silence > 0) self.silence--; if (self.luckLock > 0) self.luckLock--; if (self.blind > 0) self.blind--; if (self.healBlock > 0) self.healBlock--
+  if (self.healRegen > 0 && self.healBlock === 0) { self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.maxhp * 0.04)); self.healRegen-- }
+  if (self.stun > 0) { self.stun--; self.defCombo = 0; self.defendedLast = false; return { type: 'stun' } }
+  if (self.instVuln > 0) self.instVuln--
+  if (self.noDefend > 0) self.noDefend--
+  if (self.missDown > 0) self.missDown--
+  if (self.rage > 0) { self.rage--; if (self.rage === 0) self.cd[0] = 2 }
+  if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
+  if (foe.sunder > 0) foe.sunder--
+  if (self.name === '마법사' && self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= Math.round(guts(ds.메테오, foe, df)); return { type: 'meteor', dmg: b - foe.hp } } return { type: 'cast' } }
+  return null
+}
+function ctxFor (self, foe, ds, df) {
+  const fm = df.마공 > df.물공, fd = (fm ? df.마공 : df.물공) * 0.6, fh = Math.ceil(3 / Math.max(df.턴, 2) * ds.턴) + 2
+  return { est: estAtk(ds, df), foeTurn: estAtk(df, ds), safe: self.hp > fd * fh * 0.6 }
+}
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit } }
+function execAttack (self, foe, ds, df) { const fb = foe.hp; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false; return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt } }
+function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.회복 * ds.maxhp / 100); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
+function aiTurn (self, foe, ds, df) {
+  const forced = upkeep(self, foe, ds, df); if (forced) return forced
+  if (self.ai !== '방어적' && self.silence === 0) {
+    const ctx = ctxFor(self, foe, ds, df); let best = null, bestScore = ctx.est
+    for (const sk of SKILLS[self.name]) { if (!sk.ready(self, foe, ds, df, ctx)) continue; const sc = sk.score(self, foe, ds, df, ctx); if (sc > bestScore) { bestScore = sc; best = sk } }
+    if (best) return execSkill(self, foe, ds, df, best)
+  }
+  if (decideDefend(self, foe, ds, df)) return execDefend(self, ds)
+  return execAttack(self, foe, ds, df)
+}
+function initBattle (meName, oppName, oppAI) {
   const dA = derive(CHARS[meName]), dB = derive(CHARS[oppName])
   const tA = pickTitle(), tB = pickTitle()
   if (tA.d) tA.d(dA); if (tB.d) tB.d(dB)
-  const A = mkFighter(dA, meName, meAI), B = mkFighter(dB, oppName, oppAI)
+  const A = mkFighter(dA, meName, null), B = mkFighter(dB, oppName, oppAI)
   if (tA.flag) A[tA.flag] = true; if (tB.flag) B[tB.flag] = true
-  const maxA = dA.maxhp, maxB = dB.maxhp
-  const log = []
-  let t = 0; const DT = 0.1
+  return { A, B, dA, dB, maxA: dA.maxhp, maxB: dB.maxhp, meName, oppName, oppAI, meTitle: tA.name, oppTitle: tB.name, t: 0, log: [] }
+}
+function recEntry (state, who, ev) {
+  const other = who === 'me' ? state.B : state.A, otherMax = who === 'me' ? state.maxB : state.maxA
+  const self = who === 'me' ? state.A : state.B, selfMax = who === 'me' ? state.maxA : state.maxB
+  state.log.push(Object.assign({ who, hp: Math.max(other.hp, 0), max: otherMax, selfHp: Math.max(self.hp, 0), selfMax }, ev))
+}
+function reviveRec (state, who) { const f = who === 'me' ? state.A : state.B, mx = who === 'me' ? state.maxA : state.maxB; state.log.push({ who, type: 'revive', hp: Math.max(f.hp, 0), max: mx }) }
+function stateResult (state) { return { winner: state.winner, log: state.log, meTitle: state.meTitle, oppTitle: state.oppTitle, meMax: state.maxA, oppMax: state.maxB, meHp: Math.max(state.A.hp, 0), oppHp: Math.max(state.B.hp, 0) } }
 
-  const act = (self, foe, ds, df, foeMax) => {
-    self.defending = false; self.note = null; self.lastCrit = false; self.lastBolt = false
-    self.cd[0] = Math.max(0, self.cd[0] - 1); self.cd[1] = Math.max(0, self.cd[1] - 1)
-    if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.maxhp * 0.03))
-    if (self.autoSpell > 0) self.autoSpell--
-    if (self.slow > 0) self.slow--; if (self.silence > 0) self.silence--; if (self.luckLock > 0) self.luckLock--; if (self.blind > 0) self.blind--; if (self.healBlock > 0) self.healBlock--
-    if (self.healRegen > 0 && self.healBlock === 0) { self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.maxhp * 0.04)); self.healRegen-- }
-    if (self.stun > 0) { self.stun--; self.defCombo = 0; self.defendedLast = false; return { type: 'stun' } }
-    if (self.instVuln > 0) self.instVuln--
-    if (self.noDefend > 0) self.noDefend--
-    if (self.missDown > 0) self.missDown--
-    if (self.rage > 0) { self.rage--; if (self.rage === 0) self.cd[0] = 2 }
-    if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
-    if (foe.sunder > 0) foe.sunder--
-    if (self.name === '마법사' && self.cast > 0) { self.cast--; if (self.cast === 0) { const before = foe.hp; foe.hp -= Math.round(guts(ds.메테오, foe, df)); return { type: 'meteor', dmg: before - foe.hp } } return { type: 'cast' } }
-    if (self.ai !== '방어적' && self.silence === 0) {
-      const foeMagic = df.마공 > df.물공
-      const foeDmg = (foeMagic ? df.마공 : df.물공) * 0.6
-      const foeHits = Math.ceil(3 / Math.max(df.턴, 2) * ds.턴) + 2
-      const ctx = { est: estAtk(ds, df), foeTurn: estAtk(df, ds), safe: self.hp > foeDmg * foeHits * 0.6 }
-      let best = null, bestScore = ctx.est
-      for (const sk of SKILLS[self.name]) { if (!sk.ready(self, foe, ds, df, ctx)) continue; const sc = sk.score(self, foe, ds, df, ctx); if (sc > bestScore) { bestScore = sc; best = sk } }
-      if (best) { const fb = foe.hp; best.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: best.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit } }
-    }
-    if (decideDefend(self, foe, ds, df)) { self.hp = Math.min(ds.maxhp, self.hp + ds.회복 * ds.maxhp / 100); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend' } }
-    const fb = foe.hp
-    let dmg = attack(self, foe, ds, df, foe.defending)
-    if (foe.vuln > 0) foe.vuln--
-    dmg = absorb(foe, dmg)
-    foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false
-    return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt }
-  }
-
-  const rec = (who, other, ev, otherMax) => {
-    log.push(Object.assign({ who, hp: Math.max(other.hp, 0), max: otherMax, selfHp: Math.max(who === 'me' ? A.hp : B.hp, 0), selfMax: who === 'me' ? maxA : maxB }, ev))
-  }
-
-  while (A.hp > 0 && B.hp > 0 && t < 600) {
-    A.gauge -= DT; B.gauge -= DT; t += DT
-    if (A.gauge <= 0) { A.gauge = Math.max(dA.턴 - (A.rage > 0 ? 2 : 0), 2) + (A.slow > 0 ? A.slowSec : 0); const ev = act(A, B, dA, dB, maxB); rec('me', B, ev, maxB); if (reviveCheck(B, dB)) log.push({ who: 'opp', type: 'revive', hp: B.hp, max: maxB, selfHp: A.hp, selfMax: maxA }) }
+// 자동 전투(밸런스 시뮬/관전용): 양쪽 AI
+function runBattle (meName, oppName, meAI, oppAI) {
+  const state = initBattle(meName, oppName, oppAI); state.A.ai = meAI
+  const { A, B, dA, dB } = state; const DT = 0.1
+  while (A.hp > 0 && B.hp > 0 && state.t < 600) {
+    A.gauge -= DT; B.gauge -= DT; state.t += DT
+    if (A.gauge <= 0) { A.gauge = resetGauge(A, dA); recEntry(state, 'me', aiTurn(A, B, dA, dB)); if (reviveCheck(B, dB)) reviveRec(state, 'opp') }
     if (B.hp <= 0) break
-    if (B.gauge <= 0) { B.gauge = Math.max(dB.턴 - (B.rage > 0 ? 2 : 0), 2) + (B.slow > 0 ? B.slowSec : 0); const ev = act(B, A, dB, dA, maxA); rec('opp', A, ev, maxA); if (reviveCheck(A, dA)) log.push({ who: 'me', type: 'revive', hp: A.hp, max: maxA, selfHp: B.hp, selfMax: maxB }) }
+    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); recEntry(state, 'opp', aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
   }
-  const winner = t >= 600 ? 'draw' : (A.hp > 0 ? 'me' : 'opp')
-  return { winner, log, meTitle: tA.name, oppTitle: tB.name, meMax: maxA, oppMax: maxB, meHp: Math.max(A.hp, 0), oppHp: Math.max(B.hp, 0) }
+  state.winner = state.t >= 600 ? 'draw' : (A.hp > 0 ? 'me' : 'opp')
+  return stateResult(state)
+}
+// 인터랙티브: 플레이어 턴까지 진행. 'player'(선택 대기) | 'end'
+function advance (state) {
+  const { A, B, dA, dB } = state; const DT = 0.1
+  while (A.hp > 0 && B.hp > 0 && state.t < 600) {
+    A.gauge -= DT; B.gauge -= DT; state.t += DT
+    if (A.gauge <= 0) {
+      A.gauge = resetGauge(A, dA)
+      const forced = upkeep(A, B, dA, dB)
+      if (forced) { recEntry(state, 'me', forced); if (reviveCheck(B, dB)) reviveRec(state, 'opp'); if (B.hp <= 0) break; continue }
+      return 'player' // 플레이어 upkeep 완료, 행동 선택 대기
+    }
+    if (B.hp <= 0) break
+    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); recEntry(state, 'opp', aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
+  }
+  state.winner = state.t >= 600 ? 'draw' : (A.hp > 0 ? 'me' : 'opp')
+  return 'end'
+}
+// 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
+function playerResolve (state, choice) {
+  const { A, B, dA, dB } = state
+  let ev
+  if (choice === 'defend') ev = execDefend(A, dA)
+  else if (choice === 's0' || choice === 's1') {
+    const sk = SKILLS[state.meName][choice === 's0' ? 0 : 1]; const ctx = ctxFor(A, B, dA, dB)
+    ev = (A.silence === 0 && sk.ready(A, B, dA, dB, ctx)) ? execSkill(A, B, dA, dB, sk) : execAttack(A, B, dA, dB)
+  } else ev = execAttack(A, B, dA, dB)
+  recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
+  if (B.hp <= 0) { state.winner = 'me'; return 'end' }
+  return advance(state)
+}
+function playerOptions (state) {
+  const { A, B, dA, dB, meName } = state; const ctx = ctxFor(A, B, dA, dB); const sks = SKILLS[meName]
+  return { canDefend: A.noDefend === 0, s0: { name: sks[0].name, usable: A.silence === 0 && sks[0].ready(A, B, dA, dB, ctx) }, s1: { name: sks[1].name, usable: A.silence === 0 && sks[1].ready(A, B, dA, dB, ctx) } }
 }
 
 // ── UI + 내레이션 ──
@@ -350,6 +393,8 @@ function hpBar (cur, max) {
 // 한글 받침 판별 → 조사 자동 선택
 function hasBatchim (w) { if (!w) return false; const c = w.charCodeAt(w.length - 1); if (c < 0xac00 || c > 0xd7a3) return false; return (c - 0xac00) % 28 !== 0 }
 const iga = (w) => hasBatchim(w) ? '이' : '가'
+const eun = (w) => hasBatchim(w) ? '은' : '는'
+const eul = (w) => hasBatchim(w) ? '을' : '를'
 function preview (name) {
   const c = CHARS[name]
   return {
@@ -394,20 +439,28 @@ function buildMatchupRow (me, opp, ai, memberId) {
   )
 }
 
-// 이벤트 → 극적 한 줄
-function narrateLine (ev, meName, oppName, memberId, oppAI) {
-  const actor = ev.who === 'me' ? `${CHARS[meName].emoji} ${meName}` : `${CHARS[oppName].emoji} ${oppName}`
-  const crit = ev.crit ? '💥**치명타!** ' : ''
-  const bolt = ev.bolt ? '✨볼트 ' : ''
+// 이벤트 → 자연스러운 RPG 로그 한 줄
+function narrateLine (ev, meName, oppName) {
+  const A = ev.who === 'me' ? meName : oppName
+  const T = ev.who === 'me' ? oppName : meName
+  const ae = CHARS[A].emoji, te = CHARS[T].emoji
+  const hurt = (n) => `${te} **${T}**${eun(T)} **${n}**의 피해를 입었다.`
   switch (ev.type) {
-    case 'attack': return ev.dmg > 0 ? `${actor} ${bolt}${crit}공격 → **${ev.dmg}** 피해` : `${actor}의 공격 — 빗나감/회피! 💨`
-    case 'skill': return `${actor} ⚡**${ev.name}**!${ev.note ? ` [${ev.note}]` : ''}${ev.dmg > 0 ? ` → ${crit}**${ev.dmg}** 피해` : ''}`
-    case 'defend': return `${actor} 🛡️ 방어 태세 (회복)`
-    case 'stun': return `${actor} 😵 기절 — 행동 불가!`
-    case 'cast': return `${actor} 🔮 메테오 시전 중…`
-    case 'meteor': return `${actor} ☄️ **메테오 작렬!** → **${ev.dmg}** 피해`
-    case 'revive': return `${actor} ✨ **불굴!** 쓰러졌다 다시 일어선다!`
-    default: return `${actor} …`
+    case 'attack':
+      if (ev.dmg <= 0) return `💨 ${ae} **${A}**의 공격이 빗나갔다. ${te} **${T}**${eun(T)} 피해를 입지 않았다.`
+      if (ev.crit) return `💥 ${ae} **${A}**의 공격이 치명타로 적중! ${hurt(ev.dmg)}`
+      return `${ev.bolt ? '✨' : '⚔️'} ${ae} **${A}**의 공격! ${hurt(ev.dmg)}`
+    case 'skill': {
+      const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
+      if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${hurt(ev.dmg)}`
+      return head
+    }
+    case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
+    case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.`
+    case 'cast': return `🔮 ${ae} **${A}**${iga(A)} 메테오를 시전하고 있다…`
+    case 'meteor': return `☄️ ${ae} **${A}**의 메테오가 작렬! ${hurt(ev.dmg)}`
+    case 'revive': return `✨ ${ae} **${A}**${eun(A)} 불굴의 의지로 다시 일어섰다!`
+    default: return `${ae} **${A}**…`
   }
 }
 function buildResultEmbed (res, meName, oppName, memberId, oppAI) {
@@ -442,20 +495,82 @@ function buildResultRow (me, opp, ai, memberId) {
   )
 }
 
+// ── 인터랙티브 전투 UI + 세션 ──
+const SESSIONS = new Map() // messageId -> { state, me, opp, ai, memberId, ts }
+function sweepSessions () { const now = Date.now(); for (const [k, v] of SESSIONS) if (now - v.ts > 1800000) SESSIONS.delete(k) }
+function statusTags (f) {
+  const t = []
+  if (f.stun > 0) t.push(`😵기절${f.stun}`)
+  if (f.slow > 0) t.push('🐢둔화')
+  if (f.silence > 0) t.push('🔇침묵')
+  if (f.luckLock > 0) t.push('🍀봉인')
+  if (f.blind > 0) t.push('🌀실명')
+  if (f.noDefend > 0) t.push('🚫방어불가')
+  if (f.rage > 0) t.push('🔥광폭')
+  if (f.luckBuff > 0) t.push('✨행운폭발')
+  if (f.cast > 0) t.push(`🔮시전${f.cast}`)
+  if (f.shield > 0) t.push(`🔷실드${f.shield}`)
+  return t.join(' ')
+}
+function buildBattleEmbed (state) {
+  const { A, B, meName, oppName, memberId, meTitle, oppTitle, oppAI } = state
+  const recent = state.log.slice(-8).map(ev => narrateLine(ev, meName, oppName))
+  const meS = statusTags(A), oppS = statusTags(B)
+  const desc =
+    `${CHARS[meName].emoji} **${meName}** '*${meTitle}*' <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
+    `\`${hpBar(A.hp, state.maxA)}\`\n` +
+    `${CHARS[oppName].emoji} **${oppName}** '*${oppTitle}*' · ${oppAI} AI${oppS ? ' · ' + oppS : ''}\n` +
+    `\`${hpBar(B.hp, state.maxB)}\`\n\n` +
+    (recent.length ? recent.join('\n') + '\n\n' : '') +
+    '🎯 **네 차례!** 행동을 골라줘'
+  return new EmbedBuilder().setTitle('⚔️ 듀얼 — 전투 중').setColor(0x3498db)
+    .setDescription(desc.length > 4090 ? '…' + desc.slice(-4089) : desc)
+}
+function buildBattleRow (state) {
+  const o = playerOptions(state); const mid = state.memberId
+  const cid = (c) => JSON.stringify({ action: 'duel', op: 'act', c, memberId: mid })
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(cid('attack')).setLabel('⚔️ 공격').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder().setCustomId(cid('defend')).setLabel('🛡️ 방어').setStyle(ButtonStyle.Secondary).setDisabled(!o.canDefend),
+    new ButtonBuilder().setCustomId(cid('s0')).setLabel('✨ ' + o.s0.name).setStyle(ButtonStyle.Primary).setDisabled(!o.s0.usable),
+    new ButtonBuilder().setCustomId(cid('s1')).setLabel('✨ ' + o.s1.name).setStyle(ButtonStyle.Primary).setDisabled(!o.s1.usable)
+  )
+}
+
 async function handleButton (interaction, info) {
   if (interaction.user.id !== info.memberId) {
     await interaction.reply({ content: '이건 다른 사람의 듀얼이야~ `/듀얼`로 직접 시작해봐! ⚔️', ephemeral: true })
     return
   }
+  const mid = info.memberId
   if (info.op === 'pick' || info.op === 'reroll') {
-    const me = info.char
-    const { opp, ai } = randomMatch(me)
-    await interaction.update({ embeds: [buildMatchupEmbed(me, opp, ai, info.memberId)], components: [buildMatchupRow(me, opp, ai, info.memberId)] })
+    const me = info.char; const { opp, ai } = randomMatch(me)
+    await interaction.update({ embeds: [buildMatchupEmbed(me, opp, ai, mid)], components: [buildMatchupRow(me, opp, ai, mid)] })
   } else if (info.op === 'back') {
-    await interaction.update({ embeds: [buildSelectEmbed()], components: buildSelectRows(info.memberId) })
+    SESSIONS.delete(interaction.message.id)
+    await interaction.update({ embeds: [buildSelectEmbed()], components: buildSelectRows(mid) })
   } else if (info.op === 'go') {
-    const res = runBattle(info.me, info.opp, '판단형', info.ai)
-    await interaction.update({ embeds: [buildResultEmbed(res, info.me, info.opp, info.memberId, info.ai)], components: [buildResultRow(info.me, info.opp, info.ai, info.memberId)] })
+    sweepSessions()
+    const state = initBattle(info.me, info.opp, info.ai); state.memberId = mid
+    const phase = advance(state)
+    if (phase === 'end') {
+      SESSIONS.delete(interaction.message.id)
+      await interaction.update({ embeds: [buildResultEmbed(stateResult(state), info.me, info.opp, mid, info.ai)], components: [buildResultRow(info.me, info.opp, info.ai, mid)] })
+    } else {
+      SESSIONS.set(interaction.message.id, { state, me: info.me, opp: info.opp, ai: info.ai, memberId: mid, ts: Date.now() })
+      await interaction.update({ embeds: [buildBattleEmbed(state)], components: [buildBattleRow(state)] })
+    }
+  } else if (info.op === 'act') {
+    const sess = SESSIONS.get(interaction.message.id)
+    if (!sess) { await interaction.reply({ content: '전투 정보가 만료됐어~ `/듀얼`로 다시 시작해줘! ⚔️', ephemeral: true }); return }
+    sess.ts = Date.now()
+    const phase = playerResolve(sess.state, info.c)
+    if (phase === 'end') {
+      SESSIONS.delete(interaction.message.id)
+      await interaction.update({ embeds: [buildResultEmbed(stateResult(sess.state), sess.me, sess.opp, mid, sess.ai)], components: [buildResultRow(sess.me, sess.opp, sess.ai, mid)] })
+    } else {
+      await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: [buildBattleRow(sess.state)] })
+    }
   }
 }
 

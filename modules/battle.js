@@ -293,10 +293,23 @@ const SKILLS = {
     { name: '동전던지기', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => ds.물공 * 4.25 * (1 - df.물방) * (s.hp < f.hp ? 1.3 : 1), exec: (s, f, ds, df) => { const m = rand() < 0.5 ? 8 : 0.5; const d = guts(ds.물공 * m * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 2; s.note = m > 1 ? '대박' : '꽝' } }
   ]
 }
+// ===== 커스텀 전용 공통 스킬 풀 (설계 검증 완료·미구현) =====
+// 커스텀 캐릭이 여기서 2개 선택. 스탯 상한85·예산320 규칙과 함께 밸런스 검증됨(docs 9절).
+// 아직 CHARS/UI에 커스텀 미등록 → 라이브 봇엔 영향 없음. 시뮬은 docs/battle-sim/custom-balance-sim.js
+// ci = 쿨다운 슬롯 인덱스(스킬이 슬롯0/1 어디에 놓여도 자기 cd 사용)
+const CUSTOM_DEFS = {
+  강타: (ci) => ({ name: '강타', ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => x.est * 1.6, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 1.6); d = absorb(f, d); f.hp -= d; s.cd[ci] = 3; s.note = '강타' } }),
+  연격: (ci) => ({ name: '연격', ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => x.est * 1.2, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 0.6 + attack(s, f, ds, df, f.defending) * 0.6); d = absorb(f, d); f.hp -= d; s.cd[ci] = 3; s.note = '연격' } }),
+  속박: (ci) => ({ name: '속박', ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + x.foeTurn * 1.5, exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[ci] = 4; s.note = '기절' } }),
+  철벽: (ci) => ({ name: '철벽', ready: (s, f, ds) => s.cd[ci] === 0 && s.shield < ds.maxhp * 0.15, score: (s, f, ds, df, x) => x.foeTurn + df.물공 * 0.3, exec: (s, f, ds, df) => { s.shield = Math.max(s.shield, Math.round(ds.maxhp * 0.35)); s.cd[ci] = 4; s.note = '철벽' } }),
+  재정비: (ci) => ({ name: '재정비', ready: (s, f, ds) => s.cd[ci] === 0 && s.hp < ds.maxhp * 0.7, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.5, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.18)); s.cd[ci] = 4; s.note = '회복' } }),
+  반격태세: (ci) => ({ name: '반격태세', ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => df.물공 * 0.4, exec: (s, f, ds, df) => { s.defending = true; s.shield = Math.max(s.shield, Math.round(ds.maxhp * 0.12)); s.cd[ci] = 3; s.note = '반격' } })
+}
+const SKILL_STARTCD_CUSTOM = { 속박: 2 } // 오프닝 CC 봉인
 // 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
 const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 파이어볼: '시전', 인스턴트캐스팅: 3, 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2 }
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
-const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3 }
+const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 속박: 2 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
 // 스킬 효과 요약(매치업 표시용)
 const SKILL_DESC = {
@@ -651,5 +664,5 @@ async function handleButton (interaction, info) {
 }
 
 function _tune (o) { Object.assign(TUNE, o) }
-module.exports = { CHARS, NAMES, AIS, TITLES, TUNE, _tune, runBattle, buildSelectEmbed, buildSelectRows, handleButton }
+module.exports = { CHARS, NAMES, AIS, TITLES, TUNE, _tune, runBattle, buildSelectEmbed, buildSelectRows, handleButton, SKILLS, CUSTOM_DEFS }
 

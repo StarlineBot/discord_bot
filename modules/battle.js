@@ -266,6 +266,8 @@ const SKILLS = {
     { name: '동전던지기', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => ds.물공 * 4.25 * (1 - df.물방) * (s.hp < f.hp ? 1.3 : 1), exec: (s, f, ds, df) => { const m = rand() < 0.5 ? 8 : 0.5; const d = guts(ds.물공 * m * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 2; s.note = m > 1 ? '대박' : '꽝' } }
   ]
 }
+// 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
+const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 메테오: '시전', 인스턴트캐스팅: 15, 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2 }
 function decideDefend (self, foe, ds, df) {
   const est = (df.물공 > df.마공 ? df.물공 : df.마공) * 0.5
   if (self.noDefend > 0) return false
@@ -372,16 +374,28 @@ function playerResolve (state, choice) {
   let ev
   if (choice === 'defend') ev = execDefend(A, dA)
   else if (choice === 's0' || choice === 's1') {
-    const sk = SKILLS[state.meName][choice === 's0' ? 0 : 1]; const ctx = ctxFor(A, B, dA, dB)
-    ev = (A.silence === 0 && sk.ready(A, B, dA, dB, ctx)) ? execSkill(A, B, dA, dB, sk) : execAttack(A, B, dA, dB)
+    const slot = choice === 's0' ? 0 : 1
+    ev = playerCanUse(state, slot).usable ? execSkill(A, B, dA, dB, SKILLS[state.meName][slot]) : execAttack(A, B, dA, dB)
   } else ev = execAttack(A, B, dA, dB)
   recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
   if (B.hp <= 0) { state.winner = 'me'; return 'end' }
   return advance(state)
 }
+// 플레이어 스킬 사용 가능 판정(AI 자제 휴리스틱 제외, 진짜 게이트만)
+function playerCanUse (state, slot) {
+  const { A, B, dB } = state; const name = SKILLS[state.meName][slot].name
+  if (A.silence > 0) return { usable: false, reason: '침묵' }
+  if (A.cd[slot] > 0) return { usable: false, reason: `${A.cd[slot]}턴 후` }
+  if (name === '처형' && !(B.hp < dB.maxhp * 0.25)) return { usable: false, reason: '상대 HP 25%↓ 필요' }
+  if ((name === '암습' || name === '돌진') && B.stun > 0) return { usable: false, reason: '상대 기절 중' }
+  if (name === '메테오' && A.cast > 0) return { usable: false, reason: '시전 중' }
+  if (name === '오토스펠' && A.autoSpell > 1) return { usable: false, reason: '유지 중' }
+  return { usable: true }
+}
 function playerOptions (state) {
-  const { A, B, dA, dB, meName } = state; const ctx = ctxFor(A, B, dA, dB); const sks = SKILLS[meName]
-  return { canDefend: A.noDefend === 0, s0: { name: sks[0].name, usable: A.silence === 0 && sks[0].ready(A, B, dA, dB, ctx) }, s1: { name: sks[1].name, usable: A.silence === 0 && sks[1].ready(A, B, dA, dB, ctx) } }
+  const { A, meName } = state; const sks = SKILLS[meName]
+  const one = (slot) => { const u = playerCanUse(state, slot); return { name: sks[slot].name, base: SKILL_CD[sks[slot].name], usable: u.usable, reason: u.reason } }
+  return { canDefend: A.noDefend === 0, s0: one(0), s1: one(1) }
 }
 
 // ── UI + 내레이션 ──
@@ -475,8 +489,8 @@ function buildResultEmbed (res, meName, oppName, memberId, oppAI) {
   const oppHead = `${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' **${res.oppNick}** · ${oppAI} AI`
   let banner
   if (res.winner === 'draw') banner = '⏳ **무승부!** 시간 초과로 승부가 나지 않았다…'
-  else if (res.winner === 'me') banner = `🏆 **승리!** <@${memberId}>의 ${meName} '*${res.meTitle}*'${iga(res.meTitle)} 이겼다!`
-  else banner = `💀 **패배…** ${oppName} '*${res.oppTitle}*' ${res.oppNick}에게 당했다.`
+  else if (res.winner === 'me') banner = `🏆 **승리!** ${CHARS[meName].emoji} **${meName}** '*${res.meTitle}*' <@${memberId}> 님이 이겼다!`
+  else banner = `💀 **패배…** ${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' **${res.oppNick}**${iga(res.oppNick)} 이겼다.`
 
   const desc = `${meHead}\n${oppHead}\n\n${body}\n\n` +
     `${CHARS[meName].emoji} ${meName} \`${hpBar(res.meHp, res.meMax)}\`\n` +
@@ -531,11 +545,14 @@ function buildBattleEmbed (state) {
 function buildBattleRow (state) {
   const o = playerOptions(state); const mid = state.memberId
   const cid = (c) => JSON.stringify({ action: 'duel', op: 'act', c, memberId: mid })
+  const skLbl = (s) => s.usable
+    ? `✨ ${s.name}${typeof s.base === 'number' ? ` (쿨${s.base})` : ''}`
+    : `${s.name} · ${s.reason}`
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId(cid('attack')).setLabel('⚔️ 공격').setStyle(ButtonStyle.Danger),
-    new ButtonBuilder().setCustomId(cid('defend')).setLabel('🛡️ 방어').setStyle(ButtonStyle.Secondary).setDisabled(!o.canDefend),
-    new ButtonBuilder().setCustomId(cid('s0')).setLabel('✨ ' + o.s0.name).setStyle(ButtonStyle.Primary).setDisabled(!o.s0.usable),
-    new ButtonBuilder().setCustomId(cid('s1')).setLabel('✨ ' + o.s1.name).setStyle(ButtonStyle.Primary).setDisabled(!o.s1.usable)
+    new ButtonBuilder().setCustomId(cid('defend')).setLabel(o.canDefend ? '🛡️ 방어' : '🛡️ 방어 · 봉쇄').setStyle(ButtonStyle.Secondary).setDisabled(!o.canDefend),
+    new ButtonBuilder().setCustomId(cid('s0')).setLabel(skLbl(o.s0)).setStyle(ButtonStyle.Primary).setDisabled(!o.s0.usable),
+    new ButtonBuilder().setCustomId(cid('s1')).setLabel(skLbl(o.s1)).setStyle(ButtonStyle.Primary).setDisabled(!o.s1.usable)
   )
 }
 

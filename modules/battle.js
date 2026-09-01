@@ -331,7 +331,7 @@ function initBattle (meName, oppName, oppAI) {
 function recEntry (state, who, ev) {
   const other = who === 'me' ? state.B : state.A, otherMax = who === 'me' ? state.maxB : state.maxA
   const self = who === 'me' ? state.A : state.B, selfMax = who === 'me' ? state.maxA : state.maxB
-  state.log.push(Object.assign({ who, hp: Math.max(other.hp, 0), max: otherMax, selfHp: Math.max(self.hp, 0), selfMax }, ev))
+  state.log.push(Object.assign({ who, hp: Math.round(Math.max(other.hp, 0)), max: otherMax, selfHp: Math.round(Math.max(self.hp, 0)), selfMax }, ev))
 }
 function reviveRec (state, who) { const f = who === 'me' ? state.A : state.B, mx = who === 'me' ? state.maxA : state.maxB; state.log.push({ who, type: 'revive', hp: Math.max(f.hp, 0), max: mx }) }
 function stateResult (state) { return { winner: state.winner, log: state.log, meTitle: state.meTitle, oppTitle: state.oppTitle, oppNick: state.oppNick, meMax: state.maxA, oppMax: state.maxB, meHp: Math.max(state.A.hp, 0), oppHp: Math.max(state.B.hp, 0) } }
@@ -446,7 +446,7 @@ function narrateLine (ev, meName, oppName) {
   const A = ev.who === 'me' ? meName : oppName
   const T = ev.who === 'me' ? oppName : meName
   const ae = CHARS[A].emoji, te = CHARS[T].emoji
-  const hurt = (n) => `${te} **${T}**${eun(T)} **${n}**의 피해를 입었다.`
+  const hurt = (n) => `${te} **${T}**${eun(T)} **${Math.round(n)}**의 피해를 입었다.`
   switch (ev.type) {
     case 'attack':
       if (ev.dmg <= 0) return `💨 ${ae} **${A}**의 공격이 빗나갔다. ${te} **${T}**${eun(T)} 피해를 입지 않았다.`

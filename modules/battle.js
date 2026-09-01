@@ -495,8 +495,8 @@ function buildResultEmbed (res, meName, oppName, memberId, oppAI) {
   const oppHead = `${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' **${res.oppNick}** · ${oppAI} AI`
   let banner
   if (res.winner === 'draw') banner = '⏳ **무승부!** 시간 초과로 승부가 나지 않았다…'
-  else if (res.winner === 'me') banner = `🏆 **승리!** ${CHARS[meName].emoji} **${meName}** '*${res.meTitle}*' <@${memberId}> 님이 이겼다!`
-  else banner = `💀 **패배…** ${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' **${res.oppNick}**${iga(res.oppNick)} 이겼다.`
+  else if (res.winner === 'me') banner = `🏆 **승리!** ${CHARS[meName].emoji} **${meName}** '*${res.meTitle}*' <@${memberId}> 님의 승리!`
+  else banner = `💀 **패배…** ${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' **${res.oppNick}**의 승리…`
 
   const desc = `${meHead}\n${oppHead}\n\n${body}\n\n` +
     `${CHARS[meName].emoji} ${meName} \`${hpBar(res.meHp, res.meMax)}\`\n` +

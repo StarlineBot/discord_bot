@@ -119,6 +119,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   const magic = dA.마공 > dA.물공
   const ls = { used: false }, lsD = { used: false }
   let dmg, 고정 = 0
+  A.hitPh = null; A.hitMg = null; A.boltName = null   // 혼합 타격 물리/마법 내역 + 볼트명(세이지)
   if (dD.sigDodge && rand() < 0.30) return 0
   if (dA.hybrid) {
     if (luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤))) return 0
@@ -134,7 +135,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     let bolt = 0, pendingAmp = 0
     if (A.autoSpell > 0 && rand() < 0.10) {
       const r = rand()
-      if (r < 1 / 3) { bolt = dA.base.지능 * 1.5; pendingAmp = 1.1 } else if (r < 2 / 3) { bolt = dA.base.지능 * 1.0 } else { bolt = dA.base.지능 * 1.2; pendingAmp = 1.2 }
+      if (r < 1 / 3) { bolt = dA.base.지능 * 1.5; pendingAmp = 1.1; A.boltName = '파이어볼트' } else if (r < 2 / 3) { bolt = dA.base.지능 * 1.0; A.boltName = '아이스볼트' } else { bolt = dA.base.지능 * 1.2; pendingAmp = 1.2; A.boltName = '라이트닝볼트' }
       bolt *= (1 - dD.마방 * (A.tMPen ? 0.75 : 1)); A.lastBolt = true
     }
     let d = ph + mg + bolt - 고정
@@ -153,6 +154,9 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (D.tFrail) d *= 1.15
     if (crit) A.lastCrit = true
     const fin = Math.max(Math.round(d), 1)
+    // 물리/마법 내역(내레이션용): ph=물리, mg+bolt=마법. 최종 fin에 비례 배분
+    const raw = ph + mg + bolt
+    if (raw > 0) { A.hitPh = Math.round(ph / raw * fin); A.hitMg = fin - A.hitPh }
     if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(fin * 0.12))
     if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
     if (pendingAmp) A.nextAmp = pendingAmp
@@ -343,8 +347,8 @@ function ctxFor (self, foe, ds, df) {
   const fm = df.마공 > df.물공, fd = (fm ? df.마공 : df.물공) * 0.6, fh = Math.ceil(3 / Math.max(df.턴, 2) * ds.턴) + 2
   return { est: estAtk(ds, df), foeTurn: estAtk(df, ds), safe: self.hp > fd * fh * 0.6 }
 }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit } }
-function execAttack (self, foe, ds, df) { const fb = foe.hp; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false; return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName } }
+function execAttack (self, foe, ds, df) { const fb = foe.hp; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false; return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName } }
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.회복 * ds.maxhp / 100); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 function aiTurn (self, foe, ds, df) {
   const forced = upkeep(self, foe, ds, df); if (forced) return forced
@@ -497,14 +501,19 @@ function narrateLine (ev, meName, oppName) {
   const T = ev.who === 'me' ? oppName : meName
   const ae = CHARS[A].emoji, te = CHARS[T].emoji
   const hurt = (n) => `${te} **${T}**${eun(T)} **${Math.round(n)}**의 피해를 입었다.`
+  // 세이지 혼합 타격: 물리+마법 내역
+  const hurtBd = () => ev.ph != null
+    ? `${te} **${T}**${eun(T)} 물리 **${ev.ph}** + 마법 **${ev.mg}** (총 **${ev.dmg}**)의 피해를 입었다.`
+    : hurt(ev.dmg)
+  const boltTag = ev.boltName ? `✨**${ev.boltName}** 발동! ` : ''
   switch (ev.type) {
     case 'attack':
       if (ev.dmg <= 0) return `💨 ${ae} **${A}**의 공격이 빗나갔다. ${te} **${T}**${eun(T)} 피해를 입지 않았다.`
-      if (ev.crit) return `💥 ${ae} **${A}**의 공격이 치명타로 적중! ${hurt(ev.dmg)}`
-      return `${ev.bolt ? '✨' : '⚔️'} ${ae} **${A}**의 공격! ${hurt(ev.dmg)}`
+      if (ev.crit) return `💥 ${ae} **${A}**의 ${ev.ph != null ? '혼합 ' : ''}공격이 치명타로 적중! ${boltTag}${hurtBd()}`
+      return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}! ${boltTag}${hurtBd()}`
     case 'skill': {
       const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
-      if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${hurt(ev.dmg)}`
+      if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}`
       return head
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`

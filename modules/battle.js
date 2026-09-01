@@ -19,6 +19,8 @@ const CHARS = {
 }
 const NAMES = Object.keys(CHARS)
 const AIS = ['공격적', '방어적', '판단형']
+// AI 상대 NPC 이름 (플레이어 @멘션과 대칭용)
+const NICKS = ['아르덴', '던컨', '리시타', '카록', '벨루가', '이멘', '루에리', '나오', '마리', '아이라', '퍼거스', '트리아나', '제이머스', '엘리자', '칼릭스', '란딜', '피오나', '에반', '제노', '아리아', '케이', '로란', '델리아', '무마']
 
 // ── 전투 길이 튜닝 노브 (기본값 = 현재 동작) ──
 const TUNE = { hpScale: 1.3, skillStart: 0 } // HP×1.3 + 스킬 시작쿨 0(원래 시뮬처럼). 길이↑ 재밸런스판
@@ -324,7 +326,7 @@ function initBattle (meName, oppName, oppAI) {
   if (tA.d) tA.d(dA); if (tB.d) tB.d(dB)
   const A = mkFighter(dA, meName, null), B = mkFighter(dB, oppName, oppAI)
   if (tA.flag) A[tA.flag] = true; if (tB.flag) B[tB.flag] = true
-  return { A, B, dA, dB, maxA: dA.maxhp, maxB: dB.maxhp, meName, oppName, oppAI, meTitle: tA.name, oppTitle: tB.name, t: 0, log: [] }
+  return { A, B, dA, dB, maxA: dA.maxhp, maxB: dB.maxhp, meName, oppName, oppAI, oppNick: pickArr(NICKS), meTitle: tA.name, oppTitle: tB.name, t: 0, log: [] }
 }
 function recEntry (state, who, ev) {
   const other = who === 'me' ? state.B : state.A, otherMax = who === 'me' ? state.maxB : state.maxA
@@ -332,7 +334,7 @@ function recEntry (state, who, ev) {
   state.log.push(Object.assign({ who, hp: Math.max(other.hp, 0), max: otherMax, selfHp: Math.max(self.hp, 0), selfMax }, ev))
 }
 function reviveRec (state, who) { const f = who === 'me' ? state.A : state.B, mx = who === 'me' ? state.maxA : state.maxB; state.log.push({ who, type: 'revive', hp: Math.max(f.hp, 0), max: mx }) }
-function stateResult (state) { return { winner: state.winner, log: state.log, meTitle: state.meTitle, oppTitle: state.oppTitle, meMax: state.maxA, oppMax: state.maxB, meHp: Math.max(state.A.hp, 0), oppHp: Math.max(state.B.hp, 0) } }
+function stateResult (state) { return { winner: state.winner, log: state.log, meTitle: state.meTitle, oppTitle: state.oppTitle, oppNick: state.oppNick, meMax: state.maxA, oppMax: state.maxB, meHp: Math.max(state.A.hp, 0), oppHp: Math.max(state.B.hp, 0) } }
 
 // 자동 전투(밸런스 시뮬/관전용): 양쪽 AI
 function runBattle (meName, oppName, meAI, oppAI) {
@@ -470,11 +472,11 @@ function buildResultEmbed (res, meName, oppName, memberId, oppAI) {
   else body = lines.join('\n')
 
   const meHead = `${CHARS[meName].emoji} **${meName}** '*${res.meTitle}*' <@${memberId}>`
-  const oppHead = `${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' · ${oppAI} AI`
+  const oppHead = `${CHARS[oppName].emoji} **${oppName}** '*${res.oppTitle}*' **${res.oppNick}** · ${oppAI} AI`
   let banner
   if (res.winner === 'draw') banner = '⏳ **무승부!** 시간 초과로 승부가 나지 않았다…'
   else if (res.winner === 'me') banner = `🏆 **승리!** <@${memberId}>의 ${meName} '*${res.meTitle}*'${iga(res.meTitle)} 이겼다!`
-  else banner = `💀 **패배…** ${oppName} '*${res.oppTitle}*'(${oppAI})에게 당했다.`
+  else banner = `💀 **패배…** ${oppName} '*${res.oppTitle}*' ${res.oppNick}에게 당했다.`
 
   const desc = `${meHead}\n${oppHead}\n\n${body}\n\n` +
     `${CHARS[meName].emoji} ${meName} \`${hpBar(res.meHp, res.meMax)}\`\n` +
@@ -513,13 +515,13 @@ function statusTags (f) {
   return t.join(' ')
 }
 function buildBattleEmbed (state) {
-  const { A, B, meName, oppName, memberId, meTitle, oppTitle, oppAI } = state
+  const { A, B, meName, oppName, memberId, meTitle, oppTitle, oppAI, oppNick } = state
   const recent = state.log.slice(-8).map(ev => narrateLine(ev, meName, oppName))
   const meS = statusTags(A), oppS = statusTags(B)
   const desc =
     `${CHARS[meName].emoji} **${meName}** '*${meTitle}*' <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
     `\`${hpBar(A.hp, state.maxA)}\`\n` +
-    `${CHARS[oppName].emoji} **${oppName}** '*${oppTitle}*' · ${oppAI} AI${oppS ? ' · ' + oppS : ''}\n` +
+    `${CHARS[oppName].emoji} **${oppName}** '*${oppTitle}*' **${oppNick}** · ${oppAI} AI${oppS ? ' · ' + oppS : ''}\n` +
     `\`${hpBar(B.hp, state.maxB)}\`\n\n` +
     (recent.length ? recent.join('\n') + '\n\n' : '') +
     '🎯 **네 차례!** 행동을 골라줘'

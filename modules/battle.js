@@ -270,7 +270,7 @@ const SKILLS = {
   마법사: [
     { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && x.safe, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { s.cast = 4; s.note = '시전' } },
     // 인스턴트 캐스팅: 시전시간 0 = 즉시 메테오(풀댐) 발사. 반응성 있는 한방
-    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[1] === 0 && s.cast === 0, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { f.hp -= Math.round(guts(ds.메테오, f, df)); s.cd[1] = 10; s.note = '즉시시전' } }
+    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[1] === 0 && s.cast === 0, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { f.hp -= Math.round(guts(ds.메테오 * 0.7, f, df) * magicGraze()); s.cd[1] = 10; s.note = '메테오 즉시시전' } }
   ],
   도적: [
     { name: '암습', ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + x.foeTurn * 2, exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.cd[0] = 10; s.note = '기절' } },
@@ -347,7 +347,7 @@ function upkeep (self, foe, ds, df) {
   if (self.rage > 0) { self.rage--; if (self.rage === 0) self.cd[0] = 2 }
   if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
   if (foe.sunder > 0) foe.sunder--
-  if (self.name === '마법사' && self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= Math.round(guts(ds.메테오, foe, df)); return { type: 'meteor', dmg: b - foe.hp } } return { type: 'cast' } }
+  if (self.name === '마법사' && self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= Math.round(guts(ds.메테오, foe, df) * magicGraze()); return { type: 'meteor', dmg: b - foe.hp } } return { type: 'cast' } }
   return null
 }
 function ctxFor (self, foe, ds, df) {

@@ -20,6 +20,19 @@ const CHARS = {
 const NAMES = Object.keys(CHARS)
 const AIS = ['공격적', '방어적', '판단형']
 
+// ── 전투 길이 튜닝 노브 (기본값 = 현재 동작) ──
+const TUNE = { hpScale: 1.3, skillStart: 0 } // HP×1.3 + 스킬 시작쿨 0(원래 시뮬처럼). 길이↑ 재밸런스판
+// 각 캐릭 슬롯별 "첫 사용까지 대기" 쿨 (perskill 모드). 스킬 실제 쿨과 유사, 장쿨(암습10/인캐15)은 완화.
+const CDINIT = {
+  전사: [3, 5], 광전사: [3, 5], 기사: [3, 5], 마법사: [3, 6], 도적: [6, 5],
+  명사수: [4, 4], 마검사: [3, 5], 세이지: [3, 4], 행운아: [3, 3]
+}
+function startCd (name) {
+  if (TUNE.skillStart === 'perskill') return CDINIT[name].slice()
+  if (typeof TUNE.skillStart === 'number') return [TUNE.skillStart, TUNE.skillStart]
+  return [1, 1]
+}
+
 // ── 타이틀 (docs 시뮬 동일) ──
 const clampT = (v, mx) => Math.min(v, mx)
 const TITLES = [
@@ -71,8 +84,8 @@ function derive (c) {
   return {
     물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     물방: (step(c.힘, 3) + step(c.체력, 1)) / 100, 마방: Math.min(30 + step(c.지능, 3), 70) / 100,
-    maxhp: Math.round(50 + c.체력 * 1.1 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3),
-    명중: Math.min(20 + step(c.솜씨, 5), c.솜씨 === 100 ? 90 : 80) / 100, 물회: Math.min(10 + step(c.민첩, 2.5), 50) / 100, 마회: step(c.민첩, 3) / 100,
+    maxhp: Math.round((50 + c.체력 * 1.1 + c.힘 * 0.5 + c.지능 * 0.2 + c.민첩 * 0.2 + c.행운 * 0.3) * TUNE.hpScale),
+    명중: Math.min(28 + step(c.솜씨, 5), c.솜씨 === 100 ? 90 : 80) / 100, 물회: Math.min(10 + step(c.민첩, 2.5), 50) / 100, 마회: step(c.민첩, 3) / 100,
     sigPen: c.힘 === 100, sigDodge: c.행운 === 100, sigTank: c.체력 === 100, sigEcho: c.민첩 === 100, sigEye: c.지능 === 100, base: c,
     hybrid: (c.힘 === 60 && c.지능 === 65 && c.체력 === 55),
     fusion: (c.힘 === 65 && c.지능 === 60 && c.체력 === 55),
@@ -104,8 +117,8 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (A.echoReady) { crit = true; A.echoReady = 0 }
     const cP = crit ? (dA.물크기본 + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1) : 1
     const cM = crit ? (dA.마크기본 + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1) : 1
-    let ph = dA.물공 * 0.85 * (block ? (1 - block) : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
-    let mg = dA.마공 * 0.85 * (block ? (1 - block) : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
+    let ph = dA.물공 * 0.78 * (block ? (1 - block) : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
+    let mg = dA.마공 * 0.78 * (block ? (1 - block) : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
     let bolt = 0, pendingAmp = 0
     if (A.autoSpell > 0 && rand() < 0.10) {
       const r = rand()
@@ -174,8 +187,8 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (dD.방패막기 && rand() < dD.방패막기) { dmg *= 0.30; 고정 = dD.방패고정 }
     dmg *= (1 - dD.마방 * (A.tMPen ? 0.75 : 1))
     if (D.sunder > 0) dmg *= 1.15
-    if (rand() < dD.마회 && rand() >= dA.비껴무효) dmg *= 0.70
-    if (rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0))) { dmg *= (dA.마크기본 + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1); A.lastCrit = true; if (dA.sigEye) A.shield = Math.min(Math.round(dA.maxhp * 0.3), A.shield + Math.round(dA.maxhp * 0.06)) }
+    const gr = rand(); if (gr >= 0.30) { dmg *= (gr < 0.70 ? 0.80 : 0.40); if (gr >= 0.70) A.lastGraze = true }   // 마법 빗맞힘 구간: 30% 풀딜 / 40% 80% / 30% 40%
+    if (rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0))) { dmg *= (dA.마크기본 + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1); A.lastCrit = true; if (dA.sigEye) A.shield = Math.min(Math.round(dA.maxhp * 0.22), A.shield + Math.round(dA.maxhp * 0.03)) }
   }
   dmg -= 고정
   if (dD.마나경감) dmg *= (1 - dD.마나경감)
@@ -208,7 +221,7 @@ function applyAdaptiveCC (foe, df) {
   applyCC(foe, 'noDefend', 2); applyCC(foe, 'healBlock', 2); return '봉쇄'
 }
 function estAtk (a, d) {
-  if (a.hybrid) return (a.물공 * 0.85 * (1 - d.물방) * Math.max(a.명중, 0.3)) + (a.마공 * 0.85 * (1 - d.마방))
+  if (a.hybrid) return (a.물공 * 0.78 * (1 - d.물방) * Math.max(a.명중, 0.3)) + (a.마공 * 0.78 * (1 - d.마방))
   if (a.fusion) return (a.물공 + a.마공) * (1 - Math.max(d.물방, d.마방)) * Math.max(a.명중, 0.3)
   if (a.마공 > a.물공) return a.마공 * (1 - d.마방)
   return a.물공 * (1 - d.물방) * Math.max(a.명중, 0.3)
@@ -227,7 +240,7 @@ const SKILLS = {
     { name: '도발', ready: (s, f, ds, df) => s.cd[1] === 0 && f.noDefend === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2, exec: (s, f, ds, df) => { applyCC(f, 'noDefend', 2); const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.cd[1] = 5; s.note = '도발' } }
   ],
   마법사: [
-    { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && x.safe, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { s.cast = 3; s.note = '시전' } },
+    { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && x.safe, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { s.cast = 4; s.note = '시전' } },
     { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => ds.메테오 * 1.1, exec: (s, f, ds, df) => { f.hp -= Math.round(ds.메테오 * 0.6 * guts(1, f, df)); s.cd[1] = 15; s.instVuln = 3 } }
   ],
   도적: [
@@ -235,7 +248,7 @@ const SKILLS = {
     { name: '처형', ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => ds.물공 * 5 * (1 - df.물방), exec: (s, f, ds, df) => { const d = guts(ds.물공 * 5 * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 5; s.note = '처형' } }
   ],
   명사수: [
-    { name: '약점간파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.물공 * (ds.물크기본 + rand() * ds.크랜폭) * (1 - df.물방); if (df.마나경감) d *= (1 - df.마나경감); if (f.instVuln > 0) d *= 1.5; d = guts(d, f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '크리' } },
+    { name: '약점간파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * 1.2 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.물공 * 1.2 * (ds.물크기본 + rand() * ds.크랜폭) * (1 - df.물방); if (df.마나경감) d *= (1 - df.마나경감); if (f.instVuln > 0) d *= 1.5; d = guts(d, f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '크리' } },
     { name: '견제사격', ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.1, exec: (s, f, ds, df) => { const d = attack(s, f, ds, df, f.defending); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } }
   ],
   마검사: [
@@ -248,7 +261,7 @@ const SKILLS = {
   ],
   행운아: [
     { name: '행운폭발', ready: (s, f, ds, df) => s.cd[0] === 0 && s.luckBuff === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.5, exec: (s, f, ds, df) => { s.luckBuff = 3; const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.note = '폭발' } },
-    { name: '동전던지기', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => ds.물공 * 4.25 * (1 - df.물방) * (s.hp < f.hp ? 1.3 : 1), exec: (s, f, ds, df) => { const m = rand() < 0.5 ? 8 : 0.5; const d = guts(ds.물공 * m * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 3; s.note = m > 1 ? '대박' : '꽝' } }
+    { name: '동전던지기', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => ds.물공 * 4.25 * (1 - df.물방) * (s.hp < f.hp ? 1.3 : 1), exec: (s, f, ds, df) => { const m = rand() < 0.5 ? 8 : 0.5; const d = guts(ds.물공 * m * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 2; s.note = m > 1 ? '대박' : '꽝' } }
   ]
 }
 function decideDefend (self, foe, ds, df) {
@@ -261,7 +274,7 @@ function decideDefend (self, foe, ds, df) {
 function mkFighter (d, name, ai) {
   // 게이지에 랜덤 미세오프셋 → 속도 동률 시 선공을 공정하게(플레이어 선공 고정 방지)
   return { name, hp: d.maxhp, gauge: d.턴 + Math.random() * 0.3, ai, defending: false, defCombo: 0, defendedLast: false,
-    shield: d.마나경감 ? Math.round(d.maxhp * 0.3) : 0, vuln: 0, cd: [1, 1], rage: 0, sunder: 0, luckBuff: 0,
+    shield: d.마나경감 ? Math.round(d.maxhp * 0.22) : 0, vuln: 0, cd: startCd(name), rage: 0, sunder: 0, luckBuff: 0,
     cast: 0, instVuln: 0, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, nextAmp: 0,
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
     sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, revive: d.sigTank ? 1 : 0 }
@@ -442,5 +455,6 @@ async function handleButton (interaction, info) {
   }
 }
 
-module.exports = { CHARS, NAMES, AIS, TITLES, runBattle, buildSelectEmbed, buildSelectRows, handleButton }
+function _tune (o) { Object.assign(TUNE, o) }
+module.exports = { CHARS, NAMES, AIS, TITLES, TUNE, _tune, runBattle, buildSelectEmbed, buildSelectRows, handleButton }
 

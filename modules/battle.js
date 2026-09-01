@@ -23,7 +23,7 @@ const AIS = ['공격적', '방어적', '판단형']
 const NICKS = ['아르덴', '던컨', '리시타', '카록', '벨루가', '이멘', '루에리', '나오', '마리', '아이라', '퍼거스', '트리아나', '제이머스', '엘리자', '칼릭스', '란딜', '피오나', '에반', '제노', '아리아', '케이', '로란', '델리아', '무마']
 
 // ── 전투 길이 튜닝 노브 (기본값 = 현재 동작) ──
-const TUNE = { hpScale: 1, skillStart: 0 } // HP×1.6(순삭 완화, 밸런스 유지)
+const TUNE = { hpScale: 1, skillStart: 2 } // HP×1.6(순삭 완화, 밸런스 유지)
 // 각 캐릭 슬롯별 "첫 사용까지 대기" 쿨 (perskill 모드). 스킬 실제 쿨과 유사, 장쿨(암습10/인캐15)은 완화.
 const CDINIT = {
   전사: [3, 5], 광전사: [3, 5], 기사: [3, 5], 마법사: [3, 6], 도적: [6, 5],
@@ -105,7 +105,7 @@ function derive (c) {
     근성: step(c.체력, 4) / 100,
     방패가격: Math.round(Math.round(c.힘 * (1 + step(c.힘, 10) / 100)) * 0.5 + c.체력 * 1.8 + (step(c.힘, 3) + step(c.체력, 1)) * 2),
     힘절반: Math.round(c.힘 / 2), 돌진딜: Math.round(Math.round(c.힘 * (1 + step(c.힘, 10) / 100)) * 1.5),
-    메테오: Math.round(Math.round(c.지능 * (1 + step(c.지능, 10) / 100)) * 4), 회복: Math.min(10 + step(c.체력, 1), 30),
+    메테오: Math.round(Math.round(c.지능 * (1 + step(c.지능, 10) / 100)) * 2.2), 회복: Math.min(10 + step(c.체력, 1), 30),
     물크기본: 2.5, 마크기본: 1.5, 크랜폭: step(c.행운, 0.15) * 2, 비껴무효: step(c.행운, 3) / 100, 턴: Math.max(10 - step(c.민첩, 0.7), 2),
     무기막기: c.힘 >= 50 ? (30 + Math.floor((c.힘 - 50) / 10) * 2) / 100 : 0,
     방패막기: c.체력 >= 70 ? (30 + Math.floor((c.체력 - 70) / 10) * 3) / 100 : 0,
@@ -268,9 +268,9 @@ const SKILLS = {
     { name: '도발', ready: (s, f, ds, df) => s.cd[1] === 0 && f.noDefend === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2, exec: (s, f, ds, df) => { applyCC(f, 'noDefend', 2); const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.cd[1] = 5; s.note = '도발' } }
   ],
   마법사: [
-    { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && x.safe, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { s.cast = 4; s.note = '시전' } },
-    // 인스턴트 캐스팅: 시전시간 0 = 즉시 메테오(풀댐) 발사. 반응성 있는 한방
-    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[1] === 0 && s.cast === 0, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { f.hp -= Math.round(guts(ds.메테오 * 0.7, f, df) * magicGraze()); s.cd[1] = 10; s.note = '메테오 즉시시전' } }
+    { name: '파이어볼', ready: (s, f, ds, df, x) => s.cast === 0 && x.safe, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { s.cast = 2; s.note = '파이어볼 시전' } },
+    // 인스턴트 캐스팅: 시전시간 0 = 즉시 파이어볼 발사. 시작 3쿨(오프닝 봉인)
+    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[1] === 0 && s.cast === 0, score: (s, f, ds, df, x) => ds.메테오, exec: (s, f, ds, df) => { f.hp -= Math.round(guts(ds.메테오 * 0.7, f, df) * magicGraze()); s.cd[1] = 3; s.note = '파이어볼 즉시시전' } }
   ],
   도적: [
     { name: '암습', ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + x.foeTurn * 2, exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.cd[0] = 10; s.note = '기절' } },
@@ -294,13 +294,16 @@ const SKILLS = {
   ]
 }
 // 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
-const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 메테오: '시전', 인스턴트캐스팅: 10, 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2 }
+const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 파이어볼: '시전', 인스턴트캐스팅: 3, 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2 }
+// 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
+const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3 }
+const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
 // 스킬 효과 요약(매치업 표시용)
 const SKILL_DESC = {
   방어파괴: '상대 2턴 받는뎀+15% + 고정딜', 돌진: '딜+1턴 스턴 (나 반동)',
   광폭화: '3턴 공격력↑ + 턴 빨라짐', 재생의광기: '즉시 25% 회복+3턴 재생 (공격도 함)',
   방패가격: '방어 기반 강력한 한 방', 도발: '상대 2턴 방어행동 불가 + 딜',
-  메테오: '4턴 시전 → 마공×4 방어무시 폭딜', 인스턴트캐스팅: '즉시 메테오 풀댐 발사',
+  파이어볼: '2턴 시전 → 마공 기반 딜(방어무시)', 인스턴트캐스팅: '즉시 파이어볼 발사(시작 3쿨)',
   암습: '상대 2턴 기절 + 진입딜', 처형: '상대 HP25%↓면 물공×5 대박딜',
   약점간파: '확정 크리 + 방어 대부분 무시', 견제사격: '딜 + 상대 2턴 명중-20%',
   약점봉인: '상대 최고 스탯에 맞는 CC + 딜', 중력베기: '완전명중 + 상대 3턴 둔화',
@@ -323,7 +326,7 @@ function decideDefend (self, foe, ds, df) {
 function mkFighter (d, name, ai) {
   // 게이지에 랜덤 미세오프셋 → 속도 동률 시 선공을 공정하게(플레이어 선공 고정 방지)
   return { name, hp: d.maxhp, gauge: d.턴 + Math.random() * 0.3, ai, defending: false, defCombo: 0, defendedLast: false,
-    shield: d.마나경감 ? Math.round(d.maxhp * 0.22) : 0, vuln: 0, cd: startCd(name), rage: 0, sunder: 0, luckBuff: 0,
+    shield: d.마나경감 ? Math.round(d.maxhp * 0.22) : 0, vuln: 0, cd: skillStartCd(name), rage: 0, sunder: 0, luckBuff: 0,
     cast: 0, instVuln: 0, instCast: false, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, nextAmp: 0,
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
     sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, revive: d.sigTank ? 1 : 0 }
@@ -354,7 +357,7 @@ function ctxFor (self, foe, ds, df) {
   const fm = df.마공 > df.물공, fd = (fm ? df.마공 : df.물공) * 0.6, fh = Math.ceil(3 / Math.max(df.턴, 2) * ds.턴) + 2
   return { est: estAtk(ds, df), foeTurn: estAtk(df, ds), safe: self.hp > fd * fh * 0.6 }
 }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp, sb = self.hp; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, selfDmg: Math.max(sb - self.hp, 0) } }
 function execAttack (self, foe, ds, df) { const fb = foe.hp; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false; return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName } }
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.회복 * ds.maxhp / 100); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 function aiTurn (self, foe, ds, df) {
@@ -433,7 +436,7 @@ function playerCanUse (state, slot) {
   if (A.cd[slot] > 0) return { usable: false, reason: `${A.cd[slot]}턴 후` }
   if (name === '처형' && !(B.hp < dB.maxhp * 0.25)) return { usable: false, reason: '상대 HP 25%↓ 필요' }
   if ((name === '암습' || name === '돌진') && B.stun > 0) return { usable: false, reason: '상대 기절 중' }
-  if (name === '메테오' && A.cast > 0) return { usable: false, reason: '시전 중' }
+  if (name === '파이어볼' && A.cast > 0) return { usable: false, reason: '시전 중' }
   if (name === '오토스펠' && A.autoSpell > 1) return { usable: false, reason: '유지 중' }
   return { usable: true }
 }
@@ -520,14 +523,15 @@ function narrateLine (ev, meName, oppName) {
       return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}! ${boltTag}${hurtBd()}`
     case 'skill': {
       const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
-      if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}`
-      if (ev.name === '메테오') return head // 시전 시작(딜 없음)
-      return `${head} 하지만 공격은 빗나갔다 💨` // 공격형 스킬인데 회피됨
+      { const back = ev.selfDmg > 0 ? ` (**${A}**도 반동으로 **${ev.selfDmg}** 피해)` : ''
+        if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}${back}`
+        if (ev.name === '파이어볼') return head // 시전 시작(딜 없음)
+        return `${head} 하지만 공격은 빗나갔다 💨${back}` } // 공격형 스킬인데 회피됨
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
     case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.`
     case 'cast': return `🔮 ${ae} **${A}**${iga(A)} 메테오를 시전하고 있다…`
-    case 'meteor': return `☄️ ${ae} **${A}**의 메테오가 작렬! ${hurt(ev.dmg)}`
+    case 'meteor': return `☄️ ${ae} **${A}**의 파이어볼이 작렬! ${hurt(ev.dmg)}`
     case 'revive': return `✨ ${ae} **${A}**${eun(A)} 불굴의 의지로 다시 일어섰다!`
     default: return `${ae} **${A}**…`
   }

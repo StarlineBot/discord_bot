@@ -175,7 +175,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   if (!magic) {
     if (!luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) return 0
     if (luckRoll(rand() < dD.물회, lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { if (dD.sigEcho) D.echoReady = 1; return 0 }
-    dmg = dA.물공
+    dmg = dA.물공 * physSwing(dA)
     if (dD.방패막기 && rand() < dD.방패막기) { dmg *= 0.30; 고정 = dD.방패고정 } else if (dD.무기막기 && rand() < dD.무기막기) { dmg *= 0.50 }
     dmg *= (1 - dD.물방 * (dA.sigPen ? 0.70 : 1))
     if (D.sunder > 0) dmg *= 1.15
@@ -208,6 +208,8 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   return fin
 }
 function guts (dmg, foe, df) { const p = foe.hp / df.maxhp; if (p < 0.5) dmg *= (1 - df.근성 * ((0.5 - p) / 0.5)); return dmg }
+// 물리 딜 변수: 솜씨 기반 풀댐 확률, 빗맞으면 70~100% 유동 (예측성↓, 명중형=일관/난동형=도박)
+function physSwing (d) { const pFull = 0.5 + Math.floor(d.base.솜씨 / 10) * 0.04; return rand() < pFull ? 1 : (0.70 + rand() * 0.30) }
 function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; foe.vuln = 1; return r } } return dmg }
 function applyCC (foe, field, dur) { foe[field] = Math.max(foe[field], foe.sigTank ? Math.max(dur - 1, 0) : dur) }
 function applyAdaptiveCC (foe, df) {
@@ -231,14 +233,14 @@ function estAtk (a, d) {
 const SKILLS = {
   전사: [
     { name: '방어파괴', ready: (s, f, ds, df) => s.cd[0] === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2, exec: (s, f, ds, df) => { f.sunder = 2; const d = attack(s, f, ds, df, f.defending); f.hp -= d + ds.힘절반; s.cd[0] = 3 } },
-    { name: '돌진', ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => ds.돌진딜 * (1 - df.물방) + x.foeTurn, exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 1); s.hp -= Math.round(ds.maxhp * 0.1); s.cd[1] = 5; s.note = '기절' } }
+    { name: '돌진', ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => ds.돌진딜 * (1 - df.물방) + x.foeTurn, exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 1); s.hp -= Math.round(ds.maxhp * 0.1); s.cd[1] = 5; s.note = '기절' } }
   ],
   광전사: [
     { name: '광폭화', ready: (s, f, ds, df) => s.cd[0] === 0 && s.rage === 0 && s.hp > ds.maxhp * 0.4 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.5, exec: (s, f, ds, df) => { s.rage = 3; const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.note = '광폭' } },
     { name: '재생의광기', ready: (s, f, ds, df) => s.cd[1] === 0 && s.hp < ds.maxhp * 0.65, score: (s, f, ds, df, x) => x.est * 3, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.25)); s.healRegen = 3; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[1] = 5; s.note = '회복' } }
   ],
   기사: [
-    { name: '방패가격', ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => ds.방패가격 * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.방패가격; if (f.defending) d *= 0.10; d *= (1 - df.물방); d = guts(d, f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[0] = 3 } },
+    { name: '방패가격', ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => ds.방패가격 * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.방패가격 * physSwing(ds); if (f.defending) d *= 0.10; d *= (1 - df.물방); d = guts(d, f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[0] = 3 } },
     { name: '도발', ready: (s, f, ds, df) => s.cd[1] === 0 && f.noDefend === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2, exec: (s, f, ds, df) => { applyCC(f, 'noDefend', 2); const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.cd[1] = 5; s.note = '도발' } }
   ],
   마법사: [
@@ -247,7 +249,7 @@ const SKILLS = {
   ],
   도적: [
     { name: '암습', ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + x.foeTurn * 2, exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); const d = attack(s, f, ds, df, f.defending); f.hp -= d; s.cd[0] = 10; s.note = '기절' } },
-    { name: '처형', ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => ds.물공 * 5 * (1 - df.물방), exec: (s, f, ds, df) => { const d = guts(ds.물공 * 5 * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 5; s.note = '처형' } }
+    { name: '처형', ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => ds.물공 * 5 * (1 - df.물방), exec: (s, f, ds, df) => { const d = guts(ds.물공 * 5 * physSwing(ds) * (1 - df.물방), f, df); f.hp -= Math.max(Math.round(d), 1); s.cd[1] = 5; s.note = '처형' } }
   ],
   명사수: [
     { name: '약점간파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * 1.2 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.물공 * 1.2 * (ds.물크기본 + rand() * ds.크랜폭) * (1 - df.물방); if (df.마나경감) d *= (1 - df.마나경감); if (f.instVuln > 0) d *= 1.5; d = guts(d, f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '크리' } },

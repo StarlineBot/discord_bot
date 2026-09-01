@@ -11,7 +11,8 @@ const CHARS = {
   '도적':   { 힘: 45, 지능: 15, 체력: 40, 민첩: 100,솜씨: 55, 행운: 55 },
   '명사수': { 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100,행운: 40 },
   '행운아': { 힘: 25, 지능: 20, 체력: 40, 민첩: 85, 솜씨: 35, 행운: 100 },
-  '세이지': { 힘: 60, 지능: 65, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30 }  // 하이브리드(혼합 타격)
+  '세이지': { 힘: 60, 지능: 65, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30 },  // 하이브리드(혼합 타격)
+  '마검사': { 힘: 65, 지능: 60, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30 }  // 하이브리드(융합 타격, CC 특화)
 }
 const AIS = ['공격적','방어적','판단형']; const pickAI=()=>AIS[Math.floor(rand()*3)]
 // ── 타이틀: 캐릭 선택 시 랜덤 1개. 파생 능력치에 직접 랜덤 보정(= 의도된 매판 변수) ──
@@ -73,6 +74,7 @@ function derive (c) {
     명중: Math.min(20+step(c.솜씨,5), c.솜씨===100?90:80)/100, 물회: Math.min(10+step(c.민첩,2.5),50)/100, 마회: step(c.민첩,3)/100,
     sigPen:c.힘===100, sigDodge:c.행운===100, sigTank:c.체력===100, sigEcho:c.민첩===100, sigEye:c.지능===100, base:c,
     hybrid:(c.힘===60&&c.지능===65&&c.체력===55),
+    fusion:(c.힘===65&&c.지능===60&&c.체력===55),
     크리: Math.min(10+step(c.솜씨,1)+step(c.행운,3.5),70)/100, 리롤: Math.min(step(c.행운,4),50)/100,
     근성: step(c.체력,4)/100,
     방패가격: Math.round(Math.round(c.힘*(1+step(c.힘,10)/100))*0.5 + c.체력*1.2 + (step(c.힘,3)+step(c.체력,1))*2),
@@ -87,17 +89,17 @@ function derive (c) {
 }
 function luckRoll (s, ls, p) { if (s) return true; if (ls.used) return false; if (rand()<p){ls.used=true;return true} return false }
 function gutsMul (d, hp, df) { const p=hp/df.maxhp; if(p>=0.5)return 1; return 1-df.근성*((0.5-p)/0.5) }
-function attack (A, D, dA, dD, defending) {
+function attack (A, D, dA, dD, defending, guaranteed) {
   const magic = dA.마공 > dA.물공
   const ls={used:false}, lsD={used:false}
   let dmg, 고정=0
   if (dD.sigDodge && rand()<0.30) return 0   // 천운(행운100): 완전회피 30%
   if (dA.hybrid) {   // ── 세이지 혼합 타격: 마법식 자동명중(리롤 완전회피만), 물리+마법 절반 합산 ──
-    if (luckRoll(false, lsD, dD.리롤)) return 0
+    if (luckRoll(false, lsD, (D.luckLock>0?0:dD.리롤))) return 0
     let block=0; 고정=0
     if (dD.방패막기 && rand()<dD.방패막기) { block=0.30; 고정=dD.방패고정 }        // 방패=둘 다
     const wBlk = (!block && dD.무기막기 && rand()<dD.무기막기) ? 0.50 : 1          // 무기막기=물리절반만
-    let crit = luckRoll(rand()<(dA.크리+(A.luckBuff>0?0.2:0)), ls, dA.리롤+(A.luckBuff>0?0.2:0))
+    let crit = luckRoll(rand()<(dA.크리+(A.luckBuff>0?0.2:0)), ls, (A.luckLock>0?0:dA.리롤)+(A.luckBuff>0?0.2:0))
     if (A.echoReady){ crit=true; A.echoReady=0 }
     const cP = crit ? (dA.물크기본+rand()*dA.크랜폭)*(A.luckBuff>0?2:1) : 1
     const cM = crit ? (dA.마크기본+rand()*dA.크랜폭*0.6)*(A.luckBuff>0?2:1) : 1
@@ -130,21 +132,47 @@ function attack (A, D, dA, dD, defending) {
     if (pendingAmp) A.nextAmp=pendingAmp   // 이번 볼트가 다음 공격 버프 부여
     return fin
   }
+  if (dA.fusion) {   // ── 마검사 융합 타격: (물공+마공) 한 방, 방어자는 max(물방,마방)로만 경감 ──
+    if (!guaranteed && luckRoll(rand()<dD.물회, lsD, (D.luckLock>0?0:dD.리롤))) { if(dD.sigEcho)D.echoReady=1; return 0 }
+    let dmg = dA.물공 + dA.마공; 고정=0
+    if (dD.방패막기 && rand()<dD.방패막기) { dmg*=0.30; 고정=dD.방패고정 }
+    else if (dD.무기막기 && rand()<dD.무기막기) { dmg*=0.50 }
+    dmg *= (1 - Math.max(dD.물방*(dA.sigPen?0.7:1), dD.마방))   // 방어자 최고 방어 하나로만 경감
+    if (D.sunder>0) dmg*=1.15
+    if (rand()<0.30 && rand()>=(dA.비껴무효+(A.luckBuff>0?0.2:0))) dmg*=0.70
+    let crit = luckRoll(rand()<(dA.크리+(A.luckBuff>0?0.2:0)), ls, (A.luckLock>0?0:dA.리롤)+(A.luckBuff>0?0.2:0))
+    if (A.echoReady){ crit=true; A.echoReady=0 }
+    if (crit) dmg*=(dA.물크기본+rand()*dA.크랜폭)*(A.luckBuff>0?2:1)
+    dmg -= 고정
+    if (dD.마나경감) dmg*=(1-dD.마나경감)
+    if (defending) dmg*=0.10
+    dmg *= gutsMul(dD, D.hp, dD)
+    if (D.vuln>0) dmg*=2.0
+    if (D.instVuln>0) dmg*=1.5
+    if (A.tFury && A.hp<dA.maxhp*0.5) dmg*=1.22
+    if (D.tWall) dmg*=0.90
+    if (D.tLegend) dmg*=0.85
+    if (D.tFrail) dmg*=1.15
+    const fin=Math.max(Math.round(dmg),1)
+    if (A.tLeech) A.hp=Math.min(dA.maxhp,A.hp+Math.round(fin*0.12))
+    if (D.tThorns) A.hp-=Math.max(Math.round(fin*0.05),1)
+    return fin
+  }
   if (!magic) {
-    if (!luckRoll(rand()<(dA.명중-(A.missDown>0?0.2:0)), ls, dA.리롤+(A.luckBuff>0?0.2:0))) return 0
+    if (!luckRoll(rand()<(dA.명중-(A.missDown>0?0.2:0)-(A.blind>0?0.3:0)), ls, (A.luckLock>0?0:dA.리롤)+(A.luckBuff>0?0.2:0))) return 0
     let dodge = dD.물회
-    if (luckRoll(rand()<dodge, lsD, dD.리롤)) { if(dD.sigEcho)D.echoReady=1; return 0 }  // 도적 잔상: 회피 시 다음 확정크리
+    if (luckRoll(rand()<dodge, lsD, (D.luckLock>0?0:dD.리롤))) { if(dD.sigEcho)D.echoReady=1; return 0 }  // 도적 잔상: 회피 시 다음 확정크리
     dmg = dA.물공
     if (dD.방패막기 && rand()<dD.방패막기) { dmg*=0.30; 고정=dD.방패고정 }
     else if (dD.무기막기 && rand()<dD.무기막기) { dmg*=0.50 }
     dmg *= (1-dD.물방*(dA.sigPen?0.70:1))   // 파괴(힘100): 물방 30% 관통
     if (D.sunder>0) dmg*=1.15
     if (rand()<0.30 && rand()>=(dA.비껴무효+(A.luckBuff>0?0.2:0))) dmg*=0.70
-    let crit = luckRoll(rand()<(dA.크리+(A.luckBuff>0?0.2:0)), ls, dA.리롤+(A.luckBuff>0?0.2:0))
+    let crit = luckRoll(rand()<(dA.크리+(A.luckBuff>0?0.2:0)), ls, (A.luckLock>0?0:dA.리롤)+(A.luckBuff>0?0.2:0))
     if (A.echoReady) { crit=true; A.echoReady=0 }
     if (crit) dmg*=(dA.물크기본+rand()*dA.크랜폭)*(A.luckBuff>0?2:1)
   } else {
-    if (luckRoll(false, lsD, dD.리롤)) return 0
+    if (luckRoll(false, lsD, (D.luckLock>0?0:dD.리롤))) return 0
     dmg = dA.마공
     if (dD.방패막기 && rand()<dD.방패막기) { dmg*=0.30; 고정=dD.방패고정 }
     dmg *= (1-dD.마방*(A.tMPen?0.75:1))   // 타이틀 심연의: 마방 25% 관통
@@ -174,8 +202,21 @@ function absorb(foe, dmg){ // 실드 흡수. 남은 데미지 반환
   return dmg
 }
 function applyCC(foe, field, dur){ foe[field]=Math.max(foe[field], foe.sigTank?Math.max(dur-1,0):dur) }  // 기사 불굴: CC 지속 -1턴
+function applyAdaptiveCC(foe, df){   // 마검사: 상대 최고 스탯(≥70)에 맞는 CC 2턴 / 다 <70이면 폴백 3턴
+  const b=df.base
+  const cand=[['힘',b.힘],['민첩',b.민첩],['지능',b.지능],['행운',b.행운],['솜씨',b.솜씨],['체력',b.체력]].filter(s=>s[1]>=70)
+  if(cand.length===0){ applyCC(foe,'slow',3); foe.slowSec=Math.max(foe.slowSec,1); applyCC(foe,'noDefend',3); return }   // 하이브리드 폴백
+  cand.sort((x,y)=>y[1]-x[1]); const top=cand[0][0]
+  if(top==='힘') applyCC(foe,'stun',1)
+  else if(top==='민첩'){ applyCC(foe,'slow',2); foe.slowSec=Math.max(foe.slowSec,1) }
+  else if(top==='지능') applyCC(foe,'silence',2)
+  else if(top==='행운') applyCC(foe,'luckLock',2)
+  else if(top==='솜씨') applyCC(foe,'blind',2)
+  else if(top==='체력'){ applyCC(foe,'noDefend',2); applyCC(foe,'healBlock',2) }
+}
 function estAtk(a, d){ // 평타 기대딜(순위용 근사)
   if(a.hybrid) return (a.물공*0.85*(1-d.물방)*Math.max(a.명중,0.3)) + (a.마공*0.85*(1-d.마방))
+  if(a.fusion) return (a.물공+a.마공)*(1-Math.max(d.물방,d.마방))*Math.max(a.명중,0.3)
   if(a.마공>a.물공) return a.마공*(1-d.마방)
   return a.물공*(1-d.물방)*Math.max(a.명중,0.3)
 }
@@ -196,10 +237,10 @@ const SKILLS = {
       ready:(s,f,ds,df)=> s.cd[0]===0 && s.rage===0 && s.hp>ds.maxhp*0.4 && f.hp>df.maxhp*0.3,
       score:(s,f,ds,df,x)=> x.est*1.5,
       exec:(s,f,ds,df)=>{ s.rage=3; let d=attack(s,f,ds,df,f.defending); f.hp-=d } },
-    { name:'피의갈망', tag:'딜',
-      ready:(s,f,ds,df)=> s.cd[1]===0,
-      score:(s,f,ds,df,x)=> x.est*1.05,
-      exec:(s,f,ds,df)=>{ let d=attack(s,f,ds,df,f.defending); f.hp-=d; s.hp=Math.min(ds.maxhp,s.hp+Math.round(d*0.5)); s.cd[1]=4 } },
+    { name:'재생의광기', tag:'딜',   // 즉시(턴 소모X, 공격도 함) 25% 회복 + 3턴간 매턴 4% 재생
+      ready:(s,f,ds,df)=> s.cd[1]===0 && s.hp<ds.maxhp*0.65,
+      score:(s,f,ds,df,x)=> x.est*3,   // 회복+공격이라 저HP면 최우선
+      exec:(s,f,ds,df)=>{ s.hp=Math.min(ds.maxhp,s.hp+Math.round(ds.maxhp*0.25)); s.healRegen=3; let d=attack(s,f,ds,df,f.defending); d=absorb(f,d); f.hp-=d; s.cd[1]=5 } },
   ],
   '기사': [
     { name:'방패가격', tag:'딜',
@@ -241,6 +282,16 @@ const SKILLS = {
       score:(s,f,ds,df,x)=> x.est*1.1,
       exec:(s,f,ds,df)=>{ let d=attack(s,f,ds,df,f.defending); f.hp-=d; f.missDown=2; s.cd[1]=4 } },
   ],
+  '마검사': [
+    { name:'약점봉인', tag:'제어',   // 상대 최고 스탯에 맞는 CC(적응형) + 융합딜
+      ready:(s,f,ds,df)=> s.cd[0]===0,
+      score:(s,f,ds,df,x)=> x.est + x.foeTurn*2,
+      exec:(s,f,ds,df)=>{ applyAdaptiveCC(f,df); let d=attack(s,f,ds,df,f.defending); d=absorb(f,d); f.hp-=d; s.cd[0]=3 } },
+    { name:'중력베기', tag:'제어',   // 완전명중 융합딜 + 상대 3턴 슬로우(턴+2초)
+      ready:(s,f,ds,df)=> s.cd[1]===0,
+      score:(s,f,ds,df,x)=> x.est + x.foeTurn,
+      exec:(s,f,ds,df)=>{ let d=attack(s,f,ds,df,f.defending,true); d=absorb(f,d); f.hp-=d; f.slow=Math.max(f.slow,3); f.slowSec=Math.max(f.slowSec,2); s.cd[1]=5 } },
+  ],
   '세이지': [
     { name:'오토스펠', tag:'딜',   // 즉시(턴 소모X) + 3턴 버프 유지, 공격마다 10% 볼트. 끝나기 직전 재발동→상시
       ready:(s,f,ds,df)=> s.cd[0]===0 && s.autoSpell<=1,
@@ -273,6 +324,7 @@ function mkFighter(d, name){
   return {name, hp:d.maxhp, gauge:d.턴, ai:pickAI(), defending:false, defCombo:0, defendedLast:false,
     shield:d.마나경감?Math.round(d.maxhp*0.3):0, vuln:0, cd:[0,0], rage:0, sunder:0, luckBuff:0,
     cast:0, instVuln:0, stun:0, noDefend:0, missDown:0, autoSpell:0, nextAmp:0,
+    slow:0, slowSec:0, silence:0, luckLock:0, blind:0, healBlock:0, healRegen:0,
     sigDodge:d.sigDodge, sigEcho:d.sigEcho, sigTank:d.sigTank, echoReady:0, revive:d.sigTank?1:0}
 }
 function reviveCheck(f, d){ if(f.hp<=0 && f.revive>0){ f.hp=Math.round(d.maxhp*0.20); f.revive--; f.stun=0; f.noDefend=0 } }
@@ -286,8 +338,10 @@ function battle (cA, cB) {
   const act=(self,foe,ds,df)=>{
     self.defending=false
     self.cd[0]=Math.max(0,self.cd[0]-1); self.cd[1]=Math.max(0,self.cd[1]-1)
-    if(self.tRegen)self.hp=Math.min(ds.maxhp,self.hp+Math.round(ds.maxhp*0.03))   // 타이틀 재생
+    if(self.tRegen && self.healBlock===0)self.hp=Math.min(ds.maxhp,self.hp+Math.round(ds.maxhp*0.03))   // 타이틀 재생(회복금지 시 X)
     if(self.autoSpell>0)self.autoSpell--   // 오토스펠 버프 지속
+    if(self.slow>0)self.slow--; if(self.silence>0)self.silence--; if(self.luckLock>0)self.luckLock--; if(self.blind>0)self.blind--; if(self.healBlock>0)self.healBlock--
+    if(self.healRegen>0 && self.healBlock===0){ self.hp=Math.min(ds.maxhp,self.hp+Math.round(ds.maxhp*0.04)); self.healRegen-- }   // 재생의광기 지속회복
     if(self.stun>0){ self.stun--; self.defCombo=0; self.defendedLast=false; return }
     if(self.instVuln>0)self.instVuln--
     if(self.noDefend>0)self.noDefend--
@@ -298,7 +352,7 @@ function battle (cA, cB) {
     // 마법사 시전 진행
     if(self.name==='마법사' && self.cast>0){ self.cast--; if(self.cast===0){ let d=guts(ds.메테오,foe,df); foe.hp-=Math.round(d) } self.defCombo=0; self.defendedLast=false; return }
     // ── 태그 기반 행동 선택 ──
-    if(self.ai!=='방어적'){
+    if(self.ai!=='방어적' && self.silence===0){   // 침묵 시 스킬 불가(평타만)
       const foeMagic=df.마공>df.물공
       const foeDmg=(foeMagic?df.마공:df.물공)*0.6
       const foeHits=Math.ceil(3/Math.max(df.턴,2)*ds.턴)+2
@@ -321,8 +375,8 @@ function battle (cA, cB) {
     }
   }
   while(A.hp>0&&B.hp>0&&t<600){ A.gauge-=DT;B.gauge-=DT;t+=DT
-    if(A.gauge<=0){A.gauge=Math.max(dA.턴-(A.rage>0?2:0),2);act(A,B,dA,dB); reviveCheck(B,dB)} if(B.hp<=0)break
-    if(B.gauge<=0){B.gauge=Math.max(dB.턴-(B.rage>0?2:0),2);act(B,A,dB,dA); reviveCheck(A,dA)} }
+    if(A.gauge<=0){A.gauge=Math.max(dA.턴-(A.rage>0?2:0),2)+(A.slow>0?A.slowSec:0);act(A,B,dA,dB); reviveCheck(B,dB)} if(B.hp<=0)break
+    if(B.gauge<=0){B.gauge=Math.max(dB.턴-(B.rage>0?2:0),2)+(B.slow>0?B.slowSec:0);act(B,A,dB,dA); reviveCheck(A,dA)} }
   if(t>=600){ TS[tA.name].g++; TS[tB.name].g++; return 'draw' }
   const win=A.hp>0?cA:cB
   TS[tA.name].g++; TS[tB.name].g++

@@ -820,13 +820,17 @@ function buildBattleRow (state) {
     const suf = s.inst ? ` · ${s.inst}` : ''
     return `${pre} ${s.name}${suf}${typeof s.base === 'number' ? ` (쿨${s.base})` : ''}`
   }
-  const btns = [
+  // 1줄=행동(공격/방어), 2줄=스킬(+패시브) — 스킬 쿨타임 항상 노출. 스킬 4개까지 대비
+  const actionBtns = [
     new ButtonBuilder().setCustomId(cid('attack')).setLabel('⚔️ 공격').setStyle(ButtonStyle.Danger),
     new ButtonBuilder().setCustomId(cid('defend')).setLabel(o.canDefend ? '🛡️ 방어' : '🛡️ 방어 · 봉쇄').setStyle(ButtonStyle.Secondary).setDisabled(!o.canDefend)
   ]
-  o.skills.forEach((sk, i) => btns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(skLbl(sk)).setStyle(ButtonStyle.Primary).setDisabled(!sk.usable)))
-  if (o.passive && btns.length < 5) btns.push(new ButtonBuilder().setCustomId(cid('passive')).setLabel(`🔒 ${o.passive.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true))
-  return new ActionRowBuilder().addComponents(btns.slice(0, 5))
+  const skillBtns = []
+  o.skills.forEach((sk, i) => skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(skLbl(sk)).setStyle(ButtonStyle.Primary).setDisabled(!sk.usable)))
+  if (o.passive && skillBtns.length < 5) skillBtns.push(new ButtonBuilder().setCustomId(cid('passive')).setLabel(`🔒 ${o.passive.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true))
+  const rows = [new ActionRowBuilder().addComponents(actionBtns)]
+  if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5)))
+  return rows
 }
 
 async function handleButton (interaction, info) {
@@ -850,7 +854,7 @@ async function handleButton (interaction, info) {
       await interaction.update({ embeds: [buildResultEmbed(stateResult(state), info.me, info.opp, mid, info.ai)], components: [buildResultRow(info.me, info.opp, info.ai, mid)] })
     } else {
       SESSIONS.set(interaction.message.id, { state, me: info.me, opp: info.opp, ai: info.ai, memberId: mid, ts: Date.now() })
-      await interaction.update({ embeds: [buildBattleEmbed(state)], components: [buildBattleRow(state)] })
+      await interaction.update({ embeds: [buildBattleEmbed(state)], components: buildBattleRow(state) })
     }
   } else if (info.op === 'act') {
     const sess = SESSIONS.get(interaction.message.id)
@@ -861,7 +865,7 @@ async function handleButton (interaction, info) {
       SESSIONS.delete(interaction.message.id)
       await interaction.update({ embeds: [buildResultEmbed(stateResult(sess.state), sess.me, sess.opp, mid, sess.ai)], components: [buildResultRow(sess.me, sess.opp, sess.ai, mid)] })
     } else {
-      await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: [buildBattleRow(sess.state)] })
+      await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: buildBattleRow(sess.state) })
     }
   }
 }

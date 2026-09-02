@@ -271,9 +271,11 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     let mBlock = 1
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' }   // 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
     dmg = 0; const braw = []; const bnames = []
+    // 연쇄주문(볼트조합): 3종 볼트를 셔플해 발당 서로 다른 볼트가 나오게(같은 볼트 2연발 방지)
+    const boltPool = bolts > 1 ? [{ elem: 1.1, bn: '파이어볼트' }, { elem: 1.05, bn: '라이트닝볼트' }, { elem: 1.0, bn: '아이스볼트' }].sort(() => rand() - 0.5) : null
     for (let i = 0; i < bolts; i++) {
       let elem = 1; let bn = null
-      if (bolts > 1) { const r = rand(); if (r < 1 / 3) { elem = 1.1; bn = '파이어볼트' } else if (r < 2 / 3) { elem = 1.05; bn = '라이트닝볼트' } else { elem = 1.0; bn = '아이스볼트' } }   // 네임드 볼트(계수 차등)
+      if (bolts > 1) { elem = boltPool[i].elem; bn = boltPool[i].bn }   // 네임드 볼트(계수 차등, 발당 다른 종류)
       let b = dA.마공 * dA.평타계수 * dA.마뎀너프 * per * elem
       b *= mBlock
       b *= (1 - dD.마방 * (A.tMPen ? 0.75 : 1))
@@ -343,7 +345,7 @@ const SKILLS = {
     { name: '방어파괴', ready: (s, f, ds, df) => s.cd[0] === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2 + df.maxhp * 0.09, exec: (s, f, ds, df) => { f.sunder = 2; const d = attack(s, f, ds, df, f.defending); f.hp -= d + ds.힘절반 + Math.round(df.maxhp * 0.09); s.cd[0] = 3 } },
     { name: '돌진', ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => ds.돌진딜 * (1 - df.물방) + x.foeTurn, exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.1); s.cd[1] = 5; s.note = '기절' } },
     // 차단: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
-    { name: '차단', ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 150 : x.foeTurn * 0.6), exec: (s, f, ds, df) => { if (f.cast > 0) { f.cast = 0; f.castCarry = 1; applyCC(f, 'silence', 1); s.note = '시전차단' } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; s.cd[2] = 4 } }   // guaranteed=true: 회피/빗나감 무시(확정 명중)
+    { name: '차단', ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 150 : x.foeTurn * 0.6), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; if (wasCasting) { f.cast = 0; f.castCarry = 1; applyCC(f, 'silence', 1); s.note = '시전차단' } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting) s.brokeCast = true; s.cd[2] = 4 } }   // guaranteed=true: 회피/빗나감 무시(확정 명중). 시전 끊으면 brokeCast 표식
   ],
   광전사: [
     { name: '재생의광기', ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.65, score: (s, f, ds, df, x) => x.est * 3, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.07)); s.healRegen = 3; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[0] = 5; s.note = '회복' } },
@@ -391,7 +393,7 @@ const SKILLS = {
     { name: '마나소각', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => x.est * (f.shield > 0 ? 2.2 : 1.2), exec: (s, f, ds, df) => { const had = f.shield > 0; f.shield = 0; let d = attack(s, f, ds, df, f.defending); if (had) d = Math.round(d * 1.5); f.hp -= d; s.cd[0] = 3; s.note = had ? '마나소각' : '마나번' } },
     // 시전파괴: 상대 시전 확정 취소 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전취소+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
-    { name: '시전파괴', ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 300 : 150), exec: (s, f, ds, df) => { s.cd[1] = 3; if (df.base.지능 >= 70) { const wc = f.cast > 0; if (wc) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 4); let d = Math.round(attack(s, f, ds, df, f.defending) * 1.3); d = absorb(f, d); f.hp -= d; s.note = wc ? '시전파괴' : '침묵' } else { applyCC(s, 'stun', 1); s.note = '헛손질' } } },
+    { name: '시전파괴', ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 300 : 150), exec: (s, f, ds, df) => { s.cd[1] = 3; if (df.base.지능 >= 70) { const wc = f.cast > 0; if (wc) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 4); let d = Math.round(attack(s, f, ds, df, f.defending) * 1.3); d = absorb(f, d); f.hp -= d; if (wc) s.brokeCast = true; s.note = wc ? '시전파괴' : '침묵' } else { applyCC(s, 'stun', 1); s.note = '헛손질' } } },
   ],
   세이지: [
     { name: '오토스펠', ready: (s, f, ds, df) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => x.est * 2.2, exec: (s, f, ds, df) => { s.autoSpell = 4; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[0] = 3; s.note = '주문각인' } },
@@ -717,7 +719,7 @@ function narrateLine (ev, meName, oppName) {
         if (ev.name === '파이어볼') return head // 시전 시작(딜 없음)
         if (!ev.attacked) return `${head}${back}` // 공격 안 하는 버프/방어 스킬(마력충전 등) → 미스 문구 없이
         const miss = ev.shieldAbsorb > 0 ? `하지만 ${T}${iga(T)} 마나실드로 **${ev.shieldAbsorb}** 모두 흡수 🔷` : ev.def === '회피' ? `하지만 ${T}${iga(T)} 회피했다 💨` : (ev.def === '천운' || ev.def === '완전회피') ? `하지만 ${T}${iga(T)} 천운으로 흘렸다 🍀` : '하지만 공격은 빗나갔다 💨'
-        return `${head} ${miss}${back}` }
+        return `${head} ${miss}${brokeTag}${back}` }
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
     case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.`

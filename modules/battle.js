@@ -10,7 +10,7 @@ const CHARS = {
   전사: { emoji: '⚔️', 힘: 85, 지능: 10, 체력: 75, 민첩: 45, 솜씨: 60, 행운: 30, 무기: '검방', id: '물리 딜탱' },
   광전사: { emoji: '🪓', 힘: 100, 지능: 10, 체력: 45, 민첩: 55, 솜씨: 60, 행운: 45, 무기: '양도끼', 불굴: true, id: '물리 유리대포' },
   기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '검방', 반사: 0.12, id: '순수 탱커' },
-  마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', id: '스태프 마법사' },
+  마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', 마나환류: true, id: '스태프 마법사' },
   원드마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', id: '완드 마법사' },
   도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 40, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', id: '스피드/회피/암살' },
   명사수: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, 무기: '활', id: '명중/크리/저격' },
@@ -294,7 +294,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   dmg *= gutsMul(dD, D.hp, dD)
   if (D.vuln > 0) dmg *= 2.0
   if (D.instVuln > 0) dmg *= 1.5
-  if (D.cast > 0) dmg *= 0.6   // 파이어볼 시전 중 받는뎀 40%↓
+  if (D.cast > 0) dmg *= 0.6   // 화염구 시전 중 받는뎀 40%↓
   if (A.tFury && A.hp < dA.maxhp * 0.5) dmg *= 1.22
   if (A.powBuff > 0) dmg *= A.powMul
   if (D.tWall) dmg *= 0.90
@@ -307,6 +307,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   if (A._braw && A._braw.length > 1) { const s = A._braw.reduce((a, b) => a + b, 0) || 1; A.boltHits = A._braw.map(r => Math.round(r / s * fin)); A.boltNames = A._bnames }
   if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))
   if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
+  if (A.마나환류 && magic && fin > 0 && rand() < 0.30) A.shield = Math.min(Math.round(dA.maxhp * 0.22), A.shield + Math.round(fin * 0.4))   // 마나환류(마법사 패시브): 마법딜 30% 확률로 40% 실드복구
   return fin
 }
 function guts (dmg, foe, df) { const p = foe.hp / df.maxhp; if (p < 0.5) dmg *= (1 - df.근성 * ((0.5 - p) / 0.5)); return dmg }
@@ -315,7 +316,7 @@ function physSwing (d) { const pFull = 0.5 + Math.floor(d.base.솜씨 / 10) * 0.
 // 마법 빗맞힘 구간(공유): 30% 풀댐 / 40% 80% / 30% 40% (평균 74%). 마법사 마법 + 볼트 공통
 function magicGraze () { const gr = rand(); return gr < 0.30 ? 1 : (gr < 0.70 ? 0.80 : 0.40) }
 function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; foe.vuln = 1; return r } } return dmg }
-// 시전 마법(파이어볼/인캐) 피해: 일반 마법과 동일 — 천운 완전회피 / 마방 감소 / 빗맞힘 / 근성
+// 시전 마법(화염구/인캐) 피해: 일반 마법과 동일 — 천운 완전회피 / 마방 감소 / 빗맞힘 / 근성
 function spellDmg (base, foe, df) { if (rand() < df.리롤) return 0; return Math.max(Math.round(guts(base * (1 - df.마방) * magicGraze(), foe, df)), 0) }
 // 시전 중 피격 → 5% 시전 중단(취소). 피해가 실제로 들어갔을 때만("정말 운 없을 때")
 function castHit (A, D, fin) { if (D.cast > 0 && fin > 0 && rand() < 0.05) { D.cast = 0; D.castCarry = 1; A.brokeCast = true } }   // 취소돼도 충전 일부 남아 다음 시전 -1턴
@@ -359,12 +360,14 @@ const SKILLS = {
     { name: '방패들기', ready: (s, f, ds, df) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => x.foeTurn * 1.3, exec: (s, f, ds, df) => { s.blockUp = 3; s.cd[1] = 4; s.note = '방패들기' } }
   ],
   마법사: [
-    // 파이어볼: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). castCarry(취소 잔여)로 -1턴
-    { name: '파이어볼', ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => ds.파이어볼딜 * (s.instCast ? 2.5 : 1), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(ds.파이어볼딜, f, df); s.note = '즉시 파이어볼' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = ds.파이어볼딜; s.castName = '파이어볼'; s.note = '파이어볼 시전' } } },
+    // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). castCarry(취소 잔여)로 -1턴
+    { name: '화염구', ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => ds.파이어볼딜 * (s.instCast ? 2.5 : 1), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(ds.파이어볼딜, f, df); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = ds.파이어볼딜; s.castName = '화염구'; s.note = '화염구 시전' } } },
     // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. 취소돼도 castCarry 유지
     { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => ds.파이어볼딜 * 0.9, exec: (s, f, ds, df) => { s.cast = Math.max(2, 9 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = ds.메테오딜; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
     // 인스턴트캐스팅: 다음 시전 마법을 즉시시전으로(버프·딜 없음). 메테오엔 안 걸림
-    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => ds.파이어볼딜 * 1.3, exec: (s, f, ds, df) => { s.instCast = 3; s.cd[2] = 6; s.note = '인스턴트 캐스팅' } }
+    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => ds.파이어볼딜 * 1.3, exec: (s, f, ds, df) => { s.instCast = 3; s.cd[2] = 6; s.note = '인스턴트 캐스팅' } },
+    // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
+    { name: '서리구', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => s.instCast ? ds.파이어볼딜 * 0.65 * 2.2 : (f.slow === 0 ? ds.파이어볼딜 * 0.65 + Math.max(10 - df.턴, 0) * 65 : ds.파이어볼딜 * 0.3), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = Math.round(ds.파이어볼딜 * 0.65); if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(dmg, f, df); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castName = '서리구'; s.note = '서리구 시전' } } }
   ],
   원드마법사: [
     { name: '연쇄주문', ready: (s, f, ds, df) => s.cd[0] === 0 && s.chainBolt <= 1, score: (s, f, ds, df, x) => x.est * 1.1, exec: (s, f, ds, df) => { s.chainBolt = 4; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '연쇄주문' } },
@@ -419,7 +422,7 @@ const CUSTOM_DEFS = {
 }
 const SKILL_STARTCD_CUSTOM = { 속박: 2 } // 오프닝 CC 봉인
 // 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
-const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 파이어볼: '시전', 메테오: '시전', 인스턴트캐스팅: '버프', 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2, 연쇄주문: '버프', 마력충전: 5, 마나소각: 3, 시전파괴: 4, 차단: 4, 방패들기: '버프', 인챈트: '버프', 피의각성: '버프', 메테오: '시전', 볼트임팩트: '시전', 백스텝: '버프', 연발사격: 4, 룰렛: 3, 마법반사: '버프' }
+const SKILL_CD = { 방어파괴: 3, 돌진: 5, 광폭화: '버프', 재생의광기: 5, 방패가격: 3, 도발: 5, 화염구: '시전', 메테오: '시전', 서리구: '시전', 인스턴트캐스팅: '버프', 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 3, 중력베기: 5, 오토스펠: 3, 연환주문: 4, 행운폭발: '버프', 동전던지기: 2, 연쇄주문: '버프', 마력충전: 5, 마나소각: 3, 시전파괴: 4, 차단: 4, 방패들기: '버프', 인챈트: '버프', 피의각성: '버프', 메테오: '시전', 볼트임팩트: '시전', 백스텝: '버프', 연발사격: 4, 룰렛: 3, 마법반사: '버프' }
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
 const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 4, 속박: 2 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
@@ -428,7 +431,7 @@ const SKILL_DESC = {
   방어파괴: '상대 2턴 받는뎀+15% + 고정딜', 돌진: '딜+1턴 스턴 (나 반동)',
   광폭화: '3턴 공격력↑ + 턴 빨라짐', 재생의광기: '즉시 25% 회복+3턴 재생 (공격도 함)',
   방패가격: '방어 기반 강력한 한 방', 도발: '상대 2턴 방어행동 불가 + 딜',
-  파이어볼: '시전 마법 — 마공 기반 딜(인캐로 즉발 가능)', 메테오: '긴 시전 → 초대형 한 방(인캐 불가)', 인스턴트캐스팅: '3턴간 다음 시전을 즉시시전(메테오 제외)',
+  화염구: '시전 마법 — 마공 기반 딜(인캐로 즉발 가능)', 메테오: '긴 시전 → 초대형 한 방(인캐 불가)', 서리구: '짧은 시전 → 딜(약) + 상대 3턴 둔화(인캐로 즉발)', 인스턴트캐스팅: '3턴간 다음 시전을 즉시시전(메테오 제외)',
   암습: '상대 3턴 기절 + 진입딜', 처형: '상대 HP25%↓면 물공×5 대박딜',
   약점간파: '확정 크리 + 방어 대부분 무시', 견제사격: '딜 + 상대 2턴 명중-20%',
   약점봉인: '상대 최고 스탯에 맞는 군중제어 (순수 CC·딜 없음)', 방패들기: '3턴간 방패막기 경감 대폭↑', 차단: '시전 취소+침묵 / 아니면 1턴 스턴 + 딜', 인챈트: '3턴간 공격력 ×1.3', 피의각성: '체력 10% 소모 → 3턴 공격력 ×1.35', 볼트임팩트: '긴 시전 → 볼트 압축 한방(마공×2.8)', 백스텝: '2턴 회피 대폭↑ + 딜', 연발사격: '3연사(발당 약)', 룰렛: 'All or Nothing — 잭팟/회복/기절/폭주/꽝 랜덤', 마법반사: '3턴간 받는 마법 반사(완전/부분 랜덤)', 중력베기: '완전명중 + 상대 3턴 둔화',
@@ -460,6 +463,7 @@ function mkFighter (d, name, ai) {
     powBuff: 0, powMul: 1, thorns: 0, thornsPct: 0, blockUp: 0, thornsBase: (CHARS[name] && CHARS[name].반사) || 0,   // 공격강화 / 반사버프 / 방패막기강화 / 패시브반사(가시방패)
     dodgeUp: 0, magReflect: 0, elemStack: 0, 원소: (CHARS[name] && CHARS[name].원소) || false,   // 백스텝 회피버프 / 마법반사 / 원소스택(세이지 패시브)
     불굴: (CHARS[name] && CHARS[name].불굴) || false, undyingUsed: 0, reviveType: null, accBuff: 0,   // 광전사 불굴(죽을 피해→회복 생존) / 피의각성 명중보정(상대 회피↓)
+    마나환류: (CHARS[name] && CHARS[name].마나환류) || false,   // 마법사 패시브: 마법딜 시 확률적 실드복구
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
     sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, revive: d.sigTank ? 1 : 0 }
 }
@@ -504,8 +508,8 @@ function upkeep (self, foe, ds, df) {
   if (self.rage > 0) { self.rage--; if (self.rage === 0) self.cd[0] = 2 }
   if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
   if (foe.sunder > 0) foe.sunder--
-  // 시전 진행(캐스터 공통, 이름 무관): 카운트다운 후 발사. 지금은 파이어볼(ds.파이어볼딜)만
-  if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= spellDmg(self.castDmg || ds.파이어볼딜, foe, df); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '파이어볼' } } return { type: 'cast', spell: self.castName || '파이어볼' } }
+  // 시전 진행(캐스터 공통, 이름 무관): 카운트다운 후 발사. 지금은 화염구(ds.파이어볼딜)만
+  if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= spellDmg(self.castDmg || ds.파이어볼딜, foe, df); const fdmg = b - foe.hp; if (self.마나환류 && fdmg > 0 && rand() < 0.30) self.shield = Math.min(Math.round(ds.maxhp * 0.22), self.shield + Math.round(fdmg * 0.4)); return { type: 'castfire', dmg: fdmg, spell: self.castName || '화염구' } } return { type: 'cast', spell: self.castName || '화염구' } }
   return null
 }
 function ctxFor (self, foe, ds, df) {
@@ -582,7 +586,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 기사: [{ name: '가시방패', desc: '받는 피해 12% 반사(상시)' }], 세이지: [{ name: '원소스택', desc: '3타마다 원소폭발 ×1.3' }], 광전사: [{ name: '불굴', desc: '전투당 1회, 죽을 피해를 받으면 최대HP 10% 회복해 생존(직후 2턴 취약)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }] }
+const PASSIVES = { 기사: [{ name: '가시방패', desc: '받는 피해 12% 반사(상시)' }], 세이지: [{ name: '원소스택', desc: '3타마다 원소폭발 ×1.3' }], 광전사: [{ name: '불굴', desc: '전투당 1회, 죽을 피해를 받으면 최대HP 10% 회복해 생존(직후 2턴 취약)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 마법사: [{ name: '마나환류', desc: '마법 딜 시 30% 확률로 딜의 40%만큼 마나실드 복구' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev
@@ -602,7 +606,7 @@ function playerCanUse (state, slot) {
   if (A.cd[slot] > 0) return { usable: false, reason: `${A.cd[slot]}턴 후` }
   if (name === '처형' && !(B.hp < dB.maxhp * 0.25)) return { usable: false, reason: '상대 HP 25%↓ 필요' }
   if ((name === '암습' || name === '돌진') && B.stun > 0) return { usable: false, reason: '상대 기절 중' }
-  if ((name === '파이어볼' || name === '메테오' || name === '볼트임팩트') && A.cast > 0) return { usable: false, reason: '시전 중' }
+  if ((name === '화염구' || name === '메테오' || name === '서리구' || name === '볼트임팩트') && A.cast > 0) return { usable: false, reason: '시전 중' }
   if (name === '인스턴트캐스팅' && A.instCast > 0) return { usable: false, reason: '즉시시전 중' }
   if (name === '방패들기' && A.blockUp > 0) return { usable: false, reason: '유지 중' }
   if ((name === '인챈트' || name === '피의각성') && A.powBuff > 0) return { usable: false, reason: '유지 중' }
@@ -617,8 +621,8 @@ function playerCanUse (state, slot) {
 }
 function playerOptions (state) {
   const { A, meName } = state; const sks = SKILLS[meName]
-  // 인캐(instCast) 중 즉발 여부 힌트: 파이어볼=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
-  const one = (slot) => { const nm = sks[slot].name; const u = playerCanUse(state, slot); const inst = A.instCast > 0 ? (nm === '파이어볼' ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; return { name: nm, base: SKILL_CD[nm], usable: u.usable, reason: u.reason, inst } }
+  // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
+  const one = (slot) => { const nm = sks[slot].name; const u = playerCanUse(state, slot); const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; return { name: nm, base: SKILL_CD[nm], usable: u.usable, reason: u.reason, inst } }
   return { canDefend: A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [] }
 }
 
@@ -717,15 +721,15 @@ function narrateLine (ev, meName, oppName) {
       const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
       { const back = ev.selfDmg > 0 ? ` (**${A}**도 반동으로 **${ev.selfDmg}** 피해)` : ''
         if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}${defTag}${grazeTag}${shieldTag}${brokeTag}${back}`
-        if (ev.name === '파이어볼') return head // 시전 시작(딜 없음)
+        if (ev.name === '화염구') return head // 시전 시작(딜 없음)
         if (!ev.attacked) return `${head}${back}` // 공격 안 하는 버프/방어 스킬(마력충전 등) → 미스 문구 없이
         const miss = ev.shieldAbsorb > 0 ? `하지만 ${T}${iga(T)} 마나실드로 **${ev.shieldAbsorb}** 모두 흡수 🔷` : ev.def === '회피' ? `하지만 ${T}${iga(T)} 회피했다 💨` : (ev.def === '천운' || ev.def === '완전회피') ? `하지만 ${T}${iga(T)} 천운으로 흘렸다 🍀` : '하지만 공격은 빗나갔다 💨'
         return `${head} ${miss}${brokeTag}${back}` }
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
     case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.`
-    case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '파이어볼'}${eul(ev.spell || '파이어볼')} 시전하고 있다…`
-    case 'castfire': { const sp = ev.spell || '파이어볼'; return ev.dmg > 0 ? `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}` : `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!` }
+    case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다…`
+    case 'castfire': { const sp = ev.spell || '화염구'; return ev.dmg > 0 ? `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}` : `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!` }
     case 'revive': return ev.rtype === 'undying'
       ? `🩸 ${ae} **${A}**${eun(A)} 불굴로 치명상을 버텨내며 일어섰다! (잠시 취약)`
       : `✨ ${ae} **${A}**${eun(A)} 죽음을 딛고 다시 일어섰다!`

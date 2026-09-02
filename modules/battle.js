@@ -166,15 +166,15 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     let ph = 0, mg = 0, crit = false; 고정 = 0
     if (!evaded) {
       let block = 0
-      if (dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.30); 고정 = dD.방패고정; A.lastDef = '방패막기' }
+      if (dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' }
       const wBlk = (!block && dD.무기막기 && rand() < dD.무기막기) ? 0.50 : 1
       if (wBlk < 1) A.lastDef = '무기막기'
       crit = luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
       if (A.echoReady) { crit = true; A.echoReady = 0 }
       const cP = crit ? ((dA.무기.크리배율 || dA.물크기본) + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1) : 1
       const cM = crit ? ((dA.무기.크리배율 || dA.마크기본) + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1) : 1
-      ph = dA.물공 * 0.68 * (block ? (1 - block) : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
-      mg = dA.마공 * 0.68 * (block ? (1 - block) : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
+      ph = dA.물공 * 0.68 * (block ? block : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP
+      mg = dA.마공 * 0.68 * (block ? block : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM
     }
     if (evaded && bolt <= 0) { A.lastDef = '회피'; return 0 }   // 완전회피 + 볼트 미발동 → 무피해
     let d = ph + mg + bolt - 고정
@@ -208,7 +208,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   if (dA.fusion) {
     if (!guaranteed && luckRoll(rand() < dD.물회 + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     let d = dA.물공 + dA.마공; 고정 = 0
-    if (dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.30); 고정 = dD.방패고정; A.lastDef = '방패막기' } else if (dD.무기막기 && rand() < dD.무기막기) { d *= 0.50; A.lastDef = '무기막기' }
+    if (dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (dD.무기막기 && rand() < dD.무기막기) { d *= 0.50; A.lastDef = '무기막기' }
     d *= (1 - Math.max(dD.물방 * (dA.sigPen ? 0.7 : 1), dD.마방))
     if (D.sunder > 0) d *= 1.15
     if (rand() < 0.30 && rand() >= (dA.비껴무효 + (A.luckBuff > 0 ? 0.2 : 0))) d *= 0.70
@@ -240,12 +240,12 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (luckRoll(rand() < dD.물회 + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     const hits = dA.무기.다단 || 1          // 쌍검: 2연타(기본공에 발당 배수 반영)
     let block = 0, wblk = 1
-    if (dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.30); 고정 = dD.방패고정; A.lastDef = '방패막기' } else if (dD.무기막기 && rand() < dD.무기막기) { wblk = 0.50; A.lastDef = '무기막기' }
+    if (dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (dD.무기막기 && rand() < dD.무기막기) { wblk = 0.50; A.lastDef = '무기막기' }
     const penMul = (dA.sigPen ? 0.70 : 1) * (1 - (dA.무기.관통 || 0))   // 양도끼 관통 + 힘100 시그
     dmg = 0
     for (let i = 0; i < hits; i++) {
       let h = dA.물공 * physSwing(dA) * dA.기본공   // 기본공: 무기별 평타 배수
-      h *= block ? 0.30 : wblk
+      h *= block ? block : wblk
       h *= (1 - dD.물방 * penMul)
       if (D.sunder > 0) h *= 1.15
       if (rand() < 0.30 && rand() >= (dA.비껴무효 + (A.luckBuff > 0 ? 0.2 : 0))) h *= 0.70
@@ -261,7 +261,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     const bolts = A.chainBolt > 0 ? 2 : 1
     const per = A.chainBolt > 0 ? 0.55 : 1
     let mBlock = 1
-    if (dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.30); 고정 = dD.방패고정; A.lastDef = '방패막기' }   // 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
+    if (dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' }   // 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
     dmg = 0; const braw = []; const bnames = []
     for (let i = 0; i < bolts; i++) {
       let elem = 1; let bn = null
@@ -291,8 +291,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   if (D.tLegend) dmg *= 0.85
   if (D.tFrail) dmg *= 1.15
   // 마법은 막혀도 최종 마공10% 바닥 보장(방패고정에 0딜 방지) — 방어행동 시엔 제외
-  const floor = (magic && !defending) ? Math.round(dA.마공 * 0.10) : 1
-  const fin = Math.max(Math.round(dmg), floor)
+  const fin = Math.max(Math.round(dmg), 1)
   // 연쇄볼트: 최종 피해를 발당 raw 비율로 배분(마나경감·근성 등 후처리 반영)
   if (A._braw && A._braw.length > 1) { const s = A._braw.reduce((a, b) => a + b, 0) || 1; A.boltHits = A._braw.map(r => Math.round(r / s * fin)); A.boltNames = A._bnames }
   if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))

@@ -488,8 +488,8 @@ function ctxFor (self, foe, ds, df) {
   const fm = df.마공 > df.물공, fd = (fm ? df.마공 : df.물공) * 0.6, fh = Math.ceil(3 / Math.max(df.턴, 2) * ds.턴) + 2
   return { est: estAtk(ds, df), foeTurn: estAtk(df, ds), safe: self.hp > fd * fh * 0.6 }
 }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp, sb = self.hp; self.didAttack = false; self.lastDef = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; { const dealt = Math.max(fb - foe.hp, 0); const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, selfDmg: Math.max(sb - self.hp, 0) } }
-function execAttack (self, foe, ds, df) { const fb = foe.hp; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, def: self.lastDef, broke: self.brokeCast } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp, sb = self.hp, psh = foe.shield; self.didAttack = false; self.lastDef = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; { const dealt = Math.max(fb - foe.hp, 0); const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0) } }
+function execAttack (self, foe, ds, df) { const fb = foe.hp, psh = foe.shield; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, def: self.lastDef, broke: self.brokeCast, shieldAbsorb: Math.max(psh - foe.shield, 0) } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 function aiTurn (self, foe, ds, df) {
@@ -664,9 +664,11 @@ function narrateLine (ev, meName, oppName) {
   const boltTag = ev.boltName ? `✨**${ev.boltName}** 발동! ` : ''
   // 방어 성공(피해는 일부 들어간 경우) 태그
   const defTag = (ev.def === '방패막기' || ev.def === '무기막기') ? ` 🛡️*${T} ${ev.def}!*` : ''
-  const brokeTag = ev.broke ? ` ⚡**${T} 시전 중단!**` : ''   // 피격으로 상대 시전 취소
+  const brokeTag = ev.broke ? ` ⚡**${T} 시전 중단!**` : ''
+  const shieldTag = ev.shieldAbsorb > 0 ? ` 🔷*마나실드 ${ev.shieldAbsorb} 흡수*` : ''   // 피격으로 상대 시전 취소
   // 완전 무피해: 회피/천운/빗나감 구분
   const evadeLine = () => {
+    if (ev.shieldAbsorb > 0) return `🔷 ${te} **${T}**${iga(T)} 마나실드로 ${ae} **${A}**의 공격 **${ev.shieldAbsorb}**를 모두 흡수했다!`
     if (ev.def === '회피') return `💨 ${te} **${T}**${iga(T)} ${ae} **${A}**의 공격을 날렵하게 회피했다!`
     if (ev.def === '천운' || ev.def === '완전회피') return `🍀 ${te} **${T}**${iga(T)} 천운으로 ${ae} **${A}**의 일격을 흘려냈다!`
     return `💨 ${ae} **${A}**의 공격이 빗나갔다. ${te} **${T}**${eun(T)} 피해를 입지 않았다.`
@@ -674,15 +676,15 @@ function narrateLine (ev, meName, oppName) {
   switch (ev.type) {
     case 'attack':
       if (ev.dmg <= 0) return evadeLine()
-      if (ev.crit) return `💥 ${ae} **${A}**의 ${ev.ph != null ? '혼합 ' : ''}공격이 치명타로 적중! ${boltTag}${hurtBd()}${defTag}${brokeTag}`
-      return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}! ${boltTag}${hurtBd()}${defTag}${brokeTag}`
+      if (ev.crit) return `💥 ${ae} **${A}**의 ${ev.ph != null ? '혼합 ' : ''}공격이 치명타로 적중! ${boltTag}${hurtBd()}${defTag}${shieldTag}${brokeTag}`
+      return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}! ${boltTag}${hurtBd()}${defTag}${shieldTag}${brokeTag}`
     case 'skill': {
       const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
       { const back = ev.selfDmg > 0 ? ` (**${A}**도 반동으로 **${ev.selfDmg}** 피해)` : ''
-        if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}${defTag}${brokeTag}${back}`
+        if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}${defTag}${shieldTag}${brokeTag}${back}`
         if (ev.name === '파이어볼') return head // 시전 시작(딜 없음)
         if (!ev.attacked) return `${head}${back}` // 공격 안 하는 버프/방어 스킬(마력충전 등) → 미스 문구 없이
-        const miss = ev.def === '회피' ? `하지만 ${T}${iga(T)} 회피했다 💨` : (ev.def === '천운' || ev.def === '완전회피') ? `하지만 ${T}${iga(T)} 천운으로 흘렸다 🍀` : '하지만 공격은 빗나갔다 💨'
+        const miss = ev.shieldAbsorb > 0 ? `하지만 ${T}${iga(T)} 마나실드로 **${ev.shieldAbsorb}** 모두 흡수 🔷` : ev.def === '회피' ? `하지만 ${T}${iga(T)} 회피했다 💨` : (ev.def === '천운' || ev.def === '완전회피') ? `하지만 ${T}${iga(T)} 천운으로 흘렸다 🍀` : '하지만 공격은 빗나갔다 💨'
         return `${head} ${miss}${back}` }
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`

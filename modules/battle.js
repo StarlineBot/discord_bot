@@ -494,6 +494,12 @@ function execAttack (self, foe, ds, df) { const fb = foe.hp, psh = foe.shield; l
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 function aiTurn (self, foe, ds, df) {
   const forced = upkeep(self, foe, ds, df); if (forced) return forced
+  // 상대 시전 중이면 AI 유형 무관하게 '차단기'만 우선 사용(방어적도 시전은 끊음)
+  if (foe.cast > 0 && self.silence === 0) {
+    const cx = ctxFor(self, foe, ds, df)
+    const intr = SKILLS[self.name].find(sk => ['차단', '돌진', '암습', '약점봉인', '시전파괴'].includes(sk.name) && sk.ready(self, foe, ds, df, cx))
+    if (intr) return execSkill(self, foe, ds, df, intr)
+  }
   if (self.ai !== '방어적' && self.silence === 0) {
     const ctx = ctxFor(self, foe, ds, df); let best = null, bestScore = ctx.est
     for (const sk of SKILLS[self.name]) { if (!sk.ready(self, foe, ds, df, ctx)) continue; const sc = sk.score(self, foe, ds, df, ctx); if (sc > bestScore) { bestScore = sc; best = sk } }

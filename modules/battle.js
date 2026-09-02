@@ -24,13 +24,13 @@ const CHARS = {
 // 물리·하이브리드 무기는 현재 스텁(수치 보정 기본값=불변) → 효과는 차차. 스태프·완드만 활성.
 const WEAPONS = {
   // 한손 근접=기본배수·속도불변 / 양손(대검류)=평타↑·20%느림 / 쌍검=듀얼(속도불변, 다단) / 활=원거리(공격자 턴+30%)
-  검방: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 기본공: 1.0, tempoMul: 1.0, 방어: '방패' },
-  단검: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 기본공: 0.78, tempoMul: 1.0, 크리보너스: 0.15, 크리배율: 2.2, 회피보너스: 0.15, 방어: '패링' },
+  검방: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 기본공: 1.0, tempoMul: 1.0, 받는뎀: 0.10, 방어: '방패' },
+  단검: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 기본공: 0.72, tempoMul: 1.0, 크리보너스: 0.15, 크리배율: 1.9, 회피보너스: 0.15, 방어: '패링' },
   쌍검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 기본공: 0.6, tempoMul: 1.0, 다단: 2, 방어: '패링' },
   양검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 기본공: 1.25, tempoMul: 1.25, 방어: '무기막기' },
   양둔: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 기본공: 1.2, tempoMul: 1.25, 스턴확률: 0.2, 방어: '무기막기' },
   양도끼: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 기본공: 1.4, tempoMul: 1.25, 관통: 0.3, 방어: '무기막기' },
-  활: { 계열: '물리', 평타: '물리', range: '원거리', hands: 2, 기본공: 1.05, tempoMul: 1.0, 크리배율: 2.5, 원거리페널티: 0.3, 방어: '회피' },
+  활: { 계열: '물리', 평타: '물리', range: '원거리', hands: 2, 기본공: 1.05, tempoMul: 1.0, 크리배율: 2.5, 원거리페널티: 0.4, 방어: '회피' },
   스태프: { 계열: '마법', 평타: '마법', range: '원거리', hands: 2, tempoStat: '지능', tempoMul: 1.65, 평타계수: 0.55, castMod: -2, 원거리페널티: 0.15, 방어: '마나실드' },
   완드: { 계열: '마법', 평타: '마법', range: '원거리', hands: 1, tempoStat: '지능', tempoMul: 0.75, 평타계수: 0.9, 마뎀너프: 0.66, 원거리페널티: 0.15, 방어: '마나실드' },
   마도서: { 계열: '마법', 평타: '혼합', range: '근접', hands: 2, tempoStat: '힘지능', tempoMul: 1.08, 크리배율: 1.9, 방어: '무기막기' },
@@ -126,11 +126,11 @@ function tempoVal (w, c) { return w.tempoStat === '지능' ? c.지능 : w.tempoS
 function derive (c) {
   const w = WEAPONS[c.무기] || {}
   return {
-    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
+    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100) * (c.체력 === 100 && w.hands === 1 ? 1.3 : 1) * (c.솜씨 === 100 && c.무기 === '활' ? 1.05 : 1)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     물방: Math.min((step(c.힘, 3) + step(c.체력, 1)) / 100 + (w.물방보너스 || 0) + (c.마도갑주 || 0), 0.80), 마방: Math.min(Math.min(30 + step(c.지능, 3), 70) / 100 + (w.마방보너스 || 0), 0.85),
     maxhp: maxHp(c),
     명중: Math.min(35 + step(c.솜씨, 5), c.솜씨 === 100 ? 90 : 80) / 100, 물회: Math.min(10 + step(c.민첩, 2.5), 50) / 100 + (w.회피보너스 || 0), 마회: step(c.민첩, 3) / 100,
-    sigPen: c.힘 === 100, sigDodge: c.행운 === 100, sigTank: c.체력 === 100, sigEcho: c.민첩 === 100, sigEye: c.지능 === 100, base: c,
+    sigPen: c.힘 === 100, sigDodge: c.행운 === 100, sigTank: c.체력 === 100, sigEcho: c.민첩 === 100, sigEye: c.지능 === 100, sigAim: c.솜씨 === 100, base: c,
     hybrid: (c.힘 === 60 && c.지능 === 65 && c.체력 === 55),
     fusion: (c.힘 === 65 && c.지능 === 60 && c.체력 === 55),
     크리: Math.min(10 + step(c.솜씨, 1) + step(c.행운, 3.5) + (w.크리보너스 || 0) * 100, 70) / 100, 리롤: Math.min(step(c.행운, 4), 50) / 100,
@@ -144,7 +144,7 @@ function derive (c) {
     평타계수: w.평타계수 || 1, 마뎀너프: w.마뎀너프 || 1, 기본공: w.기본공 || 1, 무기: w,
     무기막기: c.힘 >= 50 ? (30 + Math.floor((c.힘 - 50) / 10) * 2) / 100 : 0,
     // 방패막기는 검/방(방패) 무기 전용. 무기막기는 스탯기반 유지(무기무관)
-    방패막기: (w.방어 === '방패' && c.체력 >= 70) ? (30 + Math.floor((c.체력 - 70) / 10) * 3) / 100 : 0,
+    방패막기: (w.방어 === '방패' && c.체력 >= 50) ? (30 + Math.floor((c.체력 - 50) / 10) * 3) / 100 : 0,
     방패고정: (w.방어 === '방패' && c.체력 >= 70) ? c.체력 / 3 : 0,
     마나경감: c.지능 >= 70 ? (10 + ((c.지능 - 70) / 10) * 2) / 100 : 0
   }
@@ -158,7 +158,8 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   A.hitPh = null; A.hitMg = null; A.boltName = null; A.boltHits = null; A.boltNames = null; A._braw = null; A._bnames = null; A.lastDef = null; A.didAttack = true; A.brokeCast = false; A.lastElem = false; A.lastRefl = null; A.grazed = false   // 혼합 내역 + 볼트명 + 연쇄볼트 발당 + 방어판정 + 공격시도 + 시전중단 표식 + 빗맞음(×0.70)
   // 기절 중엔 능동 방어(회피·천운·방패막기·무기막기·패링) 봉쇄. 빗맞힘(공격자 실수)·마나실드·반사·근성은 수동이라 유지
   const canDef = D.stun === 0
-  if (canDef && dD.sigDodge && !dA.hybrid && rand() < 0.30) { A.lastDef = '완전회피'; return 0 }
+  const aimPierce = dA.sigAim && rand() < 0.15   // 솜씨100 시그(정밀사격): 30% 확률로 상대 회피 무효
+  if (canDef && !aimPierce && dD.sigDodge && !dA.hybrid && rand() < 0.30) { A.lastDef = '완전회피'; return 0 }
   if (dA.hybrid) {
     // 본 공격 회피 판정(천운/리롤) — 볼트는 별개로 무조건 명중
     const evaded = canDef && ((dD.sigDodge && rand() < 0.30) || luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)))
@@ -197,6 +198,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (D.tWall) d *= 0.90
     if (D.tLegend) d *= 0.85
     if (D.tFrail) d *= 1.15
+    if (dD.무기.받는뎀) d *= (1 - dD.무기.받는뎀)
     if (crit) A.lastCrit = true
     // 원소 스택(세이지 패시브): 공격마다 1스택, 3스택째 폭발(×1.5) + 리셋
     if (A.원소) { if (A.elemStack >= 2) { d *= 1.3; A.elemStack = 0; A.lastElem = true } else { A.elemStack++; A.lastElem = false } }
@@ -211,7 +213,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     return fin
   }
   if (dA.fusion) {
-    if (canDef && !guaranteed && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
+    if (canDef && !aimPierce && !guaranteed && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     let d = dA.물공 + dA.마공; 고정 = 0
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && rand() < dD.무기막기) { d *= 0.50; A.lastDef = '무기막기' }
     d *= (1 - Math.max(dD.물방 * (dA.sigPen ? 0.7 : 1), dD.마방))
@@ -232,6 +234,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (D.tWall) d *= 0.90
     if (D.tLegend) d *= 0.85
     if (D.tFrail) d *= 1.15
+    if (dD.무기.받는뎀) d *= (1 - dD.무기.받는뎀)
     const fin = Math.max(Math.round(d), 1)
     castHit(A, D, fin)
     if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))
@@ -242,7 +245,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     // 활(원거리): 근접 공격자가 나를 때리면 자기 다음 턴 지연(거리 비용, 공격자 턴 %)
     if (dD.무기.원거리페널티 && dA.무기.range === '근접') A.gauge += dA.턴 * dD.무기.원거리페널티
     if (!luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) return 0
-    if (canDef && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
+    if (canDef && !aimPierce && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     const hits = dA.무기.다단 || 1          // 쌍검: 2연타(기본공에 발당 배수 반영)
     let block = 0, wblk = 1
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && rand() < dD.무기막기) { wblk = 0.50; A.lastDef = '무기막기' }
@@ -295,6 +298,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   if (D.tWall) dmg *= 0.90
   if (D.tLegend) dmg *= 0.85
   if (D.tFrail) dmg *= 1.15
+  if (dD.무기.받는뎀) dmg *= (1 - dD.무기.받는뎀)
   // 마법은 막혀도 최종 마공10% 바닥 보장(방패고정에 0딜 방지) — 방어행동 시엔 제외
   const fin = Math.max(Math.round(dmg), 1)
   // 연쇄볼트: 최종 피해를 발당 raw 비율로 배분(마나경감·근성 등 후처리 반영)
@@ -632,7 +636,7 @@ function preview (name) {
   const c = CHARS[name]; const w = WEAPONS[c.무기] || {}
   return {
     hp: maxHp(c),
-    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
+    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100) * (c.체력 === 100 && w.hands === 1 ? 1.3 : 1) * (c.솜씨 === 100 && c.무기 === '활' ? 1.05 : 1)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     // 턴: 무기 반영(tempoVal) — derive와 동일 공식
     턴: Math.round(Math.max((10 - step(tempoVal(w, c), 0.7)) * (w.tempoMul || 1), 2) * 10) / 10
   }

@@ -429,10 +429,13 @@ const SKILL_DESC = {
   마나소각: '상대 마나실드 파괴 + 마공 딜(실드 있으면 ×1.5)', 시전파괴: '상대 시전 확정 취소 + 3턴 침묵 + 딜'
 }
 function skillsBlock (name) {
-  return SKILLS[name].map((sk, i) => {
+  const lines = SKILLS[name].map((sk, i) => {
     const cd = SKILL_CD[sk.name]
     return `${i + 1}) **${sk.name}** — ${SKILL_DESC[sk.name] || ''} (${typeof cd === 'number' ? `쿨${cd}` : cd})`
-  }).join('\n')
+  })
+  const p = PASSIVES[name]
+  if (p) lines.push(`🔒 **${p.name}**(패시브) — ${p.desc}`)   // 패시브도 표시(스킬 수 불리해 보이지 않게)
+  return lines.join('\n')
 }
 function decideDefend (self, foe, ds, df) {
   const est = (df.물공 > df.마공 ? df.물공 : df.마공) * 0.5

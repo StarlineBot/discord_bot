@@ -617,7 +617,8 @@ function playerCanUse (state, slot) {
 }
 function playerOptions (state) {
   const { A, meName } = state; const sks = SKILLS[meName]
-  const one = (slot) => { const u = playerCanUse(state, slot); return { name: sks[slot].name, base: SKILL_CD[sks[slot].name], usable: u.usable, reason: u.reason } }
+  // 인캐(instCast) 중 즉발 여부 힌트: 파이어볼=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
+  const one = (slot) => { const nm = sks[slot].name; const u = playerCanUse(state, slot); const inst = A.instCast > 0 ? (nm === '파이어볼' ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; return { name: nm, base: SKILL_CD[nm], usable: u.usable, reason: u.reason, inst } }
   return { canDefend: A.noDefend === 0, skills: sks.map((_, i) => one(i)), passive: PASSIVES[meName] || null }
 }
 
@@ -813,9 +814,12 @@ function buildBattleEmbed (state) {
 function buildBattleRow (state) {
   const o = playerOptions(state); const mid = state.memberId
   const cid = (c) => JSON.stringify({ action: 'duel', op: 'act', c, memberId: mid })
-  const skLbl = (s) => s.usable
-    ? `✨ ${s.name}${typeof s.base === 'number' ? ` (쿨${s.base})` : ''}`
-    : `${s.name} · ${s.reason}`
+  const skLbl = (s) => {
+    if (!s.usable) return `${s.name} · ${s.reason}`
+    const pre = s.inst === '즉시' ? '⚡' : '✨'
+    const suf = (s.inst && s.inst !== '즉시') ? ` · ${s.inst}` : ''
+    return `${pre} ${s.name}${suf}${typeof s.base === 'number' ? ` (쿨${s.base})` : ''}`
+  }
   const btns = [
     new ButtonBuilder().setCustomId(cid('attack')).setLabel('⚔️ 공격').setStyle(ButtonStyle.Danger),
     new ButtonBuilder().setCustomId(cid('defend')).setLabel(o.canDefend ? '🛡️ 방어' : '🛡️ 방어 · 봉쇄').setStyle(ButtonStyle.Secondary).setDisabled(!o.canDefend)

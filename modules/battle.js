@@ -817,7 +817,7 @@ function buildBattleRow (state) {
   const skLbl = (s) => {
     if (!s.usable) return `${s.name} · ${s.reason}`
     const pre = s.inst === '즉시' ? '⚡' : '✨'
-    const suf = (s.inst && s.inst !== '즉시') ? ` · ${s.inst}` : ''
+    const suf = s.inst ? ` · ${s.inst}` : ''
     return `${pre} ${s.name}${suf}${typeof s.base === 'number' ? ` (쿨${s.base})` : ''}`
   }
   const btns = [

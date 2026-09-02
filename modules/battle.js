@@ -260,14 +260,14 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     // 연쇄주문(완드): 볼트 2발, 발당 약하게(총합 소폭↑) + 발당 빗맞힘·크리 독립. chainBolt=0이면 기존과 동일.
     const bolts = A.chainBolt > 0 ? 2 : 1
     const per = A.chainBolt > 0 ? 0.55 : 1
-    let mBlock = 0
-    if (dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.30); 고정 = dD.방패고정; A.lastDef = '방패막기' }
+    let mBlock = 1
+    if (dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.30); 고정 = dD.방패고정; A.lastDef = '방패막기' }   // 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
     dmg = 0; const braw = []; const bnames = []
     for (let i = 0; i < bolts; i++) {
       let elem = 1; let bn = null
       if (bolts > 1) { const r = rand(); if (r < 1 / 3) { elem = 1.1; bn = '파이어볼트' } else if (r < 2 / 3) { elem = 1.05; bn = '라이트닝볼트' } else { elem = 1.0; bn = '아이스볼트' } }   // 네임드 볼트(계수 차등)
       let b = dA.마공 * dA.평타계수 * dA.마뎀너프 * per * elem
-      if (mBlock) b *= 0.30
+      b *= mBlock
       b *= (1 - dD.마방 * (A.tMPen ? 0.75 : 1))
       if (D.sunder > 0) b *= 1.15
       b *= magicGraze()   // 마법 빗맞힘 구간(발당 독립)
@@ -290,7 +290,9 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   if (D.tWall) dmg *= 0.90
   if (D.tLegend) dmg *= 0.85
   if (D.tFrail) dmg *= 1.15
-  const fin = Math.max(Math.round(dmg), 1)
+  // 마법은 막혀도 최종 마공10% 바닥 보장(방패고정에 0딜 방지) — 방어행동 시엔 제외
+  const floor = (magic && !defending) ? Math.round(dA.마공 * 0.10) : 1
+  const fin = Math.max(Math.round(dmg), floor)
   // 연쇄볼트: 최종 피해를 발당 raw 비율로 배분(마나경감·근성 등 후처리 반영)
   if (A._braw && A._braw.length > 1) { const s = A._braw.reduce((a, b) => a + b, 0) || 1; A.boltHits = A._braw.map(r => Math.round(r / s * fin)); A.boltNames = A._bnames }
   if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))

@@ -655,9 +655,10 @@ function narrateLine (ev, meName, oppName) {
   const ae = CHARS[A].emoji, te = CHARS[T].emoji
   const hurt = (n) => `${te} **${T}**${eun(T)} **${Math.round(n)}**의 피해를 입었다.`
   // 피해 내역: 세이지 혼합(물/마) · 완드 연쇄볼트(발당) · 기본
+  // 내역은 흡수(마나실드) 전 값이라, 실제 피해(ev.dmg)에 비례 재배분해 총합과 일치시킴
   const hurtBd = () => {
-    if (ev.ph != null) return `${te} **${T}**${eun(T)} 물리 **${ev.ph}** + 마법 **${ev.mg}** (총 **${ev.dmg}**)의 피해를 입었다.`
-    if (ev.boltHits && ev.boltHits.length > 1) { const parts = ev.boltHits.map((h, i) => `${(ev.boltNames && ev.boltNames[i]) || '볼트'} **${h}**`).join(' + '); return `${te} **${T}**${eun(T)} ${parts} (총 **${ev.dmg}**)의 피해를 입었다.` }
+    if (ev.ph != null) { const raw = ev.ph + ev.mg; const ph = raw > 0 ? Math.round(ev.ph / raw * ev.dmg) : 0; return `${te} **${T}**${eun(T)} 물리 **${ph}** + 마법 **${ev.dmg - ph}** (총 **${ev.dmg}**)의 피해를 입었다.` }
+    if (ev.boltHits && ev.boltHits.length > 1) { const raw = ev.boltHits.reduce((a, b) => a + b, 0) || 1; let acc = 0; const n = ev.boltHits.length; const parts = ev.boltHits.map((h, i) => { const v = i === n - 1 ? ev.dmg - acc : Math.round(h / raw * ev.dmg); acc += v; return `${(ev.boltNames && ev.boltNames[i]) || '볼트'} **${v}**` }).join(' + '); return `${te} **${T}**${eun(T)} ${parts} (총 **${ev.dmg}**)의 피해를 입었다.` }
     return hurt(ev.dmg)
   }
   const boltTag = ev.boltName ? `✨**${ev.boltName}** 발동! ` : ''

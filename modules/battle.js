@@ -150,7 +150,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   const magic = dA.마공 > dA.물공
   const ls = { used: false }, lsD = { used: false }
   let dmg, 고정 = 0
-  A.hitPh = null; A.hitMg = null; A.boltName = null; A.boltHits = null; A._braw = null; A.lastDef = null   // 혼합 내역 + 볼트명 + 연쇄볼트 발당 + 방어판정(방패막기/무기막기/회피/천운)
+  A.hitPh = null; A.hitMg = null; A.boltName = null; A.boltHits = null; A._braw = null; A.lastDef = null; A.didAttack = true   // 혼합 내역 + 볼트명 + 연쇄볼트 발당 + 방어판정 + 공격시도 표식
   if (dD.sigDodge && !dA.hybrid && rand() < 0.30) { A.lastDef = '완전회피'; return 0 }
   if (dA.hybrid) {
     // 본 공격 회피 판정(천운/리롤) — 볼트는 별개로 무조건 명중
@@ -403,7 +403,7 @@ function mkFighter (d, name, ai) {
   // 게이지에 랜덤 미세오프셋 → 속도 동률 시 선공을 공정하게(플레이어 선공 고정 방지)
   return { name, hp: d.maxhp, gauge: d.턴 + Math.random() * 0.3, ai, defending: false, defCombo: 0, defendedLast: false,
     shield: d.마나경감 ? Math.round(d.maxhp * 0.22) : 0, vuln: 0, cd: skillStartCd(name), rage: 0, sunder: 0, luckBuff: 0,
-    cast: 0, instVuln: 0, instCast: false, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, chainBolt: 0, nextAmp: 0,
+    cast: 0, instVuln: 0, instCast: false, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, chainBolt: 0, nextAmp: 0, didAttack: false,
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
     sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, revive: d.sigTank ? 1 : 0 }
 }
@@ -434,7 +434,7 @@ function ctxFor (self, foe, ds, df) {
   const fm = df.마공 > df.물공, fd = (fm ? df.마공 : df.물공) * 0.6, fh = Math.ceil(3 / Math.max(df.턴, 2) * ds.턴) + 2
   return { est: estAtk(ds, df), foeTurn: estAtk(df, ds), safe: self.hp > fd * fh * 0.6 }
 }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp, sb = self.hp; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, def: self.lastDef, selfDmg: Math.max(sb - self.hp, 0) } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp, sb = self.hp; self.didAttack = false; self.lastDef = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; return { type: 'skill', name: sk.name, dmg: Math.max(fb - foe.hp, 0), note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, def: self.lastDef, attacked: self.didAttack, selfDmg: Math.max(sb - self.hp, 0) } }
 function execAttack (self, foe, ds, df) { const fb = foe.hp; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; self.defCombo = 0; self.defendedLast = false; return { type: 'attack', dmg: Math.max(fb - foe.hp, 0), crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, def: self.lastDef } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
@@ -615,6 +615,7 @@ function narrateLine (ev, meName, oppName) {
       { const back = ev.selfDmg > 0 ? ` (**${A}**도 반동으로 **${ev.selfDmg}** 피해)` : ''
         if (ev.dmg > 0) return `${head} ${ev.crit ? '치명타! ' : ''}${boltTag}${hurtBd()}${defTag}${back}`
         if (ev.name === '파이어볼') return head // 시전 시작(딜 없음)
+        if (!ev.attacked) return `${head}${back}` // 공격 안 하는 버프/방어 스킬(마력충전 등) → 미스 문구 없이
         const miss = ev.def === '회피' ? `하지만 ${T}${iga(T)} 회피했다 💨` : (ev.def === '천운' || ev.def === '완전회피') ? `하지만 ${T}${iga(T)} 천운으로 흘렸다 🍀` : '하지만 공격은 빗나갔다 💨'
         return `${head} ${miss}${back}` }
     }

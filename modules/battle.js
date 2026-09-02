@@ -12,7 +12,7 @@ const CHARS = {
   기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '검방', 반사: 0.12, id: '순수 탱커' },
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', 마나환류: true, id: '스태프 마법사' },
   원드마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', id: '완드 마법사' },
-  도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 40, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', id: '스피드/회피/암살' },
+  도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 40, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
   명사수: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, 무기: '활', id: '명중/크리/저격' },
   한탕주의자: { emoji: '🃏', 힘: 25, 지능: 20, 체력: 40, 민첩: 85, 솜씨: 35, 행운: 100, 무기: '쌍검', id: '고속 도박' },
   세이지: { emoji: '📖', 힘: 60, 지능: 65, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, 무기: '마도서', 원소: true, id: '혼합 하이브리드' },
@@ -25,7 +25,7 @@ const CHARS = {
 const WEAPONS = {
   // 한손 근접=기본배수·속도불변 / 양손(대검류)=평타↑·20%느림 / 쌍검=듀얼(속도불변, 다단) / 활=원거리(공격자 턴+30%)
   검방: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 기본공: 1.0, tempoMul: 1.0, 받는뎀: 0.10, 방어: '방패' },
-  단검: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 기본공: 0.72, tempoMul: 1.0, 크리보너스: 0.15, 크리배율: 1.9, 회피보너스: 0.15, 방어: '패링' },
+  단검: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 기본공: 0.68, tempoMul: 1.0, 크리보너스: 0.15, 크리배율: 1.9, 회피보너스: 0.15, 방어: '패링' },
   쌍검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 기본공: 0.6, tempoMul: 1.0, 다단: 2, 방어: '패링' },
   양검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 기본공: 1.25, tempoMul: 1.25, 방어: '무기막기' },
   양둔: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 기본공: 1.2, tempoMul: 1.25, 스턴확률: 0.2, 방어: '무기막기' },
@@ -246,7 +246,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     if (dD.무기.원거리페널티 && dA.무기.range === '근접') A.gauge += dA.턴 * dD.무기.원거리페널티
     if (!guaranteed && !luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) return 0
     if (canDef && !aimPierce && !guaranteed && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
-    const hits = dA.무기.다단 || 1          // 쌍검: 2연타(기본공에 발당 배수 반영)
+    const baseHits = dA.무기.다단 || 1; const hits = baseHits + (A.연속타격 && rand() < 0.20 ? 1 : 0)   // 쌍검 2연타 / 도적 연속타격 패시브: 20% 확률 추가타(크리 안 터짐)
     let block = 0, wblk = 1
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && rand() < dD.무기막기) { wblk = 0.50; A.lastDef = '무기막기' }
     const penMul = (dA.sigPen ? 0.70 : 1) * (1 - (dA.무기.관통 || 0))   // 양도끼 관통 + 힘100 시그
@@ -257,7 +257,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
       h *= (1 - dD.물방 * penMul)
       if (D.sunder > 0) h *= 1.15
       if (rand() < 0.30 && rand() >= (dA.비껴무효 + (A.luckBuff > 0 ? 0.2 : 0))) { h *= 0.70; A.grazed = true }
-      let crit = luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
+      let crit = i < baseHits && luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))   // 연속타격 추가타(i>=baseHits)는 크리 제외
       if (A.echoReady) { crit = true; A.echoReady = 0 }
       if (crit) { h *= ((dA.무기.크리배율 || dA.물크기본) + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1); A.lastCrit = true }   // 무기 크리배율이 base 덮어씀(활2·단검1.8)
       dmg += h
@@ -466,6 +466,7 @@ function mkFighter (d, name, ai) {
     dodgeUp: 0, magReflect: 0, elemStack: 0, 원소: (CHARS[name] && CHARS[name].원소) || false,   // 백스텝 회피버프 / 마법반사 / 원소스택(세이지 패시브)
     불굴: (CHARS[name] && CHARS[name].불굴) || false, undyingUsed: 0, reviveType: null, accBuff: 0,   // 광전사 불굴(죽을 피해→회복 생존) / 피의각성 명중보정(상대 회피↓)
     마나환류: (CHARS[name] && CHARS[name].마나환류) || false,   // 마법사 패시브: 마법딜 시 확률적 실드복구
+    연속타격: (CHARS[name] && CHARS[name].연속타격) || false,   // 도적 패시브: 공격 시 확률적 추가타
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
     sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, revive: d.sigTank ? 1 : 0 }
 }
@@ -588,7 +589,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 기사: [{ name: '가시방패', desc: '받는 피해 12% 반사(상시)' }], 세이지: [{ name: '원소스택', desc: '3타마다 원소폭발 ×1.3' }], 광전사: [{ name: '불굴', desc: '전투당 1회, 죽을 피해를 받으면 최대HP 10% 회복해 생존(직후 2턴 취약)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 마법사: [{ name: '마나환류', desc: '마법 딜 시 30% 확률로 딜의 40%만큼 마나실드 복구' }] }
+const PASSIVES = { 기사: [{ name: '가시방패', desc: '받는 피해 12% 반사(상시)' }], 세이지: [{ name: '원소스택', desc: '3타마다 원소폭발 ×1.3' }], 광전사: [{ name: '불굴', desc: '전투당 1회, 죽을 피해를 받으면 최대HP 10% 회복해 생존(직후 2턴 취약)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 마법사: [{ name: '마나환류', desc: '마법 딜 시 30% 확률로 딜의 40%만큼 마나실드 복구' }], 도적: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev

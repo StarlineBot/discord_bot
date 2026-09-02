@@ -442,8 +442,7 @@ function skillsBlock (name) {
     const cd = SKILL_CD[sk.name]
     return `${i + 1}) **${sk.name}** — ${SKILL_DESC[sk.name] || ''} (${typeof cd === 'number' ? `쿨${cd}` : cd})`
   })
-  const p = PASSIVES[name]
-  if (p) lines.push(`🔒 **${p.name}**(패시브) — ${p.desc}`)   // 패시브도 표시(스킬 수 불리해 보이지 않게)
+  for (const p of PASSIVES[name] || []) lines.push(`🔒 **${p.name}**(패시브) — ${p.desc}`)   // 패시브도 표시(스킬 수 불리해 보이지 않게)
   return lines.join('\n')
 }
 function decideDefend (self, foe, ds, df) {
@@ -582,7 +581,8 @@ function advance (state) {
   return 'end'
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
-const PASSIVES = { 기사: { name: '가시방패', desc: '받는 피해 12% 반사(상시)' }, 세이지: { name: '원소스택', desc: '3타마다 원소폭발 ×1.3' }, 광전사: { name: '불굴', desc: '전투당 1회, 죽을 피해를 받으면 최대HP 10% 회복해 생존(직후 2턴 취약)' }, 스펠브레이커: { name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' } }
+// 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
+const PASSIVES = { 기사: [{ name: '가시방패', desc: '받는 피해 12% 반사(상시)' }], 세이지: [{ name: '원소스택', desc: '3타마다 원소폭발 ×1.3' }], 광전사: [{ name: '불굴', desc: '전투당 1회, 죽을 피해를 받으면 최대HP 10% 회복해 생존(직후 2턴 취약)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev
@@ -619,7 +619,7 @@ function playerOptions (state) {
   const { A, meName } = state; const sks = SKILLS[meName]
   // 인캐(instCast) 중 즉발 여부 힌트: 파이어볼=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
   const one = (slot) => { const nm = sks[slot].name; const u = playerCanUse(state, slot); const inst = A.instCast > 0 ? (nm === '파이어볼' ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; return { name: nm, base: SKILL_CD[nm], usable: u.usable, reason: u.reason, inst } }
-  return { canDefend: A.noDefend === 0, skills: sks.map((_, i) => one(i)), passive: PASSIVES[meName] || null }
+  return { canDefend: A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [] }
 }
 
 // ── UI + 내레이션 ──
@@ -827,7 +827,7 @@ function buildBattleRow (state) {
   ]
   const skillBtns = []
   o.skills.forEach((sk, i) => skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(skLbl(sk)).setStyle(ButtonStyle.Primary).setDisabled(!sk.usable)))
-  if (o.passive && skillBtns.length < 5) skillBtns.push(new ButtonBuilder().setCustomId(cid('passive')).setLabel(`🔒 ${o.passive.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true))
+  o.passives.forEach((p, i) => { if (skillBtns.length < 5) skillBtns.push(new ButtonBuilder().setCustomId(cid('passive' + i)).setLabel(`🔒 ${p.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true)) })
   const rows = [new ActionRowBuilder().addComponents(actionBtns)]
   if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5)))
   return rows

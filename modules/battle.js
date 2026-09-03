@@ -414,13 +414,13 @@ const SKILLS = {
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). castCarry(취소 잔여)로 -1턴
-    { name: '화염구', ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => ds.파이어볼딜 * (s.instCast ? 2.5 : 1), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(ds.파이어볼딜, f, df); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = ds.파이어볼딜; s.castName = '화염구'; s.note = '화염구 시전' } } },
+    { name: '화염구', ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => ds.파이어볼딜 * (s.instCast ? 2.5 : 1), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(ds.파이어볼딜, f, df); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = ds.파이어볼딜; s.castTotal = s.cast; s.castName = '화염구'; s.note = '화염구 시전' } } },
     // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. 취소돼도 castCarry 유지
-    { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => ds.파이어볼딜 * 0.9, exec: (s, f, ds, df) => { s.cast = Math.max(2, 9 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = ds.메테오딜; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
+    { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => ds.파이어볼딜 * 0.9, exec: (s, f, ds, df) => { s.cast = Math.max(2, 9 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = ds.메테오딜; s.castTotal = s.cast; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
     // 인스턴트캐스팅: 다음 시전 마법을 즉시시전으로(버프·딜 없음). 메테오엔 안 걸림
     { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => ds.파이어볼딜 * 1.3, exec: (s, f, ds, df) => { s.instCast = 3; s.cd[2] = 6; s.note = '인스턴트 캐스팅' } },
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
-    { name: '서리구', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => s.instCast ? ds.파이어볼딜 * 0.65 * 2.2 : (f.slow === 0 ? ds.파이어볼딜 * 0.65 + Math.max(10 - df.턴, 0) * 65 : ds.파이어볼딜 * 0.3), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = Math.round(ds.파이어볼딜 * 0.65); if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(dmg, f, df); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castName = '서리구'; s.note = '서리구 시전' } } }
+    { name: '서리구', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => s.instCast ? ds.파이어볼딜 * 0.65 * 2.2 : (f.slow === 0 ? ds.파이어볼딜 * 0.65 + Math.max(10 - df.턴, 0) * 65 : ds.파이어볼딜 * 0.3), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = Math.round(ds.파이어볼딜 * 0.65); if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(dmg, f, df); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } }
   ],
   볼트마법사: [
     // 볼트마법: 볼트 발사 주력기(시전 없음, 쿨1=매턴). 마스터라 원소당 5발(볼트마법조합 켜면 5+5=10). 스킬이라 침묵에 막힘
@@ -529,7 +529,7 @@ function mkFighter (d, name, ai) {
   // 게이지에 랜덤 미세오프셋 → 속도 동률 시 선공을 공정하게(플레이어 선공 고정 방지)
   return { name, hp: d.maxhp, gauge: d.턴 + Math.random() * 0.3, ai, defending: false, defCombo: 0, defendedLast: false,
     shield: d.마나경감 ? Math.round(d.maxhp * 0.22) : 0, vuln: 0, cd: skillStartCd(name), rage: 0, sunder: 0, weaponBroken: 0, luckBuff: 0,
-    cast: 0, castCarry: 0, castDmg: 0, castName: null, instVuln: 0, instCast: 0, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, chainBolt: 0, nextAmp: 0, didAttack: false,
+    cast: 0, castCarry: 0, castDmg: 0, castName: null, castTotal: 0, instVuln: 0, instCast: 0, stun: 0, noDefend: 0, missDown: 0, autoSpell: 0, chainBolt: 0, nextAmp: 0, didAttack: false,
     powBuff: 0, powMul: 1, thorns: 0, thornsPct: 0, blockUp: 0, thornsBase: (CHARS[name] && CHARS[name].반사) || 0,   // 공격강화 / 반사버프 / 방패막기강화 / 패시브반사(가시방패)
     dodgeUp: 0, magReflect: 0, elemStack: 0, 원소: (CHARS[name] && CHARS[name].원소) || false,   // 백스텝 회피버프 / 마법반사 / 원소스택(세이지 패시브)
     불굴: (CHARS[name] && CHARS[name].불굴) || false, undyingUsed: 0, reviveType: null, accBuff: 0,   // 광전사 불굴(죽을 피해→회복 생존) / 피의각성 명중보정(상대 회피↓)
@@ -592,7 +592,7 @@ function upkeep (self, foe, ds, df) {
   if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
   if (foe.sunder > 0) foe.sunder--
   // 시전 진행(캐스터 공통, 이름 무관): 카운트다운 후 발사. 지금은 화염구(ds.파이어볼딜)만
-  if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= spellDmg(self.castDmg || ds.파이어볼딜, foe, df); const fdmg = b - foe.hp; if (self.마나환류 && fdmg > 0 && rand() < 0.30) self.shield = Math.min(Math.round(ds.maxhp * 0.22), self.shield + Math.round(fdmg * 0.4)); return { type: 'castfire', dmg: fdmg, spell: self.castName || '화염구' } } return { type: 'cast', spell: self.castName || '화염구' } }
+  if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= spellDmg(self.castDmg || ds.파이어볼딜, foe, df); const fdmg = b - foe.hp; if (self.마나환류 && fdmg > 0 && rand() < 0.30) self.shield = Math.min(Math.round(ds.maxhp * 0.22), self.shield + Math.round(fdmg * 0.4)); return { type: 'castfire', dmg: fdmg, spell: self.castName || '화염구' } } return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal } }
   return null
 }
 function ctxFor (self, foe, ds, df) {
@@ -831,7 +831,7 @@ function narrateLine (ev, meName, oppName) {
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
     case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.`
-    case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다…`
+    case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다… ${ev.total ? `**[${ev.total - ev.left}/${ev.total}]**` : ''}`
     case 'castfire': { const sp = ev.spell || '화염구'; return ev.dmg > 0 ? `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}` : `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!` }
     case 'revive': return ev.rtype === 'undying'
       ? `🩸 ${ae} **${A}**${eun(A)} 불굴로 치명상을 버텨내며 일어섰다! (잠시 취약)`
@@ -902,7 +902,7 @@ function statusTags (f) {
   if (f.instVuln > 0) t.push('💥취약')
   if (f.autoSpell > 0) t.push('📜주문각인')
   if (f.healRegen > 0) t.push('💚재생')
-  if (f.cast > 0) t.push(`🔮${f.castName || '시전'}${f.cast}`)
+  if (f.cast > 0) { const tot = f.castTotal || f.cast; t.push(`🔮${f.castName || '시전'} ${tot - f.cast}/${tot}`) }
   if (f.instCast > 0) t.push(`⚡즉시시전${f.instCast}`)
   if (f.shield > 0) t.push(`🔷실드${f.shield}`)
   return t.join(' ')

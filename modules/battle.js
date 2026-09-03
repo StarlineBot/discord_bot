@@ -806,7 +806,9 @@ function statusTags (f) {
 }
 function buildBattleEmbed (state) {
   const { A, B, meName, oppName, memberId, meTitle, oppTitle, oppAI, oppNick } = state
-  const recent = state.log.slice(-8).map(ev => narrateLine(ev, meName, oppName))
+  const shown = state.shown == null ? state.log.length : state.shown   // 순차 공개: 공개된 로그까지만
+  const recent = state.log.slice(0, shown).slice(-8).map(ev => narrateLine(ev, meName, oppName))
+  const footer = state.revealing ? '⏳ 진행 중…' : '🎯 **네 차례!** 행동을 골라줘'
   const meS = statusTags(A), oppS = statusTags(B)
   const desc =
     // 상단: 상대
@@ -817,7 +819,7 @@ function buildBattleEmbed (state) {
     // 하단: 나 (버튼 바로 위 — 이 캐릭을 조작한다는 걸 명확히)
     `${CHARS[meName].emoji} **${meName}**: ${titleTag(meTitle)} <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
     `\`${hpBar(A.hp, state.maxA, 18)}\`\n` +
-    '🎯 **네 차례!** 행동을 골라줘'
+    footer
   return new EmbedBuilder().setTitle('⚔️ 듀얼 — 전투 중').setColor(0x3498db)
     .setDescription(desc.length > 4090 ? '…' + desc.slice(-4089) : desc)
 }
@@ -843,6 +845,32 @@ function buildBattleRow (state) {
   return rows
 }
 
+const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+// 순차 공개: 새 로그 엔트리를 1개씩(턴 종료마다) 편집 공개. 마지막에 버튼/결과 표시
+async function revealTurns (interaction, state, phase, ctx) {
+  const REVEAL_MS = 1000
+  const target = state.log.length
+  const start = state.shown || 0
+  const renderFinal = () => {
+    state.revealing = false; state.shown = target
+    if (phase === 'end') return { embeds: [buildResultEmbed(stateResult(state), ctx.me, ctx.opp, ctx.mid, ctx.ai)], components: [buildResultRow(ctx.me, ctx.opp, ctx.ai, ctx.mid)] }
+    return { embeds: [buildBattleEmbed(state)], components: buildBattleRow(state) }
+  }
+  try {
+    if (target <= start) { await interaction.update(renderFinal()); if (phase === 'end') SESSIONS.delete(ctx.msgId); return }
+    let acked = false
+    for (let s = start + 1; s <= target; s++) {
+      const last = (s === target)
+      state.shown = s
+      let payload
+      if (last) payload = renderFinal()
+      else { state.revealing = true; payload = { embeds: [buildBattleEmbed(state)], components: [] } }
+      if (!acked) { await interaction.update(payload); acked = true } else { await interaction.editReply(payload) }
+      if (!last) await sleep(REVEAL_MS)
+    }
+    if (phase === 'end') SESSIONS.delete(ctx.msgId)
+  } catch (e) { state.revealing = false; state.shown = target }   // 편집 실패 시 상태 정리(다음 클릭에서 복구)
+}
 async function handleButton (interaction, info) {
   if (interaction.user.id !== info.memberId) {
     await interaction.reply({ content: '이건 다른 사람의 듀얼이야~ `/듀얼`로 직접 시작해봐! ⚔️', ephemeral: true })
@@ -857,26 +885,16 @@ async function handleButton (interaction, info) {
     await interaction.update({ embeds: [buildSelectEmbed()], components: buildSelectRows(mid) })
   } else if (info.op === 'go') {
     sweepSessions()
-    const state = initBattle(info.me, info.opp, info.ai); state.memberId = mid
+    const state = initBattle(info.me, info.opp, info.ai); state.memberId = mid; state.shown = 0
     const phase = advance(state)
-    if (phase === 'end') {
-      SESSIONS.delete(interaction.message.id)
-      await interaction.update({ embeds: [buildResultEmbed(stateResult(state), info.me, info.opp, mid, info.ai)], components: [buildResultRow(info.me, info.opp, info.ai, mid)] })
-    } else {
-      SESSIONS.set(interaction.message.id, { state, me: info.me, opp: info.opp, ai: info.ai, memberId: mid, ts: Date.now() })
-      await interaction.update({ embeds: [buildBattleEmbed(state)], components: buildBattleRow(state) })
-    }
+    if (phase !== 'end') SESSIONS.set(interaction.message.id, { state, me: info.me, opp: info.opp, ai: info.ai, memberId: mid, ts: Date.now() })
+    await revealTurns(interaction, state, phase, { me: info.me, opp: info.opp, ai: info.ai, mid, msgId: interaction.message.id })
   } else if (info.op === 'act') {
     const sess = SESSIONS.get(interaction.message.id)
     if (!sess) { await interaction.reply({ content: '전투 정보가 만료됐어~ `/듀얼`로 다시 시작해줘! ⚔️', ephemeral: true }); return }
     sess.ts = Date.now()
     const phase = playerResolve(sess.state, info.c)
-    if (phase === 'end') {
-      SESSIONS.delete(interaction.message.id)
-      await interaction.update({ embeds: [buildResultEmbed(stateResult(sess.state), sess.me, sess.opp, mid, sess.ai)], components: [buildResultRow(sess.me, sess.opp, sess.ai, mid)] })
-    } else {
-      await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: buildBattleRow(sess.state) })
-    }
+    await revealTurns(interaction, sess.state, phase, { me: sess.me, opp: sess.opp, ai: sess.ai, mid, msgId: interaction.message.id })
   }
 }
 

@@ -133,7 +133,7 @@ function derive (c) {
     sigPen: c.힘 === 100, sigDodge: c.행운 === 100, sigTank: c.체력 === 100, sigEcho: c.민첩 === 100, sigEye: c.지능 === 100, sigAim: c.솜씨 === 100, base: c,
     hybrid: (c.힘 === 60 && c.지능 === 65 && c.체력 === 55),
     fusion: (c.힘 === 65 && c.지능 === 60 && c.체력 === 55),
-    크리: Math.min(10 + step(c.솜씨, 1) + step(c.행운, 3.5) + (w.크리보너스 || 0) * 100, 70) / 100, 리롤: Math.min(step(c.행운, 4), 50) / 100,
+    크리: Math.min(10 + step(c.솜씨, 1) + step(c.행운, 3.5) + (w.크리보너스 || 0) * 100, 70) / 100, 리롤: Math.min(step(c.행운, 4), 50) / 100, 천운: step(c.행운, 1.5) / 100,
     근성: step(c.체력, 4) / 100,
     방패가격: Math.round(Math.round(c.힘 * (1 + step(c.힘, 10) / 100)) * 0.5 + c.체력 * 1.8 + (step(c.힘, 3) + step(c.체력, 1)) * 2),
     힘절반: Math.round(c.힘 / 2), 돌진딜: Math.round(Math.round(c.힘 * (1 + step(c.힘, 10) / 100)) * 1.5),
@@ -159,10 +159,10 @@ function attack (A, D, dA, dD, defending, guaranteed) {
   // 기절 중엔 능동 방어(회피·천운·방패막기·무기막기·패링) 봉쇄. 빗맞힘(공격자 실수)·마나실드·반사·근성은 수동이라 유지
   const canDef = D.stun === 0
   const aimPierce = dA.sigAim && rand() < 0.15   // 솜씨100 시그(정밀사격): 30% 확률로 상대 회피 무효
-  if (canDef && !aimPierce && dD.sigDodge && !dA.hybrid && rand() < 0.30) { A.lastDef = '완전회피'; return 0 }
+  if (canDef && !aimPierce && dD.sigDodge && !dA.hybrid && rand() < 0.15) { A.lastDef = '완전회피'; return 0 }
   if (dA.hybrid) {
     // 본 공격 회피 판정(천운/리롤) — 볼트는 별개로 무조건 명중
-    const evaded = canDef && ((dD.sigDodge && rand() < 0.30) || luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)))
+    const evaded = canDef && ((dD.sigDodge && rand() < 0.15) || luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)))
     let bolt = 0, pendingAmp = 0
     if (A.autoSpell > 0 && rand() < 0.30) {   // 볼트: 마법이라 발동 시 회피 무관 명중
       const r = rand()
@@ -264,7 +264,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     }
     if (dA.무기.스턴확률 && rand() < dA.무기.스턴확률) applyCC(D, 'stun', 1)   // 양둔: 확률 스턴
   } else {
-    if (canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '천운'; return 0 }
+    if (canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.천운))) { A.lastDef = '천운'; return 0 }   // 마법 완전회피 = 행운 10당 1%(리롤과 분리)
     // 연쇄주문(완드): 볼트 2발, 발당 약하게(총합 소폭↑) + 발당 빗맞힘·크리 독립. chainBolt=0이면 기존과 동일.
     const bolts = A.chainBolt > 0 ? 2 : 1
     const per = A.chainBolt > 0 ? 0.55 : 1

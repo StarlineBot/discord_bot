@@ -127,7 +127,7 @@ function tempoVal (w, c) { return w.tempoStat === '지능' ? c.지능 : w.tempoS
 function derive (c) {
   const w = WEAPONS[c.무기] || {}
   return {
-    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100) * (c.체력 === 100 && w.hands === 1 ? 1.3 : 1) * (c.솜씨 === 100 && c.무기 === '활' ? 1.05 : 1)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
+    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100) * (c.체력 === 100 && w.hands === 1 ? 1.3 : 1) * (c.솜씨 === 100 && c.무기 === '활' ? 1.05 : 1) * (c.행운 === 100 && c.무기 === '주사위' ? 1.2 : 1)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     물방: Math.min((step(c.힘, 3) + step(c.체력, 1)) / 100 + (w.물방보너스 || 0) + (c.마도갑주 || 0), 0.80), 마방: Math.min(Math.min(30 + step(c.지능, 3), 70) / 100 + (w.마방보너스 || 0), 0.85),
     maxhp: maxHp(c),
     명중: Math.min(35 + step(c.솜씨, 5), c.솜씨 === 100 ? 90 : 80) / 100, 물회: Math.min(10 + step(c.민첩, 2.5), 50) / 100 + (w.회피보너스 || 0), 마회: step(c.민첩, 3) / 100,
@@ -651,7 +651,7 @@ function preview (name) {
   const c = CHARS[name]; const w = WEAPONS[c.무기] || {}
   return {
     hp: maxHp(c),
-    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100) * (c.체력 === 100 && w.hands === 1 ? 1.3 : 1) * (c.솜씨 === 100 && c.무기 === '활' ? 1.05 : 1)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
+    물공: Math.round(c.힘 * (1 + step(c.힘, 10) / 100) * (c.체력 === 100 && w.hands === 1 ? 1.3 : 1) * (c.솜씨 === 100 && c.무기 === '활' ? 1.05 : 1) * (c.행운 === 100 && c.무기 === '주사위' ? 1.2 : 1)), 마공: Math.round(c.지능 * (1 + step(c.지능, 10) / 100)),
     // 턴: 무기 반영(tempoVal) — derive와 동일 공식
     턴: Math.round(Math.max((10 - step(tempoVal(w, c), 0.7)) * (w.tempoMul || 1), 2) * 10) / 10
   }

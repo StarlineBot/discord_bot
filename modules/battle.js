@@ -631,11 +631,11 @@ function playerOptions (state) {
 
 // ── UI + 내레이션 ──
 const BAR = 12
-function hpBar (cur, max) {
+function hpBar (cur, max, len = BAR) {
   cur = Math.max(0, Math.round(cur))
   const pct = Math.max(0, Math.min(1, cur / max))
-  const fill = Math.round(pct * BAR)
-  return '█'.repeat(fill) + '░'.repeat(BAR - fill) + ` ${cur}/${max} (${Math.round(pct * 100)}%)`
+  const fill = Math.round(pct * len)
+  return '█'.repeat(fill) + '░'.repeat(len - fill) + ` ${cur}/${max} (${Math.round(pct * 100)}%)`
 }
 // 한글 받침 판별 → 조사 자동 선택
 function hasBatchim (w) { if (!w) return false; const c = w.charCodeAt(w.length - 1); if (c < 0xac00 || c > 0xd7a3) return false; return (c - 0xac00) % 28 !== 0 }
@@ -809,11 +809,14 @@ function buildBattleEmbed (state) {
   const recent = state.log.slice(-8).map(ev => narrateLine(ev, meName, oppName))
   const meS = statusTags(A), oppS = statusTags(B)
   const desc =
-    `${CHARS[meName].emoji} **${meName}**: ${titleTag(meTitle)} <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
-    `\`${hpBar(A.hp, state.maxA)}\`\n` +
+    // 상단: 상대
     `${CHARS[oppName].emoji} **${oppName}**: ${titleTag(oppTitle)} **${oppNick}**${oppS ? ' · ' + oppS : ''} · ${oppAI} AI\n` +
-    `\`${hpBar(B.hp, state.maxB)}\`\n\n` +
+    `\`${hpBar(B.hp, state.maxB, 18)}\`\n\n` +
+    // 중앙: 로그
     (recent.length ? recent.join('\n') + '\n\n' : '') +
+    // 하단: 나 (버튼 바로 위 — 이 캐릭을 조작한다는 걸 명확히)
+    `${CHARS[meName].emoji} **${meName}**: ${titleTag(meTitle)} <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
+    `\`${hpBar(A.hp, state.maxA, 18)}\`\n` +
     '🎯 **네 차례!** 행동을 골라줘'
   return new EmbedBuilder().setTitle('⚔️ 듀얼 — 전투 중').setColor(0x3498db)
     .setDescription(desc.length > 4090 ? '…' + desc.slice(-4089) : desc)

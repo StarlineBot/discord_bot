@@ -263,7 +263,9 @@ function attack (A, D, dA, dD, defending, guaranteed) {
       if (D.sunder > 0) h *= 1.15
       if (rand() < 0.30 && rand() >= (dA.비껴무효 + (A.luckBuff > 0 ? 0.2 : 0))) { h *= 0.70; A.grazed = true }
       let crit = i < baseHits && luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))   // 연속타격 추가타(i>=baseHits)는 크리 제외
+      if (i === 0 && A.sigEcho) A.echoStack = (A.echoStack || 0) + 1   // 잔상: 공격마다 스택
       if (A.echoReady) { crit = true; A.echoReady = 0 }
+      else if (i === 0 && A.sigEcho && A.echoStack >= 3) { crit = true; A.echoStack = 0 }   // 잔상: 3타마다 확정 크리(회피 없어도 딜 기회)
       if (crit) { h *= ((dA.무기.크리배율 || dA.물크기본) + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1); A.lastCrit = true }   // 무기 크리배율이 base 덮어씀(활2·단검1.8)
       dmg += h
     }
@@ -480,7 +482,7 @@ function mkFighter (d, name, ai) {
     연속타격: (CHARS[name] && CHARS[name].연속타격) || false,   // 도적 패시브: 공격 시 확률적 추가타
     diceAdv: 0,   // 한탕 2d20: 주사위를 2개 굴려 높은 값(어드밴티지) 버프
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
-    sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, revive: d.sigTank ? 1 : 0 }
+    sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, echoStack: 0, revive: d.sigTank ? 1 : 0 }
 }
 function reviveCheck (f, d) {
   // 불굴(광전사): 죽을 피해 → 회복하며 생존. 회복량 점감(15/10/5%) 후 소진 → 진짜 죽음. 직후 2턴 취약(instVuln)

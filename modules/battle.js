@@ -406,7 +406,7 @@ const SKILLS = {
     { name: '방해', ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 150 : x.foeTurn * 0.6), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }   // guaranteed=true: 회피/빗나감 무시(확정 명중). 시전 끊으면 brokeCast 표식
   ],
   광전사: [
-    { name: '재생의광기', ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.65, score: (s, f, ds, df, x) => x.est * 3, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.07)); s.healRegen = 3; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[0] = 5; s.note = '회복' } },
+    { name: '재생의광기', ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.65, score: (s, f, ds, df, x) => x.est * 3, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.07)); s.healRegen = 3; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[0] = 5; s.note = '회복' }, stunnable: true, stunExec: (s, f, ds, df) => { const before = s.hp; s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.07)); s.healRegen = 3; s.cd[0] = 5; return { type: 'skill', name: '재생의광기', dmg: 0, note: '기절 중 회복', attacked: false, heal: Math.round(s.hp - before), selfDmg: 0 } } },
     // 피의각성: 체력 10% 소모 → 3턴간 공격력 ×1.35 + 명중보정(상대 회피↓)
     { name: '피의각성', ready: (s, f, ds, df) => s.cd[1] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.4, exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[1] = 5; s.note = '피의각성' } }
   ],
@@ -428,7 +428,7 @@ const SKILLS = {
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
     { name: '서리구', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => s.instCast ? spellBase(ds, '서리구') * 2.2 : (f.slow === 0 ? spellBase(ds, '서리구') + Math.max(10 - df.턴, 0) * 65 : spellBase(ds, '서리구') * 0.45), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= spellDmg(dmg, f, df); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
-    { name: '충격파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => spellBase(ds, '충격파') + x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 2.5, exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[0] = 5; s.note = '충격파' } }
+    { name: '충격파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => spellBase(ds, '충격파') + x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 2.5, exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[0] = 5; s.note = '충격파' }, stunnable: true }
   ],
   볼트마법사: [
     // 볼트마법: 볼트 발사 주력기(시전 없음, 쿨1=매턴). 마스터라 원소당 5발(볼트마법조합 켜면 5+5=10). 스킬이라 침묵에 막힘
@@ -601,7 +601,7 @@ function upkeep (self, foe, ds, df) {
     if (self.cast > 0) { self.cast = 0; self.castCarry = 1 }   // 그 외 시전은 기절에 즉시 취소(충전 일부 잔존)
     self.stun--; self.defCombo = 0; self.defendedLast = false; self.stunned = true
     // 행동불능 중 쓸 스킬(마법사 충격파 / 광전사 재생의광기)이 있으면 플레이어·AI가 선택, 없으면 자동 스킵
-    if (!stunSkill(self, ds)) return { type: 'stun', stunLeft: self.stun }
+    if (!stunSkill(self, foe, ds, df)) return { type: 'stun', stunLeft: self.stun }
     return null   // 제한된 턴 진행 — self.stunned=true 로 옵션 제한(공격/일반스킬 불가, 충격파/재생 or 턴넘기기)
   }
   // 시전 진행(캐스터 공통): 카운트다운 후 발사
@@ -621,25 +621,11 @@ function execAttack (self, foe, ds, df) { const fb = foe.hp, psh = foe.shield; l
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
 const BUFF_SKILLS = new Set(['광폭화', '인스턴트캐스팅', '2d20', '볼트마법조합', '방패들기', '룬각인', '피의각성', '마법반사', '오토스펠'])
-// 행동불능(기절) 중 사용 가능한 스킬 이름 — 없으면 null(자동 스킵)
-function stunSkill (self, ds) {
-  if (self.name === '마법사' && self.cd[0] === 0) return '충격파'
-  if (self.name === '광전사' && self.cd[0] === 0 && self.hp < ds.maxhp * 0.65) return '재생의광기'
-  return null
-}
-// 기절 중 스킬 실행(제한판): 충격파=위기탈출(딜+게이지초기화+둔화) / 재생의광기=회복만(공격 없음)
-function execStunSkill (self, foe, ds, df) {
-  if (self.name === '마법사') {
-    let d = spellDmg(spellBase(ds, '충격파'), foe, df); d = absorb(foe, d); foe.hp -= d
-    foe.gauge = Math.max(foe.gauge, df.턴); applyCC(foe, 'slow', 1); foe.slowSec = Math.max(foe.slowSec, 1); self.cd[0] = 5
-    return { type: 'skill', name: '충격파', dmg: d, note: '기절 중 충격파', attacked: false, selfDmg: 0 }
-  }
-  if (self.name === '광전사') {
-    const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.maxhp * 0.07)); self.healRegen = 3; self.cd[0] = 5
-    return { type: 'skill', name: '재생의광기', dmg: 0, note: '기절 중 회복', attacked: false, heal: Math.round(self.hp - before), selfDmg: 0 }
-  }
-  return { type: 'skip' }
-}
+// 행동불능(기절) 중 쓸 수 있는 스킬 — 스킬의 stunnable 플래그 + 기존 ready 조건 재사용(하드코딩 제거). 없으면 null
+function stunUsableSkill (self, foe, ds, df) { return (SKILLS[self.name] || []).find(s => s.stunnable && s.ready(self, foe, ds, df)) || null }
+function stunSkill (self, foe, ds, df) { const sk = stunUsableSkill(self, foe, ds, df); return sk ? sk.name : null }
+// 기절 중 실행: 동작이 다르면 stunExec(예: 재생의광기=회복만), 아니면 일반 exec 재사용(충격파)
+function execStunSkill (self, foe, ds, df) { const sk = stunUsableSkill(self, foe, ds, df); if (!sk) return { type: 'skip' }; return sk.stunExec ? sk.stunExec(self, foe, ds, df) : execSkill(self, foe, ds, df, sk) }
 function execSkip (self) { self.defending = false; return { type: 'skip' } }   // 턴넘기기(이점 미정 — 일단 순수 패스)
 function aiTurn (self, foe, ds, df) {
   const forced = upkeep(self, foe, ds, df); if (forced) return forced
@@ -764,9 +750,9 @@ function playerCanUse (state, slot) {
   return { usable: true }
 }
 function playerOptions (state) {
-  const { A, meName, dA } = state; const sks = SKILLS[meName]
+  const { A, B, meName, dA, dB } = state; const sks = SKILLS[meName]
   const stunned = A.stunned === true
-  const stunSk = stunned ? stunSkill(A, dA) : null   // 기절 중 유일하게 쓸 수 있는 스킬 이름
+  const stunSk = stunned ? stunSkill(A, B, dA, dB) : null   // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
   const one = (slot) => { const nm = sks[slot].name; let u = playerCanUse(state, slot); if (stunned) u = (nm === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; return { name: nm, base: SKILL_CD[nm], usable: u.usable, reason: u.reason, inst } }
   return { canDefend: !stunned && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned }

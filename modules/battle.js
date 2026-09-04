@@ -454,15 +454,15 @@ const SKILLS = {
     // 약점봉인: 순수 CC(딜 없음) — 상대 최고 스탯에 맞는 군중제어만
     { name: '약점봉인', ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => x.foeTurn * 2.5, exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 5; s.note = cc } },
     // 역장베기: 혼합 평타딜(확정명중, 방어로 깎임) + 역장피해(마공×1.5 flat, 물방·마방 무시 관통딜 — D&D force). 순수 딜기
-    { name: '역장베기', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => x.est * 1.8, exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true); const force = Math.round(ds.마공 * 1.5); d = absorb(f, d + force); f.hp -= d; s.cd[1] = 4; s.note = '역장베기' } },
+    { name: '역장베기', dmgType: '역장', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => x.est * 1.8, exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true); const force = Math.round(ds.마공 * 1.5); d = absorb(f, d + force); f.hp -= d; s.cd[1] = 4; s.note = '역장베기' } },
     // 인챈트: 3턴간 공격력 ×1.3 (마검사 딜 보강)
     { name: '룬각인', ready: (s, f, ds, df) => s.cd[2] === 0 && s.powBuff === 0, score: (s, f, ds, df, x) => x.est * 1.3, exec: (s, f, ds, df) => { s.powBuff = 4; s.powMul = 1.8; s.cd[2] = 4; s.note = '룬각인' } },   // 순수버프(공격 제거), 지속4=쿨4(사용성↑)
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
-    { name: '역장폭발', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => x.est * 2, exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 2.5); const d = absorb(f, force); f.hp -= d; s.instVuln = 2; s.cd[3] = 5; s.note = '역장폭발' } }
+    { name: '역장폭발', dmgType: '역장', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => x.est * 2, exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 2.5); const d = absorb(f, force); f.hp -= d; s.instVuln = 2; s.cd[3] = 5; s.note = '역장폭발' } }
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
-    { name: '마나소각', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.마공 * (f.shield > 0 ? 0.95 : 0.42), exec: (s, f, ds, df) => { const had = f.shield > 0; f.shield = 0; let d = Math.round(ds.마공 * (had ? 0.95 : 0.42)); f.hp -= d; if (had) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, Math.round(df.턴 * 0.2 * 10) / 10) } s.cd[0] = 5; s.note = had ? '마나소각' : '마나번' } },   // 역장피해(마방 무시 flat): 실드 즉시파괴 + 실드있었으면 마공×3 & 2턴 20% 턴지연 / 없으면 마공×1.5
+    { name: '마나소각', dmgType: '역장', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.마공 * (f.shield > 0 ? 0.95 : 0.42), exec: (s, f, ds, df) => { const had = f.shield > 0; f.shield = 0; let d = Math.round(ds.마공 * (had ? 0.95 : 0.42)); f.hp -= d; if (had) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, Math.round(df.턴 * 0.2 * 10) / 10) } s.cd[0] = 5; s.note = had ? '마나소각' : '마나번' } },   // 역장피해(마방 무시 flat): 실드 즉시파괴 + 실드있었으면 마공×3 & 2턴 20% 턴지연 / 없으면 마공×1.5
     // 시전파괴: 상대 시전 확정 차단 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
     { name: '시전파괴', ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 300 : 150), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } },   // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
@@ -615,7 +615,7 @@ function ctxFor (self, foe, ds, df) {
 }
 // 불굴 버스트 완충: 단일 피격이 최대HP 15%↑면 즉시 6% 회복(생존 시). df=피격자 파생. 딜 표기는 회복 전 값 사용
 function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + Math.round(df.maxhp * 0.04)) }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp, sb = self.hp, psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } bigHitHeal(foe, df, dealt); return { type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp, sb = self.hp, psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } bigHitHeal(foe, df, dealt); return { type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
 function execAttack (self, foe, ds, df) { const fb = foe.hp, psh = foe.shield; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; const dealt = Math.max(fb - foe.hp, 0); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } bigHitHeal(foe, df, dealt); return { type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), diceAtk: self.diceAtk, diceDef: self.diceDef } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
@@ -819,7 +819,6 @@ function buildMatchupRow (me, opp, ai, memberId) {
 }
 
 // 이벤트 → 자연스러운 RPG 로그 한 줄
-const FORCE_SKILLS = new Set(['역장베기', '역장폭발', '마나소각'])   // 역장피해(물방·마방 무시) 스킬 — 나레이션에 🟣 마커
 function narrateLine (ev, meName, oppName) {
   const A = ev.who === 'me' ? meName : oppName
   const T = ev.who === 'me' ? oppName : meName
@@ -846,7 +845,7 @@ function narrateLine (ev, meName, oppName) {
   const defTag = (ev.def === '방패막기' || ev.def === '무기막기') ? ` 🛡️*${T} ${ev.def}!*` : ''
   const brokeTag = ev.broke ? ` ⚡**${T} 시전 중단!**` : ''
   const meteorTag = ev.meteorImmune ? ` 🌠**하지만 ${T}의 메테오 시전은 막을 수 없다!**` : ''
-  const forceTag = (ev.type === 'skill' && FORCE_SKILLS.has(ev.name)) ? '🟣' : ''   // 역장피해 마커(방어무시)
+  const forceTag = ev.dmgType === '역장' ? '🟣' : ''   // 역장피해 마커(방어무시) — 스킬 dmgType 기반(하드코딩 제거)
   const shieldTag = ev.shieldAbsorb > 0 ? ` 🔷*마나실드 ${ev.shieldAbsorb} 흡수*` : ''   // 피격으로 상대 시전 차단
   const grazeTag = (ev.grazed && !ev.crit) ? ` 🌫️*빗맞음*` : ''   // 비껴맞음(×0.70) — 치명타와 공존 시 표기 생략
   const diceTag = (ev.diceAtk ? ` 🎲**공격 ${ev.diceAtk}**${ev.diceAtk === 20 ? '💥대성공!' : ev.diceAtk === 1 ? '💢대실패!' : ''}` : '') +

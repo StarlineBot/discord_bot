@@ -20,6 +20,7 @@ export default [
       'scripts/**',
       'temp/**',
       'static/**',
+      'docs/**',
       '**/*.json'
     ]
   },

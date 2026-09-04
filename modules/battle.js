@@ -152,10 +152,15 @@ function derive (c) {
 }
 function luckRoll (s, ls, p) { if (s) return true; if (ls.used) return false; if (rand() < p) { ls.used = true; return true } return false }
 function gutsMul (d, hp, df) { const p = hp / df.maxhp; if (p >= 0.5) return 1; return 1 - df.근성 * ((0.5 - p) / 0.5) }
+// 방어 적용(관통 통합): 방어 × (1 − 관통) 만큼만 감소. 관통 0=방어 전부, 1=방어무시(역장)
+function defMul (def, pen) { return 1 - def * (1 - Math.min(pen || 0, 1)) }
 function attack (A, D, dA, dD, defending, guaranteed) {
   const magic = dA.마공 > dA.물공
   const ls = { used: false }, lsD = { used: false }
   let dmg, 고정 = 0
+  // 관통값 통합: 물리=힘100시그(0.30)+무기관통 / 마법=심연의(0.25). (기존 sigPen·tMPen·무기.관통과 동치)
+  const 물관통 = 1 - (dA.sigPen ? 0.7 : 1) * (1 - (dA.무기.관통 || 0))
+  const 마관통 = A.tMPen ? 0.25 : 0
   A.hitPh = null; A.hitMg = null; A.boltName = null; A.boltHits = null; A.boltNames = null; A.boltShots = 0; A.boltCombo = 0; A._braw = null; A._bnames = null; A.lastDef = null; A.didAttack = true; A.brokeCast = false; A.lastElem = false; A.lastRefl = null; A.grazed = false; A.diceAtk = 0; A.diceDef = 0   // 혼합 내역 + 볼트명 + 연쇄볼트 발당 + 방어판정 + 공격시도 + 시전중단 표식 + 빗맞음 + 주사위
   // 기절 중엔 능동 방어(회피·천운·방패막기·무기막기·패링) 봉쇄. 빗맞힘(공격자 실수)·마나실드·반사·근성은 수동이라 유지
   const canDef = D.stun === 0 && D.cast === 0   // 기절 또는 시전 중엔 능동 방어(회피·천운·막기·주사위방어) 불가. 마나실드·반사·근성은 유지
@@ -166,7 +171,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     const evaded = canDef && ((dD.sigDodge && rand() < 0.15) || luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)))
     let bolt = 0, pendingAmp = 0
     if (A.autoSpell > 0 && rand() < 0.90) {   // 볼트: 마법이라 발동 시 회피 무관 명중. 오토스펠 켜면 거의 확정 발동(0.90), 1~5연타 랜덤(5=10%), 발당 감쇠(0.5)
-      const n = rollBoltCount(); const mdef = (1 - dD.마방 * (A.tMPen ? 0.75 : 1)); const braw = []; const bnames = []
+      const n = rollBoltCount(); const mdef = defMul(dD.마방, 마관통); const braw = []; const bnames = []
       const types = ['파이어볼트', '아이스볼트', '라이트닝볼트']
       const bn = types[Math.floor(rand() * 3)]                      // 프록당 원소 1종(원소당) — 원소 조합은 볼트마법조합 스킬 전용
       pendingAmp = BOLT_AMP[bn]
@@ -186,8 +191,8 @@ function attack (A, D, dA, dD, defending, guaranteed) {
       if (A.echoReady) { crit = true; A.echoReady = 0 }
       const cP = crit ? ((dA.무기.크리배율 || dA.물크기본) + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1) : 1
       const cM = crit ? ((dA.무기.크리배율 || dA.마크기본) + rand() * dA.크랜폭 * 0.6) * (A.luckBuff > 0 ? 2 : 1) : 1
-      ph = dA.물공 * (dA.무기.물타 || 1.1) * (block ? block : wBlk) * (1 - dD.물방 * (dA.sigPen ? 0.7 : 1)) * cP   // 물리 스윙(물리판정)
-      mg = dA.무기.마타 ? dA.마공 * dA.무기.마타 * (block ? block : 1) * (1 - dD.마방 * (A.tMPen ? 0.75 : 1)) * cM : 0   // 검오브(마검사)=마법 혼합 / 마도서(세이지)=0(볼트로 대체)
+      ph = dA.물공 * (dA.무기.물타 || 1.1) * (block ? block : wBlk) * defMul(dD.물방, 물관통) * cP   // 물리 스윙(물리판정)
+      mg = dA.무기.마타 ? dA.마공 * dA.무기.마타 * (block ? block : 1) * defMul(dD.마방, 마관통) * cM : 0   // 검오브(마검사)=마법 혼합 / 마도서(세이지)=0(볼트로 대체)
     }
     if (evaded && bolt <= 0) { A.lastDef = '회피'; return 0 }   // 완전회피 + 볼트 미발동 → 무피해
     let d = ph + mg + bolt - 고정
@@ -262,12 +267,11 @@ function attack (A, D, dA, dD, defending, guaranteed) {
       const dd = d20adv(D.diceAdv > 0); A.diceDef = dd
       block = dd === 1 ? 2.0 : dd === 20 ? 0.001 : Math.max(1.0 - (dd - 2) * 0.06, 0.05); A.lastDef = '주사위방어'
     } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = 0.50; A.lastDef = '무기막기' }
-    const penMul = (dA.sigPen ? 0.70 : 1) * (1 - (dA.무기.관통 || 0))   // 양도끼 관통 + 힘100 시그
     dmg = 0
     for (let i = 0; i < hits; i++) {
       let h = dA.무기.주사위 ? (atkD === 1 ? 0 : dA.물공 * (atkD === 20 ? 3 : atkD / 13)) : dA.물공 * physSwing(dA) * dA.기본공   // 주사위=d20 배율 / 그 외 기본공×physSwing
       h *= block ? block : wblk
-      h *= (1 - dD.물방 * penMul)
+      h *= defMul(dD.물방, 물관통)   // 물방 × (1-물관통)
       if (D.sunder > 0) h *= 1.15
       if (rand() < 0.30 && rand() >= (dA.비껴무효 + (A.luckBuff > 0 ? 0.2 : 0))) { h *= 0.70; A.grazed = true }
       let crit = i < baseHits && luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))   // 연속타격 추가타(i>=baseHits)는 크리 제외
@@ -293,7 +297,7 @@ function attack (A, D, dA, dD, defending, guaranteed) {
     let mBlock = 1
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' }   // 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
     dmg = 0; const braw = []; const bnames = []
-    const mdef = (1 - dD.마방 * (A.tMPen ? 0.75 : 1))
+    const mdef = defMul(dD.마방, 마관통)
     for (let i = 0; i < bolts; i++) {
       let b, bn = null
       if (boltPlan) { bn = boltPlan[i].bn; b = boltDmg(dA, A, bn, mdef) }   // 볼트마법(공통 공식)

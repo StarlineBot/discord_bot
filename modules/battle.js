@@ -417,7 +417,7 @@ const DEBUFFS = [
 const SKILLS = {
   전사: [
     // 방어파괴: 딜 + 상대 2턴 받는뎀↑ + 상대 최대체력 6% 고정딜(HP스케일 관통)
-    { name: '방어파괴', ready: (s, f, ds, df) => s.cd[0] === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2 + df.maxhp * 0.09, exec: (s, f, ds, df) => { f.sunder = 2; const d = attack(s, f, ds, df, f.defending); f.hp -= d + ds.힘절반 + Math.round(df.maxhp * 0.09); s.cd[0] = 3 } },
+    { name: '방어파괴', ready: (s, f, ds, df) => s.cd[0] === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2 + df.maxhp * 0.09, exec: (s, f, ds, df) => { f.sunder = 2; let d = attack(s, f, ds, df, f.defending) + ds.힘절반 + Math.round(df.maxhp * 0.09); d = absorb(f, d); f.hp -= d; s.cd[0] = 3 } },
     { name: '돌진', ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => ds.돌진딜 * (1 - df.물방) + x.foeTurn, exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.1); s.cd[1] = 6; s.note = '기절' } },
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
     { name: '방해', ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 150 : x.foeTurn * 0.6), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }   // guaranteed=true: 회피/빗나감 무시(확정 명중). 시전 끊으면 brokeCast 표식
@@ -490,7 +490,7 @@ const SKILLS = {
   ],
   세이지: [
     { name: '오토스펠', ready: (s, f, ds, df) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => x.est * 2.2, exec: (s, f, ds, df) => { s.autoSpell = 4; s.cd[0] = 3; s.note = '주문각인' } },   // 순수버프(공격 제거)
-    { name: '연환주문', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => x.est * 2 + df.maxhp * 0.06, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 2); d = absorb(f, d); f.hp -= d + Math.round(df.maxhp * 0.06); s.cd[1] = 4 } }   // +상대 최대HP 6% 고정딜(탱버스터)
+    { name: '연환주문', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => x.est * 2 + df.maxhp * 0.06, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 2) + Math.round(df.maxhp * 0.06); d = absorb(f, d); f.hp -= d; s.cd[1] = 4 } }   // +상대 최대HP 6% 고정딜(탱버스터)
   ],
   한탕주의자: [
     // 2d20: 주사위 2개(2~40) 합 비례 도박 딜 — 더블20=대박 / 뻥=꽝. HP% 기반(방어감소는 받되 실드 흡수)

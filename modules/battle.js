@@ -13,7 +13,7 @@ const CHARS = {
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', id: '스태프 마법사' },
   볼트마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', boltMaster: true, id: '볼트 마법사' },
   도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 40, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
-  명사수: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, 무기: '활', id: '명중/크리/저격' },
+  사냥꾼: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, 무기: '활', id: '저격/덫/카이팅' },
   한탕주의자: { emoji: '🃏', 힘: 25, 지능: 20, 체력: 40, 민첩: 85, 솜씨: 35, 행운: 100, 무기: '주사위', id: '고속 도박' },
   세이지: { emoji: '📖', 힘: 60, 지능: 65, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, 무기: '마도서', 원소: true, id: '혼합 하이브리드' },
   스펠블레이드: { emoji: '⚡', 힘: 65, 지능: 60, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, 무기: '검오브', id: '혼합 관통 스펠블레이드' },
@@ -54,7 +54,7 @@ const TUNE = { hpScale: 1, skillStart: 2 } // HP×1.6(순삭 완화, 밸런스 �
 // 각 캐릭 슬롯별 "첫 사용까지 대기" 쿨 (perskill 모드). 스킬 실제 쿨과 유사, 장쿨(암습10/인캐15)은 완화.
 const CDINIT = {
   전사: [3, 5], 광전사: [3, 5], 기사: [3, 5], 마법사: [3, 6], 도적: [6, 5],
-  명사수: [4, 4], 스펠블레이드: [3, 5], 세이지: [3, 4], 한탕주의자: [3, 3]
+  사냥꾼: [4, 4], 스펠블레이드: [3, 5], 세이지: [3, 4], 한탕주의자: [3, 3]
 }
 function startCd (name) {
   if (TUNE.skillStart === 'perskill') return CDINIT[name].slice()
@@ -443,10 +443,12 @@ const SKILLS = {
     // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
     { name: '입막음', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 200 : (df.마공 > df.물공 && f.silence === 0 ? x.foeTurn * 1.2 : 0)), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
   ],
-  명사수: [
+  사냥꾼: [
     { name: '약점간파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * 1.4 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = ds.물공 * 1.4 * ((ds.무기.크리배율 || ds.물크기본) + rand() * ds.크랜폭) * (1 - df.물방); if (df.마나경감) d *= (1 - df.마나경감); if (f.instVuln > 0) d *= 1.5; d = guts(d, f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '치명타' } },
     { name: '견제사격', ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.1, exec: (s, f, ds, df) => { const d = attack(s, f, ds, df, f.defending); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } },
-    { name: '연발사격', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.est * 1.4, exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending) * 0.5); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.cd[2] = 4; s.note = '연발' } }
+    { name: '연발사격', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.est * 1.4, exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending) * 0.5); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.cd[2] = 4; s.note = '연발' } },
+    // 사냥꾼덫: 예약형 — 설치 후 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈). 딜은 출혈로. 카이팅/거리 유지
+    { name: '사냥꾼덫', ready: (s, f, ds, df) => s.cd[3] === 0 && f.trap === 0 && f.bleed === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.8, exec: (s, f, ds, df) => { f.trap = 2; f.trapBleed = Math.round(ds.물공 * 0.3); s.cd[3] = 5; s.note = '덫 설치' } }
   ],
   스펠블레이드: [
     // 약점봉인: 순수 CC(딜 없음) — 상대 최고 스탯에 맞는 군중제어만
@@ -493,7 +495,7 @@ const CUSTOM_DEFS = {
 }
 const SKILL_STARTCD_CUSTOM = { 속박: 2 } // 오프닝 CC 봉인
 // 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
-const SKILL_CD = { 방어파괴: 3, 돌진: 6, 광폭화: '버프', 재생의광기: 5, 방패밀쳐내기: 3, 방패가격: 4, 도발: 5, 화염구: '시전', 메테오: '시전', 서리구: '시전', 충격파: 5, 인스턴트캐스팅: '버프', 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 약점봉인: 5, 역장베기: 5, 오토스펠: 3, 연환주문: 4, '2d20': '버프', 동전던지기: 2, 볼트마법: 1, '볼트마법조합': '버프', 마력충전: 5, 마나소각: 5, 시전파괴: 5, 무기파괴: 5, 파훼: 4, 방해: 5, 방패들기: '버프', 룬각인: '버프', 역장폭발: 5, 피의각성: '버프', 메테오: '시전', 백스텝: '버프', 입막음: 5, 연발사격: 4, 룰렛: 3, 마법반사: '버프' }
+const SKILL_CD = { 방어파괴: 3, 돌진: 6, 광폭화: '버프', 재생의광기: 5, 방패밀쳐내기: 3, 방패가격: 4, 도발: 5, 화염구: '시전', 메테오: '시전', 서리구: '시전', 충격파: 5, 인스턴트캐스팅: '버프', 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 사냥꾼덫: 5, 약점봉인: 5, 역장베기: 5, 오토스펠: 3, 연환주문: 4, '2d20': '버프', 동전던지기: 2, 볼트마법: 1, '볼트마법조합': '버프', 마력충전: 5, 마나소각: 5, 시전파괴: 5, 무기파괴: 5, 파훼: 4, 방해: 5, 방패들기: '버프', 룬각인: '버프', 역장폭발: 5, 피의각성: '버프', 메테오: '시전', 백스텝: '버프', 입막음: 5, 연발사격: 4, 룰렛: 3, 마법반사: '버프' }
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
 const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
@@ -505,7 +507,7 @@ const SKILL_DESC = {
   화염구: '시전 마법 — 마공 기반 딜(인캐로 즉발 가능)', 메테오: '긴 시전 → 초대형 한 방(인캐 불가)', 서리구: '짧은 시전 → 딜(약) + 상대 3턴 둔화(인캐로 즉발)', 충격파: '즉발 소량딜 + 상대 현재 턴 진행 초기화 + 1턴 둔화(카이팅)', 인스턴트캐스팅: '3턴간 다음 시전을 즉시시전(메테오 제외)',
   암습: '상대 3턴 기절 + 진입딜', 처형: '상대 HP25%↓면 물공×5 대박딜',
   약점간파: '확정 크리 + 방어 대부분 무시', 견제사격: '딜 + 상대 2턴 명중-20%',
-  약점봉인: '상대 최고 스탯에 맞는 군중제어 (순수 CC·딜 없음)', 방패들기: '3턴간 방패막기 경감 대폭↑', 방해: '시전 차단+침묵 / 아니면 1턴 스턴 + 딜', 룬각인: '4턴간 공격력 ×1.8 (순수버프, 지속4=쿨4)', 역장베기: '혼합 딜 + 역장피해(방어무시 추가딜)', 역장폭발: '큰 역장피해(방어무시) — 이후 2턴 취약(받는뎀+50%)', 피의각성: '체력 10% 소모 → 3턴 공격력 ×1.35', 백스텝: '2턴 회피 대폭↑ + 딜', 입막음: '시전 차단 + 2턴 침묵 + 딜 (캐스터 카운터)', 연발사격: '3연사(발당 약)', 룰렛: 'All or Nothing — 잭팟/회복/기절/폭주/꽝 랜덤', 마법반사: '3턴간 받는 마법 반사(완전/부분 랜덤)', 
+  약점봉인: '상대 최고 스탯에 맞는 군중제어 (순수 CC·딜 없음)', 방패들기: '3턴간 방패막기 경감 대폭↑', 방해: '시전 차단+침묵 / 아니면 1턴 스턴 + 딜', 룬각인: '4턴간 공격력 ×1.8 (순수버프, 지속4=쿨4)', 역장베기: '혼합 딜 + 역장피해(방어무시 추가딜)', 역장폭발: '큰 역장피해(방어무시) — 이후 2턴 취약(받는뎀+50%)', 피의각성: '체력 10% 소모 → 3턴 공격력 ×1.35', 백스텝: '2턴 회피 대폭↑ + 딜', 입막음: '시전 차단 + 2턴 침묵 + 딜 (캐스터 카운터)', 연발사격: '3연사(발당 약)', 사냥꾼덫: '덫 설치 → 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈)', 룰렛: 'All or Nothing — 잭팟/회복/기절/폭주/꽝 랜덤', 마법반사: '3턴간 받는 마법 반사(완전/부분 랜덤)', 
   오토스펠: '켜면 평타마다 90% 볼트 1~5발 자동발동(발당 원소 랜덤) + 턴가속', 연환주문: '혼합 타격 ×2 한방기',
   '2d20': '3턴간 주사위 어드밴티지(2개 굴려 높은값 → 대성공↑·대실패↓)', 동전던지기: '50% 물공×8 / 50% ×0.5 도박',
   볼트마법: '볼트 발사 주력기(시전없음·매턴). 마스터라 원소당 5발, 조합 시 5+5=10발. 침묵에 막힘', 볼트마법조합: '4턴 유지 — 볼트마법이 두 원소 5+5=10발 혼합발사 + 조합배율(순수버프)', 마력충전: '마나실드 즉시 재충전',
@@ -548,6 +550,8 @@ function mkFighter (d, name, ai) {
     boltShots: 0, _boltFire: false,
     diceAdv: 0,   // 한탕 2d20: 주사위를 2개 굴려 높은 값(어드밴티지) 버프
     slow: 0, slowSec: 0, silence: 0, luckLock: 0, blind: 0, healBlock: 0, healRegen: 0,
+    trap: 0, trapBleed: 0, bleed: 0, bleedDmg: 0,   // 사냥꾼덫(예약 발동) + 출혈 DoT
+
     sigDodge: d.sigDodge, sigEcho: d.sigEcho, sigTank: d.sigTank, echoReady: 0, echoStack: 0, revive: d.sigTank ? 1 : 0 }
 }
 function reviveCheck (f, d) {
@@ -561,7 +565,7 @@ function reviveCheck (f, d) {
 function resetGauge (f, d) { return Math.max(d.턴 * (f.autoSpell > 0 ? 0.85 : 1) - (f.rage > 0 ? 2 : 0), 2) + (f.slow > 0 ? f.slowSec : 0) }   // 오토스펠: 턴시간 15%↓(가속)
 // 턴 시작 처리(쿨/상태 감소, 기절·시전). 턴이 소모되는 강제 이벤트면 그 이벤트, 아니면 null
 function upkeep (self, foe, ds, df) {
-  self.defending = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false
+  self.defending = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false; self._tick = []
   for (let i = 0; i < self.cd.length; i++) self.cd[i] = Math.max(0, self.cd[i] - 1)   // 전 스킬 슬롯 쿨 감소(3스킬 대응)
   if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.base.체력 * 0.3))
   if (self.autoSpell > 0) self.autoSpell--
@@ -569,6 +573,8 @@ function upkeep (self, foe, ds, df) {
   if (self.slow > 0) self.slow--; if (self.silence > 0) self.silence--; if (self.luckLock > 0) self.luckLock--; if (self.blind > 0) self.blind--; if (self.healBlock > 0) self.healBlock--
   if (self.weaponBroken > 0) self.weaponBroken--   // 무기파괴 디버프 감소
   if (self.healRegen > 0 && self.healBlock === 0) { self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.base.체력 / 2)); self.healRegen-- }
+  if (self.bleed > 0) { const bd = Math.max(self.bleedDmg, 0); self.hp -= bd; self.bleed--; self._tick.push({ type: 'bleed', dmg: bd, left: self.bleed }) }   // 출혈 DoT(방어·실드 무시)
+  if (self.trap > 0) { self.trap--; if (self.trap === 0) { self.gauge += ds.턴 * 0.8; applyCC(self, 'slow', 1); self.slowSec = Math.max(self.slowSec, Math.round(ds.턴 * 0.2 * 10) / 10); self.bleed = 3; self.bleedDmg = self.trapBleed || 0; self._tick.push({ type: 'trapspring', dmg: self.bleedDmg }) } }   // 사냥꾼덫 발동: 게이지 밀림 + 1턴 둔화 + 출혈 3턴
   // 버프/디버프 지속은 기절·시전 중에도 흐른다 (기절 중 버프 동결 버그 A2 수정)
   if (self.instVuln > 0) self.instVuln--
   if (self.instCast > 0 && self.cast === 0) self.instCast--   // 인캐 버프 3턴 지속(시전 중엔 유지)
@@ -637,6 +643,7 @@ function execStunSkill (self, foe, ds, df) {
 function execSkip (self) { self.defending = false; return { type: 'skip' } }   // 턴넘기기(이점 미정 — 일단 순수 패스)
 function aiTurn (self, foe, ds, df) {
   const forced = upkeep(self, foe, ds, df); if (forced) return forced
+  if (self.hp <= 0) return { type: 'skip' }   // 출혈 등으로 upkeep 중 사망 → 행동 없음(종료는 루프에서)
   if (self.stunned) return execStunSkill(self, foe, ds, df)   // 기절 중: 쓸 스킬 있으면 사용(AI는 항상 사용 = 기존 자동발동과 동일)
   // 상대 시전 중이면 AI 유형 무관하게 '차단기'만 우선 사용(방어적도 시전은 끊음)
   if (foe.cast > 0 && self.silence === 0) {
@@ -680,6 +687,8 @@ function recEntry (state, who, ev) {
   state.log.push(Object.assign(base, ev))
 }
 function reviveRec (state, who) { const f = who === 'me' ? state.A : state.B, mx = who === 'me' ? state.maxA : state.maxB; state.log.push({ who, type: 'revive', hp: Math.max(f.hp, 0), max: mx, rtype: f.reviveType }) }
+// 턴 기록: upkeep이 남긴 tick 이벤트(출혈/덫 발동)를 먼저 로그에 풀고, 본 행동 이벤트를 기록
+function recTurn (state, who, f, ev) { if (f._tick && f._tick.length) { for (const t of f._tick) recEntry(state, who, t); f._tick = [] } if (ev && ev.type === 'skip' && f.hp <= 0) return; recEntry(state, who, ev) }   // 출혈로 죽은 턴의 빈 스킵은 기록 생략(koLog가 처리)
 function koLog (state) { const dead = state.B.hp <= 0 ? 'opp' : (state.A.hp <= 0 ? 'me' : null); if (dead) { const mx = dead === 'me' ? state.maxA : state.maxB; state.log.push(Object.assign({ who: dead, type: 'ko', hp: 0, max: mx }, snapFrame(state))) } }   // 전투 종료 시 쓰러진 쪽 로그
 function stateResult (state) { return { winner: state.winner, log: state.log, meTitle: state.meTitle, oppTitle: state.oppTitle, oppNick: state.oppNick, meMax: state.maxA, oppMax: state.maxB, meHp: Math.max(state.A.hp, 0), oppHp: Math.max(state.B.hp, 0) } }
 
@@ -689,9 +698,9 @@ function runBattle (meName, oppName, meAI, oppAI) {
   const { A, B, dA, dB } = state; const DT = 0.1
   while (A.hp > 0 && B.hp > 0 && state.t < 600) {
     A.gauge -= DT; B.gauge -= DT; state.t += DT
-    if (A.gauge <= 0) { A.gauge = resetGauge(A, dA); recEntry(state, 'me', aiTurn(A, B, dA, dB)); if (reviveCheck(B, dB)) reviveRec(state, 'opp') }
+    if (A.gauge <= 0) { A.gauge = resetGauge(A, dA); recTurn(state, 'me', A, aiTurn(A, B, dA, dB)); if (reviveCheck(B, dB)) reviveRec(state, 'opp') }
     if (B.hp <= 0) break
-    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); recEntry(state, 'opp', aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
+    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); recTurn(state, 'opp', B, aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
   }
   koLog(state)
   state.winner = state.t >= 600 ? 'draw' : (A.hp > 0 ? 'me' : 'opp')
@@ -705,11 +714,13 @@ function advance (state) {
     if (A.gauge <= 0) {
       A.gauge = resetGauge(A, dA)
       const forced = upkeep(A, B, dA, dB)
+      if (A._tick && A._tick.length) { for (const t of A._tick) recEntry(state, 'me', t); A._tick = [] }   // 출혈/덫 발동 로그 먼저
+      if (A.hp <= 0) { koLog(state); state.winner = 'opp'; return 'end' }   // 출혈로 사망 시 종료
       if (forced) { recEntry(state, 'me', forced); if (reviveCheck(B, dB)) reviveRec(state, 'opp'); if (B.hp <= 0) break; continue }
       return 'player' // 플레이어 upkeep 완료, 행동 선택 대기
     }
     if (B.hp <= 0) break
-    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); recEntry(state, 'opp', aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
+    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); recTurn(state, 'opp', B, aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
   }
   koLog(state)
   state.winner = state.t >= 600 ? 'draw' : (A.hp > 0 ? 'me' : 'opp')
@@ -876,6 +887,8 @@ function narrateLine (ev, meName, oppName) {
         return `${head} ${miss}${brokeTag}${meteorTag}${back}` }
     }
     case 'defend': return `🛡️ ${ae} **${A}**${eun(A)} 방어 태세!${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
+    case 'trapspring': return `🪤 ${ae} **${A}**${iga(A)} 사냥꾼덫을 밟았다! 발이 묶이고(둔화) 🩸출혈 시작!`
+    case 'bleed': return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${ev.left > 0 ? ` (출혈 ${ev.left}턴 남음)` : ''}`
     case 'ko': return `💀 ${ae} **${A}**${iga(A)} 쓰러졌다! 체력이 바닥났다.`
     case 'skip': return `⏭️ ${ae} **${A}**${iga(A)} 턴을 넘겼다.`
     case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.${ev.stunLeft > 0 ? ` (기절 ${ev.stunLeft}턴 남음)` : ' 💫 다음 턴 해제!'}`
@@ -937,6 +950,8 @@ function statusGroups (f) {
   if (f.missDown > 0) deb.push(`🎯명중↓${f.missDown}`)
   if (f.sunder > 0) deb.push(`💢방어약화${f.sunder}`)
   if (f.weaponBroken > 0) deb.push(`🔨무기파괴${f.weaponBroken}`)
+  if (f.trap > 0) deb.push(`🪤덫${f.trap}`)
+  if (f.bleed > 0) deb.push(`🩸출혈${f.bleed}`)
   // 버프(남은턴/스택 표기)
   if (f.rage > 0) buf.push(`🔥광폭${f.rage}`)
   if (f.powBuff > 0) buf.push(`💪공격강화${f.powBuff}`)

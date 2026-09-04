@@ -665,13 +665,21 @@ function initBattle (meName, oppName, oppAI) {
   if (tA.flag) A[tA.flag] = true; if (tB.flag) B[tB.flag] = true
   return { A, B, dA, dB, maxA: dA.maxhp, maxB: dB.maxhp, meName, oppName, oppAI, oppNick: pickArr(NICKS), meTitle: tA.name, oppTitle: tB.name, t: 0, log: [] }
 }
+// 현재 시점 프레임: 양쪽 HP + 버프/디버프(위아래 분리용) 스냅샷
+function snapFrame (state) {
+  const ga = statusGroups(state.A), gb = statusGroups(state.B)
+  return { aHp: Math.round(Math.max(state.A.hp, 0)), bHp: Math.round(Math.max(state.B.hp, 0)), aBuf: ga.buffs.join(' '), aDeb: ga.debuffs.join(' '), bBuf: gb.buffs.join(' '), bDeb: gb.debuffs.join(' ') }
+}
 function recEntry (state, who, ev) {
   const other = who === 'me' ? state.B : state.A, otherMax = who === 'me' ? state.maxB : state.maxA
   const self = who === 'me' ? state.A : state.B, selfMax = who === 'me' ? state.maxA : state.maxB
-  state.log.push(Object.assign({ who, hp: Math.round(Math.max(other.hp, 0)), max: otherMax, selfHp: Math.round(Math.max(self.hp, 0)), selfMax }, ev))
+  const base = { who, hp: Math.round(Math.max(other.hp, 0)), max: otherMax, selfHp: Math.round(Math.max(self.hp, 0)), selfMax }
+  // 순차공개 동기화: 이벤트 시점 양쪽 HP·버프·디버프 스냅샷 — 인터랙티브(state.shown 설정)에서만(시뮬 성능 보호)
+  if (state.shown != null) Object.assign(base, snapFrame(state))
+  state.log.push(Object.assign(base, ev))
 }
 function reviveRec (state, who) { const f = who === 'me' ? state.A : state.B, mx = who === 'me' ? state.maxA : state.maxB; state.log.push({ who, type: 'revive', hp: Math.max(f.hp, 0), max: mx, rtype: f.reviveType }) }
-function koLog (state) { const dead = state.B.hp <= 0 ? 'opp' : (state.A.hp <= 0 ? 'me' : null); if (dead) { const mx = dead === 'me' ? state.maxA : state.maxB; state.log.push({ who: dead, type: 'ko', hp: 0, max: mx }) } }   // 전투 종료 시 쓰러진 쪽 로그
+function koLog (state) { const dead = state.B.hp <= 0 ? 'opp' : (state.A.hp <= 0 ? 'me' : null); if (dead) { const mx = dead === 'me' ? state.maxA : state.maxB; state.log.push(Object.assign({ who: dead, type: 'ko', hp: 0, max: mx }, snapFrame(state))) } }   // 전투 종료 시 쓰러진 쪽 로그
 function stateResult (state) { return { winner: state.winner, log: state.log, meTitle: state.meTitle, oppTitle: state.oppTitle, oppNick: state.oppNick, meMax: state.maxA, oppMax: state.maxB, meHp: Math.max(state.A.hp, 0), oppHp: Math.max(state.B.hp, 0) } }
 
 // 자동 전투(밸런스 시뮬/관전용): 양쪽 AI
@@ -913,54 +921,67 @@ function buildResultRow (me, opp, ai, memberId) {
 // ── 인터랙티브 전투 UI + 세션 ──
 const SESSIONS = new Map() // messageId -> { state, me, opp, ai, memberId, ts }
 function sweepSessions () { const now = Date.now(); for (const [k, v] of SESSIONS) if (now - v.ts > 1800000) SESSIONS.delete(k) }
-function statusTags (f) {
-  const t = []
-  // 디버프
-  if (f.stun > 0) t.push(`😵기절${f.stun}`)
-  if (f.slow > 0) t.push('🐢둔화')
-  if (f.silence > 0) t.push('🔇침묵')
-  if (f.luckLock > 0) t.push('🍀봉인')
-  if (f.blind > 0) t.push('🌀실명')
-  if (f.noDefend > 0) t.push('🚫방어불가')
-  if (f.healBlock > 0) t.push('💔회복불가')
-  if (f.missDown > 0) t.push('🎯명중↓')
-  if (f.sunder > 0) t.push('💢방어약화')
-  if (f.vuln > 0) t.push('💥취약')
-  // 버프
-  if (f.rage > 0) t.push('🔥광폭')
-  if (f.powBuff > 0) t.push('💪공격강화')
-  if (f.blockUp > 0) t.push('🛡️방패강화')
-  if (f.thornsBase > 0) t.push('🌵가시')
-  if (f.dodgeUp > 0) t.push('🌀회피')
-  if (f.magReflect > 0) t.push('🔮마법반사')
-  if (f.elemStack > 0) t.push('🔥원소'+f.elemStack)
-  if (f.luckBuff > 0) t.push('🍀행운폭주')
-  if (f.diceAdv > 0) t.push(`🎲어드밴티지${f.diceAdv}`)
-  if (f.chainBolt > 0) t.push('🔗볼트마법조합')
-  if (f.weaponBroken > 0) t.push(`🔨무기파괴${f.weaponBroken}`)
-  if (f.instVuln > 0) t.push('💥취약')
-  if (f.autoSpell > 0) t.push('📜주문각인')
-  if (f.healRegen > 0) t.push('💚재생')
-  if (f.cast > 0) { const tot = f.castTotal || f.cast; t.push(`🔮${f.castName || '시전'} ${tot - f.cast}/${tot}`) }
-  if (f.instCast > 0) t.push(`⚡즉시시전${f.instCast}`)
-  if (f.shield > 0) t.push(`🔷실드${f.shield}`)
-  return t.join(' ')
+// 상태태그: {buffs, debuffs} 두 그룹(위아래 분리용). 각 지속효과에 남은턴 표기.
+function statusGroups (f) {
+  const deb = [], buf = []
+  // 디버프(남은턴 표기)
+  if (f.stun > 0) deb.push(`😵기절${f.stun}`)
+  if (f.vuln > 0 || f.instVuln > 0) deb.push(`💥취약${Math.max(f.vuln, f.instVuln)}`)
+  if (f.slow > 0) deb.push(`🐢둔화${f.slow}`)
+  if (f.silence > 0) deb.push(`🔇침묵${f.silence}`)
+  if (f.luckLock > 0) deb.push(`🍀봉인${f.luckLock}`)
+  if (f.blind > 0) deb.push(`🌀실명${f.blind}`)
+  if (f.noDefend > 0) deb.push(`🚫방어불가${f.noDefend}`)
+  if (f.healBlock > 0) deb.push(`💔회복불가${f.healBlock}`)
+  if (f.missDown > 0) deb.push(`🎯명중↓${f.missDown}`)
+  if (f.sunder > 0) deb.push(`💢방어약화${f.sunder}`)
+  if (f.weaponBroken > 0) deb.push(`🔨무기파괴${f.weaponBroken}`)
+  // 버프(남은턴/스택 표기)
+  if (f.rage > 0) buf.push(`🔥광폭${f.rage}`)
+  if (f.powBuff > 0) buf.push(`💪공격강화${f.powBuff}`)
+  if (f.blockUp > 0) buf.push(`🛡️방패강화${f.blockUp}`)
+  if (f.dodgeUp > 0) buf.push(`🌀회피${f.dodgeUp}`)
+  if (f.magReflect > 0) buf.push(`🔮마법반사${f.magReflect}`)
+  if (f.elemStack > 0) buf.push(`🔥원소${f.elemStack}`)
+  if (f.luckBuff > 0) buf.push(`🍀행운폭주${f.luckBuff}`)
+  if (f.diceAdv > 0) buf.push(`🎲어드밴티지${f.diceAdv}`)
+  if (f.chainBolt > 0) buf.push(`🔗볼트마법조합${f.chainBolt}`)
+  if (f.autoSpell > 0) buf.push(`📜주문각인${f.autoSpell}`)
+  if (f.healRegen > 0) buf.push(`💚재생${f.healRegen}`)
+  if (f.instCast > 0) buf.push(`⚡즉시시전${f.instCast}`)
+  if (f.thornsBase > 0) buf.push('🌵가시')   // 상시 패시브(턴 없음)
+  if (f.shield > 0) buf.push(`🔷실드${f.shield}`)
+  if (f.cast > 0) { const tot = f.castTotal || f.cast; buf.push(`🔮${f.castName || '시전'} ${tot - f.cast}/${tot}`) }
+  return { buffs: buf, debuffs: deb }
+}
+function statusTags (f) { const g = statusGroups(f); return [...g.debuffs, ...g.buffs].join(' ') }   // 하위호환(단일 문자열)
+// 공개된 마지막 로그 시점의 프레임(HP·버프·디버프) — 순차공개 동기화. 완전 공개면 라이브 상태
+function frameAt (state, shown) {
+  if (shown == null || shown >= state.log.length) return snapFrame(state)
+  for (let i = shown - 1; i >= 0; i--) { const ev = state.log[i]; if (ev.aHp != null) return ev }
+  return snapFrame(state)
 }
 function buildBattleEmbed (state) {
-  const { A, B, meName, oppName, memberId, meTitle, oppTitle, oppAI, oppNick } = state
+  const { meName, oppName, memberId, meTitle, oppTitle, oppAI, oppNick } = state
   const shown = state.shown == null ? state.log.length : state.shown   // 순차 공개: 공개된 로그까지만
   const recent = state.log.slice(0, shown).slice(-8).map(ev => narrateLine(ev, meName, oppName))
   const footer = state.revealing ? '⏳ 진행 중…' : '🎯 **네 차례!** 행동을 골라줘'
-  const meS = statusTags(A), oppS = statusTags(B)
+  const fr = frameAt(state, shown)   // 공개 시점 프레임(체력·버프·디버프 실시간 동기화)
+  const buffLine = (s) => s ? `🟢 ${s}\n` : ''      // 버프 = 캐릭명 위
+  const debLine = (s) => s ? `🔴 ${s}\n` : ''       // 디버프 = 캐릭명 아래
   const desc =
-    // 상단: 상대
-    `${CHARS[oppName].emoji} **${oppName}**: ${titleTag(oppTitle)} **${oppNick}**${oppS ? ' · ' + oppS : ''} · ${oppAI} AI\n` +
-    `\`${hpBar(B.hp, state.maxB, 18)}\`\n\n` +
+    // 상단: 상대 (버프 위 · 이름 · 디버프 아래 · HP)
+    buffLine(fr.bBuf) +
+    `${CHARS[oppName].emoji} **${oppName}**: ${titleTag(oppTitle)} **${oppNick}** · ${oppAI} AI\n` +
+    debLine(fr.bDeb) +
+    `\`${hpBar(fr.bHp, state.maxB, 18)}\`\n\n` +
     // 중앙: 로그
     (recent.length ? recent.join('\n') + '\n\n' : '') +
-    // 하단: 나 (버튼 바로 위 — 이 캐릭을 조작한다는 걸 명확히)
-    `${CHARS[meName].emoji} **${meName}**: ${titleTag(meTitle)} <@${memberId}>${meS ? ' · ' + meS : ''}\n` +
-    `\`${hpBar(A.hp, state.maxA, 18)}\`\n` +
+    // 하단: 나 (버프 위 · 이름 · 디버프 아래 · HP — 버튼 바로 위)
+    buffLine(fr.aBuf) +
+    `${CHARS[meName].emoji} **${meName}**: ${titleTag(meTitle)} <@${memberId}>\n` +
+    debLine(fr.aDeb) +
+    `\`${hpBar(fr.aHp, state.maxA, 18)}\`\n` +
     footer
   return new EmbedBuilder().setTitle('⚔️ 듀얼 — 전투 중').setColor(0x3498db)
     .setDescription(desc.length > 4090 ? '…' + desc.slice(-4089) : desc)

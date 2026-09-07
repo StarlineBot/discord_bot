@@ -12,7 +12,7 @@ const CHARS = {
   기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '검방', 완벽방어: true, id: '순수 탱커' },
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', id: '스태프 마법사' },
   볼트마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', boltMaster: true, id: '볼트 마법사' },
-  암살자: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 40, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
+  암살자: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 35, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
   사냥꾼: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, 무기: '활', id: '저격/덫/카이팅' },
   한탕주의자: { emoji: '🃏', 힘: 25, 지능: 20, 체력: 40, 민첩: 85, 솜씨: 35, 행운: 100, 무기: '주사위', 행운의여신: true, id: '고속 도박' },
   세이지: { emoji: '📖', 힘: 60, 지능: 65, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, 무기: '마도서', 원소마스터: true, 현자균형: true, id: '혼합 하이브리드' },
@@ -581,7 +581,7 @@ const SKILLS = {
     { name: '처형', tag: '공격', coef: '물공×5 (상대 HP25%↓ 처형)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = guts(ds.물공 * 5 * physSwing(ds) * (1 - df.물방), f, df); d = absorb(f, Math.max(Math.round(d), 1)); f.hp -= d; s.cd[1] = 5; s.note = '처형' } },
     { name: '백스텝', tag: '공격', coef: '타격×1.5', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 1.5); d = absorb(f, d); f.hp -= d; s.cd[2] = 4; s.note = '백스텝' } }, // 회피버프 제거 → 후측 강타 ×1.5
     // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
-    { name: '입막음', tag: '제어', coef: '시전차단 + 2턴 침묵 + 딜', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
+    { name: '입막음', tag: '제어', coef: '시전차단 + 2턴 침묵 + 딜', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est / Math.max(1 - df.물회, 0.3), 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
   ],
   사냥꾼: [
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
@@ -606,7 +606,7 @@ const SKILLS = {
     { name: '마나소각', tag: '관통', coef: '실드 파괴 + 역장 마공×0.42 (실드 있으면 ×0.95+둔화)', cd: 5, dmgType: '역장', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * (f.shield > 0 ? 0.95 : 0.42), 1, f.shield > 0 ? ctrlVal(x.foeTurn, 2, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const had = f.shield > 0; f.shield = 0; const d = Math.round(ds.마공 * (had ? 0.95 : 0.42)); f.hp -= d; if (had) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, Math.round(df.턴 * 0.2 * 10) / 10) } s.cd[0] = 5; s.note = had ? '마나소각' : '마나번' } }, // 역장피해(마방 무시 flat): 실드 즉시파괴 + 실드있었으면 마공×3 & 2턴 20% 턴지연 / 없으면 마공×1.5
     // 시전파괴: 상대 시전 확정 차단 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
-    { name: '시전파괴', tag: '제어', coef: '시전차단 + 2턴 침묵 (캐스터 전용, 딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
+    { name: '시전파괴', tag: '제어', coef: '시전차단 + 2턴 침묵 (캐스터 전용, 딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
     // 무기파괴: 3턴간 상대 딜 1/3(물리·마법 공통). 안티캐스터가 물리 상대에도 통하는 카운터 — 순수 디버프(즉발)
     { name: '무기파괴', tag: '디버프', coef: '3턴 상대 딜 1/3 + 무기막기 불가', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2, exec: (s, f, ds, df) => { f.weaponBroken = 3; s.cd[2] = 5; s.note = '무기파괴' } },
     // 파훼: 평소엔 약딜, 무기파괴(약점노출)된 적엔 치명딜. "무기파괴 → 파훼" 처치 콤보
@@ -896,6 +896,12 @@ function execAttack (self, foe, ds, df) { const fb = foe.hp; const psh = foe.shi
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
 const BUFF_SKILLS = new Set(['인스턴트캐스팅', '2d20', '볼트마법조합', '방패들기', '룬각인', '마법반사', '오토스펠'])
+// 마법 스킬: 침묵 시 사용 불가(물리 스킬은 침묵 무시). 원소·역장·시전·마법 유틸·마법 버프가 대상 (물리 타격·물리 버프·물리 덫은 제외)
+const MAGIC_SKILLS = new Set(['화염구', '메테오', '인스턴트캐스팅', '서리구', '충격파', '파이어볼트', '라이트닝볼트', '콜드볼트', '볼트마법조합', '오토스펠', '디스펠', '마법의완전이해', '룬각인', '역장폭발', '약점봉인', '마나소각', '시전파괴', '마법반사'])
+const silenced = (s, name) => s.silence > 0 && MAGIC_SKILLS.has(name)
+// 침묵 AI 가치: 상대의 마법 스킬 비율(0~1). 순수 물리 상대에겐 침묵이 무의미하므로 0 → 침묵 점수 소멸(딜만 남음)
+const _magicShare = {}
+const magicShare = name => { if (_magicShare[name] != null) return _magicShare[name]; const s = SKILLS[name] || []; return (_magicShare[name] = s.length ? s.filter(sk => MAGIC_SKILLS.has(sk.name)).length / s.length : 0) }
 // 행동불능(기절) 중 쓸 수 있는 스킬 — 스킬의 stunnable 플래그 + 기존 ready 조건 재사용(하드코딩 제거). 없으면 null
 function stunUsableSkill (self, foe, ds, df) { return (SKILLS[self.name] || []).find(s => s.stunnable && s.ready(self, foe, ds, df)) || null }
 function stunSkill (self, foe, ds, df) { const sk = stunUsableSkill(self, foe, ds, df); return sk ? sk.name : null }
@@ -907,17 +913,18 @@ function aiTurn (self, foe, ds, df) {
   if (self.hp <= 0) return { type: 'skip' } // 출혈 등으로 upkeep 중 사망 → 행동 없음(종료는 루프에서)
   if (self.stunned) return execStunSkill(self, foe, ds, df) // 기절 중: 쓸 스킬 있으면 사용(AI는 항상 사용 = 기존 자동발동과 동일)
   // 상대 시전 중이면 AI 유형 무관하게 '차단기'만 우선 사용(방어적도 시전은 끊음)
-  if (foe.cast > 0 && self.silence === 0) {
+  if (foe.cast > 0) {
     const cx = ctxFor(self, foe, ds, df)
-    const intr = SKILLS[self.name].find(sk => ['방해', '돌진', '암습', '약점봉인', '시전파괴', '입막음', '방패가격'].includes(sk.name) && sk.ready(self, foe, ds, df, cx))
+    const intr = SKILLS[self.name].find(sk => ['방해', '돌진', '암습', '약점봉인', '시전파괴', '입막음', '방패가격'].includes(sk.name) && !silenced(self, sk.name) && sk.ready(self, foe, ds, df, cx))
     if (intr) return execSkill(self, foe, ds, df, intr)
   }
   // 방어 판단(AI별): 공격적=치명일 때만 / 방어적=저HP 선제 / 판단형=치명 직전. (회복스킬은 아래 스킬선택서 HP게이트로 처리)
   if (decideDefend(self, foe, ds, df)) return execDefend(self, ds)
-  // 스킬 선택: 침묵 아니면 점수 최고. 제어는 이미 고점수(우선), 버프는 AI 생존여유 게이트
-  if (self.silence === 0) {
+  // 스킬 선택: 점수 최고. 침묵 시 마법 스킬만 제외(물리 스킬은 사용 가능). 제어는 이미 고점수(우선), 버프는 AI 생존여유 게이트
+  {
     const ctx = ctxFor(self, foe, ds, df); let best = null; let bestScore = ctx.est
     for (const sk of SKILLS[self.name]) {
+      if (silenced(self, sk.name)) continue
       if (!sk.ready(self, foe, ds, df, ctx)) continue
       if (BUFF_SKILLS.has(sk.name) && !buffOk(self.ai, self.hp, Math.max(0, ctx.foeTurn - self.shield))) continue // 버프는 여유 있을 때만(공격적은 항상)
       const sc = sk.score(self, foe, ds, df, ctx); if (sc > bestScore) { bestScore = sc; best = sk }
@@ -1007,7 +1014,7 @@ function playerResolve (state, choice) {
 // 플레이어 스킬 사용 가능 판정(AI 자제 휴리스틱 제외, 진짜 게이트만)
 function playerCanUse (state, slot) {
   const { A, B, dB } = state; const name = SKILLS[state.meName][slot].name
-  if (A.silence > 0) return { usable: false, reason: '침묵' }
+  if (A.silence > 0 && MAGIC_SKILLS.has(name)) return { usable: false, reason: '침묵(마법)' }
   if (A.cd[slot] > 0) return { usable: false, reason: `${A.cd[slot]}턴 후` }
   if (name === '처형' && !(B.hp < dB.maxhp * 0.25)) return { usable: false, reason: '상대 HP 25%↓ 필요' }
   if ((name === '암습' || name === '돌진') && B.stun > 0) return { usable: false, reason: '상대 기절 중' }

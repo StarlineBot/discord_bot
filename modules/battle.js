@@ -7,8 +7,8 @@ const step = (s, per) => Math.floor(s / 10) * per
 const pickArr = (arr) => arr[Math.floor(Math.random() * arr.length)]
 
 const CHARS = {
-  전사: { emoji: '⚔️', 힘: 85, 지능: 10, 체력: 75, 민첩: 45, 솜씨: 60, 행운: 30, 무기: '검방', id: '물리 딜탱' },
-  광전사: { emoji: '🪓', 힘: 100, 지능: 10, 체력: 45, 민첩: 55, 솜씨: 60, 행운: 45, 무기: '양도끼', 불굴: true, 광란: true, id: '물리 유리대포' },
+  검투사: { emoji: '⚔️', 힘: 85, 지능: 10, 체력: 75, 민첩: 45, 솜씨: 60, 행운: 30, 무기: '검방', 무기의달인: true, id: '무기막기 검투사' },
+  광전사: { emoji: '🪓', 힘: 100, 지능: 10, 체력: 40, 민첩: 65, 솜씨: 60, 행운: 35, 무기: '양도끼', 격노: true, 광란: true, id: '물리 광전사' },
   기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '검방', 완벽방어: true, id: '순수 탱커' },
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', id: '스태프 마법사' },
   볼트마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', boltMaster: true, id: '볼트 마법사' },
@@ -191,7 +191,8 @@ function derive (c) {
     마뎀너프: w.마뎀너프 || 1,
     기본공: w.기본공 || 1,
     무기: w,
-    무기막기: c.힘 >= 50 ? (30 + Math.floor((c.힘 - 50) / 10) * 2) / 100 : 0,
+    무기막기: c.힘 >= 50 ? (25 + Math.floor((c.힘 - 50) / 10) * (c.무기의달인 ? 3 : 1.5)) / 100 : 0, // 무기막기 확률: 25% + 힘10당 1.5%(달인 3%)
+    무기막기경감: c.무기의달인 ? 0.6 : 0.7, // 무기막기 성공 시 피해 배수(기본 0.7=30%경감 / 달인 0.6=40%경감)
     // 방패막기는 검/방(방패) 무기 전용. 무기막기는 스탯기반 유지(무기무관)
     방패막기: (w.방어 === '방패' && c.체력 >= 50) ? (30 + Math.floor((c.체력 - 50) / 10) * 3) / 100 : 0,
     방패고정: (w.방어 === '방패' && c.체력 >= 70) ? c.체력 / 3 : 0,
@@ -204,11 +205,11 @@ function gutsMul (d, hp, df, foe) { const coat = 1 - (foe && foe.passiveLock ? 0
 function defMul (def, pen) { return 1 - def * (1 - Math.min(pen || 0, 1)) }
 // ── 패시브 토대 ──
 // 패시브 레지스트리: 표시명 → fighter 플래그. 열거·디스펠 타겟·표시 공용. (마도갑주는 derive 물방 baked라 lock 미대응 — 스탯형)
-const PASSIVE_FLAGS = { '완벽방어!': '완벽방어', 행운의여신: '행운의여신', 연속타격: '연속타격', 볼트마법마스터: 'boltMaster', '원소 마스터': '원소마스터', 불굴: '불굴', 광란: '광란', '현자의 균형': '현자균형', 마도갑주: '마도갑주' }
+const PASSIVE_FLAGS = { '완벽방어!': '완벽방어', 행운의여신: '행운의여신', 연속타격: '연속타격', '볼트마법의 이해': 'boltMaster', '원소의 이해': '원소마스터', 불굴: '불굴', 광란: '광란', '현자의 균형': '현자균형', 마도갑주: '마도갑주', 격노: '격노', '무기의 달인': '무기의달인' }
 // 패시브 활성 판정: 플래그 보유 && 잠기지 않음(디스펠). passiveLock=0이면 기존 동작과 동일.
 function psv (f, flag) { return f && f[flag] && !f.passiveLock }
 // 디스펠 대상 버프 필드(실드·시전은 자원/채널이라 제외). clearBuffs=즉시 제거, 개수 반환.
-const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast']
+const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100']
 function clearBuffs (f) { let n = 0; for (const k of BUFF_FIELDS) { if (f[k] > 0) { f[k] = 0; n++ } } f.powMul = 1; return n }
 function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
   const magic = dA.마공 > dA.물공
@@ -226,20 +227,20 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
   if (dA.hybrid) {
     // 본 공격 회피 판정(천운/리롤) — 볼트는 별개로 무조건 명중
     const evaded = canDef && ((dD.sigDodge && rand() < 0.15) || luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)))
-    let bolt = 0; let pendingAmp = 0
-    if (A.autoSpell > 0 && rand() < 0.90) { // 볼트: 마법이라 발동 시 회피 무관 명중. 오토스펠 중 0.90 발동, 1~5연타 랜덤(발당 감쇠 0.5)
+    let bolt = 0
+    if (A.autoSpell > 0 && rand() < 0.90) { // 오토스펠: 공유 볼트(파이어/라이트닝/콜드) 랜덤 발동. 시전 없이 즉발(랜덤발동이라). 1~5연타, 발당 마방·graze
       const n = rollBoltCount(); const mdef = defMul(dD.마방, 마관통); const braw = []; const bnames = []
-      const types = ['파이어볼트', '아이스볼트', '라이트닝볼트']
+      const types = ['파이어볼트', '라이트닝볼트', '콜드볼트']
       const bn = types[Math.floor(rand() * 3)] // 프록당 원소 1종
-      pendingAmp = BOLT_AMP[bn]
-      for (let i = 0; i < n; i++) { const bb = boltDmg(dA, A, bn, mdef, SAGE_BOLT * (psv(A, '원소마스터') ? ELEM_MASTER : 1)); bolt += bb; braw.push(bb); bnames.push(bn) }
+      const em = (psv(A, '원소마스터') && isElemental(bn)) ? ELEM_MASTER : 1 // 원소의 이해: 원소 볼트 대미지 배율
+      for (let i = 0; i < n; i++) { const bb = boltShot(dA, A, bn, mdef, em); bolt += bb; braw.push(bb); bnames.push(bn) }
       A.lastBolt = true; A.boltShots = n; A._braw = braw; A._bnames = bnames
     }
     let ph = 0; let mg = 0; let crit = false; 고정 = 0
     if (!evaded) {
       let block = 0
       if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' }
-      const wBlk = (canDef && !block && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) ? 0.50 : 1
+      const wBlk = (canDef && !block && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) ? dD.무기막기경감 : 1
       if (wBlk < 1) A.lastDef = '무기막기'
       crit = forceCrit || luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
       if (A.echoReady) { crit = true; A.echoReady = 0 }
@@ -257,7 +258,6 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     if (D.vuln > 0) d *= 2.0
     if (D.instVuln > 0) d *= 1.5
     if (D.cast > 0) d *= 0.6
-    if (A.nextAmp) { d *= A.nextAmp; A.nextAmp = 0 }
     if (A.tFury && A.hp < dA.maxhp * 0.5) d *= 1.22
     if (A.powBuff > 0) d *= A.powMul
     if (A.weaponBroken > 0) d *= (1 / 3) // 무기파괴: 기초딜 1/3
@@ -273,13 +273,12 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     castHit(A, D, fin)
     if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))
     if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
-    if (pendingAmp) A.nextAmp = pendingAmp
     return perfectGuard(A, D, fin)
   }
   if (dA.fusion) {
     if (canDef && !aimPierce && !guaranteed && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     let d = dA.물공 + dA.마공; 고정 = 0
-    if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { d *= 0.50; A.lastDef = '무기막기' }
+    if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { d *= dD.무기막기경감; A.lastDef = '무기막기' }
     d *= (1 - Math.max(dD.물방 * (dA.sigPen ? 0.7 : 1), dD.마방))
     if (D.sunder > 0) d *= 1.15
     if (rand() < 0.30 && rand() >= (dA.비껴무효 + (A.luckBuff > 0 ? 0.2 : 0))) { d *= 0.70; A.grazed = true }
@@ -317,7 +316,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     if (canDef && dD.무기.주사위) { // 한탕 방어 d20(검방 방패막기처럼 무기 방어기제) — 기본 회피/완전회피는 그대로, 여기에 추가
       const dd = d20adv(D.diceAdv > 0); A.diceDef = dd
       block = dd === 1 ? 2.0 : dd === 20 ? 0.001 : Math.max(1.0 - (dd - 2) * 0.06, 0.05); A.lastDef = '주사위방어'
-    } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = 0.50; A.lastDef = '무기막기' }
+    } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = dD.무기막기경감; A.lastDef = '무기막기' }
     dmg = 0
     for (let i = 0; i < hits; i++) {
       let h = dA.무기.주사위 ? (atkD === 1 ? 0 : dA.물공 * (atkD === 20 ? 3 : atkD / 13)) : dA.물공 * physSwing(dA) * dA.기본공 // 주사위=d20 배율 / 그 외 기본공×physSwing
@@ -350,7 +349,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     for (let i = 0; i < bolts; i++) {
       let b; let bn = null
       if (boltPlan) { bn = boltPlan[i].bn; b = boltDmg(dA, A, bn, mdef) } else { // 볼트마법(공통 공식) / 매직미사일(완드 평타): 평타계수·마뎀너프, 단발
-        b = dA.마공 * dA.평타계수 * dA.마뎀너프 * mdef * magicGraze() // 매직미사일: 마법=크리 없음(magicGraze 편차만)
+        b = dA.마공 * dA.평타계수 * dA.마뎀너프 * mdef * magicGraze(A) // 매직미사일: 마법=크리 없음(magicGraze 편차만)
       }
       b *= mBlock
       if (D.sunder > 0) b *= 1.15
@@ -373,7 +372,8 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
   if (D.instVuln > 0) dmg *= 1.5
   if (D.cast > 0) dmg *= 0.6 // 화염구 시전 중 받는뎀 40%↓
   if (A.tFury && A.hp < dA.maxhp * 0.5) dmg *= 1.22
-  if (psv(A, '광란')) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * 0.8) // 광란: 체력 낮을수록 공격력 급증(2차곡선, 빈사 ~+80%)
+  if (psv(A, '격노') && dA.maxhp) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * 0.9) // 격노: 체력 낮을수록 공격력↑(2차곡선, 빈사 ~+90%). 회복하면 다시 감소(자기조절)
+  if (psv(A, '무기의달인') && !magic) dmg *= 1.1 // 무기의 달인: 무기(물리) 배율 소폭↑
   if (A.powBuff > 0) dmg *= A.powMul
   if (A.weaponBroken > 0) dmg *= (1 / 3) // 무기파괴: 기초딜 1/3
   if (D.tWall) dmg *= 0.90
@@ -400,7 +400,7 @@ function perfectGuard (A, D, fin) {
 // 물리 딜 변수: 솜씨 기반 풀댐 확률, 빗맞으면 70~100% 유동 (예측성↓, 명중형=일관/난동형=도박)
 function physSwing (d) { const pFull = 0.5 + Math.floor(d.base.솜씨 / 10) * 0.04; return rand() < pFull ? 1 : (0.70 + rand() * 0.30) }
 // 마법 빗맞힘 구간(공유): 30% 풀댐 / 40% 80% / 30% 40% (평균 74%). 마법사 마법 + 볼트 공통
-function magicGraze () { const gr = rand(); return gr < 0.30 ? 1 : (gr < 0.70 ? 0.80 : 0.40) }
+function magicGraze (A) { if (A && A.graze100 > 0) return 1; const gr = rand(); return gr < 0.30 ? 1 : (gr < 0.70 ? 0.80 : 0.40) } // 마법의 완전이해(graze100): 편차 무시 상시 풀댐. A 미전달(시전마법)은 기존 랜덤 편차 유지
 function d20adv (adv) { const a = 1 + Math.floor(rand() * 20); if (!adv) return a; return Math.max(a, 1 + Math.floor(rand() * 20)) } // 2d20 어드밴티지: adv면 2개 중 높은 값
 function rollBoltCount () { return rand() < 0.10 ? 5 : 1 + Math.floor(rand() * 4) } // 세이지 오토스펠 연타수: 5=10%, 1~4 각 22.5%
 // 공통 볼트마법: 마공 기반 단일 볼트 피해(평타계수·마뎀너프 미적용 — 볼트는 주문이지 무기평타 아님). 세이지·볼트마법사 공유
@@ -410,18 +410,83 @@ const SPELL_COEF = { 화염구: 4.8, 메테오: 8.4, 서리구: 3.1, 충격파: 
 function spellBase (ds, name) { return Math.round(ds.마공 * SPELL_COEF[name]) }
 const SIG_SHIELD_CAP = 0.40; const SIG_SHIELD_REGEN = 0.04 // 지능100 시그(마법사): 마나실드 최대 maxHP 40%로 확대 + 매턴 4% 자동 회복(시전 중에도)
 const BOLT_COMBO_DAMP = 0.85 // 볼트마법조합(10발) 총딜 감쇠 — 마법 무크리 보상 반영(0.7→0.85)
-const BOLT_AMP = { 파이어볼트: 1.1, 라이트닝볼트: 1.2, 아이스볼트: 0 } // 세이지 후속딜 증폭(nextAmp)
-const SAGE_BOLT = 1.7 // 세이지 볼트 전용 배율 — 물리:마법 균형용(sim 튜닝)
 const ELEM_MASTER = 3.0 // 원소 마스터(세이지 패시브): 볼트마법 대미지 배율
+// ── 마법 속성 분류(5속성) ──
+// 화염/전격/냉기=원소(마방 적용) · 역장=마방무시 관통 · 무=비원소. 원소의 이해=원소 3종만 강화.
+const MAGIC_ELEM = {
+  파이어볼트: '화염',
+  화염구: '화염',
+  라이트닝볼트: '전격',
+  아이스볼트: '냉기',
+  콜드볼트: '냉기',
+  서리구: '냉기',
+  역장베기: '역장',
+  역장폭발: '역장',
+  마나소각: '역장',
+  메테오: '무',
+  충격파: '무',
+  매직미사일: '무'
+}
+const ELEM_EMO = { 화염: '🔥', 전격: '⚡', 냉기: '❄️', 역장: '🟣', 무: '⚪' }
+const ELEMENTAL = new Set(['화염', '전격', '냉기']) // 원소의 이해 대상(역장·무 제외)
+function magicElem (name) { return MAGIC_ELEM[name] || '무' }
+function isElemental (name) { return ELEMENTAL.has(magicElem(name)) } // 원소 3종이면 true
+function isPierce (name) { return magicElem(name) === '역장' } // 역장=마방무시 관통
 function boltDmg (dA, A, bn, mdef, scale) {
-  const b = dA.마공 * BOLT_ELEM[bn] * BOLT_DAMP * (scale || 1) * mdef * magicGraze() // 마법=크리 없음, 발당 편차는 magicGraze(1.0/0.8/0.4). scale: 세이지 전용 배율
+  const b = dA.마공 * BOLT_ELEM[bn] * BOLT_DAMP * (scale || 1) * mdef * magicGraze(A) // 마법=크리 없음, 발당 편차는 magicGraze(1.0/0.8/0.4). scale: 세이지 전용 배율
   return b
+}
+// ── 시전형 볼트(볼트마법사) ── 화염구처럼 시전마법. 발당 마공×계수, 발수 1~5(볼트마법의 이해면 5고정), 발당 마방·graze 개별.
+// 파이어=고배율/2시전 · 라이트닝=1시전 · 콜드=즉발+둔화(쿨1). 세이지 오토스펠(랜덤 발동)과 무관.
+const BOLT_CAST = { 파이어볼트: { coef: 0.6, cast: 2 }, 라이트닝볼트: { coef: 0.35, cast: 1 }, 콜드볼트: { coef: 0.2, cast: 0, slow: 1 } }
+// 볼트 1발 raw(단일 소스): 마공×계수×배율×마방×graze. 시전형(볼트마법사)·오토스펠(세이지) 공유
+function boltShot (ds, A, bn, mdef, mult) { return ds.마공 * BOLT_CAST[bn].coef * (mult || 1) * mdef * magicGraze(A) }
+// 볼트마법조합(chainBolt): 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
+const BOLT_CHAIN = { 파이어볼트: '라이트닝볼트', 라이트닝볼트: '콜드볼트', 콜드볼트: '파이어볼트' }
+function boltChain (s, foe, ds, df, bn) {
+  const cn = BOLT_CHAIN[bn]; if (!cn) return 0 // 발동 여부는 호출측이 판단(시전=시전시작 시점 확정 / 즉발=현재 chainBolt)
+  const mHits = s.boltHits || []; const mNames = s.boltNames || [] // 본 볼트 내역 보존 → 후속과 합쳐 표시
+  let d = boltVolley(s, foe, ds, df, cn); d = absorb(foe, d); foe.hp -= d
+  if (BOLT_CAST[cn].slow) { applyCC(foe, 'slow', BOLT_CAST[cn].slow); foe.slowSec = Math.max(foe.slowSec, 1) }
+  s.boltHits = mHits.concat(s.boltHits || []); s.boltNames = mNames.concat(s.boltNames || [])
+  return d
+}
+function boltVolley (s, foe, ds, df, bn) {
+  const shots = psv(s, 'boltMaster') ? 5 : rollBoltCount() // 마스터=5고정 / 없으면 1~5
+  const 마관통 = s.tMPen ? 0.25 : 0; const mdef = defMul(df.마방, 마관통)
+  const canDef = foe.stun === 0 && foe.cast === 0
+  if (canDef && rand() < df.리롤) { s.boltDodged = true; s.lastBolt = false; return 0 } // 볼트 전체 완전회피(spellDmg와 동일 성격)
+  let mBlock = 1
+  if (canDef && df.방패막기 && rand() < df.방패막기) { mBlock = (foe.blockUp > 0 ? 0.10 : 0.20); s.lastDef = '방패막기' } // 방패는 볼트도 막음
+  const braw = []; let total = 0
+  for (let i = 0; i < shots; i++) { let b = boltShot(ds, s, bn, mdef, 1) * mBlock; if (foe.sunder > 0) b *= 1.15; braw.push(b); total += b } // 발당 마방·graze 개별(boltShot 공유)
+  total = guts(total, foe, df) // 근성·현자균형
+  if (df.마나경감) total *= (1 - df.마나경감)
+  let fin = Math.max(Math.round(total), 1)
+  const sum = braw.reduce((a, b) => a + b, 0) || 1; const hits = braw.map(r => Math.max(1, Math.round(r / sum * fin))); fin = hits.reduce((a, b) => a + b, 0) // 발당 배분(내레이션)
+  s.boltHits = hits; s.boltNames = Array(shots).fill(bn); s.lastBolt = true; s.boltShots = shots
+  return fin
+}
+// 시전형 볼트 스킬 팩토리(창고). 파이어·라이트닝=s.cast 게이트(쿨 없음) / 콜드=즉발(쿨1)
+function boltCastSkill (ci, bn) {
+  const B = BOLT_CAST[bn]
+  const coef = `발당 마공×${B.coef} ·1~5발(마스터5)·${B.cast > 0 ? B.cast + '시전' : '즉발'}${B.slow ? '+둔화' : ''} (조합 중 +1시전)`
+  const spec = { name: bn, tag: '공격', coef, cast: B.cast > 0, cd: B.cast > 0 ? null : 1 }
+  return Object.assign({}, spec, {
+    // 조합(chainBolt) 중엔 콜드도 1시전이 되므로, 콜드 ready도 시전가능(safe) 요구
+    ready: (s, f, ds, df, x) => (B.cast + (s.chainBolt > 0 ? 1 : 0)) > 0 ? (s.cast === 0 && x.safe) : (s.cd[ci] === 0),
+    score: (s, f, ds, df, x) => ds.마공 * B.coef * (psv(s, 'boltMaster') ? 5 : 3) * (1 - df.마방) * 1.3, // 추정: 마스터 5발/그외 평균 3발. ×1.3=회피불가 확정 다발 프리미엄(평타는 회피 가능)
+    exec: (s, f, ds, df) => {
+      const castT = B.cast + (s.chainBolt > 0 ? 1 : 0) // 볼트마법조합: 모든 볼트류 시전 +1(콜드 0→1시전으로 리스크 발생)
+      if (castT > 0) { s.cast = Math.max(1, castT + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castTotal = s.cast; s.castName = bn; s.castBolt = bn; s.castBoltChain = s.chainBolt > 0; s.cd[ci] = 1; s.note = bn + ' 시전' } else { let d = boltVolley(s, f, ds, df, bn); d = absorb(f, d); f.hp -= d; if (B.slow) { applyCC(f, 'slow', B.slow); f.slowSec = Math.max(f.slowSec, 1) } if (s.chainBolt > 0) boltChain(s, f, ds, df, bn); s.cd[ci] = 1; s.note = bn } // 콜드 즉발(비조합)
+    }
+  })
 }
 // 볼트 다단 → 원소묶음 표시: total을 발당 비율로 배분 후 원소별 그룹핑(🔥파이어(a·b) ⚡라이트닝(c) …)
 function boltGroupStr (hits, names, total) {
   const raw = hits.reduce((a, b) => a + b, 0) || 1
-  const emo = { 파이어볼트: '🔥', 라이트닝볼트: '⚡', 아이스볼트: '❄️' }
-  const order = ['파이어볼트', '라이트닝볼트', '아이스볼트']
+  const emo = { 파이어볼트: '🔥', 라이트닝볼트: '⚡', 콜드볼트: '❄️', 아이스볼트: '❄️' }
+  const order = ['파이어볼트', '라이트닝볼트', '콜드볼트', '아이스볼트']
   const g = {}; let acc = 0; const n = hits.length
   hits.forEach((h, i) => { const v = i === n - 1 ? total - acc : Math.round(h / raw * total); acc += v; const nm = (names && names[i]) || '볼트'; (g[nm] = g[nm] || []).push(v) })
   return order.filter(nm => g[nm]).map(nm => `${emo[nm] || ''}**${nm}**(${g[nm].join('·')})`).join(' ')
@@ -468,92 +533,97 @@ const DEBUFFS = [
   { name: '회복불가', apply: f => applyCC(f, 'healBlock', 3) }
 ]
 const SKILLS = {
-  전사: [
+  검투사: [
     // 방어파괴: 딜 + 상대 2턴 받는뎀↑ + 상대 최대체력 6% 고정딜(HP스케일 관통)
-    { name: '방어파괴', ready: (s, f, ds, df) => s.cd[0] === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2 + df.maxhp * 0.09, exec: (s, f, ds, df) => { f.sunder = 2; let d = attack(s, f, ds, df, f.defending) + ds.힘절반 + Math.round(df.maxhp * 0.09); d = absorb(f, d); f.hp -= d; s.cd[0] = 3 } },
-    { name: '돌진', ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => ds.돌진딜 * (1 - df.물방) + x.foeTurn, exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.1); s.cd[1] = 6; s.note = '기절' } },
+    { name: '방어파괴', tag: '공격', coef: '타격+힘/2+상대HP9% · 2턴 받는뎀↑', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.2 + df.maxhp * 0.09, exec: (s, f, ds, df) => { f.sunder = 2; let d = attack(s, f, ds, df, f.defending) + ds.힘절반 + Math.round(df.maxhp * 0.09); d = absorb(f, d); f.hp -= d; s.cd[0] = 3 } },
+    { name: '돌진', tag: '제어', coef: '돌진딜 + 2턴 스턴 (자기 반동)', cd: 6, ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => ds.돌진딜 * (1 - df.물방) + x.foeTurn, exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.1); s.cd[1] = 6; s.note = '기절' } },
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
-    { name: '방해', ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 150 : x.foeTurn * 0.6), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } } // guaranteed=true: 회피/빗나감 무시(확정 명중). 시전 끊으면 brokeCast 표식
+    { name: '방해', tag: '제어', coef: '시전차단 / 1턴 스턴 + 딜×1.0', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 150 : x.foeTurn * 0.6), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
+    // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
+    { name: '발차기', tag: '제어', coef: '1턴 스턴 (딜 없음)', cd: 4, ready: (s, f, ds, df) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.4, exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); s.cd[3] = 4; s.note = '기절' } }
   ],
   광전사: [
-    { name: '재생의광기', ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.65, score: (s, f, ds, df, x) => x.est * 3, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.07)); s.healRegen = 3; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[0] = 5; s.note = '회복' }, stunnable: true, stunExec: (s, f, ds, df) => { const before = s.hp; s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.07)); s.healRegen = 3; s.cd[0] = 5; return { type: 'skill', name: '재생의광기', dmg: 0, note: '기절 중 회복', attacked: false, heal: Math.round(s.hp - before), selfDmg: 0 } } },
-    // 피의각성: 체력 10% 소모 → 3턴간 공격력 ×1.35 + 명중보정(상대 회피↓)
-    { name: '피의각성', ready: (s, f, ds, df) => s.cd[1] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.4, exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[1] = 5; s.note = '피의각성' } }
+    // 개편: 피 태우는 하이리스크(불굴 없음). 저체력→광란(회복↑·속도↑·제어면역) + 격노(피격 시 공격력↑)
+    skBloodThirst(0), // 피의갈증: 회복(광란 증폭) + 딜, 쿨1
+    skBloodRage(1), // 피의격노: 체력15%↓ → 공격력 버프
+    skClash(2) // 격돌: 1턴 스턴 + 체력5%↓
   ],
   기사: [
     // 방패밀쳐내기: 물리딜 + 상대 최대체력 10% 고정딜(방어무시) — HP스케일 관통 탱버스터
-    { name: '방패밀쳐내기', ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => ds.방패밀쳐내기 * (1 - df.물방) + df.maxhp * 0.10, exec: (s, f, ds, df) => { let d = ds.방패밀쳐내기 * physSwing(ds); if (f.defending) d *= 0.10; d *= (1 - df.물방); d = guts(d, f, df); d += df.maxhp * 0.10; const dd = absorb(f, Math.max(Math.round(d), 1)); f.hp -= dd; s.cd[0] = 3 } },
+    { name: '방패밀쳐내기', tag: '공격', coef: '방어기반 + 상대HP10% 관통', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => ds.방패밀쳐내기 * (1 - df.물방) + df.maxhp * 0.10, exec: (s, f, ds, df) => { let d = ds.방패밀쳐내기 * physSwing(ds); if (f.defending) d *= 0.10; d *= (1 - df.물방); d = guts(d, f, df); d += df.maxhp * 0.10; const dd = absorb(f, Math.max(Math.round(d), 1)); f.hp -= dd; s.cd[0] = 3 } },
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
-    { name: '방패들기', ready: (s, f, ds, df) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => x.foeTurn * 1.3, exec: (s, f, ds, df) => { s.blockUp = 3; s.cd[1] = 4; s.note = '방패들기' } },
+    { name: '방패들기', tag: '버프', coef: '3턴 방패막기 경감 대폭↑', buff: 3, cd: 4, ready: (s, f, ds, df) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => x.foeTurn * 1.3, exec: (s, f, ds, df) => { s.blockUp = 3; s.cd[1] = 4; s.note = '방패들기' } },
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
-    { name: '방패가격', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? 300 : (f.stun === 0 ? x.foeTurn * 1.3 : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } }
+    { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? 300 : (f.stun === 0 ? x.foeTurn * 1.3 : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } }
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). castCarry(취소 잔여)로 -1턴
-    { name: '화염구', ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => spellBase(ds, '화염구') * (s.instCast ? 2.5 : 1), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(spellBase(ds, '화염구'), f, df)); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = spellBase(ds, '화염구'); s.castTotal = s.cast; s.castName = '화염구'; s.note = '화염구 시전' } } },
+    { name: '화염구', tag: '시전', coef: '마공×4.8 (인캐 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => spellBase(ds, '화염구') * (s.instCast ? 2.5 : 1), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(spellBase(ds, '화염구'), f, df)); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = spellBase(ds, '화염구'); s.castTotal = s.cast; s.castName = '화염구'; s.note = '화염구 시전' } } },
     // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. 취소돼도 castCarry 유지
-    { name: '메테오', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => spellBase(ds, '메테오') * 0.9, exec: (s, f, ds, df) => { s.cast = Math.max(2, 9 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = spellBase(ds, '메테오'); s.castTotal = s.cast; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
+    { name: '메테오', tag: '시전', coef: '마공×8.4 긴 시전 (인캐 불가)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => spellBase(ds, '메테오') * 0.9, exec: (s, f, ds, df) => { s.cast = Math.max(2, 9 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = spellBase(ds, '메테오'); s.castTotal = s.cast; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
     // 인스턴트캐스팅: 다음 시전 마법을 즉시시전으로(버프·딜 없음). 메테오엔 안 걸림
-    { name: '인스턴트캐스팅', ready: (s, f, ds, df) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => spellBase(ds, '화염구') * 1.3, exec: (s, f, ds, df) => { s.instCast = 3; s.cd[2] = 6; s.note = '인스턴트 캐스팅' } },
+    { name: '인스턴트캐스팅', tag: '버프', coef: '3턴 — 다음 시전을 즉시시전(메테오 제외)', buff: 3, cd: 6, ready: (s, f, ds, df) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => spellBase(ds, '화염구') * 1.3, exec: (s, f, ds, df) => { s.instCast = 3; s.cd[2] = 6; s.note = '인스턴트 캐스팅' } },
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
-    { name: '서리구', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => s.instCast ? spellBase(ds, '서리구') * 2.2 : (f.slow === 0 ? spellBase(ds, '서리구') + Math.max(10 - df.턴, 0) * 65 : spellBase(ds, '서리구') * 0.45), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(dmg, f, df)); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
+    { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인캐 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => s.instCast ? spellBase(ds, '서리구') * 2.2 : (f.slow === 0 ? spellBase(ds, '서리구') + Math.max(10 - df.턴, 0) * 65 : spellBase(ds, '서리구') * 0.45), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(dmg, f, df)); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
-    { name: '충격파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => spellBase(ds, '충격파') + x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 2.5, exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[0] = 5; s.note = '충격파' }, stunnable: true }
+    { name: '충격파', tag: '공격', coef: '즉발 소량딜 + 턴 리셋 + 1턴 둔화', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => spellBase(ds, '충격파') + x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 2.5, exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[0] = 5; s.note = '충격파' }, stunnable: true }
   ],
   볼트마법사: [
-    // 볼트마법: 볼트 발사 주력기(시전 없음, 쿨1=매턴). 마스터라 원소당 5발(볼트마법조합 켜면 5+5=10). 스킬이라 침묵에 막힘
-    { name: '볼트마법', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => x.est * 2.5, exec: (s, f, ds, df) => { s._boltFire = true; let dmg = attack(s, f, ds, df, f.defending); s._boltFire = false; if (f.vuln > 0) f.vuln--; dmg = absorb(f, dmg); f.hp -= dmg; s.cd[0] = 1 } },
-    { name: '볼트마법조합', ready: (s, f, ds, df) => s.cd[1] === 0 && s.chainBolt <= 1, score: (s, f, ds, df, x) => x.est * 3, exec: (s, f, ds, df) => { s.chainBolt = 4; s.cd[1] = 4; s.note = '볼트마법조합' } }, // 순수버프(공격 제거): 볼트마법을 10발로. 다운 시 볼트마법보다 우선 재시전
-    { name: '마력충전', ready: (s, f, ds, df) => s.cd[2] === 0 && s.shield < ds.maxhp * 0.10, score: (s, f, ds, df, x) => x.foeTurn * 0.8, exec: (s, f, ds, df) => { s.shield = Math.max(s.shield, Math.round(ds.maxhp * 0.22)); s.cd[2] = 5; s.note = '마나실드 충전' } }
+    // 시전형 볼트 3종(화염구식 시전마법). 파이어=2시전 고배율 / 라이트닝=1시전 / 콜드=즉발+둔화(쿨1). 발수 1~5(볼트마법의 이해=5고정)
+    boltCastSkill(0, '파이어볼트'),
+    boltCastSkill(1, '라이트닝볼트'),
+    boltCastSkill(2, '콜드볼트'),
+    // 볼트마법조합: 4턴 버프 — 활성 중 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
+    { name: '볼트마법조합', tag: '버프', coef: '4턴 — 볼트류 시전 +1, 착탄마다 다음 원소 자동 후속', buff: 4, cd: 4, ready: (s, f, ds, df) => s.cd[3] === 0 && s.chainBolt <= 1, score: (s, f, ds, df, x) => x.est * 2, exec: (s, f, ds, df) => { s.chainBolt = 4; s.cd[3] = 4; s.note = '볼트마법조합' } }
   ],
   암살자: [
-    { name: '암습', ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.foeTurn * 2.5, exec: (s, f, ds, df) => { applyCC(f, 'stun', 3); s.cd[0] = 10; s.note = '기절' } }, // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
-    { name: '처형', ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => ds.물공 * 5 * (1 - df.물방), exec: (s, f, ds, df) => { let d = guts(ds.물공 * 5 * physSwing(ds) * (1 - df.물방), f, df); d = absorb(f, Math.max(Math.round(d), 1)); f.hp -= d; s.cd[1] = 5; s.note = '처형' } },
-    { name: '백스텝', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.est * 1.5, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 1.5); d = absorb(f, d); f.hp -= d; s.cd[2] = 4; s.note = '백스텝' } }, // 회피버프 제거 → 후측 강타 ×1.5
+    { name: '암습', tag: '제어', coef: '3턴 스턴 (딜 없음, 후속타로 딜)', cd: 10, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.foeTurn * 2.5, exec: (s, f, ds, df) => { applyCC(f, 'stun', 3); s.cd[0] = 10; s.note = '기절' } }, // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
+    { name: '처형', tag: '공격', coef: '물공×5 (상대 HP25%↓ 처형)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => ds.물공 * 5 * (1 - df.물방), exec: (s, f, ds, df) => { let d = guts(ds.물공 * 5 * physSwing(ds) * (1 - df.물방), f, df); d = absorb(f, Math.max(Math.round(d), 1)); f.hp -= d; s.cd[1] = 5; s.note = '처형' } },
+    { name: '백스텝', tag: '공격', coef: '타격×1.5', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.est * 1.5, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 1.5); d = absorb(f, d); f.hp -= d; s.cd[2] = 4; s.note = '백스텝' } }, // 회피버프 제거 → 후측 강타 ×1.5
     // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
-    { name: '입막음', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 200 : (df.마공 > df.물공 && f.silence === 0 ? x.foeTurn * 1.2 : 0)), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
+    { name: '입막음', tag: '제어', coef: '시전차단 + 2턴 침묵 + 딜', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 200 : (df.마공 > df.물공 && f.silence === 0 ? x.foeTurn * 1.2 : 0)), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
   ],
   사냥꾼: [
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
-    { name: '약점간파', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * 1.4 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true, true) * 2.0; if (f.instVuln > 0) d *= 1.5; d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '치명타' } },
-    { name: '견제사격', ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.1, exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } },
-    { name: '연발사격', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.est * 1.4, exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending) * 0.5); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.cd[2] = 4; s.note = '연발' } },
+    { name: '약점간파', tag: '공격', coef: '확정 크리 + 방어 대부분 무시', cd: 4, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.물공 * 1.4 * (ds.물크기본 + ds.크랜폭 * 0.5) * (1 - df.물방), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true, true) * 2.0; if (f.instVuln > 0) d *= 1.5; d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '치명타' } },
+    { name: '견제사격', tag: '공격', coef: '딜 + 2턴 상대 명중-20%', cd: 4, ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => x.est * 1.1, exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } },
+    { name: '연발사격', tag: '공격', coef: '타격×0.5 ×3타', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.est * 1.4, exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending) * 0.5); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.cd[2] = 4; s.note = '연발' } },
     // 사냥꾼덫: 예약형 — 설치 후 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈). 딜은 출혈로. 카이팅/거리 유지
-    { name: '사냥꾼덫', ready: (s, f, ds, df) => s.cd[3] === 0 && f.trap === 0 && f.bleed === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.8, exec: (s, f, ds, df) => { f.trap = 2; f.trapBleed = Math.round(ds.물공 * 0.3); s.cd[3] = 5; s.note = '덫 설치' } }
+    { name: '사냥꾼덫', tag: '디버프', coef: '2턴뒤 발동: 게이지밀림 + 둔화 + 3턴 출혈', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0 && f.trap === 0 && f.bleed === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.8, exec: (s, f, ds, df) => { f.trap = 2; f.trapBleed = Math.round(ds.물공 * 0.3); s.cd[3] = 5; s.note = '덫 설치' } }
   ],
   스펠블레이드: [
     // 약점봉인: 순수 CC(딜 없음) — 상대 최고 스탯에 맞는 군중제어만
-    { name: '약점봉인', ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => x.foeTurn * 2.5, exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 5; s.note = cc } },
+    { name: '약점봉인', tag: '제어', coef: '상대 최고 스탯 맞춤 CC (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => x.foeTurn * 2.5, exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 5; s.note = cc } },
     // 역장베기: 혼합 평타딜(확정명중, 방어로 깎임) + 역장피해(마공×1.5 flat, 물방·마방 무시 관통딜 — D&D force). 순수 딜기
-    { name: '역장베기', dmgType: '역장', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => x.est * 1.8, exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true); const force = Math.round(ds.마공 * 1.5); d = absorb(f, d + force); f.hp -= d; s.cd[1] = 4; s.note = '역장베기' } },
+    { name: '역장베기', tag: '공격', coef: '타격 + 역장 마공×1.5 관통', cd: 4, dmgType: '역장', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => x.est * 1.8, exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true); const force = Math.round(ds.마공 * 1.5); d = absorb(f, d + force); f.hp -= d; s.cd[1] = 4; s.note = '역장베기' } },
     // 인챈트: 3턴간 공격력 ×1.3 (마검사 딜 보강)
-    { name: '룬각인', ready: (s, f, ds, df) => s.cd[2] === 0 && s.powBuff === 0, score: (s, f, ds, df, x) => x.est * 1.3, exec: (s, f, ds, df) => { s.powBuff = 4; s.powMul = 1.8; s.cd[2] = 4; s.note = '룬각인' } }, // 순수버프(공격 제거), 지속4=쿨4(사용성↑)
+    { name: '룬각인', tag: '버프', coef: '4턴 공격력×1.8', buff: 4, cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0 && s.powBuff === 0, score: (s, f, ds, df, x) => x.est * 1.3, exec: (s, f, ds, df) => { s.powBuff = 4; s.powMul = 1.8; s.cd[2] = 4; s.note = '룬각인' } }, // 순수버프(공격 제거), 지속4=쿨4(사용성↑)
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
-    { name: '역장폭발', dmgType: '역장', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => x.est * 2, exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 2.5); const d = absorb(f, force); f.hp -= d; s.instVuln = 2; s.cd[3] = 5; s.note = '역장폭발' } }
+    { name: '역장폭발', tag: '관통', coef: '역장 마공×2.5 관통 (이후 2턴 취약)', cd: 5, dmgType: '역장', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => x.est * 2, exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 2.5); const d = absorb(f, force); f.hp -= d; s.instVuln = 2; s.cd[3] = 5; s.note = '역장폭발' } }
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
-    { name: '마나소각', dmgType: '역장', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.마공 * (f.shield > 0 ? 0.95 : 0.42), exec: (s, f, ds, df) => { const had = f.shield > 0; f.shield = 0; const d = Math.round(ds.마공 * (had ? 0.95 : 0.42)); f.hp -= d; if (had) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, Math.round(df.턴 * 0.2 * 10) / 10) } s.cd[0] = 5; s.note = had ? '마나소각' : '마나번' } }, // 역장피해(마방 무시 flat): 실드 즉시파괴 + 실드있었으면 마공×3 & 2턴 20% 턴지연 / 없으면 마공×1.5
+    { name: '마나소각', tag: '관통', coef: '실드 파괴 + 역장 마공×0.42 (실드 있으면 ×0.95+둔화)', cd: 5, dmgType: '역장', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => ds.마공 * (f.shield > 0 ? 0.95 : 0.42), exec: (s, f, ds, df) => { const had = f.shield > 0; f.shield = 0; const d = Math.round(ds.마공 * (had ? 0.95 : 0.42)); f.hp -= d; if (had) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, Math.round(df.턴 * 0.2 * 10) / 10) } s.cd[0] = 5; s.note = had ? '마나소각' : '마나번' } }, // 역장피해(마방 무시 flat): 실드 즉시파괴 + 실드있었으면 마공×3 & 2턴 20% 턴지연 / 없으면 마공×1.5
     // 시전파괴: 상대 시전 확정 차단 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
-    { name: '시전파괴', ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 300 : 150), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
+    { name: '시전파괴', tag: '제어', coef: '시전차단 + 2턴 침묵 (캐스터 전용, 딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => x.est + (f.cast > 0 ? 300 : 150), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
     // 무기파괴: 3턴간 상대 딜 1/3(물리·마법 공통). 안티캐스터가 물리 상대에도 통하는 카운터 — 순수 디버프(즉발)
-    { name: '무기파괴', ready: (s, f, ds, df) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2, exec: (s, f, ds, df) => { f.weaponBroken = 3; s.cd[2] = 5; s.note = '무기파괴' } },
+    { name: '무기파괴', tag: '디버프', coef: '3턴 상대 딜 1/3 + 무기막기 불가', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2, exec: (s, f, ds, df) => { f.weaponBroken = 3; s.cd[2] = 5; s.note = '무기파괴' } },
     // 파훼: 평소엔 약딜, 무기파괴(약점노출)된 적엔 치명딜. "무기파괴 → 파훼" 처치 콤보
-    { name: '파훼', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => f.weaponBroken > 0 ? x.est * 3.3 : x.est * 1.2, exec: (s, f, ds, df) => { const mult = f.weaponBroken > 0 ? 3.3 : 1.2; let d = Math.round(attack(s, f, ds, df, f.defending) * mult); d = absorb(f, d); f.hp -= d; s.cd[3] = 4; s.note = f.weaponBroken > 0 ? '파훼 작렬' : '파훼' } }
+    { name: '파훼', tag: '공격', coef: '타격×1.2 (무기파괴된 적 ×3.3)', cd: 4, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => f.weaponBroken > 0 ? x.est * 3.3 : x.est * 1.2, exec: (s, f, ds, df) => { const mult = f.weaponBroken > 0 ? 3.3 : 1.2; let d = Math.round(attack(s, f, ds, df, f.defending) * mult); d = absorb(f, d); f.hp -= d; s.cd[3] = 4; s.note = f.weaponBroken > 0 ? '파훼 작렬' : '파훼' } }
   ],
   세이지: [
-    { name: '오토스펠', ready: (s, f, ds, df) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => x.est * 2.2, exec: (s, f, ds, df) => { s.autoSpell = 4; s.cd[0] = 3; s.note = '주문각인' } }, // 순수버프(공격 제거)
+    { name: '오토스펠', tag: '버프', coef: '4턴 — 평타마다 볼트 자동발동 + 턴가속', buff: 4, cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => x.est * 2.2, exec: (s, f, ds, df) => { s.autoSpell = 4; s.cd[0] = 3; s.note = '주문각인' } }, // 순수버프(공격 제거)
     // 디스펠: 상대 패시브 N턴 봉인 + 현재 버프 즉시 전부 제거(딜 없음). 쿨=봉인+2. 안티버프/안티패시브 현자 도구
-    { name: '디스펠', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const buffs = BUFF_FIELDS.filter(k => f[k] > 0).length; const bigPsv = f.passiveLock === 0 && (f.불굴 || f.완벽방어 || f.행운의여신); if (buffs === 0 && !bigPsv) return 0; return x.est * 0.4 + buffs * 45 + (bigPsv ? 30 : 0) }, exec: (s, f, ds, df) => { const L = 3; const cleared = clearBuffs(f); f.passiveLock = L; s.cd[1] = L + 2; s.note = '디스펠' + (cleared ? `(버프${cleared} 제거)` : '') } }
+    { name: '디스펠', tag: '디버프', coef: '상대 패시브 3턴 봉인 + 버프 즉시 제거 (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const buffs = BUFF_FIELDS.filter(k => f[k] > 0).length; const bigPsv = f.passiveLock === 0 && (f.불굴 || f.완벽방어 || f.행운의여신); if (buffs === 0 && !bigPsv) return 0; return x.est * 0.4 + buffs * 45 + (bigPsv ? 30 : 0) }, exec: (s, f, ds, df) => { const L = 3; const cleared = clearBuffs(f); f.passiveLock = L; s.cd[1] = L + 2; s.note = '디스펠' + (cleared ? `(버프${cleared} 제거)` : '') } }
   ],
   한탕주의자: [
     // 2d20: 주사위 2개(2~40) 합 비례 도박 딜 — 더블20=대박 / 뻥=꽝. HP% 기반(방어감소는 받되 실드 흡수)
-    { name: '2d20', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => df.maxhp * 0.135, exec: (s, f, ds, df) => { const sum = (1 + Math.floor(rand() * 20)) + (1 + Math.floor(rand() * 20)); let d = Math.round(df.maxhp * (sum / 40) * 0.6); d = absorb(f, d); f.hp -= d; s.cd[0] = 3; s.note = sum >= 38 ? `🎯더블! 2d20=${sum}` : (sum <= 5 ? `💢뻥 2d20=${sum}` : `🎲2d20=${sum}`) } },
+    { name: '2d20', tag: '공격', coef: '주사위 2개 합(2~40) 비례 도박딜', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => df.maxhp * 0.135, exec: (s, f, ds, df) => { const sum = (1 + Math.floor(rand() * 20)) + (1 + Math.floor(rand() * 20)); let d = Math.round(df.maxhp * (sum / 40) * 0.6); d = absorb(f, d); f.hp -= d; s.cd[0] = 3; s.note = sum >= 38 ? `🎯더블! 2d20=${sum}` : (sum <= 5 ? `💢뻥 2d20=${sum}` : `🎲2d20=${sum}`) } },
     // 동전던지기: All or Nothing — 앞면=상대 최대체력 10% / 뒷면=자기 5%, 둘 다 방어·실드 무시(HP비례 확정딜)
-    { name: '동전던지기', ready: (s, f, ds, df) => s.cd[1] === 0 && s.hp > ds.maxhp * 0.12, score: (s, f, ds, df, x) => df.maxhp * 0.075, exec: (s, f, ds, df) => { if (rand() < 0.5) { const d = absorb(f, Math.round(df.maxhp * 0.15)); f.hp -= d; s.note = '앞면! 상대 최대체력 15%' } else { s.hp -= Math.round(ds.maxhp * 0.05); s.note = '뒷면… 자해 5%' } s.cd[1] = 2 } }, // HP비례딜(물방/마방 무관), 마나실드엔 흡수됨
+    { name: '동전던지기', tag: '공격', coef: '앞면 상대HP15% / 뒷면 자해5% (실드 흡수)', cd: 2, ready: (s, f, ds, df) => s.cd[1] === 0 && s.hp > ds.maxhp * 0.12, score: (s, f, ds, df, x) => df.maxhp * 0.075, exec: (s, f, ds, df) => { if (rand() < 0.5) { const d = absorb(f, Math.round(df.maxhp * 0.15)); f.hp -= d; s.note = '앞면! 상대 최대체력 15%' } else { s.hp -= Math.round(ds.maxhp * 0.05); s.note = '뒷면… 자해 5%' } s.cd[1] = 2 } }, // HP비례딜(물방/마방 무관), 마나실드엔 흡수됨
     // 룰렛: 상대에게 랜덤 디버프(레지스트리에서 추출, 칩딜 없음) — 무슨 재앙이 걸릴지 모르는 도박
-    { name: '룰렛', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.6, exec: (s, f, ds, df) => { const d = DEBUFFS[Math.floor(rand() * DEBUFFS.length)]; d.apply(f); s.cd[2] = 3; s.note = '룰렛: ' + d.name } }
+    { name: '룰렛', tag: '디버프', coef: '상대에게 랜덤 디버프', cd: 3, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.6, exec: (s, f, ds, df) => { const d = DEBUFFS[Math.floor(rand() * DEBUFFS.length)]; d.apply(f); s.cd[2] = 3; s.note = '룰렛: ' + d.name } }
   ]
 }
 // ===== 커스텀 전용 공통 스킬 풀 (설계 검증 완료·미구현) =====
@@ -568,60 +638,87 @@ const CUSTOM_DEFS = {
   재정비: (ci) => ({ name: '재정비', ready: (s, f, ds) => s.cd[ci] === 0 && s.hp < ds.maxhp * 0.7, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.5, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.18)); s.cd[ci] = 4; s.note = '회복' } }),
   반격태세: (ci) => ({ name: '반격태세', ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => df.물공 * 0.4, exec: (s, f, ds, df) => { s.defending = true; s.shield = Math.max(s.shield, Math.round(ds.maxhp * 0.12)); s.cd[ci] = 3; s.note = '반격' } })
 }
-// 스킬 표시용 쿨다운(버튼 라벨). 숫자=턴 쿨, 문자=특수
-const SKILL_CD = { 방어파괴: 3, 돌진: 6, 광폭화: '버프', 재생의광기: 5, 방패밀쳐내기: 3, 방패가격: 4, 도발: 5, 화염구: '시전', 메테오: '시전', 서리구: '시전', 충격파: 5, 인스턴트캐스팅: '버프', 암습: 10, 처형: 5, 약점간파: 4, 견제사격: 4, 사냥꾼덫: 5, 약점봉인: 5, 역장베기: 5, 오토스펠: 3, 디스펠: 5, '2d20': 3, 동전던지기: 2, 볼트마법: 1, 볼트마법조합: '버프', 마력충전: 5, 마나소각: 5, 시전파괴: 5, 무기파괴: 5, 파훼: 4, 방해: 5, 방패들기: '버프', 룬각인: '버프', 역장폭발: 5, 피의각성: '버프', 백스텝: '버프', 입막음: 5, 연발사격: 4, 룰렛: 3, 마법반사: '버프' }
+// ===== 선언형 딜 스키마 =====
+// 스킬 딜 = 기본계수(mult, 기본 1.0)로 attack() 경유분 + 추가계수(dmg{})로 관통 성분.
+// composeDamage=실제 딜(attack 호출=실히트) / estDamage=AI score용 추정(비파괴, attack 미호출).
+const TAG_EMO = { 공격: '⚔️', 시전: '🔮', 버프: '🔺', 디버프: '🔻', 제어: '🌀', 회복: '💚', 관통: '⚡' }
+function composeDamage (spec, s, f, ds, df) {
+  const M = spec.mult != null ? spec.mult : 1; const D = spec.dmg || {}; const hits = spec.hits || 1
+  let total = 0
+  if (M) for (let i = 0; i < hits; i++) total += attack(s, f, ds, df, f.defending) * M // 타격분(물방·막기·크리·guts 적용)
+  if (D.selfHp) total += ds.maxhp * D.selfHp // 자기 최대체력 비례(관통)
+  if (D.foeHp) total += df.maxhp * D.foeHp // 상대 최대체력 비례(관통)
+  if (D.force) total += Math.round(ds.마공 * D.force) // 역장(마공 비례 관통)
+  if (D.selfStr) total += Math.round(ds.base.힘 * D.selfStr) // 힘 스탯 비례(관통)
+  return Math.max(Math.round(total), 1)
+}
+function estDamage (spec, ds, df, x) {
+  const M = spec.mult != null ? spec.mult : 1; const D = spec.dmg || {}; let e = 0
+  if (M) e += (x ? x.est : estAtk(ds, df)) * M * (spec.hits || 1)
+  if (D.selfHp) e += ds.maxhp * D.selfHp
+  if (D.foeHp) e += df.maxhp * D.foeHp
+  if (D.force) e += ds.마공 * D.force
+  if (D.selfStr) e += ds.base.힘 * D.selfStr
+  return e
+}
+// 자동 설명: 선언 필드에서 딜 성분 문자열 생성(수동 문자열 없음)
+function dmgDesc (spec) {
+  const D = spec.dmg || {}; const p = []; const M = spec.mult != null ? spec.mult : 1
+  if (M) p.push(`타격×${M}${spec.hits ? `×${spec.hits}타` : ''}`)
+  if (D.selfHp) p.push(`자기HP ${Math.round(D.selfHp * 100)}%`)
+  if (D.foeHp) p.push(`상대HP ${Math.round(D.foeHp * 100)}% 관통`)
+  if (D.force) p.push(`역장 마공×${D.force}`)
+  if (D.selfStr) p.push(`힘×${D.selfStr}`)
+  return p.join(' + ')
+}
+// 스킬 한 줄 자동설명: coef(특수계수 예외 문자열) 우선, 없으면 dmgDesc. cd/buff 자동.
+function skillLine (spec) {
+  const body = spec.coef || ((spec.mult != null || spec.dmg) ? dmgDesc(spec) : '')
+  const cd = spec.cast ? '' : (spec.cd != null ? ` (쿨${spec.cd})` : (spec.buff ? ` (${spec.buff}턴)` : '')) // 시전 스킬은 tag/coef가 '시전'을 이미 표기 → 접미사 생략
+  return `${TAG_EMO[spec.tag] || ''} **${spec.name}** — ${spec.tag}${body ? ' ' + body : ''}${cd}`
+}
+// 스킬 버튼/표시용 쿨 라벨(필드 기반, SKILL_CD 테이블 대체): 시전=시전 / 버프=버프 / 그외=쿨숫자
+function skillCd (sk) { return sk.cast ? '시전' : (sk.buff && sk.cd == null ? '버프' : (sk.cd != null ? sk.cd : '')) }
+// 순수 딜기 팩토리: ready/score/exec를 필드에서 자동 생성(부가효과 없는 스킬). 필드는 그대로 남아 skillLine이 읽음
+function dmgSkill (ci, spec) {
+  return Object.assign({}, spec, {
+    ready: (s) => s.cd[ci] === 0,
+    score: (s, f, ds, df, x) => estDamage(spec, ds, df, x),
+    exec: (s, f, ds, df) => { let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = spec.name }
+  })
+}
+// 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속
+function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 2.5 : 1 }
+// 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
+function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(광란 시 증폭)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => estDamage(spec, ds, df, x) + (ds.maxhp - s.hp) * 0.4 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.03 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
+function skBloodRage (ci) { const spec = { name: '피의격노', tag: '버프', mult: 1.0, buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑' }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => estDamage(spec, ds, df, x) * 1.4, exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의격노' } }) }
+function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 2, coef: '1턴 스턴 + 타격×1.0 (자기 체력5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => estDamage(spec, ds, df, x) + x.foeTurn, exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
+// ===== 재사용 스킬 창고(SKILL_POOL) =====
+// 구현만 해두고 배치는 나중에(CHARS/SKILLS에서 참조). ci=쿨슬롯 인덱스. 숫자는 자리표시자(밸런스 차차).
+// 미배치=라이브 무영향(CUSTOM_DEFS와 동일 원칙).
+const SKILL_POOL = {
+  // [순수 딜기 — dmgSkill 자동생성] 기본계수만
+  강타: (ci) => dmgSkill(ci, { name: '강타', tag: '공격', mult: 1.6, cd: 3 }),
+  // [순수 딜기 — 추가계수] 타격분 없이 자기/상대 체력비례(관통). "maxHP로" 확정
+  방패밀쳐내기: (ci) => dmgSkill(ci, { name: '방패밀쳐내기', tag: '공격', mult: 0, dmg: { selfHp: 0.12, foeHp: 0.10 }, cd: 3 }),
+  // [광전사 킷 — hoisted 함수 재사용] 피의갈증=회복(광란 증폭) / 피의격노=버프 / 격돌=제어
+  피의갈증: skBloodThirst,
+  피의격노: skBloodRage,
+  격돌: skClash,
+  // 마법 캐스터: 2턴간 마법 편차 무시(graze100) — 순수버프
+  마법의완전이해: (ci) => ({ name: '마법의완전이해', tag: '버프', buff: 2, cd: 5, coef: '마법 편차 무시(상시 풀댐)', ready: (s) => s.cd[ci] === 0 && s.graze100 === 0, score: (s, f, ds, df, x) => x.est * 1.3, exec: (s, f, ds, df) => { s.graze100 = 2; s.cd[ci] = 5; s.note = '완전이해' } }),
+  // [시전형 볼트 — 볼트마법사] 화염구식 시전마법. 파이어 2시전 / 라이트닝 1시전 / 콜드 즉발+둔화(쿨1). 발수 1~5(마스터5)
+  파이어볼트: (ci) => boltCastSkill(ci, '파이어볼트'),
+  라이트닝볼트: (ci) => boltCastSkill(ci, '라이트닝볼트'),
+  콜드볼트: (ci) => boltCastSkill(ci, '콜드볼트')
+}
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
 const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
-// 스킬 효과 요약(매치업 표시용)
-const SKILL_DESC = {
-  방어파괴: '상대 2턴 받는뎀+15% + 고정딜',
-  돌진: '딜+1턴 스턴 (나 반동)',
-  광폭화: '3턴 공격력↑ + 턴 빨라짐',
-  재생의광기: '즉시 25% 회복+3턴 재생 (공격도 함)',
-  방패밀쳐내기: '방어 기반 강력한 한 방 + 상대 최대체력 10% 관통딜',
-  방패가격: '시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴',
-  도발: '상대 2턴 방어행동 불가 + 딜',
-  화염구: '시전 마법 — 마공 기반 딜(인캐로 즉발 가능)',
-  메테오: '긴 시전 → 초대형 한 방(인캐 불가)',
-  서리구: '짧은 시전 → 딜(약) + 상대 3턴 둔화(인캐로 즉발)',
-  충격파: '즉발 소량딜 + 상대 현재 턴 진행 초기화 + 1턴 둔화(카이팅)',
-  인스턴트캐스팅: '3턴간 다음 시전을 즉시시전(메테오 제외)',
-  암습: '상대 3턴 기절 + 진입딜',
-  처형: '상대 HP25%↓면 물공×5 대박딜',
-  약점간파: '확정 크리 + 방어 대부분 무시',
-  견제사격: '딜 + 상대 2턴 명중-20%',
-  약점봉인: '상대 최고 스탯에 맞는 군중제어 (순수 CC·딜 없음)',
-  방패들기: '3턴간 방패막기 경감 대폭↑',
-  방해: '시전 차단+침묵 / 아니면 1턴 스턴 + 딜',
-  룬각인: '4턴간 공격력 ×1.8 (순수버프, 지속4=쿨4)',
-  역장베기: '혼합 딜 + 역장피해(방어무시 추가딜)',
-  역장폭발: '큰 역장피해(방어무시) — 이후 2턴 취약(받는뎀+50%)',
-  피의각성: '체력 10% 소모 → 3턴 공격력 ×1.35',
-  백스텝: '2턴 회피 대폭↑ + 딜',
-  입막음: '시전 차단 + 2턴 침묵 + 딜 (캐스터 카운터)',
-  연발사격: '3연사(발당 약)',
-  사냥꾼덫: '덫 설치 → 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈)',
-  룰렛: '상대에게 랜덤 디버프(기절·둔화·침묵·취약 등에서 무작위)',
-  마법반사: '3턴간 받는 마법 반사(완전/부분 랜덤)',
-  오토스펠: '켜면 평타마다 90% 볼트 1~5발 자동발동(발당 원소 랜덤) + 턴가속',
-  디스펠: '상대 패시브를 3턴 봉인 + 현재 버프 즉시 전부 제거(딜 없음)',
-  '2d20': '주사위 2개 합(2~40) 비례 도박 딜 — 더블20 대박/뻥 꽝',
-  동전던지기: 'All or Nothing — 앞면 상대 최대체력 15%% / 뒷면 자기 5%% (HP비례·실드엔 흡수)',
-  볼트마법: '볼트 발사 주력기(시전없음·매턴). 마스터라 원소당 5발, 조합 시 5+5=10발. 침묵에 막힘',
-  볼트마법조합: '4턴 유지 — 볼트마법이 두 원소 5+5=10발 혼합발사 + 조합배율(순수버프)',
-  마력충전: '마나실드 즉시 재충전',
-  마나소각: '마나실드 즉시 파괴 + 역장피해(마방무시) — 실드 파괴 시 대미지↑ & 2턴 둔화',
-  시전파괴: '시전 확정 차단 + 2턴 침묵 (딜 없음·캐스터 전용)',
-  무기파괴: '3턴간 상대 딜 1/3(물리·마법) + 무기막기 불가',
-  파훼: '약딜(×1.2) — 무기파괴된 적에겐 치명딜(×3.3)'
-}
+// 스킬블록: 선택 캐릭의 스킬슬롯을 필드에서 자동 렌더(번호 없음, 하드코딩 테이블 없음) + 패시브 나열
 function skillsBlock (name) {
-  const lines = SKILLS[name].map((sk, i) => {
-    const cd = SKILL_CD[sk.name]
-    return `${i + 1}) **${sk.name}** — ${SKILL_DESC[sk.name] || ''} (${typeof cd === 'number' ? `쿨${cd}` : cd})`
-  })
-  for (const p of PASSIVES[name] || []) lines.push(`🔒 **${p.name}**(패시브) — ${p.desc}`) // 패시브도 표시(스킬 수 불리해 보이지 않게)
+  const lines = SKILLS[name].map(sk => skillLine(sk))
+  for (const p of PASSIVES[name] || []) lines.push(`🔒 **${p.name}** — 패시브 ${p.desc}`)
   return lines.join('\n')
 }
 // 방어 결정 = AI 리스크 톨러런스. 예상딜은 추정치(실제는 변동) → 계수로 낙관/비관 표현
@@ -659,6 +756,8 @@ function mkFighter (d, name, ai) {
     castCarry: 0,
     castDmg: 0,
     castName: null,
+    castBolt: null, // 시전형 볼트(볼트마법사): 착탄 시 boltVolley로 다발 해석
+    castBoltChain: false, // 볼트마법조합: 이 시전볼트가 착탄 시 다음 원소 후속 발동(시전 시작 시점에 확정)
     castTotal: 0,
     instVuln: 0,
     instCast: 0,
@@ -668,7 +767,6 @@ function mkFighter (d, name, ai) {
     missDown: 0,
     autoSpell: 0,
     chainBolt: 0,
-    nextAmp: 0,
     didAttack: false,
     powBuff: 0,
     powMul: 1,
@@ -682,13 +780,16 @@ function mkFighter (d, name, ai) {
     불굴: (CHARS[name] && CHARS[name].불굴) || false,
     undyingUsed: 0,
     reviveType: null,
-    accBuff: 0, // 광전사 불굴(죽을 피해→회복 생존) / 피의각성 명중보정(상대 회피↓)
+    accBuff: 0, // 피의격노 명중보정(상대 회피↓) 등
     광란: (CHARS[name] && CHARS[name].광란) || false,
     maxhp: d.maxhp, // 광전사 광란: 체력 낮을수록 제어감소+공격력↑(2차곡선)
     마나환류: (CHARS[name] && CHARS[name].마나환류) || false, // 마법사 패시브: 마법딜 시 확률적 실드복구
     연속타격: (CHARS[name] && CHARS[name].연속타격) || false, // 암살자 패시브: 공격 시 확률적 추가타
     완벽방어: (CHARS[name] && CHARS[name].완벽방어) || false,
     blockStreak: 0, // 기사 패시브: 연속 방패막기 3회 → 피해 무효
+    격노: (CHARS[name] && CHARS[name].격노) || false, // 패시브: 체력 낮을수록 공격력↑(회복하면 감소)
+    무기의달인: (CHARS[name] && CHARS[name].무기의달인) || false, // 패시브: 무기막기 강화 + 무기 배율↑
+    graze100: 0, // 마법의 완전이해(버프): 마법 편차 무시 상시 풀댐
 
     boltMaster: (CHARS[name] && CHARS[name].boltMaster) || false, // 볼트마법사 패시브: 볼트마법 사용 시 원소당 확정 5발
     행운의여신: (CHARS[name] && CHARS[name].행운의여신) ? (CHARS[name].행운 / 1000) : 0, // 한탕 패시브: 받는 피해마다 이 확률로 피해 1(전 타입)
@@ -723,13 +824,14 @@ function reviveCheck (f, d) {
 }
 
 // ── 스텝형 전투 엔진 (자동 runBattle + 인터랙티브 공용) ──
-function resetGauge (f, d) { return Math.max(d.턴 * (f.autoSpell > 0 ? 0.85 : 1) - (f.rage > 0 ? 2 : 0), 2) + (f.slow > 0 ? f.slowSec : 0) } // 오토스펠: 턴시간 15%↓(가속)
+function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 0.3) : 1; return Math.max(d.턴 * (f.autoSpell > 0 ? 0.85 : 1) * fury - (f.rage > 0 ? 2 : 0), 2) + (f.slow > 0 ? f.slowSec : 0) } // 오토스펠: 턴시간 15%↓ / 광란: 저체력일수록 턴 가속(빈사 ~30%↑)
 // 턴 시작 처리(쿨/상태 감소, 기절·시전). 턴이 소모되는 강제 이벤트면 그 이벤트, 아니면 null
 function upkeep (self, foe, ds, df) {
   self.defending = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false; self._tick = []
   for (let i = 0; i < self.cd.length; i++) self.cd[i] = Math.max(0, self.cd[i] - 1) // 전 스킬 슬롯 쿨 감소(3스킬 대응)
   if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.base.체력 * 0.3))
   if (self.autoSpell > 0) self.autoSpell--
+  if (self.graze100 > 0) self.graze100--
   if (self.passiveLock > 0) self.passiveLock--
   if (self.chainBolt > 0) self.chainBolt--
   if (self.slow > 0) self.slow--; if (self.silence > 0) self.silence--; if (self.luckLock > 0) self.luckLock--; if (self.blind > 0) self.blind--; if (self.healBlock > 0) self.healBlock--
@@ -767,7 +869,7 @@ function upkeep (self, foe, ds, df) {
     return null // 제한된 턴 진행 — self.stunned=true 로 옵션 제한(공격/일반스킬 불가, 충격파/재생 or 턴넘기기)
   }
   // 시전 진행(캐스터 공통): 카운트다운 후 발사
-  if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } } return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal } }
+  if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; self.castBolt = null; foe.hp -= absorb(foe, boltVolley(self, foe, ds, df, bn)); if (BOLT_CAST[bn].slow) { applyCC(foe, 'slow', BOLT_CAST[bn].slow); foe.slowSec = Math.max(foe.slowSec, 1) } if (self.castBoltChain) { self.castBoltChain = false; boltChain(self, foe, ds, df, bn) } return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } } return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal } }
   return null
 }
 function ctxFor (self, foe, ds, df) {
@@ -782,7 +884,7 @@ function execAttack (self, foe, ds, df) { const fb = foe.hp; const psh = foe.shi
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
-const BUFF_SKILLS = new Set(['광폭화', '인스턴트캐스팅', '2d20', '볼트마법조합', '방패들기', '룬각인', '피의각성', '마법반사', '오토스펠'])
+const BUFF_SKILLS = new Set(['인스턴트캐스팅', '2d20', '볼트마법조합', '방패들기', '룬각인', '마법반사', '오토스펠'])
 // 행동불능(기절) 중 쓸 수 있는 스킬 — 스킬의 stunnable 플래그 + 기존 ready 조건 재사용(하드코딩 제거). 없으면 null
 function stunUsableSkill (self, foe, ds, df) { return (SKILLS[self.name] || []).find(s => s.stunnable && s.ready(self, foe, ds, df)) || null }
 function stunSkill (self, foe, ds, df) { const sk = stunUsableSkill(self, foe, ds, df); return sk ? sk.name : null }
@@ -876,7 +978,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 즉시 반사 — 방패들기(막기 90%)와 강시너지' }], 세이지: [{ name: '원소 마스터', desc: '볼트마법 대미지 대폭 증가 — 세이지 오토캐스트 딜 코어' }, { name: '현자의 균형', desc: '힘·지능 둘 다 숙련할수록 상시 피해감소(둘 중 낮은 값 기준, 세이지 15%). 하이브리드 전용' }], 광전사: [{ name: '불굴', desc: '전투당 1회, 죽을 피해를 받으면 최대HP 10% 회복해 생존(직후 2턴 취약)' }, { name: '광란', desc: '체력이 낮을수록 받는 제어 감소 + 공격력 급증(2차곡선, 빈사에서 폭발)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 한탕주의자: [{ name: '행운의여신', desc: '받는 피해마다 행운 비례 확률(행운100=10%)로 그 피해를 1로 — 전 타입(마법·볼트도)' }], 암살자: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 볼트마법사: [{ name: '볼트마법마스터', desc: '볼트마법 사용 시 원소당 확정 5발. 마스터 없으면 원소당 1~5 랜덤' }] }
+const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 즉시 반사 — 방패들기(막기 90%)와 강시너지' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가 — 세이지 볼트 딜 코어(역장·무속성 제외)' }, { name: '현자의 균형', desc: '힘·지능 둘 다 숙련할수록 상시 피해감소(둘 중 낮은 값 기준, 세이지 15%). 하이브리드 전용' }], 광전사: [{ name: '격노', desc: '체력이 낮을수록 공격력 급증(빈사 ~+90%) — 회복하면 다시 감소(죽어갈수록 강해짐)' }, { name: '광란', desc: '체력이 낮을수록 받는 제어 감소 + 턴 가속 + 회복 계수 증폭(빈사에서 폭발)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 한탕주의자: [{ name: '행운의여신', desc: '받는 피해마다 행운 비례 확률(행운100=10%)로 그 피해를 1로 — 전 타입(마법·볼트도)' }], 암살자: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev
@@ -901,12 +1003,11 @@ function playerCanUse (state, slot) {
   if ((name === '화염구' || name === '메테오' || name === '서리구') && A.cast > 0) return { usable: false, reason: '시전 중' }
   if (name === '인스턴트캐스팅' && A.instCast > 0) return { usable: false, reason: '즉시시전 중' }
   if (name === '방패들기' && A.blockUp > 0) return { usable: false, reason: '유지 중' }
-  if ((name === '룬각인' || name === '피의각성') && A.powBuff > 0) return { usable: false, reason: '유지 중' }
+  if ((name === '룬각인' || name === '피의격노') && A.powBuff > 0) return { usable: false, reason: '유지 중' }
   if (name === '백스텝' && A.dodgeUp > 0) return { usable: false, reason: '유지 중' }
   if (name === '마법반사' && A.magReflect > 0) return { usable: false, reason: '유지 중' }
   if (name === '오토스펠' && A.autoSpell > 1) return { usable: false, reason: '유지 중' }
   // 버프 유지 중엔 재사용 방지(직관적 비활성 + 낭비 방지)
-  if (name === '광폭화' && A.rage > 0) return { usable: false, reason: '광폭 중' }
   if (name === '2d20' && A.diceAdv > 0) return { usable: false, reason: '폭발 중' }
   if (name === '볼트마법조합' && A.chainBolt > 1) return { usable: false, reason: '유지 중' }
   return { usable: true }
@@ -916,7 +1017,7 @@ function playerOptions (state) {
   const stunned = A.stunned === true
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
-  const one = (slot) => { const nm = sks[slot].name; let u = playerCanUse(state, slot); if (stunned) u = (nm === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; return { name: nm, base: SKILL_CD[nm], usable: u.usable, reason: u.reason, inst } }
+  const one = (slot) => { const nm = sks[slot].name; let u = playerCanUse(state, slot); if (stunned) u = (nm === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(sks[slot]); if (A.chainBolt > 0 && BOLT_CAST[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst } } // 볼트마법조합 중엔 콜드도 시전이 되므로 버튼 라벨 반영
   return { canDefend: !stunned && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned }
 }
 
@@ -1041,7 +1142,12 @@ function narrateLine (ev, meName, oppName) {
     case 'skip': return `⏭️ ${ae} **${A}**${iga(A)} 턴을 넘겼다.`
     case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.${ev.stunLeft > 0 ? ` (기절 ${ev.stunLeft}턴 남음)` : ' 💫 다음 턴 해제!'}`
     case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다… ${ev.total ? `**[${ev.total - ev.left}/${ev.total}]**` : ''}`
-    case 'castfire': { const sp = ev.spell || '화염구'; return ev.dmg > 0 ? `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}` : `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!` }
+    case 'castfire': {
+      const sp = ev.spell || '화염구'
+      if (ev.dmg <= 0) return `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!`
+      if (ev.bolt && ev.boltHits && ev.boltHits.length) { const combo = ev.boltNames && new Set(ev.boltNames).size > 1 ? '🔗**원소조합!** ' : ''; return `☄️ ${ae} **${A}**의 ${sp} 작렬! ${combo}${te} **${T}**${eun(T)} ✨${boltGroupStr(ev.boltHits, ev.boltNames, ev.dmg)} 총 **${ev.dmg}**의 피해를 입었다.` } // 시전형 볼트: 발당 분해 표시(파이어볼트(1·3·2·1·4))
+      return `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}`
+    }
     case 'revive': return ev.rtype === 'undying'
       ? `🩸 ${ae} **${A}**${eun(A)} 불굴로 치명상을 버텨내며 일어섰다! (잠시 취약)`
       : `✨ ${ae} **${A}**${eun(A)} 죽음을 딛고 다시 일어섰다!`
@@ -1156,7 +1262,7 @@ function buildBattleRow (state) {
     if (!s.usable) return `${s.name} · ${s.reason}`
     const pre = s.inst === '즉시' ? '⚡' : '✨'
     const suf = s.inst ? ` · ${s.inst}` : ''
-    return `${pre} ${s.name}${suf}${typeof s.base === 'number' ? ` (쿨${s.base})` : ''}`
+    return `${pre} ${s.name}${suf}${typeof s.base === 'number' ? ` (쿨${s.base})` : (s.base ? ` (${s.base})` : '')}`
   }
   // 1줄=행동(공격/방어), 2줄=스킬(+패시브) — 스킬 쿨타임 항상 노출. 스킬 4개까지 대비
   const actionBtns = [
@@ -1226,4 +1332,4 @@ async function handleButton (interaction, info) {
 }
 
 function _tune (o) { Object.assign(TUNE, o) }
-module.exports = { CHARS, NAMES, AIS, TITLES, TUNE, _tune, runBattle, buildSelectEmbed, buildSelectRows, handleButton, SKILLS, CUSTOM_DEFS, PASSIVE_FLAGS }
+module.exports = { CHARS, NAMES, AIS, TITLES, TUNE, _tune, runBattle, buildSelectEmbed, buildSelectRows, handleButton, SKILLS, CUSTOM_DEFS, SKILL_POOL, PASSIVE_FLAGS, skillLine, skillsBlock, narrateLine, MAGIC_ELEM, ELEM_EMO, magicElem, isElemental, isPierce }

@@ -873,7 +873,7 @@ function upkeep (self, foe, ds, df) {
     if (self.cast > 0 && self.castName === '메테오') {
       self.cast--; self.stun--; self.defCombo = 0; self.defendedLast = false
       if (self.cast === 0) { const b = foe.hp; foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '메테오'), foe, df)); return { type: 'castfire', dmg: b - foe.hp, spell: '메테오' } }
-      return { type: 'stun', stunLeft: self.stun }
+      return { type: 'stun', stunLeft: self.stun, castName: self.castName, castLeft: self.cast, castTotal: self.castTotal } // 기절 중에도 메테오 시전 진행 표시
     }
     if (self.cast > 0) { self.cast = 0; self.castCarry = 1 } // 그 외 시전은 기절에 즉시 취소(충전 일부 잔존)
     self.stun--; self.defCombo = 0; self.defendedLast = false; self.stunned = true
@@ -1160,7 +1160,7 @@ function narrateLine (ev, meName, oppName) {
     case 'bleed': return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${ev.left > 0 ? ` (출혈 ${ev.left}턴 남음)` : ''}`
     case 'ko': return `💀 ${ae} **${A}**${iga(A)} 쓰러졌다! 체력이 바닥났다.`
     case 'skip': return `⏭️ ${ae} **${A}**${iga(A)} 턴을 넘겼다.`
-    case 'stun': return `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.${ev.stunLeft > 0 ? ` (기절 ${ev.stunLeft}턴 남음)` : ' 💫 다음 턴 해제!'}`
+    case 'stun': { const base = `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.${ev.stunLeft > 0 ? ` (기절 ${ev.stunLeft}턴 남음)` : ' 💫 다음 턴 해제!'}`; return ev.castName ? `${base} 🔮 하지만 ${ev.castName} 시전은 멈추지 않는다… **[${ev.castTotal - ev.castLeft}/${ev.castTotal}]**` : base }
     case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다… ${ev.total ? `**[${ev.total - ev.left}/${ev.total}]**` : ''}`
     case 'castfire': {
       const sp = ev.spell || '화염구'

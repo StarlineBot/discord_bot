@@ -33,8 +33,8 @@ const WEAPONS = {
   양도끼: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 관통: 0.3, 방어: '무기막기' },
   활: { 계열: '물리', 평타: '물리', range: '원거리', hands: 2, 물공배율: 1.4, 크리배율: 2.0, 무기막기: 0.10, 회피배율: 1.3, 턴배율: 1.05, 원거리페널티: 0.4, 방어: '회피' },
   너클: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0, 회피배율: 1.3, 턴배율: 0.8, 다단: 2, 방어: '회피' }, // 무투가: 극회피·최속·다단, 무기막기 없음
-  스태프: { 계열: '마법', 평타: '마법', range: '원거리', hands: 2, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.15, 평타계수: 0.55, castMod: -2, 원거리페널티: 0.35, 방어: '마나실드' },
-  완드: { 계열: '마법', 평타: '마법', range: '원거리', hands: 1, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 평타계수: 0.9, 마뎀너프: 0.66, 원거리페널티: 0.15, 방어: '마나실드' },
+  스태프: { 계열: '마법', 평타: '마법', range: '원거리', hands: 2, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.15, 평타계수: 0.55, castMod: -2, 원거리페널티: 0.35, 마나실드배율: 1.2, 방어: '마나실드' },
+  완드: { 계열: '마법', 평타: '마법', range: '원거리', hands: 1, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 평타계수: 0.9, 마뎀너프: 0.66, 원거리페널티: 0.15, 마나실드배율: 1.5, 방어: '마나실드' },
   마도서: { 계열: '마법', 평타: '혼합', range: '근접', hands: 2, tempoStat: '힘지능', 물공배율: 1.8, 물타: 1.1, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 0.95, 관통: 0.3, 방어: '마나실드' }, // 세이지: 물리관통30%
   검오브: { 계열: '마법', 평타: '혼합', range: '근접', hands: 1, tempoStat: '힘지능', 물공배율: 1.2, 물타: 0.87, 마타: 0.87, 크리배율: 1.5, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 1.08, 방어: '마나실드' }, // 스블: 물리+마법 혼합
   마도검: { 계열: '마법', 평타: '마법', range: '근접', hands: 1, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 마방보너스: 0.15, 방어: '마나실드' },
@@ -157,12 +157,12 @@ function tempoVal (w, c) { return w.tempoStat === '지능' ? c.지능 : w.tempoS
 function derive (c) {
   const w = WEAPONS[c.무기] || {}
   return {
-    물공: 10 + c.힘 + step(c.힘, 7) + Math.floor(c.힘 / 20) * 14, // §13: 10+힘+⌊힘/10⌋7+⌊힘/20⌋14 (천250). 무기 물공배율은 attack에서 적용
+    물공: 10 + c.힘 + step(c.힘, 3) + Math.floor(c.힘 / 20) * 8, // §13: 10+힘+⌊힘/10⌋3+⌊힘/20⌋8 (천180). 무기 물공배율은 attack에서 적용
     마공: 10 + c.지능 + step(c.지능, 2) + Math.floor(c.지능 / 20) * 5, // §13: 낮은base·완만 (천155)
     물방: Math.min((c.힘 * 0.26 + c.체력 * 0.34) / 100 + (w.물방보너스 || 0) + (c.마도갑주 || 0) + (c.체력 === 100 ? 0.05 : 0), 0.80), // §13: 힘0.26+체력0.34 (광전40·기사50). 체력100시그 +5%p
     마방: Math.min((20 + step(c.지능, 3)) / 100 + (w.마방보너스 || 0), 0.85), // §13: 바닥 30→20
     maxhp: maxHp(c),
-    마나실드: (w.계열 === '마법') ? Math.round(c.지능 * 1.5 + c.체력 * 1) : 0, // §13: 마법무기만, 지능1.5+체력1 (공격 명중 시 딜25% 회복)
+    마나실드: (w.계열 === '마법') ? Math.round((c.지능 * 1.8 + c.체력 * 1.2) * (w.마나실드배율 || 1)) : 0, // §13: 마법무기만, (지능1.8+체력1.2)×무기배율. 방어구 경감 없음(실드가 풀딜 흡수) + 공격 딜25% 회복
     명중: (35 + c.솜씨 * 0.4) / 100, // §13: 35~75
     물회: (10 + c.민첩 * 0.15) / 100 * (w.회피배율 || 1) + (c.체력 === 100 ? 0.05 : 0), // §13: (10+민첩0.15)×무기회피배율. 체력100시그 +5%p
     마회: 0, // §13: 死스탯 삭제(0 유지 — 트레이트 참조 안전용)
@@ -231,7 +231,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     const evaded = canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)) // sigDodge는 상단에서 일괄 처리(물리·마법·혼합 10%)
     let bolt = 0
     if (A.autoSpell > 0 && rand() < 0.90) { // 오토스펠: 공유 볼트(파이어/라이트닝/콜드) 랜덤 발동. 시전 없이 즉발(랜덤발동이라). 1~5연타, 발당 마방·graze
-      const n = rollBoltCount(); const mdef = defMul(dD.마방, 마관통); const braw = []; const bnames = []
+      const n = rollBoltCount(); const mdef = defMul(D.shield > 0 ? 0 : dD.마방, 마관통); const braw = []; const bnames = []
       const types = ['파이어볼트', '라이트닝볼트', '콜드볼트']
       const bn = types[Math.floor(rand() * 3)] // 프록당 원소 1종
       const em = (psv(A, '원소마스터') && isElemental(bn)) ? ELEM_MASTER : 1 // 원소의 이해: 원소 볼트 대미지 배율
@@ -247,8 +247,8 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
       crit = forceCrit || luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
       if (A.echoReady) { crit = true; A.echoReady = 0 }
       const cP = crit ? ((dA.무기.크리배율 || dA.물크기본) + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1) : 1
-      ph = dA.물공 * (dA.무기.물타 || 1.1) * (block || wBlk) * defMul(dD.물방, 물관통) * cP // 물리 스윙(물리판정, 크리 O)
-      mg = dA.무기.마타 ? dA.마공 * dA.무기.마타 * (block || 1) * defMul(dD.마방, 마관통) : 0 // 혼합 마법몫(마법=크리 없음). 마도서(세이지)=0(볼트로 대체)
+      ph = dA.물공 * (dA.무기.물타 || 1.1) * (block || wBlk) * defMul(D.shield > 0 ? 0 : dD.물방, 물관통) * cP // 물리 스윙(물리판정, 크리 O)
+      mg = dA.무기.마타 ? dA.마공 * dA.무기.마타 * (block || 1) * defMul(D.shield > 0 ? 0 : dD.마방, 마관통) : 0 // 혼합 마법몫(마법=크리 없음). 마도서(세이지)=0(볼트로 대체)
     }
     if (evaded && bolt <= 0) { A.lastDef = '회피'; return 0 } // 완전회피 + 볼트 미발동 → 무피해
     let d = ph + mg + bolt - 고정
@@ -323,7 +323,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     for (let i = 0; i < hits; i++) {
       let h = dA.무기.주사위 ? (atkD === 1 ? 0 : dA.물공 * (atkD === 20 ? 3 : atkD / 13)) : dA.물공 * physSwing(dA) * (dA.무기.물공배율 || 1) // §13: 물공배율(기본공 대체)
       h *= block || wblk
-      h *= defMul(dD.물방, 물관통) // 물방 × (1-물관통)
+      h *= defMul(D.shield > 0 ? 0 : dD.물방, 물관통) // 물방 × (1-물관통)
       if (D.sunder > 0) h *= 1.15
       if (rand() < 0.30) { h *= 0.70; A.grazed = true }
       let crit = i < baseHits && (forceCrit || luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) // 연속타격 추가타(i>=baseHits)는 크리 제외
@@ -347,7 +347,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     let mBlock = 1
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } // 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
     dmg = 0; const braw = []; const bnames = []
-    const mdef = defMul(dD.마방, 마관통)
+    const mdef = defMul(D.shield > 0 ? 0 : dD.마방, 마관통)
     for (let i = 0; i < bolts; i++) {
       let b; let bn = null
       if (boltPlan) { bn = boltPlan[i].bn; b = boltDmg(dA, A, bn, mdef) } else { // 볼트마법(공통 공식) / 매직미사일(완드 평타): 평타계수·마뎀너프, 단발
@@ -439,7 +439,7 @@ function boltDmg (dA, A, bn, mdef, scale) {
 }
 // ── 시전형 볼트(볼트마법사) ── 화염구처럼 시전마법. 발당 마공×계수, 발수 1~5(볼트마법의 이해면 5고정), 발당 마방·graze 개별.
 // 파이어=고배율/2시전 · 라이트닝=1시전 · 콜드=즉발+둔화(쿨1). 세이지 오토스펠(랜덤 발동)과 무관.
-const BOLT_CAST = { 파이어볼트: { coef: 0.4, cast: 2 }, 라이트닝볼트: { coef: 0.15, cast: 1 }, 콜드볼트: { coef: 0.1, cast: 0, slow: 1 } }
+const BOLT_CAST = { 파이어볼트: { coef: 0.8, cast: 2 }, 라이트닝볼트: { coef: 0.5, cast: 1 }, 콜드볼트: { coef: 0.3, cast: 0, slow: 1 } }
 // 볼트 1발 raw(단일 소스): 마공×계수×배율×마방×graze. 시전형(볼트마법사)·오토스펠(세이지) 공유
 function boltShot (ds, A, bn, mdef, mult) { return ds.마공 * BOLT_CAST[bn].coef * (mult || 1) * mdef * magicGraze(A) }
 // 볼트마법조합(chainBolt): 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
@@ -496,7 +496,7 @@ function boltGroupStr (hits, names, total) {
 }
 function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; foe.vuln = 1; return r } } return dmg }
 // 시전 마법(화염구/인캐) 피해: 일반 마법과 동일 — 천운 완전회피 / 마방 감소 / 빗맞힘 / 근성
-function spellDmg (base, foe, df) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = (foe.blockUp > 0 ? 0.10 : 0.20); foe.spellBlocked = true }; return Math.max(Math.round(guts(base * blk * (1 - df.마방) * magicGraze(), foe, df)), 0) } // 방패는 시전 마법(화염구/메테오/서리구)도 막음 — 확률 발동, 성공 시 20%(방패들기 중 10%)로 경감
+function spellDmg (base, foe, df) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = (foe.blockUp > 0 ? 0.10 : 0.20); foe.spellBlocked = true }; return Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : df.마방)) * magicGraze(), foe, df)), 0) } // §13: 실드 있으면 마방 경감 스킵(실드가 풀딜 흡수). 방패막기는 유지
 // 시전 중 피격 → 5% 시전 중단(취소). 피해가 실제로 들어갔을 때만("정말 운 없을 때")
 function castHit (A, D, fin) { if (D.cast > 0 && fin > 0 && rand() < 0.05) { D.cast = 0; D.castCarry = 1; A.brokeCast = true } } // 취소돼도 충전 일부 남아 다음 시전 -1턴
 function applyCC (foe, field, dur) {

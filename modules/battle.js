@@ -150,7 +150,7 @@ const pickTitle = () => {
 }
 
 // HP 공식(단일 소스): 기본 500 + 스탯 보정. derive·preview 공용
-function maxHp (c) { return Math.round((300 + c.체력 * 3 + c.힘 * 2) * TUNE.hpScale) } // §13: 물리스탯(체력·힘) 기반, 기초300
+function maxHp (c) { return Math.round((300 + c.체력 * 3 + c.힘 * 2) * (c.체력 === 100 ? 1.1 : 1) * TUNE.hpScale) } // §13: 물리스탯 기반, 기초300, 체력100시그 +10%
 // 턴 파생 스탯 = 무기 tempoStat (기본 민첩). 스태프/완드/마도검='지능', 검오브/마도서='힘지능'.
 // 검오브·마도서는 힘+지능 몰빵 근접 하이브리드라 민첩-템포에선 구조적으로 느려짐 → max(힘,지능)로 파생
 function tempoVal (w, c) { return w.tempoStat === '지능' ? c.지능 : w.tempoStat === '힘지능' ? Math.max(c.힘, c.지능) : c.민첩 }
@@ -219,16 +219,16 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
   let dmg; let 고정 = 0
   // 관통값 통합: 물리=힘100시그(0.30)+무기관통 / 마법=심연의(0.25). (기존 sigPen·tMPen·무기.관통과 동치)
   const 물관통 = 1 - (dA.sigPen ? 0.7 : 1) * (1 - (dA.무기.관통 || 0))
-  const 마관통 = A.tMPen ? 0.25 : 0
+  const 마관통 = Math.max(A.tMPen ? 0.25 : 0, dA.sigEye ? 0.20 : 0) // §13: 지능100 시그 = 마방 20% 관통
   A.hitPh = null; A.hitMg = null; A.boltName = null; A.boltHits = null; A.boltNames = null; A.boltShots = 0; A.boltCombo = 0; A._braw = null; A._bnames = null; A.lastDef = null; A.didAttack = true; A.brokeCast = false; A.lastElem = false; A.lastRefl = null; A.grazed = false; A.diceAtk = 0; A.diceDef = 0 // 혼합 내역 + 볼트명 + 연쇄볼트 발당 + 방어판정 + 공격시도 + 시전중단 표식 + 빗맞음 + 주사위
   // 기절 중엔 능동 방어(회피·천운·방패막기·무기막기·패링) 봉쇄. 빗맞힘(공격자 실수)·마나실드·반사·근성은 수동이라 유지
   const canDef = D.stun === 0 && D.cast === 0 // 기절 또는 시전 중엔 능동 방어(회피·천운·막기·주사위방어) 불가. 마나실드·반사·근성은 유지
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { A.lastDef = '행운의여신'; return 1 } // 한탕 패시브: 타입 무관 확률적 피해 1(운빨 방어)
-  const aimPierce = dA.sigAim && rand() < 0.15 // 솜씨100 시그(정밀사격): 30% 확률로 상대 회피 무효
-  if (canDef && !aimPierce && dD.sigDodge && !dA.hybrid && rand() < 0.15) { A.lastDef = '완전회피'; return 0 }
+  const aimCut = dA.sigAim ? 0.05 : 0 // §13: 솜씨100 정밀사격 = 상대 물회 −5%p(회피 판정에서 차감)
+  if (canDef && dD.sigDodge && rand() < 0.10) { A.lastDef = '완전회피'; return 0 } // §13: 행운100 시그 = 물리·마법 10% 완전회피
   if (dA.hybrid) {
     // 본 공격 회피 판정(천운/리롤) — 볼트는 별개로 무조건 명중
-    const evaded = canDef && ((dD.sigDodge && rand() < 0.15) || luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)))
+    const evaded = canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)) // sigDodge는 상단에서 일괄 처리(물리·마법·혼합 10%)
     let bolt = 0
     if (A.autoSpell > 0 && rand() < 0.90) { // 오토스펠: 공유 볼트(파이어/라이트닝/콜드) 랜덤 발동. 시전 없이 즉발(랜덤발동이라). 1~5연타, 발당 마방·graze
       const n = rollBoltCount(); const mdef = defMul(dD.마방, 마관통); const braw = []; const bnames = []
@@ -278,7 +278,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     return perfectGuard(A, D, fin)
   }
   if (dA.fusion) {
-    if (canDef && !aimPierce && !guaranteed && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
+    if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     let d = dA.물공 + dA.마공; 고정 = 0
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { d *= dD.무기막기경감; A.lastDef = '무기막기' }
     d *= (1 - Math.max(dD.물방 * (dA.sigPen ? 0.7 : 1), dD.마방))
@@ -311,7 +311,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     // 활(원거리): 근접 공격자가 나를 때리면 자기 다음 턴 지연(거리 비용, 공격자 턴 %)
     if (dD.무기.원거리페널티 && dA.무기.range === '근접') A.gauge += dA.턴 * dD.무기.원거리페널티
     if (!guaranteed && !luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) return 0
-    if (canDef && !aimPierce && !guaranteed && luckRoll(rand() < dD.물회 * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
+    if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     const baseHits = dA.무기.다단 || 1; const hits = baseHits + (psv(A, '연속타격') && rand() < 0.20 ? 1 : 0) // 쌍검 2연타 / 암살자 연속타격 패시브: 20% 확률 추가타(크리 안 터짐)
     const atkD = dA.무기.주사위 ? d20adv(A.diceAdv > 0) : 0; if (atkD) A.diceAtk = atkD // 한탕 공격 d20(1=대실패 1딜 / 20=대성공 ×3 / 2~19=굴림/13), 2d20 버프면 어드밴티지
     let block = 0; let wblk = 1
@@ -410,7 +410,6 @@ const BOLT_ELEM = { 파이어볼트: 1.5, 라이트닝볼트: 1.3, 아이스볼�
 const BOLT_DAMP = 0.16 // 발당 감쇠(sim 튜닝: 볼트마법사·세이지 공통)
 const SPELL_COEF = { 화염구: 4.8, 메테오: 8.4, 서리구: 3.1, 충격파: 1.0 } // 시전 마법 = 마공 × 계수 (파생 의존 제거, 마공 기반). 서리구=둔화+짧은시전만큼 낮음 / 메테오=화염구와 raw 딜/턴 1:1(8.4÷유효7 ≈ 4.8÷유효4)이되 시전 길어 착탄 리스크가 대가
 function spellBase (ds, name) { return Math.round(ds.마공 * SPELL_COEF[name]) }
-const SIG_SHIELD_CAP = 0.40; const SIG_SHIELD_REGEN = 0.04 // 지능100 시그(마법사): 마나실드 최대 maxHP 40%로 확대 + 매턴 4% 자동 회복(시전 중에도)
 const BOLT_COMBO_DAMP = 0.85 // 볼트마법조합(10발) 총딜 감쇠 — 마법 무크리 보상 반영(0.7→0.85)
 const ELEM_MASTER = 1.7 // 원소 마스터(세이지 패시브): 볼트마법 대미지 배율
 // ── 마법 속성 분류(5속성) ──
@@ -762,7 +761,7 @@ function mkFighter (d, name, ai) {
     defending: false,
     defCombo: 0,
     defendedLast: false,
-    shield: d.sigEye ? Math.round(d.maxhp * SIG_SHIELD_CAP) : (d.마나경감 ? Math.round(d.maxhp * 0.22) : 0),
+    shield: d.마나실드 || 0, // §13: 마법무기 착용 시 지능1.5+체력1 (공격 딜 25% 회복)
     vuln: 0,
     cd: skillStartCd(name),
     rage: 0,
@@ -830,7 +829,7 @@ function mkFighter (d, name, ai) {
     sigTank: d.sigTank,
     echoReady: 0,
     echoStack: 0,
-    revive: d.sigTank ? 1 : 0
+    revive: 0 // §13: 체력100 시그 부활 삭제(CC-1·방어+5%p·HP+10%로 대체)
   }
 }
 function reviveCheck (f, d) {
@@ -871,7 +870,7 @@ function upkeep (self, foe, ds, df) {
   if (self.rage > 0) { self.rage--; if (self.rage === 0) self.cd[0] = 2 }
   if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
   if (foe.sunder > 0) foe.sunder--
-  if (self.sigEye) self.shield = Math.min(Math.round(ds.maxhp * SIG_SHIELD_CAP), self.shield + Math.round(ds.maxhp * SIG_SHIELD_REGEN)) // 지능100 시그: 매턴 마나실드 회복(시전 중에도)
+  // §13: 마나실드 자가재생 삭제 → 공격 딜 25% 회복(execAttack/execSkill)으로 대체
   if (self.stun > 0) {
     // 메테오: 시전 시작 후엔 돌이킬 수 없음 — 기절 중에도 그대로 진행(끊기 불가)
     if (self.cast > 0 && self.castName === '메테오') {
@@ -896,8 +895,8 @@ function ctxFor (self, foe, ds, df) {
 }
 // 불굴 버스트 완충: 단일 피격이 최대HP 15%↑면 즉시 6% 회복(생존 시). df=피격자 파생. 딜 표기는 회복 전 값 사용
 function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + Math.round(df.maxhp * 0.04)) }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } bigHitHeal(foe, df, dealt); return { type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
-function execAttack (self, foe, ds, df) { const fb = foe.hp; const psh = foe.shield; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; const dealt = Math.max(fb - foe.hp, 0); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } bigHitHeal(foe, df, dealt); return { type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), diceAtk: self.diceAtk, diceDef: self.diceDef } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } bigHitHeal(foe, df, dealt); return { type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
+function execAttack (self, foe, ds, df) { const fb = foe.hp; const psh = foe.shield; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } bigHitHeal(foe, df, dealt); return { type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), diceAtk: self.diceAtk, diceDef: self.diceDef } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; return { type: 'defend', heal: Math.round(self.hp - before) } }
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외

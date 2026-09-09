@@ -1071,8 +1071,8 @@ function playerResolve (state, choice) {
   let ev
   // 시전 중(메테오 제외): '시전 진행'(턴넘기기 그대로 시전 진행) / '시전 취소'(즉시 취소)
   if (A.cast > 0 && A.castName !== '메테오') {
-    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castCarry = 1; A.castBolt = null; A.castBoltChain = false; A.castName = null } // 자가 취소 → 시전 스킬 쿨 환불(안 쓴 것으로 처리)
-    else ev = advanceCast(A, B, dA, dB)
+    // 자가 취소 → 시전 스킬 쿨 환불(안 쓴 것으로 처리). 아니면 '시전 진행'
+    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castCarry = 1; A.castBolt = null; A.castBoltChain = false; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
     recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
     if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
     return advance(state)

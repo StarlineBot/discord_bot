@@ -596,7 +596,7 @@ const SKILLS = {
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
     { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 5 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(dmg, f, df, s)); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
-    { name: '충격파', tag: '공격', coef: '마공×1.0 + 상대 턴 게이지 초기화 + 1턴 둔화 (기절 중에도 사용)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '충격파') * (1 - df.마방), 1, x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 1.5, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df, s); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[0] = 5; s.note = '충격파' }, stunnable: true }
+    { name: '충격파', tag: '공격', coef: '마공×1.0 + 상대 턴 게이지 초기화 + 1턴 둔화 (기절 중에도 사용)', cd: 5, ready: (s, f, ds, df) => s.cd[4] === 0, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '충격파') * (1 - df.마방), 1, x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 1.5, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df, s); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[4] = 5; s.note = '충격파' }, stunnable: true } // 슬롯4=cd[4] (플레이어 버튼 cd[slot] 정합)
   ],
   볼트마법사: [
     // 시전형 볼트 3종(화염구식 시전마법). 파이어=2시전 고배율 / 라이트닝=1시전 / 콜드=즉발+둔화(쿨1). 발수 1~5(볼트마법의 이해=5고정)
@@ -1071,7 +1071,7 @@ function playerResolve (state, choice) {
   let ev
   // 시전 중(메테오 제외): '시전 진행'(턴넘기기 그대로 시전 진행) / '시전 취소'(즉시 취소)
   if (A.cast > 0 && A.castName !== '메테오') {
-    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; A.cast = 0; A.castCarry = 1; A.castBolt = null; A.castBoltChain = false; A.castName = null }
+    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castCarry = 1; A.castBolt = null; A.castBoltChain = false; A.castName = null } // 자가 취소 → 시전 스킬 쿨 환불(안 쓴 것으로 처리)
     else ev = advanceCast(A, B, dA, dB)
     recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
     if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }

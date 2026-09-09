@@ -18,7 +18,7 @@ const CHARS = {
   세이지: { emoji: '📖', 힘: 60, 지능: 70, 체력: 55, 민첩: 45, 솜씨: 50, 행운: 30, 무기: '마도서', 원소마스터: true, 현자균형: true, id: '혼합 하이브리드' },
   스펠블레이드: { emoji: '⚡', 힘: 65, 지능: 60, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, 무기: '검오브', id: '혼합 관통 스펠블레이드' },
   스펠브레이커: { emoji: '🪄', 힘: 30, 지능: 80, 체력: 65, 민첩: 50, 솜씨: 45, 행운: 30, 무기: '마도검', 마도갑주: 0.12, id: '안티캐스터 마딜' },
-  무도가: { emoji: '👊', 힘: 75, 지능: 10, 체력: 50, 민첩: 75, 솜씨: 55, 행운: 40, 무기: '너클', 권의극의: true, id: '콤보 무투가' }
+  무도가: { emoji: '👊', 힘: 75, 지능: 10, 체력: 50, 민첩: 75, 솜씨: 55, 행운: 40, 무기: '너클', id: '콤보 무투가' }
 }
 // 무기 정의: 캐릭은 CHARS.무기로 참조, derive()가 속성 병합.
 // 계열(물리/마법)=스킬풀·조직 / 평타(물리/마법/혼합/융합)=엔진 공격분기 / range=근접·원거리(태그)
@@ -33,7 +33,7 @@ const WEAPONS = {
   양둔: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 스턴확률: 0.2, 방어: '무기막기' },
   양도끼: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 관통: 0.3, 방어: '무기막기' },
   활: { 계열: '물리', 평타: '물리', range: '원거리', hands: 2, 물공배율: 1.5, 크리배율: 2.0, 무기막기: 0.10, 회피배율: 1.3, 턴배율: 1.0, 원거리페널티: 0.5, 방어: '회피' },
-  너클: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0, 회피배율: 1.3, 턴배율: 0.8, 다단: 2, 방어: '패링' }, // 무투가: 극회피·최속·다단, 무기막기 없음. 방어=패링(피격 시 경감+즉시 반격턴)
+  너클: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0, 회피배율: 1.5, 턴배율: 0.75, 다단: 2, 방어: '패링' }, // 무투가: 극회피·최속·다단, 무기막기 없음. 방어=패링(피격 시 경감+즉시 반격턴)
   스태프: { 계열: '마법', 평타: '마법', range: '원거리', hands: 2, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.15, 평타계수: 0.55, castMod: -2, 원거리페널티: 0.35, 마나실드배율: 1.2, 방어: '마나실드' },
   완드: { 계열: '마법', 평타: '마법', range: '원거리', hands: 1, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 평타계수: 0.9, 마뎀너프: 0.8, 원거리페널티: 0.15, 마나실드배율: 1.5, 방어: '마나실드' },
   마도서: { 계열: '마법', 평타: '혼합', range: '근접', hands: 2, tempoStat: '힘지능', 물공배율: 1.8, 물타: 1.1, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 0.95, 관통: 0.3, 방어: '마나실드' }, // 세이지: 물리관통30%
@@ -330,7 +330,6 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
       if (i === 0 && A.sigEcho) A.echoStack = (A.echoStack || 0) + 1 // 잔상: 공격마다 스택
       if (A.echoReady) { crit = true; A.echoReady = 0 } else if (i === 0 && A.sigEcho && A.echoStack >= 3) { crit = true; A.echoStack = 0 } // 잔상: 3타마다 확정 크리(회피 없어도 딜 기회)
       if (crit) { h *= ((dA.무기.크리배율 || dA.물크기본) + rand() * dA.크랜폭) * (A.luckBuff > 0 ? 2 : 1); A.lastCrit = true } // 무기 크리배율이 base 덮어씀(활2·단검1.8)
-      if (psv(A, '권의극의')) h *= 1.15 // 무도가 패시브: 맨손 물리딜 증가
       dmg += h
     }
     if (dA.무기.스턴확률 && rand() < dA.무기.스턴확률) applyCC(D, 'stun', 1) // 양둔: 확률 스턴
@@ -384,7 +383,8 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   if (D.tFrail) dmg *= 1.15
   if (dD.무기.받는뎀) dmg *= (1 - dD.무기.받는뎀)
   // 마법은 막혀도 최종 마공10% 바닥 보장(방패고정에 0딜 방지) — 방어행동 시엔 제외
-  let fin = Math.max(Math.round(dmg), 1)
+  // dmg가 정확히 0이면 완전히 빗나간 것(히트별 회피/명중실패로 아무 히트도 커밋 안 됨) → 0(빗나감). 조금이라도 적중하면 최소 1 보장
+  let fin = dmg > 0 ? Math.max(Math.round(dmg), 1) : 0
   // 연쇄볼트: 최종 피해를 발당 raw 비율로 배분(마나경감·근성 등 후처리 반영). 발당 최소 1(적중한 볼트가 0으로 안 뜨게) → 총합도 보정
   if (A._braw && A._braw.length > 1) { const s = A._braw.reduce((a, b) => a + b, 0) || 1; const hits = A._braw.map(r => Math.max(1, Math.round(r / s * fin))); A.boltHits = hits; A.boltNames = A._bnames; fin = hits.reduce((a, b) => a + b, 0) }
   if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))
@@ -635,11 +635,11 @@ const SKILLS = {
   ],
   무도가: [
     // 육합권: 물공0.6 ×3연타(무기 다단 무시=hitsOverride1). 콤보 1단계 개시(연환전신장 조건)
-    { name: '육합권', tag: '공격', coef: '물공×0.6 ×3연타 · 콤보 개시', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 1.8 * (1 - df.물방) * 1.15, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 0.6); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.comboStep = 1; s.comboWin = 3; s.cd[0] = 3; s.note = '육합권' } },
+    { name: '육합권', tag: '공격', coef: '물공×0.7 ×3연타 · 콤보 개시', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 2.1 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 0.7); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.comboStep = 1; s.comboWin = 3; s.cd[0] = 3; s.note = '육합권' } },
     // 연환전신장: 콤보(육합권 후 2턴 내) 물공0.7×4 / 단독 물공0.2×4. 콤보 2단계
-    { name: '연환전신장', tag: '공격', coef: '콤보: 물공×0.7 ×4 / 단독: 물공×0.2 ×4', cd: 2, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const combo = s.comboStep >= 1 && s.comboWin > 0; return dmgVal(ds.물공 * (combo ? 2.8 : 0.8) * (1 - df.물방) * 1.15, 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const combo = s.comboStep >= 1 && s.comboWin > 0; const per = combo ? 0.7 : 0.2; const hits = []; for (let i = 0; i < 4; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * per); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; if (combo) { s.comboStep = 2; s.comboWin = 3 } s.cd[1] = 2; s.note = combo ? '연환전신장·연계' : '연환전신장' } },
+    { name: '연환전신장', tag: '공격', coef: '콤보: 물공×0.7 ×4 / 단독: 물공×0.2 ×4', cd: 2, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const combo = s.comboStep >= 1 && s.comboWin > 0; return dmgVal(ds.물공 * (combo ? 2.8 : 0.8) * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const combo = s.comboStep >= 1 && s.comboWin > 0; const per = combo ? 0.7 : 0.2; const hits = []; for (let i = 0; i < 4; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * per); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; if (combo) { s.comboStep = 2; s.comboWin = 3 } s.cd[1] = 2; s.note = combo ? '연환전신장·연계' : '연환전신장' } },
     // 맹룡과강: 풀콤보(육합권→연환 후 2턴 내) 물공×3.5 폭발 / 단독 물공×0.5. 콤보 마무리
-    { name: '맹룡과강', tag: '공격', coef: '풀콤보: 물공×3.5 / 단독: 물공×0.5', cd: 1, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => { const full = s.comboStep >= 2 && s.comboWin > 0; return dmgVal(ds.물공 * (full ? 3.5 : 0.5) * (1 - df.물방) * 1.15, 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const full = s.comboStep >= 2 && s.comboWin > 0; let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * (full ? 3.5 : 0.5)); d = absorb(f, d); f.hp -= d; if (full) { s.comboStep = 0; s.comboWin = 0 } s.cd[2] = 1; s.note = full ? '맹룡과강·작렬' : '맹룡과강' } },
+    { name: '맹룡과강', tag: '공격', coef: '풀콤보: 물공×4.5 / 단독: 물공×0.5', cd: 1, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => { const full = s.comboStep >= 2 && s.comboWin > 0; return dmgVal(ds.물공 * (full ? 4.5 : 0.5) * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const full = s.comboStep >= 2 && s.comboWin > 0; let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * (full ? 4.5 : 0.5)); d = absorb(f, d); f.hp -= d; if (full) { s.comboStep = 0; s.comboWin = 0 } s.cd[2] = 1; s.note = full ? '맹룡과강·작렬' : '맹룡과강' } },
     // 발경: 적 물공/마공 중 높은쪽 ×1.2 충격딜(방어구·실드 무시). 고공격 상대 카운터
     { name: '발경', tag: '공격', coef: '적 물/마공 높은쪽 ×1.2 · 충격(방어구·실드 무시)', cd: 5, dmgType: '충격', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(Math.max(df.물공, df.마공) * 1.2, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const base = Math.max(df.물공, df.마공) * 1.2; const d = impactDmg(s, f, ds, df, base); f.hp -= d; s.cd[3] = 5; s.note = '발경' } },
     // 아수라패황권: 자기 체력→1, 물공×10 충격(방어구·실드 무시, 능동방어 가능), 3턴 자체둔화. 올인 피니셔(시작쿨5)
@@ -757,7 +757,7 @@ const SKILL_POOL = {
   콜드볼트: (ci) => boltCastSkill(ci, '콜드볼트')
 }
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
-const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 5 }
+const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 7 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
 // 스킬블록: 선택 캐릭의 스킬슬롯을 필드에서 자동 렌더(번호 없음, 하드코딩 테이블 없음) + 패시브 나열
 function skillsBlock (name) {
@@ -825,7 +825,6 @@ function mkFighter (d, name, ai) {
     dodgeUp: 0,
     magReflect: 0,
     원소마스터: (CHARS[name] && CHARS[name].원소마스터) || false, // 세이지 패시브: 볼트마법 대미지 배율
-    권의극의: (CHARS[name] && CHARS[name].권의극의) || false, // 무도가 패시브: 맨손(너클) 물리 대미지 증가
     불굴: (CHARS[name] && CHARS[name].불굴) || false,
     undyingUsed: 0,
     reviveType: null,
@@ -1039,7 +1038,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 한탕주의자: [{ name: '행운의여신', desc: '받는 피해마다 행운 비례 확률(행운100=10%)로 그 피해를 1로 — 전 타입(마법·볼트도)' }], 암살자: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 6발(없으면 원소당 1~5 랜덤)' }], 무도가: [{ name: '권의 극의', desc: '맨손(너클) 물리 대미지 +15%' }] }
+const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 한탕주의자: [{ name: '행운의여신', desc: '받는 피해마다 행운 비례 확률(행운100=10%)로 그 피해를 1로 — 전 타입(마법·볼트도)' }], 암살자: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 6발(없으면 원소당 1~5 랜덤)' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev

@@ -497,9 +497,10 @@ function boltGroupStr (hits, names, total) {
 function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; foe.vuln = 1; return r } } return dmg }
 // 침투(浸透): 마나실드를 무시하고 hp에 직접(방어구 관통과 별개 — 실드 버퍼 자체를 통과). 침투=false면 평소대로 실드 흡수. hp에 적용하고 실제 들어간 피해 반환.
 function dealHp (foe, dmg, 침투) { const d = 침투 ? Math.max(dmg, 0) : absorb(foe, dmg); foe.hp -= d; return d }
-// 스블 마검 인챈트 AI 자동선택: 실드 있으면 관통(침투) / 빠른 상대면 얼음(둔화) / 그 외 화염(raw 폭발)
-function pickEnchant (foe, df) { if (foe.shield > 0) return '관통'; if (df.턴 < 4.0) return '얼음'; return '화염' }
-const ENCHANT_EMO = { 화염: '🔥', 얼음: '❄️', 관통: '🟣' }
+// 스블 마검 인챈트 AI 자동선택: 빠른 상대면 전격(마비=턴 뺏기) / 저마방이면 화염(raw) / 그 외 얼음(둔화)
+function pickEnchant (foe, df) { if (df.마방 < 0.30) return '화염'; if (df.턴 > 5.0) return '얼음'; return '전격' }
+const ENCHANT_EMO = { 화염: '🔥', 얼음: '❄️', 전격: '⚡' }
+const PARALYZE_CHANCE = 0.20 // 마비(전격): 지속 중 매 턴 이 확률로 턴 상실
 // 충격(impact) 대미지: 물방·마방·마나실드 전부 무시(방어구 관통, hp 직접). 단 능동방어(완전회피·천운·회피·무기막기·방패막기)로는 막힘. 반환값을 absorb 없이 foe.hp에 직접 적용할 것.
 function impactDmg (A, D, dA, dD, base) {
   const lsD = { used: false }
@@ -621,11 +622,11 @@ const SKILLS = {
     // 약점봉인: 순수 CC(딜 없음) — 상대 최고 스탯에 맞는 군중제어만
     { name: '약점봉인', tag: '제어', coef: '상대 최고 스탯 맞춤 CC (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun'), exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 5; s.note = cc } },
     // 역장베기(스펠스트라이크): 타격(확정명중) + 역장 force(마공 flat, 마방 무시). 인챈트 시 성질 변화 — 화염=딜폭발 / 얼음=둔화 / 관통=마나실드 침투
-    { name: '역장베기', tag: '공격', coef: '타격 + 역장 마공×1.5 (인챈트: 🔥딜↑ ❄️둔화 🟣마나실드 침투)', cd: 3, dmgType: '역장', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const e = s.enchant; const fmul = e === '화염' ? 2.5 : e === '관통' ? 1.8 : 1.5; return dmgVal(x.est + ds.마공 * fmul, 1, (e === '얼음' && f.slow === 0) ? ctrlVal(x.foeTurn, 2, 'slow') : 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const d = attack(s, f, ds, df, f.defending, true); const e = s.enchant; const fmul = e === '화염' ? 2.5 : e === '관통' ? 1.8 : 1.5; const force = Math.round(ds.마공 * fmul); dealHp(f, d + force, e === '관통'); if (e === '얼음') { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } s.cd[1] = 3; s.note = e ? (ENCHANT_EMO[e] + ' 역장베기') : '역장베기' } },
-    // 룬각인(마검 인챈트): 타격 + 3턴 인챈트 속성 부여(화염/얼음/관통). 딜이 붙어 AI가 딜 목적으로 사용→인챈트 셋업. 인챈트가 역장베기를 스펠스트라이크로 변화. AI는 상대 보고 자동선택
-    { name: '룬각인', tag: '공격', coef: '타격×1.0 + 마검 인챈트(🔥화염/❄️얼음/🟣관통) 3턴 부여', cd: 4, choose: 'enchant', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, 0, f.hp, x.foeTurn) + (s.enchant ? 0 : (f.shield > 0 ? 50 : 25)), exec: (s, f, ds, df) => { const e = s.enchantChoice || pickEnchant(f, df); s.enchantChoice = null; s.enchant = e; s.enchantTurns = 5; const d = attack(s, f, ds, df, f.defending); dealHp(f, d, false); s.cd[2] = 4; s.note = ENCHANT_EMO[e] + ' ' + e + ' 인챈트' } },
+    { name: '역장베기', tag: '공격', coef: '타격 + 역장 마공×1.2 (인챈트: 🔥딜↑ ❄️둔화 ⚡마비)', cd: 2, dmgType: '역장', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const e = s.enchant; const fmul = e === '화염' ? 2.5 : e === '전격' ? 2.0 : e === '얼음' ? 2.0 : 1.2; const ctrl = (e === '얼음' && f.slow === 0) ? ctrlVal(x.foeTurn, 2, 'slow') : (e === '전격' && f.paralyze === 0) ? ctrlVal(x.foeTurn, 3, 'stun') * 0.3 : 0; return dmgVal(x.est + ds.마공 * fmul, 1, ctrl, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const d = attack(s, f, ds, df, f.defending, true); const e = s.enchant; const fmul = e === '화염' ? 2.5 : e === '전격' ? 2.0 : e === '얼음' ? 2.0 : 1.2; const force = Math.round(ds.마공 * fmul); dealHp(f, d + force, false); if (e === '얼음') { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } if (e === '전격') applyCC(f, 'paralyze', 3); s.cd[1] = 2; s.note = e ? (ENCHANT_EMO[e] + ' 역장베기') : '역장베기' } },
+    // 룬각인(마검 인챈트): 순수 버프 — 1턴 소모(딜 없음)가 리스크. 3턴 인챈트 속성 부여로 역장베기를 스펠스트라이크로 변화. AI는 인챈트의 미래 가치로 스코어링(상대 보고 자동선택)
+    { name: '룬각인', tag: '버프', coef: '마검 인챈트(🔥화염/❄️얼음/⚡전격) 3턴', buff: 3, cd: 4, choose: 'enchant', ready: (s, f, ds, df) => s.cd[2] === 0 && !s.enchant, score: (s, f, ds, df, x) => { const e0 = s.enchantChoice || pickEnchant(f, df); const fmul = e0 === '화염' ? 2.5 : 2.0; const casts = 1.5; const extra = (fmul - 1.2) * ds.마공 * casts; const ctrl = e0 === '얼음' ? ctrlVal(x.foeTurn, 2, 'slow') : e0 === '전격' ? ctrlVal(x.foeTurn, 3, 'stun') * 0.3 * casts : 0; return dmgVal(extra, 1, ctrl, f.hp, x.foeTurn) + 30 }, exec: (s, f, ds, df) => { const e = s.enchantChoice || pickEnchant(f, df); s.enchantChoice = null; s.enchant = e; s.enchantTurns = 3; s.cd[2] = 4; s.note = ENCHANT_EMO[e] + ' ' + e + ' 인챈트' } },
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
-    { name: '역장폭발', tag: '관통', coef: '역장 마공×2.5 관통 (이후 2턴 취약)', cd: 5, dmgType: '역장', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * 2.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 2.5); const d = absorb(f, force); f.hp -= d; s.instVuln = 2; s.cd[3] = 5; s.note = '역장폭발' } }
+    { name: '역장폭발', tag: '관통', coef: '역장 마공×3.0 관통 (이후 2턴 취약) · 마나실드엔 흡수 · 시작쿨3', cd: 6, dmgType: '역장', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * 3.0, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 3.0); const d = absorb(f, force); f.hp -= d; s.instVuln = 2; s.cd[3] = 6; s.note = '역장폭발' } } // 침투 없음(마나실드 흡수) — 침투는 역장베기만(순삭 콤보 방지). 지연 폭딜(쿨6·시작3)
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
@@ -762,7 +763,7 @@ const SKILL_POOL = {
   콜드볼트: (ci) => boltCastSkill(ci, '콜드볼트')
 }
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
-const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 7 }
+const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 7, 역장폭발: 3 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
 // 스킬블록: 선택 캐릭의 스킬슬롯을 필드에서 자동 렌더(번호 없음, 하드코딩 테이블 없음) + 패시브 나열
 function skillsBlock (name) {
@@ -796,8 +797,9 @@ function mkFighter (d, name, ai) {
     parryHit: false, // 패링 반격 예약(피격 시 게이지 리셋)
     comboStep: 0, // 무도가 콤보 진행도(0=없음, 1=육합권, 2=연환전신장까지)
     comboWin: 0, // 콤보 유효 창(턴 카운트다운, 0=만료)
-    enchant: null, // 스블 마검 인챈트 속성(null/'화염'/'얼음'/'관통')
+    enchant: null, // 스블 마검 인챈트 속성(null/'화염'/'얼음'/'전격')
     enchantTurns: 0, // 인챈트 지속(턴 카운트다운)
+    paralyze: 0, // 마비(전격 인챈트): 지속 중 매 턴 30% 확률로 턴 상실
     defCombo: 0,
     defendedLast: false,
     shield: d.마나실드 || 0, // §13: 마법무기 착용 시 지능1.5+체력1 (공격 딜 25% 회복)
@@ -925,6 +927,7 @@ function upkeep (self, foe, ds, df) {
     if (!stunSkill(self, foe, ds, df)) return { type: 'stun', stunLeft: self.stun }
     return null // 제한된 턴 진행 — self.stunned=true 로 옵션 제한(공격/일반스킬 불가, 충격파/재생 or 턴넘기기)
   }
+  if (self.paralyze > 0) { self.paralyze--; if (rand() < PARALYZE_CHANCE) { self.defCombo = 0; self.defendedLast = false; return { type: 'paralyze', paralyzeLeft: self.paralyze } } } // 마비: 확률로 이 턴 상실(스턴과 동일 처리)
   // 시전 진행(캐스터 공통): 카운트다운 후 발사
   if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; self.castBolt = null; const cm = self.castBoltChain ? (BOLT_COMBO_MULT[bn] || 1) : 1; foe.hp -= absorb(foe, boltVolley(self, foe, ds, df, bn, cm)); if (BOLT_CAST[bn].slow) { applyCC(foe, 'slow', BOLT_CAST[bn].slow); foe.slowSec = Math.max(foe.slowSec, 1) } if (self.castBoltChain) { self.castBoltChain = false; boltChain(self, foe, ds, df, bn, cm) } return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } } return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal } }
   return null
@@ -1210,6 +1213,7 @@ function narrateLine (ev, meName, oppName) {
     case 'ko': return `💀 ${ae} **${A}**${iga(A)} 쓰러졌다! 체력이 바닥났다.`
     case 'skip': return `⏭️ ${ae} **${A}**${iga(A)} 턴을 넘겼다.`
     case 'stun': { const base = `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.${ev.stunLeft > 0 ? ` (기절 ${ev.stunLeft}턴 남음)` : ' 💫 다음 턴 해제!'}`; return ev.castName ? `${base} 🔮 하지만 ${ev.castName} 시전은 멈추지 않는다… **[${ev.castTotal - ev.castLeft}/${ev.castTotal}]**` : base }
+    case 'paralyze': return `⚡ ${ae} **${A}**${eun(A)} 몸이 저려 움직이지 못한다! (마비${ev.paralyzeLeft > 0 ? ` ${ev.paralyzeLeft}턴 남음` : ' 해제'})`
     case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다… ${ev.total ? `**[${ev.total - ev.left}/${ev.total}]**` : ''}`
     case 'castfire': {
       const sp = ev.spell || '화염구'
@@ -1263,6 +1267,7 @@ function statusGroups (f) {
   const deb = []; const buf = []
   // 디버프(남은턴 표기)
   if (f.stun > 0) deb.push(`😵기절${f.stun}`)
+  if (f.paralyze > 0) deb.push(`⚡마비${f.paralyze}`)
   if (f.vuln > 0 || f.instVuln > 0) deb.push(`💥취약${Math.max(f.vuln, f.instVuln)}`)
   if (f.slow > 0) deb.push(`🐢둔화${f.slow}`)
   if (f.silence > 0) deb.push(`🔇침묵${f.silence}`)
@@ -1288,6 +1293,7 @@ function statusGroups (f) {
   if (f.autoSpell > 0) buf.push(`📜주문각인${f.autoSpell}`)
   if (f.healRegen > 0) buf.push(`💚재생${f.healRegen}`)
   if (f.instCast > 0) buf.push(`⚡즉시시전${f.instCast}`)
+  if (f.enchant) buf.push(`${ENCHANT_EMO[f.enchant] || '✨'}${f.enchant}인챈트${f.enchantTurns}`) // 스블 마검 인챈트(역장베기 강화)
   if (f.thornsBase > 0) buf.push('🌵가시') // 상시 패시브(턴 없음)
   if (f.shield > 0) buf.push(`🔷실드${f.shield}`)
   if (f.cast > 0) { const tot = f.castTotal || f.cast; buf.push(`🔮${f.castName || '시전'} ${tot - f.cast}/${tot}`) }
@@ -1355,7 +1361,7 @@ function buildEnchantRow (mid, slot) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId(cid('화염')).setLabel('🔥 화염 · 딜↑').setStyle(ButtonStyle.Danger),
     new ButtonBuilder().setCustomId(cid('얼음')).setLabel('❄️ 얼음 · 둔화').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId(cid('관통')).setLabel('🟣 관통 · 실드 침투').setStyle(ButtonStyle.Secondary)
+    new ButtonBuilder().setCustomId(cid('전격')).setLabel('⚡ 전격 · 마비').setStyle(ButtonStyle.Secondary)
   )
 }
 

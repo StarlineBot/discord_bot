@@ -495,6 +495,11 @@ function boltGroupStr (hits, names, total) {
   return order.filter(nm => g[nm]).map(nm => `${emo[nm] || ''}**${nm}**(${g[nm].join('·')})`).join(' ')
 }
 function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; foe.vuln = 1; return r } } return dmg }
+// 침투(浸透): 마나실드를 무시하고 hp에 직접(방어구 관통과 별개 — 실드 버퍼 자체를 통과). 침투=false면 평소대로 실드 흡수. hp에 적용하고 실제 들어간 피해 반환.
+function dealHp (foe, dmg, 침투) { const d = 침투 ? Math.max(dmg, 0) : absorb(foe, dmg); foe.hp -= d; return d }
+// 스블 마검 인챈트 AI 자동선택: 실드 있으면 관통(침투) / 빠른 상대면 얼음(둔화) / 그 외 화염(raw 폭발)
+function pickEnchant (foe, df) { if (foe.shield > 0) return '관통'; if (df.턴 < 4.0) return '얼음'; return '화염' }
+const ENCHANT_EMO = { 화염: '🔥', 얼음: '❄️', 관통: '🟣' }
 // 충격(impact) 대미지: 물방·마방·마나실드 전부 무시(방어구 관통, hp 직접). 단 능동방어(완전회피·천운·회피·무기막기·방패막기)로는 막힘. 반환값을 absorb 없이 foe.hp에 직접 적용할 것.
 function impactDmg (A, D, dA, dD, base) {
   const lsD = { used: false }
@@ -615,10 +620,10 @@ const SKILLS = {
   스펠블레이드: [
     // 약점봉인: 순수 CC(딜 없음) — 상대 최고 스탯에 맞는 군중제어만
     { name: '약점봉인', tag: '제어', coef: '상대 최고 스탯 맞춤 CC (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun'), exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 5; s.note = cc } },
-    // 역장베기: 혼합 평타딜(확정명중, 방어로 깎임) + 역장피해(마공×1.5 flat, 물방·마방 무시 관통딜 — D&D force). 순수 딜기
-    { name: '역장베기', tag: '공격', coef: '타격 + 역장 마공×1.5 관통', cd: 4, dmgType: '역장', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(x.est + ds.마공 * 1.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true); const force = Math.round(ds.마공 * 1.5); d = absorb(f, d + force); f.hp -= d; s.cd[1] = 4; s.note = '역장베기' } },
-    // 인챈트: 3턴간 공격력 ×1.3 (마검사 딜 보강)
-    { name: '룬각인', tag: '버프', coef: '4턴 공격력×1.8', buff: 4, cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0 && s.powBuff === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.8 * 4, s, ds), exec: (s, f, ds, df) => { s.powBuff = 4; s.powMul = 1.8; s.cd[2] = 4; s.note = '룬각인' } }, // 순수버프(공격 제거), 지속4=쿨4(사용성↑)
+    // 역장베기(스펠스트라이크): 타격(확정명중) + 역장 force(마공 flat, 마방 무시). 인챈트 시 성질 변화 — 화염=딜폭발 / 얼음=둔화 / 관통=마나실드 침투
+    { name: '역장베기', tag: '공격', coef: '타격 + 역장 마공×1.5 (인챈트: 🔥딜↑ ❄️둔화 🟣마나실드 침투)', cd: 3, dmgType: '역장', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const e = s.enchant; const fmul = e === '화염' ? 2.5 : e === '관통' ? 1.8 : 1.5; return dmgVal(x.est + ds.마공 * fmul, 1, (e === '얼음' && f.slow === 0) ? ctrlVal(x.foeTurn, 2, 'slow') : 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const d = attack(s, f, ds, df, f.defending, true); const e = s.enchant; const fmul = e === '화염' ? 2.5 : e === '관통' ? 1.8 : 1.5; const force = Math.round(ds.마공 * fmul); dealHp(f, d + force, e === '관통'); if (e === '얼음') { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } s.cd[1] = 3; s.note = e ? (ENCHANT_EMO[e] + ' 역장베기') : '역장베기' } },
+    // 룬각인(마검 인챈트): 타격 + 3턴 인챈트 속성 부여(화염/얼음/관통). 딜이 붙어 AI가 딜 목적으로 사용→인챈트 셋업. 인챈트가 역장베기를 스펠스트라이크로 변화. AI는 상대 보고 자동선택
+    { name: '룬각인', tag: '공격', coef: '타격×1.0 + 마검 인챈트(🔥화염/❄️얼음/🟣관통) 3턴 부여', cd: 4, choose: 'enchant', ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, 0, f.hp, x.foeTurn) + (s.enchant ? 0 : (f.shield > 0 ? 50 : 25)), exec: (s, f, ds, df) => { const e = s.enchantChoice || pickEnchant(f, df); s.enchantChoice = null; s.enchant = e; s.enchantTurns = 5; const d = attack(s, f, ds, df, f.defending); dealHp(f, d, false); s.cd[2] = 4; s.note = ENCHANT_EMO[e] + ' ' + e + ' 인챈트' } },
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
     { name: '역장폭발', tag: '관통', coef: '역장 마공×2.5 관통 (이후 2턴 취약)', cd: 5, dmgType: '역장', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * 2.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 2.5); const d = absorb(f, force); f.hp -= d; s.instVuln = 2; s.cd[3] = 5; s.note = '역장폭발' } }
   ],
@@ -791,6 +796,8 @@ function mkFighter (d, name, ai) {
     parryHit: false, // 패링 반격 예약(피격 시 게이지 리셋)
     comboStep: 0, // 무도가 콤보 진행도(0=없음, 1=육합권, 2=연환전신장까지)
     comboWin: 0, // 콤보 유효 창(턴 카운트다운, 0=만료)
+    enchant: null, // 스블 마검 인챈트 속성(null/'화염'/'얼음'/'관통')
+    enchantTurns: 0, // 인챈트 지속(턴 카운트다운)
     defCombo: 0,
     defendedLast: false,
     shield: d.마나실드 || 0, // §13: 마법무기 착용 시 지능1.5+체력1 (공격 딜 25% 회복)
@@ -877,6 +884,7 @@ function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - M
 function upkeep (self, foe, ds, df) {
   self.defending = false; self.parry = false; self.parryHit = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false; self._tick = []
   if (self.comboWin > 0) { self.comboWin--; if (self.comboWin === 0) self.comboStep = 0 } // 무도가 콤보 창 만료(2턴 지나면 리셋)
+  if (self.enchantTurns > 0) { self.enchantTurns--; if (self.enchantTurns === 0) self.enchant = null } // 스블 인챈트 만료
   for (let i = 0; i < self.cd.length; i++) self.cd[i] = Math.max(0, self.cd[i] - 1) // 전 스킬 슬롯 쿨 감소(3스킬 대응)
   if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.base.체력 * 0.3))
   if (self.autoSpell > 0) self.autoSpell--
@@ -933,7 +941,7 @@ function execAttack (self, foe, ds, df) { const fb = foe.hp; const psh = foe.shi
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; if (ds.무기.방어 === '패링') { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 패링 태세: 피격 시 경감(defending) + 즉시 반격턴(게이지 리셋)
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
-const BUFF_SKILLS = new Set(['인스턴트캐스팅', '2d20', '볼트마법조합', '방패들기', '룬각인', '마법반사', '오토스펠'])
+const BUFF_SKILLS = new Set(['인스턴트캐스팅', '2d20', '볼트마법조합', '방패들기', '마법반사', '오토스펠'])
 // 마법 스킬: 침묵 시 사용 불가(물리 스킬은 침묵 무시). 원소·역장·시전·마법 유틸·마법 버프가 대상 (물리 타격·물리 버프·물리 덫은 제외)
 const MAGIC_SKILLS = new Set(['화염구', '메테오', '인스턴트캐스팅', '서리구', '충격파', '파이어볼트', '라이트닝볼트', '콜드볼트', '볼트마법조합', '오토스펠', '디스펠', '마법의완전이해', '룬각인', '역장폭발', '약점봉인', '마나소각', '시전파괴', '마법반사'])
 const silenced = (s, name) => s.silence > 0 && MAGIC_SKILLS.has(name)
@@ -1341,6 +1349,15 @@ function buildBattleRow (state) {
   if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5)))
   return rows
 }
+// 선택형 스킬 서브메뉴(스블 마검 인챈트): 룬각인 누르면 이 3버튼 표시 → op 'enchant'로 선택
+function buildEnchantRow (mid, slot) {
+  const cid = (e) => JSON.stringify({ action: 'duel', op: 'enchant', e, slot, memberId: mid })
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(cid('화염')).setLabel('🔥 화염 · 딜↑').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder().setCustomId(cid('얼음')).setLabel('❄️ 얼음 · 둔화').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId(cid('관통')).setLabel('🟣 관통 · 실드 침투').setStyle(ButtonStyle.Secondary)
+  )
+}
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 // 순차 공개: 새 로그 엔트리를 1개씩(턴 종료마다) 편집 공개. 마지막에 버튼/결과 표시
@@ -1390,7 +1407,17 @@ async function handleButton (interaction, info) {
     const sess = SESSIONS.get(interaction.message.id)
     if (!sess) { await interaction.reply({ content: '전투 정보가 만료됐어~ `/듀얼`로 다시 시작해줘! ⚔️', ephemeral: true }); return }
     sess.ts = Date.now()
+    // 선택형 스킬(룬각인 인챈트): 실행 전 서브메뉴 표시
+    const m = /^s(\d+)$/.exec(info.c)
+    if (m) { const slot = +m[1]; const sk = SKILLS[sess.state.meName] && SKILLS[sess.state.meName][slot]; if (sk && sk.choose === 'enchant' && playerCanUse(sess.state, slot).usable) { await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: [buildEnchantRow(mid, slot)] }); return } }
     const phase = playerResolve(sess.state, info.c)
+    await revealTurns(interaction, sess.state, phase, { me: sess.me, opp: sess.opp, ai: sess.ai, mid, msgId: interaction.message.id })
+  } else if (info.op === 'enchant') {
+    const sess = SESSIONS.get(interaction.message.id)
+    if (!sess) { await interaction.reply({ content: '전투 정보가 만료됐어~ `/듀얼`로 다시 시작해줘! ⚔️', ephemeral: true }); return }
+    sess.ts = Date.now()
+    sess.state.A.enchantChoice = info.e // 플레이어가 고른 인챈트 → 룬각인 exec가 사용
+    const phase = playerResolve(sess.state, 's' + info.slot)
     await revealTurns(interaction, sess.state, phase, { me: sess.me, opp: sess.opp, ai: sess.ai, mid, msgId: interaction.message.id })
   }
 }

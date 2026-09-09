@@ -364,7 +364,8 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
       }
     }
     // 마법반사(스펠브레이커): 40% 완전반사(시전자가 다 맞음) / 30% 30%만 통과
-    if (D.magReflect > 0 && dmg > 0) { const rr = (dD.무기.방어 === '방패') ? 1.0 : 0.7; A.hp -= Math.max(Math.round(dmg * rr), 1); A.lastRefl = rr >= 1 ? 'full' : 'part'; dmg *= (1 - rr); if (rr >= 1) A._braw = null; D.magReflect = 0 } // 마법반사: 검방(방패)=100% / 그외=70% 반사, 다음 마법 1회 후 소비
+    // 마법반사: 시전마법(spellDmg) + 볼트(A.lastBolt)만 반사 — 매직미사일 평타(잔딜)는 무시(반사 낭비 방지)
+    if (D.magReflect > 0 && dmg > 0 && A.lastBolt) { const rr = (dD.무기.방어 === '방패') ? 1.0 : 0.7; A.hp -= Math.max(Math.round(dmg * rr), 1); A.lastRefl = rr >= 1 ? 'full' : 'part'; dmg *= (1 - rr); if (rr >= 1) A._braw = null; D.magReflect = 0 }
   }
   dmg -= 고정
   if (dD.마나경감) dmg *= (1 - dD.마나경감)
@@ -494,7 +495,7 @@ function boltGroupStr (hits, names, total) {
   hits.forEach((h, i) => { const v = i === n - 1 ? total - acc : Math.round(h / raw * total); acc += v; const nm = (names && names[i]) || '볼트'; (g[nm] = g[nm] || []).push(v) })
   return order.filter(nm => g[nm]).map(nm => `${emo[nm] || ''}**${nm}**(${g[nm].join('·')})`).join(' ')
 }
-function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; foe.vuln = 1; return r } } return dmg }
+function absorb (foe, dmg) { if (foe.shield > 0) { if (dmg <= foe.shield) { foe.shield -= dmg; return 0 } else { const r = dmg - foe.shield; foe.shield = 0; return r } } return dmg } // 실드 파괴 시 취약 부여 제거 — 큰 실드에선 깨짐+취약 이중페널티라 과함
 // 침투(浸透): 마나실드를 무시하고 hp에 직접(방어구 관통과 별개 — 실드 버퍼 자체를 통과). 침투=false면 평소대로 실드 흡수. hp에 적용하고 실제 들어간 피해 반환.
 function dealHp (foe, dmg, 침투) { const d = 침투 ? Math.max(dmg, 0) : absorb(foe, dmg); foe.hp -= d; return d }
 // 스블 마검 인챈트 AI 자동선택: 빠른 상대면 전격(마비=턴 뺏기) / 저마방이면 화염(raw) / 그 외 얼음(둔화)
@@ -593,7 +594,7 @@ const SKILLS = {
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
     { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 5 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(dmg, f, df, s)); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 5 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
-    { name: '충격파', tag: '공격', coef: '마공×1.0 + 상대 턴 게이지 초기화 + 1턴 둔화 (기절 중에도 사용)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => spellBase(ds, '충격파') + x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 2.5, exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df, s); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[0] = 5; s.note = '충격파' }, stunnable: true }
+    { name: '충격파', tag: '공격', coef: '마공×1.0 + 상대 턴 게이지 초기화 + 1턴 둔화 (기절 중에도 사용)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '충격파') * (1 - df.마방), 1, x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 1.5, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df, s); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[0] = 5; s.note = '충격파' }, stunnable: true }
   ],
   볼트마법사: [
     // 시전형 볼트 3종(화염구식 시전마법). 파이어=2시전 고배율 / 라이트닝=1시전 / 콜드=즉발+둔화(쿨1). 발수 1~5(볼트마법의 이해=5고정)
@@ -973,16 +974,20 @@ function aiTurn (self, foe, ds, df) {
   if (decideDefend(self, foe, ds, df)) return execDefend(self, ds)
   // 스킬 선택: 점수 최고. 침묵 시 마법 스킬만 제외(물리 스킬은 사용 가능). 제어는 이미 고점수(우선), 버프는 AI 생존여유 게이트
   {
-    const ctx = ctxFor(self, foe, ds, df); let best = null; let bestScore = ctx.est
+    const ctx = ctxFor(self, foe, ds, df); const cands = [{ sk: null, sc: ctx.est }] // null=평타
     for (const sk of SKILLS[self.name]) {
       if (silenced(self, sk.name)) continue
       if (!sk.ready(self, foe, ds, df, ctx)) continue
       if (BUFF_SKILLS.has(sk.name) && !buffOk(self.ai, self.hp, Math.max(0, ctx.foeTurn - self.shield))) continue // 버프는 여유 있을 때만(공격적은 항상)
-      const sc = sk.score(self, foe, ds, df, ctx); if (sc > bestScore) { bestScore = sc; best = sk }
+      cands.push({ sk, sc: sk.score(self, foe, ds, df, ctx) })
     }
-    if (best) return execSkill(self, foe, ds, df, best)
+    // 정형화 방지: 최고점만 뽑지 말고 상위권(최고점 75%+) 중 점수비례 확률선택 → 매판 다른 전개
+    const top = Math.max(...cands.map(c => c.sc))
+    const pool = cands.filter(c => c.sc > 0 && c.sc >= top * 0.7)
+    let pick = pool[0] || { sk: null }
+    if (pool.length > 1) { const tot = pool.reduce((a, c) => a + c.sc, 0); let r = rand() * tot; for (const c of pool) { r -= c.sc; if (r <= 0) { pick = c; break } } }
+    return pick.sk ? execSkill(self, foe, ds, df, pick.sk) : execAttack(self, foe, ds, df) // 평타(볼트마법사는 매직미사일)
   }
-  return execAttack(self, foe, ds, df) // 스킬 없음(침묵 등) → 평타(볼트마법사는 매직미사일)
 }
 function initBattle (meName, oppName, oppAI) {
   const dA = derive(CHARS[meName]); const dB = derive(CHARS[oppName])
@@ -1204,6 +1209,7 @@ function narrateLine (ev, meName, oppName) {
       const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
       { const back = ev.selfDmg > 0 ? (ev.def === '완벽방어' ? '' : ` (**${A}** 반동 **${ev.selfDmg}**)`) : '' // 완벽방어 반사는 defTag(반격 X)로 표기 — 반동과 구분
         if (ev.dmg > 0) return `${head}${diceTag} ${ev.crit ? '치명타! ' : ''}${boltTag}${forceTag}${defTag}${parryTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}${meteorTag}${back}`
+        if (ev.shieldAbsorb > 0) return `${head} 🔷 ${te} **${T}**${iga(T)} 마나실드로 **${ev.shieldAbsorb}** 흡수!${back}` // dmg는 0이지만 실드가 전부 흡수 — 흡수량 표시(마나소각 등)
         if (ev.name === '화염구') return head // 시전 시작(딜 없음)
         if (!ev.attacked) return `${head}${back}` // 공격 안 하는 버프/방어 스킬(마력충전 등) → 미스 문구 없이
         const miss = ev.shieldAbsorb > 0 ? `하지만 ${T}${iga(T)} 마나실드로 **${ev.shieldAbsorb}** 모두 흡수 🔷` : ev.def === '회피' ? `하지만 ${T}${iga(T)} 회피했다 💨` : (ev.def === '천운' || ev.def === '완전회피') ? `하지만 ${T}${iga(T)} 천운으로 흘렸다 🍀` : '하지만 공격은 빗나갔다 💨'

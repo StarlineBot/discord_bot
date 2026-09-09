@@ -31,10 +31,10 @@ const WEAPONS = {
   양검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 방어: '무기막기' },
   양둔: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 스턴확률: 0.2, 방어: '무기막기' },
   양도끼: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 관통: 0.3, 방어: '무기막기' },
-  활: { 계열: '물리', 평타: '물리', range: '원거리', hands: 2, 물공배율: 1.4, 크리배율: 2.0, 무기막기: 0.10, 회피배율: 1.3, 턴배율: 1.05, 원거리페널티: 0.4, 방어: '회피' },
+  활: { 계열: '물리', 평타: '물리', range: '원거리', hands: 2, 물공배율: 1.5, 크리배율: 2.0, 무기막기: 0.10, 회피배율: 1.3, 턴배율: 1.0, 원거리페널티: 0.5, 방어: '회피' },
   너클: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0, 회피배율: 1.3, 턴배율: 0.8, 다단: 2, 방어: '회피' }, // 무투가: 극회피·최속·다단, 무기막기 없음
   스태프: { 계열: '마법', 평타: '마법', range: '원거리', hands: 2, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.15, 평타계수: 0.55, castMod: -2, 원거리페널티: 0.35, 마나실드배율: 1.2, 방어: '마나실드' },
-  완드: { 계열: '마법', 평타: '마법', range: '원거리', hands: 1, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 평타계수: 0.9, 마뎀너프: 0.66, 원거리페널티: 0.15, 마나실드배율: 1.5, 방어: '마나실드' },
+  완드: { 계열: '마법', 평타: '마법', range: '원거리', hands: 1, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 평타계수: 0.9, 마뎀너프: 0.8, 원거리페널티: 0.15, 마나실드배율: 1.5, 방어: '마나실드' },
   마도서: { 계열: '마법', 평타: '혼합', range: '근접', hands: 2, tempoStat: '힘지능', 물공배율: 1.8, 물타: 1.1, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 0.95, 관통: 0.3, 방어: '마나실드' }, // 세이지: 물리관통30%
   검오브: { 계열: '마법', 평타: '혼합', range: '근접', hands: 1, tempoStat: '힘지능', 물공배율: 1.2, 물타: 0.87, 마타: 0.87, 크리배율: 1.5, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 1.08, 방어: '마나실드' }, // 스블: 물리+마법 혼합
   마도검: { 계열: '마법', 평타: '마법', range: '근접', hands: 1, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 마방보너스: 0.15, 방어: '마나실드' },
@@ -162,7 +162,7 @@ function derive (c) {
     물방: Math.min((c.힘 * 0.26 + c.체력 * 0.34) / 100 + (w.물방보너스 || 0) + (c.마도갑주 || 0) + (c.체력 === 100 ? 0.05 : 0), 0.80), // §13: 힘0.26+체력0.34 (광전40·기사50). 체력100시그 +5%p
     마방: Math.min((20 + step(c.지능, 3)) / 100 + (w.마방보너스 || 0), 0.85), // §13: 바닥 30→20
     maxhp: maxHp(c),
-    마나실드: (w.계열 === '마법') ? Math.round((c.지능 * 1.8 + c.체력 * 1.2) * (w.마나실드배율 || 1)) : 0, // §13: 마법무기만, (지능1.8+체력1.2)×무기배율. 방어구 경감 없음(실드가 풀딜 흡수) + 공격 딜25% 회복
+    마나실드: (w.계열 === '마법') ? Math.round((c.지능 * 1.8 + c.체력 * 1.0) * (w.마나실드배율 || 1)) : 0, // §13: 마법무기만, (지능1.8+체력1.0)×무기배율. 방어구 경감 없음(실드가 풀딜 흡수) + 공격 딜25% 회복
     명중: (35 + c.솜씨 * 0.4) / 100, // §13: 35~75
     물회: (10 + c.민첩 * 0.15) / 100 * (w.회피배율 || 1) + (c.체력 === 100 ? 0.05 : 0), // §13: (10+민첩0.15)×무기회피배율. 체력100시그 +5%p
     마회: 0, // §13: 死스탯 삭제(0 유지 — 트레이트 참조 안전용)
@@ -340,7 +340,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
     let boltPlan = null
     if (A._boltFire) {
       if (psv(A, 'boltMaster')) {
-        if (A.chainBolt > 0) { const s = [...boltTypes].sort(() => rand() - 0.5); boltPlan = [...Array(5).fill(s[0]), ...Array(5).fill(s[1])] } else { const t = boltTypes[Math.floor(rand() * 3)]; boltPlan = Array(5).fill(t) } // 조합=두 원소 5+5=10발 / 마스터=단일 원소 5발
+        if (A.chainBolt > 0) { const s = [...boltTypes].sort(() => rand() - 0.5); boltPlan = [...Array(BOLT_MASTER_SHOTS).fill(s[0]), ...Array(BOLT_MASTER_SHOTS).fill(s[1])] } else { const t = boltTypes[Math.floor(rand() * 3)]; boltPlan = Array(BOLT_MASTER_SHOTS).fill(t) } // 조합=두 원소 6+6=12발 / 마스터=단일 원소 6발
       } else { const n = rollBoltCount(); boltPlan = Array.from({ length: n }, () => boltTypes[Math.floor(rand() * 3)]) } // 마스터 없음: 1~5 랜덤
     }
     const bolts = boltPlan ? boltPlan.length : 1
@@ -411,7 +411,8 @@ const BOLT_DAMP = 0.16 // 발당 감쇠(sim 튜닝: 볼트마법사·세이지 �
 const SPELL_COEF = { 화염구: 4.8, 메테오: 8.4, 서리구: 3.1, 충격파: 1.0 } // 시전 마법 = 마공 × 계수 (파생 의존 제거, 마공 기반). 서리구=둔화+짧은시전만큼 낮음 / 메테오=화염구와 raw 딜/턴 1:1(8.4÷유효7 ≈ 4.8÷유효4)이되 시전 길어 착탄 리스크가 대가
 function spellBase (ds, name) { return Math.round(ds.마공 * SPELL_COEF[name]) }
 const BOLT_COMBO_DAMP = 0.85 // 볼트마법조합(10발) 총딜 감쇠 — 마법 무크리 보상 반영(0.7→0.85)
-const ELEM_MASTER = 1.7 // 원소 마스터(세이지 패시브): 볼트마법 대미지 배율
+const ELEM_MASTER = 1.5 // 원소 마스터(세이지 패시브): 볼트마법 대미지 배율
+const BOLT_MASTER_SHOTS = 6 // 볼트마법의 이해(볼트마법사 패시브): 원소당 확정 발수(없으면 1~5 랜덤). 조합 시 두 원소 각 이 발수
 // ── 마법 속성 분류(5속성) ──
 // 화염/전격/냉기=원소(마방 적용) · 역장=마방무시 관통 · 무=비원소. 원소의 이해=원소 3종만 강화.
 const MAGIC_ELEM = {
@@ -445,7 +446,7 @@ function boltShot (ds, A, bn, mdef, mult) { return ds.마공 * BOLT_CAST[bn].coe
 // 볼트마법조합(chainBolt): 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
 const BOLT_CHAIN = { 파이어볼트: '라이트닝볼트', 라이트닝볼트: '콜드볼트', 콜드볼트: '파이어볼트' }
 // 볼트마법조합 중 시전한 볼트의 짝 부스트 — 리드+짝 둘 다 이 배율. 파라(파이어리드) 강 / 라콜(라이트닝리드) 중 / 콜파(콜드리드) 약
-const BOLT_COMBO_MULT = { 파이어볼트: 1.7, 라이트닝볼트: 1.4, 콜드볼트: 1.2 }
+const BOLT_COMBO_MULT = { 파이어볼트: 2.0, 라이트닝볼트: 1.7, 콜드볼트: 1.5 }
 function boltChain (s, foe, ds, df, bn, mult) {
   const cn = BOLT_CHAIN[bn]; if (!cn) return 0 // 발동 여부는 호출측이 판단(시전=시전시작 시점 확정 / 즉발=현재 chainBolt)
   const mHits = s.boltHits || []; const mNames = s.boltNames || [] // 본 볼트 내역 보존 → 후속과 합쳐 표시
@@ -455,7 +456,7 @@ function boltChain (s, foe, ds, df, bn, mult) {
   return d
 }
 function boltVolley (s, foe, ds, df, bn, mult) {
-  const shots = psv(s, 'boltMaster') ? 5 : rollBoltCount() // 마스터=5고정 / 없으면 1~5
+  const shots = psv(s, 'boltMaster') ? BOLT_MASTER_SHOTS : rollBoltCount() // 마스터=확정 / 없으면 1~5
   const 마관통 = s.tMPen ? 0.25 : 0; const mdef = defMul(df.마방, 마관통)
   const canDef = foe.stun === 0 && foe.cast === 0
   if (canDef && rand() < df.리롤) { s.boltDodged = true; s.lastBolt = false; return 0 } // 볼트 전체 완전회피(spellDmg와 동일 성격)
@@ -478,7 +479,7 @@ function boltCastSkill (ci, bn) {
   return Object.assign({}, spec, {
     // 조합(chainBolt) 중엔 콜드도 1시전이 되므로, 콜드 ready도 시전가능(safe) 요구
     ready: (s, f, ds, df, x) => (B.cast + (s.chainBolt > 0 ? 1 : 0)) > 0 ? (s.cast === 0 && x.safe) : (s.cd[ci] === 0),
-    score: (s, f, ds, df, x) => { const hits = psv(s, 'boltMaster') ? 5 : 3; const combo = s.chainBolt > 0; const cm = combo ? (BOLT_COMBO_MULT[bn] || 1) : 1; const coefSum = B.coef * cm + (combo ? BOLT_CAST[BOLT_CHAIN[bn]].coef * cm : 0); const dmg = ds.마공 * coefSum * hits * (1 - df.마방); const castT = B.cast + (combo ? 1 : 0); return dmgVal(dmg, castT, B.slow ? ctrlVal(x.foeTurn, B.slow, 'slow') : 0, f.hp, x.foeTurn) }, // 조합 중이면 리드+짝 둘 다 부스트(파라 강/라콜 중/콜파 약) → AI가 조합 볼트 우선
+    score: (s, f, ds, df, x) => { const hits = psv(s, 'boltMaster') ? BOLT_MASTER_SHOTS : 3; const combo = s.chainBolt > 0; const cm = combo ? (BOLT_COMBO_MULT[bn] || 1) : 1; const coefSum = B.coef * cm + (combo ? BOLT_CAST[BOLT_CHAIN[bn]].coef * cm : 0); const dmg = ds.마공 * coefSum * hits * (1 - df.마방); const castT = B.cast + (combo ? 1 : 0); return dmgVal(dmg, castT, B.slow ? ctrlVal(x.foeTurn, B.slow, 'slow') : 0, f.hp, x.foeTurn) }, // 조합 중이면 리드+짝 둘 다 부스트(파라 강/라콜 중/콜파 약) → AI가 조합 볼트 우선
     exec: (s, f, ds, df) => {
       const castT = B.cast + (s.chainBolt > 0 ? 1 : 0) // 볼트마법조합: 모든 볼트류 시전 +1(콜드 0→1시전으로 리스크 발생)
       if (castT > 0) { s.cast = Math.max(1, castT + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castTotal = s.cast; s.castName = bn; s.castBolt = bn; s.castBoltChain = s.chainBolt > 0; s.cd[ci] = 1; s.note = bn + ' 시전' } else { let d = boltVolley(s, f, ds, df, bn); d = absorb(f, d); f.hp -= d; if (B.slow) { applyCC(f, 'slow', B.slow); f.slowSec = Math.max(f.slowSec, 1) } if (s.chainBolt > 0) boltChain(s, f, ds, df, bn); s.cd[ci] = 1; s.note = bn } // 콜드 즉발(비조합)
@@ -969,11 +970,15 @@ function stateResult (state) { return { winner: state.winner, log: state.log, me
 function runBattle (meName, oppName, meAI, oppAI) {
   const state = initBattle(meName, oppName, oppAI); state.A.ai = meAI
   const { A, B, dA, dB } = state; const DT = 0.1
+  const actA = () => { A.gauge = resetGauge(A, dA); recTurn(state, 'me', A, aiTurn(A, B, dA, dB)); if (reviveCheck(B, dB)) reviveRec(state, 'opp') }
+  const actB = () => { B.gauge = resetGauge(B, dB); recTurn(state, 'opp', B, aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
   while (A.hp > 0 && B.hp > 0 && state.t < 600) {
     A.gauge -= DT; B.gauge -= DT; state.t += DT
-    if (A.gauge <= 0) { A.gauge = resetGauge(A, dA); recTurn(state, 'me', A, aiTurn(A, B, dA, dB)); if (reviveCheck(B, dB)) reviveRec(state, 'opp') }
-    if (B.hp <= 0) break
-    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); recTurn(state, 'opp', B, aiTurn(B, A, dB, dA)); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
+    const aR = A.gauge <= 0; const bR = B.gauge <= 0
+    if (!aR && !bR) continue
+    // 동시 준비 시: 더 밀린(게이지 작은) 쪽이 먼저, 동률이면 랜덤 — 첫 인자(me) 고정 선행 편향 제거
+    const aFirst = (aR && bR) ? (A.gauge < B.gauge || (A.gauge === B.gauge && Math.random() < 0.5)) : aR
+    if (aFirst) { if (aR) actA(); if (bR && A.hp > 0 && B.hp > 0) actB() } else { if (bR) actB(); if (aR && A.hp > 0 && B.hp > 0) actA() }
   }
   koLog(state)
   state.winner = state.t >= 600 ? 'draw' : (A.hp > 0 ? 'me' : 'opp')
@@ -1001,7 +1006,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 한탕주의자: [{ name: '행운의여신', desc: '받는 피해마다 행운 비례 확률(행운100=10%)로 그 피해를 1로 — 전 타입(마법·볼트도)' }], 암살자: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }] }
+const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 한탕주의자: [{ name: '행운의여신', desc: '받는 피해마다 행운 비례 확률(행운100=10%)로 그 피해를 1로 — 전 타입(마법·볼트도)' }], 암살자: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 6발(없으면 원소당 1~5 랜덤)' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev

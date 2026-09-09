@@ -1162,12 +1162,12 @@ function narrateLine (ev, meName, oppName) {
       return `${te} **${T}**${eun(T)} ${s} (총 **${ev.dmg}**)의 피해를 입었다.`
     }
     if (ev.boltHits && ev.boltHits.length > 1) { const combo = ev.boltCombo ? '🔗**원소조합!** ' : ''; return `${te} **${T}**${eun(T)} ${combo}✨${boltGroupStr(ev.boltHits, ev.boltNames, ev.dmg)} 총 **${ev.dmg}**의 피해를 입었다.` }
-    if (ev.multiHits && ev.multiHits.length > 1) return `${te} **${T}**${eun(T)} 🏹연사 ${ev.multiHits.map(h => h > 0 ? `**${h}**` : '빗나감').join('·')} 총 **${ev.dmg}**의 피해를 입었다.`
+    if (ev.multiHits && ev.multiHits.length > 1) { const mhl = ev.name === '연발사격' ? '🏹연사' : '👊연타'; return `${te} **${T}**${eun(T)} ${mhl} ${ev.multiHits.map(h => h > 0 ? `**${h}**` : '빗나감').join('·')} 총 **${ev.dmg}**의 피해를 입었다.` }
     return hurt(ev.dmg)
   }
   const boltTag = ev.boltName ? `✨**${ev.boltName}** 발동! ` : ''
   // 방어 성공(피해는 일부 들어간 경우) 태그
-  const defTag = ev.def === '완벽방어' ? ` 🛡️✨**${T} 완벽방어!**(반격)` : (ev.def === '방패막기' || ev.def === '무기막기') ? ` 🛡️*${T} ${ev.def}!*` : (ev.def === '행운의여신' ? ' 🍀**행운의 여신!**(피해 1)' : '')
+  const defTag = ev.def === '완벽방어' ? ` 🛡️✨**${T} 완벽방어!**(반격 ${ev.selfDmg})` : (ev.def === '방패막기' || ev.def === '무기막기') ? ` 🛡️*${T} ${ev.def}!*` : (ev.def === '행운의여신' ? ' 🍀**행운의 여신!**(피해 1)' : '')
   const brokeTag = ev.broke ? ` ⚡**${T} 시전 중단!**` : ''
   const meteorTag = ev.meteorImmune ? ` 🌠**하지만 ${T}의 메테오 시전은 막을 수 없다!**` : ''
   const forceTag = ev.dmgType === '역장' ? '🟣' : '' // 역장피해 마커(방어무시) — 스킬 dmgType 기반(하드코딩 제거)
@@ -1185,12 +1185,12 @@ function narrateLine (ev, meName, oppName) {
   switch (ev.type) {
     case 'attack':
       if (ev.dmg <= 0) return evadeLine()
-      if (ev.crit) return `💥 ${ae} **${A}**의 ${ev.ph != null ? '혼합 ' : ''}공격이 치명타로 적중!${diceTag} ${boltTag}${hurtBd()}${defTag}${shieldTag}${brokeTag}`
-      return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}!${diceTag} ${boltTag}${hurtBd()}${defTag}${grazeTag}${shieldTag}${brokeTag}`
+      if (ev.crit) return `💥 ${ae} **${A}**의 ${ev.ph != null ? '혼합 ' : ''}공격이 치명타로 적중!${diceTag} ${boltTag}${defTag}${shieldTag}${hurtBd()}${brokeTag}`
+      return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}!${diceTag} ${boltTag}${defTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}`
     case 'skill': {
       const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
-      { const back = ev.selfDmg > 0 ? ` (**${A}**도 반동으로 **${ev.selfDmg}** 피해)` : ''
-        if (ev.dmg > 0) return `${head}${diceTag} ${ev.crit ? '치명타! ' : ''}${boltTag}${forceTag}${hurtBd()}${defTag}${grazeTag}${shieldTag}${brokeTag}${meteorTag}${back}`
+      { const back = ev.selfDmg > 0 ? (ev.def === '완벽방어' ? '' : ` (**${A}** 반동 **${ev.selfDmg}**)`) : '' // 완벽방어 반사는 defTag(반격 X)로 표기 — 반동과 구분
+        if (ev.dmg > 0) return `${head}${diceTag} ${ev.crit ? '치명타! ' : ''}${boltTag}${forceTag}${defTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}${meteorTag}${back}`
         if (ev.name === '화염구') return head // 시전 시작(딜 없음)
         if (!ev.attacked) return `${head}${back}` // 공격 안 하는 버프/방어 스킬(마력충전 등) → 미스 문구 없이
         const miss = ev.shieldAbsorb > 0 ? `하지만 ${T}${iga(T)} 마나실드로 **${ev.shieldAbsorb}** 모두 흡수 🔷` : ev.def === '회피' ? `하지만 ${T}${iga(T)} 회피했다 💨` : (ev.def === '천운' || ev.def === '완전회피') ? `하지만 ${T}${iga(T)} 천운으로 흘렸다 🍀` : '하지만 공격은 빗나갔다 💨'
@@ -1332,7 +1332,10 @@ function buildBattleRow (state) {
     new ButtonBuilder().setCustomId(cid('skip')).setLabel('⏭️ 턴넘기기').setStyle(ButtonStyle.Secondary)
   ]
   const skillBtns = []
-  o.skills.forEach((sk, i) => skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(skLbl(sk)).setStyle(ButtonStyle.Primary).setDisabled(!sk.usable)))
+  // 무도가 콤보 강조: 육합권 후 연환전신장(idx1), 연환 후 맹룡과강(idx2)을 초록+🔥로 표시(창 유효 시)
+  const A = state.A
+  const comboNext = (state.meName === '무도가' && A && A.comboWin > 0) ? (A.comboStep === 1 ? 1 : A.comboStep === 2 ? 2 : -1) : -1
+  o.skills.forEach((sk, i) => { const isCombo = i === comboNext && sk.usable; skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel((isCombo ? '🔥' : '') + skLbl(sk)).setStyle(isCombo ? ButtonStyle.Success : ButtonStyle.Primary).setDisabled(!sk.usable)) })
   o.passives.forEach((p, i) => { if (skillBtns.length < 5) skillBtns.push(new ButtonBuilder().setCustomId(cid('passive' + i)).setLabel(`🔒 ${p.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true)) })
   const rows = [new ActionRowBuilder().addComponents(actionBtns)]
   if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5)))

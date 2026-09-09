@@ -224,7 +224,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   A.hitPh = null; A.hitMg = null; A.boltName = null; A.boltHits = null; A.boltNames = null; A.boltShots = 0; A.boltCombo = 0; A._braw = null; A._bnames = null; A.lastDef = null; A.didAttack = true; A.brokeCast = false; A.lastElem = false; A.lastRefl = null; A.grazed = false; A.diceAtk = 0; A.diceDef = 0 // 혼합 내역 + 볼트명 + 연쇄볼트 발당 + 방어판정 + 공격시도 + 시전중단 표식 + 빗맞음 + 주사위
   // 기절 중엔 능동 방어(회피·천운·방패막기·무기막기·패링) 봉쇄. 빗맞힘(공격자 실수)·마나실드·반사·근성은 수동이라 유지
   const canDef = D.stun === 0 && D.cast === 0 // 기절 또는 시전 중엔 능동 방어(회피·천운·막기·주사위방어) 불가. 마나실드·반사·근성은 유지
-  if (canDef && D.parry) { D.parryHit = true; D.parry = false } // 패링 태세 중 피격 → 즉시 반격턴 예약(execAttack/execSkill서 게이지 리셋). 경감은 defending(×0.10)이 처리
+  if (canDef && D.parry) { D.parryHit = true; D.parry = false; D.pendCC = null } // 패링 태세 중 피격 → 즉시 반격턴 예약 + 동반 CC(보류분) 폐기(흘림). 경감은 defending(×0.10)이 처리
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { A.lastDef = '행운의여신'; return 1 } // 한탕 패시브: 타입 무관 확률적 피해 1(운빨 방어)
   const aimCut = dA.sigAim ? 0.05 : 0 // §13: 솜씨100 정밀사격 = 상대 물회 −5%p(회피 판정에서 차감)
   if (canDef && dD.sigDodge && rand() < 0.10) { A.lastDef = '완전회피'; return 0 } // §13: 행운100 시그 = 물리·마법 10% 완전회피
@@ -505,6 +505,7 @@ const PARALYZE_CHANCE = 0.20 // 마비(전격): 지속 중 매 턴 이 확률로
 // 충격(impact) 대미지: 물방·마방·마나실드 전부 무시(방어구 관통, hp 직접). 단 능동방어(완전회피·천운·회피·무기막기·방패막기)로는 막힘. 반환값을 absorb 없이 foe.hp에 직접 적용할 것.
 function impactDmg (A, D, dA, dD, base) {
   const lsD = { used: false }
+  A.didAttack = true // 충격 스킬도 '공격'으로 표기 — 회피/천운 흘림 시 narration이 miss 문구를 띄우도록(발경·아수라패황권)
   const canDef = D.stun === 0 && D.cast === 0
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { A.lastDef = '행운의여신'; return 1 } // 한탕 운빨방어
   if (canDef && dD.sigDodge && rand() < 0.10) { A.lastDef = '완전회피'; return 0 } // 행운100 시그
@@ -525,6 +526,7 @@ function castHit (A, D, fin) { if (D.cast > 0 && fin > 0 && rand() < 0.05) { D.c
 function applyCC (foe, field, dur) {
   let d = foe.sigTank ? Math.max(dur - 1, 0) : dur
   if (psv(foe, '광란') && foe.maxhp) { const e = Math.pow(1 - Math.max(foe.hp, 0) / foe.maxhp, 2); d = Math.round(d * (1 - e * 0.7)) } // 광란: 체력 낮을수록 제어 지속 감소(빈사=거의 무효)
+  if (foe.parry && foe.stun === 0 && foe.cast === 0) { (foe.pendCC = foe.pendCC || []).push([field, d]); return } // 패링 태세: CC 보류 — 동반 타격이 파리되면 폐기(흘림), 순수CC(딜 없음)면 스킬 종료 시 적용
   foe[field] = Math.max(foe[field], d)
 }
 function applyAdaptiveCC (foe, df) {
@@ -797,6 +799,7 @@ function mkFighter (d, name, ai) {
     ai,
     defending: false,
     parry: false, // 패링 태세(무도가)
+    pendCC: null, // 패링 보류 CC(동반 타격이 파리되면 폐기)
     parryHit: false, // 패링 반격 예약(피격 시 게이지 리셋)
     comboStep: 0, // 무도가 콤보 진행도(0=없음, 1=육합권, 2=연환전신장까지)
     comboWin: 0, // 콤보 유효 창(턴 카운트다운, 0=만료)
@@ -886,8 +889,14 @@ function reviveCheck (f, d) {
 // ── 스텝형 전투 엔진 (자동 runBattle + 인터랙티브 공용) ──
 function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 0.3) : 1; return Math.max(d.턴 * (f.autoSpell > 0 ? 0.85 : 1) * fury - (f.rage > 0 ? 2 : 0), 2) + (f.slow > 0 ? f.slowSec : 0) } // 오토스펠: 턴시간 15%↓ / 광란: 저체력일수록 턴 가속(빈사 ~30%↑)
 // 턴 시작 처리(쿨/상태 감소, 기절·시전). 턴이 소모되는 강제 이벤트면 그 이벤트, 아니면 null
-function upkeep (self, foe, ds, df) {
-  self.defending = false; self.parry = false; self.parryHit = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false; self._tick = []
+// 시전 1틱 진행: 카운트다운 후 착탄. upkeep 자동진행 + 플레이어 '시전 진행'(턴넘기기) 공용
+function advanceCast (self, foe, ds, df) {
+  self.cast--
+  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; self.castBolt = null; const cm = self.castBoltChain ? (BOLT_COMBO_MULT[bn] || 1) : 1; foe.hp -= absorb(foe, boltVolley(self, foe, ds, df, bn, cm)); if (BOLT_CAST[bn].slow) { applyCC(foe, 'slow', BOLT_CAST[bn].slow); foe.slowSec = Math.max(foe.slowSec, 1) } if (self.castBoltChain) { self.castBoltChain = false; boltChain(self, foe, ds, df, bn, cm) } return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df, self)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } }
+  return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal }
+}
+function upkeep (self, foe, ds, df, interactive) {
+  self.pendCC = null; self.defending = false; self.parry = false; self.parryHit = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false; self._tick = []
   if (self.comboWin > 0) { self.comboWin--; if (self.comboWin === 0) self.comboStep = 0 } // 무도가 콤보 창 만료(2턴 지나면 리셋)
   if (self.enchantTurns > 0) { self.enchantTurns--; if (self.enchantTurns === 0) self.enchant = null } // 스블 인챈트 만료
   for (let i = 0; i < self.cd.length; i++) self.cd[i] = Math.max(0, self.cd[i] - 1) // 전 스킬 슬롯 쿨 감소(3스킬 대응)
@@ -931,8 +940,8 @@ function upkeep (self, foe, ds, df) {
     return null // 제한된 턴 진행 — self.stunned=true 로 옵션 제한(공격/일반스킬 불가, 충격파/재생 or 턴넘기기)
   }
   if (self.paralyze > 0) { self.paralyze--; if (rand() < PARALYZE_CHANCE) { self.defCombo = 0; self.defendedLast = false; return { type: 'paralyze', paralyzeLeft: self.paralyze } } } // 마비: 확률로 이 턴 상실(스턴과 동일 처리)
-  // 시전 진행(캐스터 공통): 카운트다운 후 발사
-  if (self.cast > 0) { self.cast--; if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; self.castBolt = null; const cm = self.castBoltChain ? (BOLT_COMBO_MULT[bn] || 1) : 1; foe.hp -= absorb(foe, boltVolley(self, foe, ds, df, bn, cm)); if (BOLT_CAST[bn].slow) { applyCC(foe, 'slow', BOLT_CAST[bn].slow); foe.slowSec = Math.max(foe.slowSec, 1) } if (self.castBoltChain) { self.castBoltChain = false; boltChain(self, foe, ds, df, bn, cm) } return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df, self)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } } return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal } }
+  // 시전 진행(캐스터 공통): interactive(플레이어)면 메테오 외 시전은 자동진행 대신 멈춤 → '시전 진행/취소' 선택. AI·상대·메테오는 자동진행
+  if (self.cast > 0) { if (interactive && self.castName !== '메테오') return null; return advanceCast(self, foe, ds, df) }
   return null
 }
 function ctxFor (self, foe, ds, df) {
@@ -942,8 +951,8 @@ function ctxFor (self, foe, ds, df) {
 }
 // 불굴 버스트 완충: 단일 피격이 최대HP 15%↑면 즉시 6% 회복(생존 시). df=피격자 파생. 딜 표기는 회복 전 값 사용
 function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + Math.round(df.maxhp * 0.04)) }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
-function execAttack (self, foe, ds, df) { const fb = foe.hp; const psh = foe.shield; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), diceAtk: self.diceAtk, diceDef: self.diceDef } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
+function execAttack (self, foe, ds, df) { const fb = foe.hp; const psh = foe.shield; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), diceAtk: self.diceAtk, diceDef: self.diceDef } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; if (ds.무기.방어 === '패링') { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 패링 태세: 피격 시 경감(defending) + 즉시 반격턴(게이지 리셋)
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
@@ -1041,7 +1050,7 @@ function advance (state) {
     A.gauge -= DT; B.gauge -= DT; state.t += DT
     if (A.gauge <= 0) {
       A.gauge = resetGauge(A, dA)
-      const forced = upkeep(A, B, dA, dB)
+      const forced = upkeep(A, B, dA, dB, true) // interactive: 플레이어 시전 턴엔 자동진행 대신 멈춰 진행/취소 선택
       if (A._tick && A._tick.length) { for (const t of A._tick) recEntry(state, 'me', t); A._tick = [] } // 출혈/덫 발동 로그 먼저
       if (A.hp <= 0) { koLog(state); state.winner = 'opp'; return 'end' } // 출혈로 사망 시 종료
       if (forced) { recEntry(state, 'me', forced); if (reviveCheck(B, dB)) reviveRec(state, 'opp'); if (B.hp <= 0) break; continue }
@@ -1060,6 +1069,14 @@ const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 �
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev
+  // 시전 중(메테오 제외): '시전 진행'(턴넘기기 그대로 시전 진행) / '시전 취소'(즉시 취소)
+  if (A.cast > 0 && A.castName !== '메테오') {
+    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; A.cast = 0; A.castCarry = 1; A.castBolt = null; A.castBoltChain = false; A.castName = null }
+    else ev = advanceCast(A, B, dA, dB)
+    recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
+    if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
+    return advance(state)
+  }
   if (A.stunned) ev = (choice === 'skip') ? execSkip(A) : execStunSkill(A, B, dA, dB) // 기절 중: 턴넘기기 or 기절스킬(충격파/재생)만
   else if (choice === 'skip') ev = execSkip(A)
   else if (choice === 'defend') ev = execDefend(A, dA)
@@ -1093,10 +1110,11 @@ function playerCanUse (state, slot) {
 function playerOptions (state) {
   const { A, B, meName, dA, dB } = state; const sks = SKILLS[meName]
   const stunned = A.stunned === true
+  const casting = A.cast > 0 && A.castName !== '메테오' // 시전 중(메테오 제외): 진행/취소만 노출
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
   const one = (slot) => { const nm = sks[slot].name; let u = playerCanUse(state, slot); if (stunned) u = (nm === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(sks[slot]); if (A.chainBolt > 0 && BOLT_CAST[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst } } // 볼트마법조합 중엔 콜드도 시전이 되므로 버튼 라벨 반영
-  return { canDefend: !stunned && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned }
+  return { canDefend: !stunned && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
 }
 
 // ── UI + 내레이션 ──
@@ -1229,6 +1247,7 @@ function narrateLine (ev, meName, oppName) {
       if (ev.bolt && ev.boltHits && ev.boltHits.length) { const combo = ev.boltNames && new Set(ev.boltNames).size > 1 ? '🔗**원소조합!** ' : ''; return `☄️ ${ae} **${A}**의 ${sp} 작렬! ${combo}${te} **${T}**${eun(T)} ✨${boltGroupStr(ev.boltHits, ev.boltNames, ev.dmg)} 총 **${ev.dmg}**의 피해를 입었다.` } // 시전형 볼트: 발당 분해 표시(파이어볼트(1·3·2·1·4))
       return `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}`
     }
+    case 'castcancel': return `✋ ${ae} **${A}**${iga(A)} ${ev.spell || '시전'}${eul(ev.spell || '시전')} 스스로 취소했다. (충전 일부 잔존)`
     case 'revive': return ev.rtype === 'undying'
       ? `🩸 ${ae} **${A}**${eun(A)} 불굴로 치명상을 버텨내며 일어섰다! (잠시 취약)`
       : `✨ ${ae} **${A}**${eun(A)} 죽음을 딛고 다시 일어섰다!`
@@ -1321,12 +1340,15 @@ function buildBattleEmbed (state) {
   const fr = frameAt(state, shown) // 공개 시점 프레임(체력·버프·디버프 실시간 동기화)
   const buffLine = (s) => s ? `🟢 ${s}\n` : '' // 버프 = 캐릭명 위
   const debLine = (s) => s ? `🔴 ${s}\n` : '' // 디버프 = 캐릭명 아래
+  const cdLine = (nm, f) => { const sks = SKILLS[nm]; if (!sks || !f.cd) return ''; return `⏳ ${sks.map((sk, i) => `${sk.name} ${f.cd[i] > 0 ? f.cd[i] : '✅'}`).join(' · ')}\n` } // 상대 스킬 쿨 실시간(정보대칭)
   const desc =
     // 상단: 상대 (버프 위 · 이름 · 디버프 아래 · HP)
     buffLine(fr.bBuf) +
     `${CHARS[oppName].emoji} **${oppName}**: ${titleTag(oppTitle)} **${oppNick}** · ${oppAI} AI\n` +
     debLine(fr.bDeb) +
-    `\`${hpBar(fr.bHp, state.maxB, 18)}\`\n\n` +
+    `\`${hpBar(fr.bHp, state.maxB, 18)}\`\n` +
+    cdLine(oppName, state.B) +
+    '\n' +
     // 중앙: 로그
     (recent.length ? recent.join('\n') + '\n\n' : '') +
     // 하단: 나 (버프 위 · 이름 · 디버프 아래 · HP — 버튼 바로 위)
@@ -1341,6 +1363,14 @@ function buildBattleEmbed (state) {
 function buildBattleRow (state) {
   const o = playerOptions(state); const mid = state.memberId
   const cid = (c) => JSON.stringify({ action: 'duel', op: 'act', c, memberId: mid })
+  // 시전 중(메테오 제외): 턴넘기기=시전 진행 + 시전 취소 두 버튼만
+  if (o.casting) {
+    const tot = o.castTotal || o.castLeft
+    return [new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(cid('skip')).setLabel(`🔮 시전 진행 · ${o.castName} ${tot - o.castLeft}/${tot}`).setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId(cid('castcancel')).setLabel('✋ 시전 취소').setStyle(ButtonStyle.Danger)
+    )]
+  }
   const skLbl = (s) => {
     if (!s.usable) return `${s.name} · ${s.reason}`
     const pre = s.inst === '즉시' ? '⚡' : '✨'

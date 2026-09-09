@@ -310,18 +310,16 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit) {
   if (!magic) {
     // 활(원거리): 근접 공격자가 나를 때리면 자기 다음 턴 지연(거리 비용, 공격자 턴 %)
     if (dD.무기.원거리페널티 && dA.무기.range === '근접') A.gauge += dA.턴 * dD.무기.원거리페널티
-    if (!guaranteed && !luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) return 0
-    if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
-    const baseHits = dA.무기.다단 || 1; const hits = baseHits + (psv(A, '연속타격') && rand() < 0.20 ? 1 : 0) // 쌍검 2연타 / 암살자 연속타격 패시브: 20% 확률 추가타(크리 안 터짐)
-    const atkD = dA.무기.주사위 ? d20adv(A.diceAdv > 0) : 0; if (atkD) A.diceAtk = atkD // 한탕 공격 d20(1=대실패 1딜 / 20=대성공 ×3 / 2~19=굴림/13), 2d20 버프면 어드밴티지
-    let block = 0; let wblk = 1
-    if (canDef && dD.무기.주사위) { // 한탕 방어 d20(검방 방패막기처럼 무기 방어기제) — 기본 회피/완전회피는 그대로, 여기에 추가
-      const dd = d20adv(D.diceAdv > 0); A.diceDef = dd
-      block = dd === 1 ? 2.0 : dd === 20 ? 0.001 : Math.max(1.0 - (dd - 2) * 0.06, 0.05); A.lastDef = '주사위방어'
-    } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = dD.무기막기경감; A.lastDef = '무기막기' }
+    const baseHits = dA.무기.다단 || 1; const hits = baseHits + (psv(A, '연속타격') && rand() < 0.20 ? 1 : 0) // 쌍검·너클 다단 / 암살자 연속타격 패시브: 20% 확률 추가타(크리 안 터짐)
+    const perMul = (dA.무기.물공배율 || 1) / baseHits // 히트별 방어: 총배율을 히트수로 분할(총딜 보존, 각 히트 개별 명중·회피·막기)
+    const atkD = dA.무기.주사위 ? d20adv(A.diceAdv > 0) : 0; if (atkD) A.diceAtk = atkD // 한탕 공격 d20(단발): 1=대실패 1딜 / 20=×3 / 2~19=굴림/13
     dmg = 0
     for (let i = 0; i < hits; i++) {
-      let h = dA.무기.주사위 ? (atkD === 1 ? 0 : dA.물공 * (atkD === 20 ? 3 : atkD / 13)) : dA.물공 * physSwing(dA) * (dA.무기.물공배율 || 1) // §13: 물공배율(기본공 대체)
+      if (!guaranteed && !luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) continue // 히트별 명중: 빗나간 히트 스킵
+      if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; continue } // 히트별 회피
+      let block = 0; let wblk = 1
+      if (canDef && dD.무기.주사위) { const dd = d20adv(D.diceAdv > 0); A.diceDef = dd; block = dd === 1 ? 2.0 : dd === 20 ? 0.001 : Math.max(1.0 - (dd - 2) * 0.06, 0.05); A.lastDef = '주사위방어' } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = dD.무기막기경감; A.lastDef = '무기막기' } // 히트별 막기
+      let h = dA.무기.주사위 ? (atkD === 1 ? 0 : dA.물공 * (atkD === 20 ? 3 : atkD / 13)) : dA.물공 * physSwing(dA) * perMul // §13: 물공배율/히트수(총딜 보존)
       h *= block || wblk
       h *= defMul(D.shield > 0 ? 0 : dD.물방, 물관통) // 물방 × (1-물관통)
       if (D.sunder > 0) h *= 1.15
@@ -459,11 +457,9 @@ function boltVolley (s, foe, ds, df, bn, mult) {
   const shots = psv(s, 'boltMaster') ? BOLT_MASTER_SHOTS : rollBoltCount() // 마스터=확정 / 없으면 1~5
   const 마관통 = s.tMPen ? 0.25 : 0; const mdef = defMul(df.마방, 마관통)
   const canDef = foe.stun === 0 && foe.cast === 0
-  if (canDef && rand() < df.리롤) { s.boltDodged = true; s.lastBolt = false; return 0 } // 볼트 전체 완전회피(spellDmg와 동일 성격)
-  let mBlock = 1
-  if (canDef && df.방패막기 && rand() < df.방패막기) { mBlock = (foe.blockUp > 0 ? 0.10 : 0.20); s.lastDef = '방패막기' } // 방패는 볼트도 막음
+  if (canDef && rand() < df.리롤) { s.boltDodged = true; s.lastBolt = false; return 0 } // 볼트 전체 완전회피(리롤=운빨, 볼리당 유지)
   const braw = []; let total = 0
-  for (let i = 0; i < shots; i++) { let b = boltShot(ds, s, bn, mdef, mult || 1) * mBlock; if (foe.sunder > 0) b *= 1.15; braw.push(b); total += b } // 발당 마방·graze 개별(boltShot 공유). mult=조합 부스트
+  for (let i = 0; i < shots; i++) { let mBlock = 1; if (canDef && df.방패막기 && rand() < df.방패막기) { mBlock = (foe.blockUp > 0 ? 0.10 : 0.20); s.lastDef = '방패막기' } let b = boltShot(ds, s, bn, mdef, mult || 1) * mBlock; if (foe.sunder > 0) b *= 1.15; braw.push(b); total += b } // 발당 방패막기·마방·graze 개별(히트별 방어)
   total = guts(total, foe, df) // 근성·현자균형
   if (df.마나경감) total *= (1 - df.마나경감)
   let fin = Math.max(Math.round(total), 1)

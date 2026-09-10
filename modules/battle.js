@@ -547,11 +547,11 @@ function holyDmg (A, D, dA, dD, base) {
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { D.hp -= 1; A.holyHit = 1; return 1 }
   let raw = base * (1 - (D.shield > 0 ? 0 : dD.마방)) * magicGraze() // 마방 적용(실드 있으면 실드가 흡수하므로 마방 스킵) + 편차
   raw = guts(raw, D, dD) // 근성·현자균형
-  const dmg = absorb(D, Math.max(Math.round(raw), 0)) // 실드 흡수
-  // 참회 스택(1~10): 2턴 내 신성 재명중 시 +1, 아니면 1부터. 스택% 만큼 최대체력 비례 고정딜(방어·실드 무시 관통)
-  D.repentStack = (D.repentWin > 0) ? Math.min((D.repentStack || 0) + 1, 10) : 1
-  D.repentWin = 2 // 윈도우 갱신(2턴 내 재명중 요구)
-  const bonus = Math.max(Math.round(dD.maxhp * D.repentStack * 0.007), 1) // 스택 1당 최대체력 0.7% (최대 10스택=7%)
+  let dmg = absorb(D, Math.max(Math.round(raw), 1)); if (dmg === 0) dmg = 1 // 실드 흡수 — 단 신성은 마법이라 실드/마방에도 최소 1 관통
+  // 참회 스택(1~10): 프리스트 본인의 버프(A 기준). 2턴 내 신성 재명중 시 +1, 아니면 1부터. 내 턴 기준이라 느려도 다음 턴에 유지·사용 가능
+  A.repentStack = (A.repentWin > 0) ? Math.min((A.repentStack || 0) + 1, 10) : 1
+  A.repentWin = 2 // 윈도우 갱신(내 2턴 내 재명중 요구)
+  const bonus = Math.max(Math.round(dD.maxhp * A.repentStack * 0.007), 1) // 스택 1당 상대 최대체력 0.7%(방어·실드 무시 관통) (최대 10스택=7%)
   D.hp -= (dmg + bonus)
   A.holyHit = dmg; A.repentHit = bonus
   return dmg + bonus
@@ -931,8 +931,8 @@ function mkFighter (d, name, ai) {
     // 프리스트: 신념(마공↑)·신성의무(평타 신성 스플래시)=패시브 / 참회=신성 디버프 / 성역·축복·가호=버프
     신념: (CHARS[name] && CHARS[name].신념) || false,
     신성의무: (CHARS[name] && CHARS[name].신성의무) || false,
-    repentStack: 0, // 참회 스택(1~10): 스택% 만큼 최대체력 비례 고정딜
-    repentWin: 0, // 참회 윈도우(2턴 내 재명중 못하면 스택 리셋)
+    repentStack: 0, // 참회 스택(1~10): 프리스트 본인 버프. 신성딜 시 스택×0.7%(상대 최대체력) 추가딜
+    repentWin: 0, // 참회 윈도우(내 2턴 내 재명중 못하면 스택 리셋)
     sanctuary: 0, // 성역: 받는 피해 모두 1 + 턴당 회복/신성딜
     blessTurns: 0, // 축복: 능력치 20%↑
     aegisTurns: 0, // 가호/다이아: 방어력 배율
@@ -1401,7 +1401,6 @@ function statusGroups (f) {
   if (f.weaponBroken > 0) deb.push(`🔨무기파괴${f.weaponBroken}`)
   if (f.trap > 0) deb.push(`🪤덫${f.trap}`)
   if (f.bleed > 0) deb.push(`🩸출혈${f.bleed}`)
-  if (f.repentStack > 0) deb.push(`🙏참회${f.repentStack}(${(f.repentStack * 0.7).toFixed(1)}%)`)
   // 버프(남은턴/스택 표기)
   if (f.rage > 0) buf.push(`🔥광폭${f.rage}`)
   if (f.powBuff > 0) buf.push(`💪공격강화${f.powBuff}`)
@@ -1419,6 +1418,7 @@ function statusGroups (f) {
   if (f.sanctuary > 0) buf.push(`🙏성역${f.sanctuary}`)
   if (f.blessTurns > 0) buf.push(`✨축복${f.blessTurns}`)
   if (f.aegisTurns > 0) buf.push(`🛡️가호${f.aegisTurns}`)
+  if (f.repentStack > 0) buf.push(`🙏참회 ${f.repentStack}스택(${(f.repentStack * 0.7).toFixed(1)}%)`) // 프리스트 본인 버프(다음 신성딜에 상대 최대체력 비례 추가딜)
   if (f.enchant) buf.push(`${ENCHANT_EMO[f.enchant] || '✨'}${f.enchant}인챈트${f.enchantTurns}`) // 스블 마검 인챈트(역장베기 강화)
   if (f.thornsBase > 0) buf.push('🌵가시') // 상시 패시브(턴 없음)
   if (f.shield > 0) buf.push(`🔷실드${f.shield}`)

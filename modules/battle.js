@@ -151,7 +151,7 @@ const pickTitle = () => {
 }
 
 // HP 공식(단일 소스): 기본 500 + 스탯 보정. derive·preview 공용
-function maxHp (c) { return Math.round((300 + c.체력 * 3 + c.힘 * 2) * (c.체력 === 100 ? 1.1 : 1) * TUNE.hpScale) } // §13: 물리스탯 기반, 기초300, 체력100시그 +10%
+function maxHp (c) { const w = WEAPONS[c.무기]; const mag = w && w.계열 === '마법'; return Math.round((1000 + c.체력 * 37 + c.힘 * 5) * (mag ? 0.55 : 1) * TUNE.hpScale) } // 기초1000+체력37+힘5. 마법무기=HP×0.55(실드로 버티는 캐스터). 기사~5000/암살~2500, 캐스터 총합~4000(실드60%)
 // 턴 파생 스탯 = 무기 tempoStat (기본 민첩). 스태프/완드/마도검='지능', 검오브/마도서='힘지능'.
 // 검오브·마도서는 힘+지능 몰빵 근접 하이브리드라 민첩-템포에선 구조적으로 느려짐 → max(힘,지능)로 파생
 function tempoVal (w, c) { return w.tempoStat === '지능' ? c.지능 : w.tempoStat === '힘지능' ? Math.max(c.힘, c.지능) : c.민첩 }
@@ -163,7 +163,7 @@ function derive (c) {
     물방: Math.min((c.힘 * 0.26 + c.체력 * 0.34) / 100 + (w.물방보너스 || 0) + (c.마도갑주 || 0) + (c.체력 === 100 ? 0.05 : 0), 0.80), // §13: 힘0.26+체력0.34 (광전40·기사50). 체력100시그 +5%p
     마방: Math.min((20 + step(c.지능, 3)) / 100 + (w.마방보너스 || 0), 0.85), // §13: 바닥 30→20
     maxhp: maxHp(c),
-    마나실드: (w.계열 === '마법') ? Math.round((c.지능 * 1.8 + c.체력 * 1.0) * (w.마나실드배율 || 1)) : 0, // §13: 마법무기만, (지능1.8+체력1.0)×무기배율. 방어구 경감 없음(실드가 풀딜 흡수) + 공격 딜25% 회복
+    마나실드: (w.계열 === '마법') ? Math.round((c.지능 * 16 + c.체력 * 7) * (w.마나실드배율 || 1)) : 0, // 마법무기만, (지능16+체력7)×무기배율. 방어구 경감 없음(실드가 풀딜 흡수) + 공격 딜25% 회복
     명중: (35 + c.솜씨 * 0.4) / 100, // §13: 35~75
     물회: (10 + c.민첩 * 0.15) / 100 * (w.회피배율 || 1) + (c.체력 === 100 ? 0.05 : 0), // §13: (10+민첩0.15)×무기회피배율. 체력100시그 +5%p
     마회: 0, // §13: 死스탯 삭제(0 유지 — 트레이트 참조 안전용)
@@ -1320,6 +1320,7 @@ function statusGroups (f) {
   if (f.autoSpell > 0) buf.push(`📜주문각인${f.autoSpell}`)
   if (f.healRegen > 0) buf.push(`💚재생${f.healRegen}`)
   if (f.instCast > 0) buf.push(`⚡즉시시전${f.instCast}`)
+  if (f.graze100 > 0) buf.push(`🎯완전이해${f.graze100}`)
   if (f.enchant) buf.push(`${ENCHANT_EMO[f.enchant] || '✨'}${f.enchant}인챈트${f.enchantTurns}`) // 스블 마검 인챈트(역장베기 강화)
   if (f.thornsBase > 0) buf.push('🌵가시') // 상시 패시브(턴 없음)
   if (f.shield > 0) buf.push(`🔷실드${f.shield}`)

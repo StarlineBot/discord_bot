@@ -31,7 +31,7 @@ const WEAPONS = {
   쌍검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.2, 크리배율: 1.8, 무기막기: 0.40, 회피배율: 1.1, 턴배율: 1.0, 다단: 2, 방어: '무기막기' },
   양검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 방어: '무기막기' },
   양둔: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 스턴확률: 0.2, 방어: '무기막기' },
-  양도끼: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 관통: 0.3, 방어: '무기막기' },
+  양도끼: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.3, 관통: 0.3, 방어: '무기막기' },
   활: { 계열: '물리', 평타: '물리', range: '원거리', hands: 2, 물공배율: 1.5, 크리배율: 2.0, 무기막기: 0.10, 회피배율: 1.3, 턴배율: 1.0, 원거리페널티: 0.5, 방어: '회피' },
   너클: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0, 회피배율: 1.5, 턴배율: 0.75, 다단: 2, 방어: '패링' }, // 무투가: 극회피·최속·다단, 무기막기 없음. 방어=패링(피격 시 경감+즉시 반격턴)
   스태프: { 계열: '마법', 평타: '마법', range: '원거리', hands: 2, tempoStat: '지능', 크리배율: 1.2, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.15, 평타계수: 0.55, castMod: -2, 원거리페널티: 0.35, 마나실드배율: 1.2, 방어: '마나실드' },
@@ -375,7 +375,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   if (D.instVuln > 0) dmg *= 1.5
   if (D.cast > 0) dmg *= 0.6 // 화염구 시전 중 받는뎀 40%↓
   if (A.tFury && A.hp < dA.maxhp * 0.5) dmg *= 1.22
-  if (psv(A, '격노') && dA.maxhp) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * 0.9) // 격노: 체력 낮을수록 공격력↑(2차곡선, 빈사 ~+90%). 회복하면 다시 감소(자기조절)
+  if (psv(A, '격노') && dA.maxhp) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * 0.6) // 격노: 체력 낮을수록 공격력↑(2차곡선, 빈사 ~+60%). 회복하면 다시 감소(자기조절)
   if (psv(A, '무기의달인') && !magic) dmg *= 1.1 // 무기의 달인: 무기(물리) 배율 소폭↑
   if (A.powBuff > 0) dmg *= A.powMul
   if (A.weaponBroken > 0) dmg *= (1 / 3) // 무기파괴: 기초딜 1/3
@@ -524,8 +524,8 @@ function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand
 // 시전 중 피격 → 5% 시전 중단(취소). 피해가 실제로 들어갔을 때만("정말 운 없을 때")
 function castHit (A, D, fin) { if (D.cast > 0 && fin > 0 && rand() < 0.05) { D.cast = 0; D.castCarry = 1; A.brokeCast = true } } // 취소돼도 충전 일부 남아 다음 시전 -1턴
 function applyCC (foe, field, dur) {
-  let d = foe.sigTank ? Math.max(dur - 1, 0) : dur
-  if (psv(foe, '광란') && foe.maxhp) { const e = Math.pow(1 - Math.max(foe.hp, 0) / foe.maxhp, 2); d = Math.round(d * (1 - e * 0.7)) } // 광란: 체력 낮을수록 제어 지속 감소(빈사=거의 무효)
+  const d = foe.sigTank ? Math.max(dur - 1, 0) : dur
+  // 광란 CC저항 제거: 광전도 CC를 온전히 받음(근접 카운터플레이 확보)
   if (foe.parry && foe.stun === 0 && foe.cast === 0) { (foe.pendCC = foe.pendCC || []).push([field, d]); return } // 패링 태세: CC 보류 — 동반 타격이 파리되면 폐기(흘림), 순수CC(딜 없음)면 스킬 종료 시 적용
   foe[field] = Math.max(foe[field], d)
 }
@@ -741,10 +741,10 @@ function dmgSkill (ci, spec) {
   })
 }
 // 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속
-function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 2.5 : 1 }
+function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 1.8 : 1 }
 // 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
-function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.03 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
-function skBloodRage (ci) { const spec = { name: '피의격노', tag: '버프', mult: 1.0, buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑' }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds), exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의격노' } }) }
+function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.02 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
+function skBloodRage (ci) { const spec = { name: '피의격노', tag: '버프', buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑ (딜 없음, 순수 버프)' }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds), exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; s.cd[ci] = spec.cd; s.note = '피의격노' } }) }
 function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 2, coef: '1턴 스턴 (자기 체력 5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, ctrlVal(x.foeTurn, 1, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
 // 마법의 완전이해(캐스터): 2턴간 마법 편차 무시(graze100=상시 풀댐) — 순수버프. 창고·세이지 공유(hoisted)
 function skFullUnderstanding (ci) { return { name: '마법의완전이해', tag: '버프', buff: 2, cd: 5, coef: '2턴 — 마법 대미지 항상 최대치', ready: (s) => s.cd[ci] === 0 && s.graze100 === 0 && s.autoSpell > 1, score: (s, f, ds, df, x) => buffVal(x.est * 0.7, s, ds), exec: (s, f, ds, df) => { s.graze100 = 2; s.cd[ci] = 5; s.note = '완전이해' } } } // 볼트 프록 중(오토스펠)일 때만 = 편차무시가 실효. score는 딜증분(~35%)만

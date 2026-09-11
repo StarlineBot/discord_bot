@@ -408,6 +408,7 @@ function perfectGuard (A, D, fin) {
 function physSwing (d) { const pFull = 0.5 + Math.floor(d.base.솜씨 / 10) * 0.04; return rand() < pFull ? 1 : (0.70 + rand() * 0.30) }
 // 마법 빗맞힘 구간(공유): 30% 풀댐 / 40% 80% / 30% 40% (평균 74%). 마법사 마법 + 볼트 공통
 function magicGraze (A) { if (A && A.graze100 > 0) return 1; const gr = rand(); return gr < 0.10 ? 1.2 : (gr < 0.70 ? 1.0 : 0.8) } // 마법의 완전이해(graze100): 편차 무시 상시 풀댐. A 미전달(시전마법)은 기존 랜덤 편차 유지
+function healVar (amount) { return Math.round(Math.max(amount, 0) * magicGraze()) } // 회복 변동(예측 방지): 정해진 수치를 ×0.8~1.2 랜덤. 방어회복·회복스킬 공용
 function d20adv (adv) { const a = 1 + Math.floor(rand() * 20); if (!adv) return a; return Math.max(a, 1 + Math.floor(rand() * 20)) } // 2d20 어드밴티지: adv면 2개 중 높은 값
 // 행운 저점보장(갬블러): 낮은 굴림(thr 이하)이면 행운 비례 확률로 lo~hi 범위 리롤. 행운100=100% 리롤 → 바닥값 회피
 function luckFloor (roll, thr, lo, hi, luck) { if (roll <= thr && rand() < (luck || 0) / 100) return lo + Math.floor(rand() * (hi - lo + 1)); return roll }
@@ -620,7 +621,7 @@ const SKILLS = {
     skBloodRage(1), // 피의격노: 체력15%↓ → 공격력 버프
     skClash(2), // 격돌: 1턴 스턴 + 체력5%↓
     // 해방: 긴 쿨(13) 자가 속박 해제 + 5% 회복. 기절 중 사용 가능(stunnable) — 근접 CC 카운터의 오프너 탈출용
-    { name: '해방', tag: '회복', cd: 15, stunnable: true, coef: '체력 15% 즉시회복 + 행동불능 즉시해제', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => (s.hp > 0 && s.hp < ds.maxhp * 0.35) ? x.est * 0.6 : 0, exec: (s, f, ds, df) => { const broke = s.stun > 0 || s.stunned; s.stun = 0; s.stunned = false; s.hp = Math.min(s.hp + Math.round(ds.maxhp * 0.15), ds.maxhp); s.cd[3] = 15; s.note = broke ? '해방(속박 해제)' : '해방' } }
+    { name: '해방', tag: '회복', cd: 15, stunnable: true, coef: '체력 15% 즉시회복 + 행동불능 즉시해제', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => (s.hp > 0 && s.hp < ds.maxhp * 0.35) ? x.est * 0.6 : 0, exec: (s, f, ds, df) => { const broke = s.stun > 0 || s.stunned; s.stun = 0; s.stunned = false; s.hp = Math.min(s.hp + healVar(ds.maxhp * 0.15), ds.maxhp); s.cd[3] = 15; s.note = broke ? '해방(속박 해제)' : '해방' } }
   ],
   기사: [
     // 방패밀쳐내기: 물리딜 + 상대 최대체력 10% 고정딜(방어무시) — HP스케일 관통 탱버스터
@@ -692,11 +693,11 @@ const SKILLS = {
   ],
   무도가: [
     // 육합권: 물공0.6 ×3연타(무기 다단 무시=hitsOverride1). 콤보 1단계 개시(연환전신장 조건)
-    { name: '육합권', tag: '공격', coef: '물공×1.3 ×3연타 · 콤보 개시', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 3.9 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 1.3); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.comboStep = 1; s.comboWin = 3; s.cd[0] = 3; s.note = '육합권' } },
+    { name: '육합권', tag: '공격', coef: '물공×1.3 ×3연타 · 콤보 개시', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 3.9 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 1.3); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; if (hits.some(h => h > 0)) { s.comboStep = 1; s.comboWin = 3 } s.cd[0] = 3; s.note = '육합권' } }, // 콤보는 명중해야 개시(전부 빗나가면 연계 없음)
     // 연환전신장: 콤보(육합권 후 2턴 내) 물공0.7×4 / 단독 물공0.2×4. 콤보 2단계
-    { name: '연환전신장', tag: '공격', coef: '콤보: 물공×1.3 ×4 / 단독: 물공×0.4 ×4', cd: 2, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const combo = s.comboStep >= 1 && s.comboWin > 0; return dmgVal(ds.물공 * (combo ? 5.2 : 1.6) * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const combo = s.comboStep >= 1 && s.comboWin > 0; const per = combo ? 1.3 : 0.4; const hits = []; for (let i = 0; i < 4; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * per); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; if (combo) { s.comboStep = 2; s.comboWin = 3 } s.cd[1] = 2; s.note = combo ? '연환전신장·연계' : '연환전신장' } },
+    { name: '연환전신장', tag: '공격', coef: '육합권 다음에 사용가능 · 물공×1.3 ×4연타', cd: 2, ready: (s, f, ds, df) => s.cd[1] === 0 && s.comboStep >= 1 && s.comboWin > 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5.2 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 4; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 1.3); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; const landed = hits.some(h => h > 0); if (landed) { s.comboStep = 2; s.comboWin = 3 } else { s.comboStep = 0; s.comboWin = 0 } s.cd[1] = 2; s.note = landed ? '연환전신장·연계' : '연환전신장·빗나감' } }, // 콤보 전용(육합권 후만 사용). 빗나가면 콤보 끊김
     // 맹룡과강: 풀콤보(육합권→연환 후 2턴 내) 물공×3.5 폭발 / 단독 물공×0.5. 콤보 마무리
-    { name: '맹룡과강', tag: '공격', coef: '풀콤보: 물공×9.0 / 단독: 물공×1.0', cd: 1, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => { const full = s.comboStep >= 2 && s.comboWin > 0; return dmgVal(ds.물공 * (full ? 9.0 : 1.0) * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const full = s.comboStep >= 2 && s.comboWin > 0; let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * (full ? 9.0 : 1.0)); d = absorb(f, d); f.hp -= d; if (full) { s.comboStep = 0; s.comboWin = 0 } s.cd[2] = 1; s.note = full ? '맹룡과강·작렬' : '맹룡과강' } },
+    { name: '맹룡과강', tag: '공격', coef: '연환전신장 다음에 사용가능 · 물공×9.0 피니셔', cd: 1, ready: (s, f, ds, df) => s.cd[2] === 0 && s.comboStep >= 2 && s.comboWin > 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 9.0 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 9.0); d = absorb(f, d); f.hp -= d; s.comboStep = 0; s.comboWin = 0; s.cd[2] = 1; s.note = '맹룡과강·작렬' } }, // 콤보 전용(연환 후만 사용). 풀콤보 피니셔
     // 발경: 적 물공/마공 중 높은쪽 ×1.2 충격딜(방어구·실드 무시). 고공격 상대 카운터
     { name: '발경', tag: '공격', coef: '물공×(1+상대 높은방어×4) · 충격(방어구·실드 무시, 탱커일수록↑)', cd: 5, dmgType: '충격', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 + Math.max(df.물방, df.마방) * 4), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const base = ds.물공 * (1 + Math.max(df.물방, df.마방) * 4); const d = impactDmg(s, f, ds, df, base); f.hp -= d; s.cd[3] = 5; s.note = '발경' } },
     // 아수라패황권: 자기 체력→1, 물공×10 충격(방어구·실드 무시, 능동방어 가능), 3턴 자체둔화. 올인 피니셔(시작쿨5)
@@ -704,7 +705,7 @@ const SKILLS = {
   ],
   프리스트: [
     // 힐: 즉시 체력 30% + 지능×1 회복(짧은 쿨 유지기). 회복불가 중엔 사용 불가
-    { name: '힐', tag: '회복', coef: '즉시 체력 15% + 지능×1 회복', cd: 6, ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.9 && s.healBlock === 0, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.55, exec: (s, f, ds, df) => { const heal = Math.round(ds.maxhp * 0.15 + ds.base.지능); s.hp = Math.min(ds.maxhp, s.hp + heal); s.cd[0] = 6; s.note = '힐' } },
+    { name: '힐', tag: '회복', coef: '즉시 체력 15% + 지능×1 회복', cd: 6, ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.9 && s.healBlock === 0, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.55, exec: (s, f, ds, df) => { const heal = healVar(ds.maxhp * 0.15 + ds.base.지능); s.hp = Math.min(ds.maxhp, s.hp + heal); s.cd[0] = 6; s.note = '힐' } },
     // 축복: 5턴 전 능력치 20%↑(공격·명중·회피·크리·속도·방어). 근사 구현(refreshDerived)
     { name: '축복', tag: '버프', coef: '5턴 — 능력치 30%↑(공격·명중·회피·크리·속도, 방어 제외)', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[1] === 0 && s.blessTurns === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.4 * 5, s, ds), exec: (s, f, ds, df) => { s.blessTurns = 5; refreshDerived(s, ds); s.cd[1] = 6; s.note = '축복 · 공격·속도 30%↑(5턴)' } },
     // 성역: 3턴 무적급(받는 피해 모두 1) + 턴당 체력3%회복 + 턴당 상대 신성딜(마공×0.7). 강력 → 10쿨·시작쿨5
@@ -736,7 +737,7 @@ const SKILLS = {
 function drawCard (c, s, f, ds, df) {
   if (c === '킹') { const d = trueDmg(s, f, df, df.maxhp * 0.20); f.hp -= d; return '👑킹·상대 체력20% 확정딜' }
   if (c === '퀸') { const d = trueDmg(s, f, df, df.maxhp * 0.10); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.10); return '👸퀸·상대 체력10%+자해10%' }
-  if (c === '하트') { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.10)); return '❤️하트·체력10% 회복' }
+  if (c === '하트') { s.hp = Math.min(ds.maxhp, s.hp + healVar(ds.maxhp * 0.10)); return '❤️하트·체력10% 회복' }
   if (c === '다이아') { s.aegisTurns = 2; s.aegisMul = 1.5; refreshDerived(s, ds); return '♦️다이아·방어 1.5배(2턴)' }
   if (c === '클로버') { s.luckBuff = 2; return '♣️클로버·행운폭주 크리·회피↑(2턴)' }
   if (c === '스페이드') { f.hp = Math.min(df.maxhp, f.hp + Math.round(df.maxhp * 0.05)); return '♠️스페이드·상대 체력5% 회복(꽝)' }
@@ -813,7 +814,7 @@ function dmgSkill (ci, spec) {
 // 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속
 function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 1.8 : 1 }
 // 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
-function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.02 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
+function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + healVar(ds.maxhp * 0.02 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
 function skBloodRage (ci) { const spec = { name: '피의격노', tag: '버프', buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑ (딜 없음, 순수 버프)' }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds), exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; s.cd[ci] = spec.cd; s.note = '피의격노' } }) }
 function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 3, coef: '1턴 스턴 (자기 체력 5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, ctrlVal(x.foeTurn, 1, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
 // 마법의 완전이해(캐스터): 2턴간 마법 편차 무시(graze100=상시 풀댐) — 순수버프. 창고·세이지 공유(hoisted)
@@ -881,6 +882,7 @@ function mkFighter (d, name, ai) {
     enchantTurns: 0, // 인챈트 지속(턴 카운트다운)
     paralyze: 0, // 마비(전격 인챈트): 지속 중 매 턴 30% 확률로 턴 상실
     defCombo: 0,
+    defHealCd: 0, // 방어 회복 쿨(2쿨 — 매 방어 무한회복 방지)
     defendedLast: false,
     shield: d.마나실드 || 0, // §13: 마법무기 착용 시 지능1.5+체력1 (공격 딜 25% 회복)
     vuln: 0,
@@ -981,6 +983,8 @@ function advanceCast (self, foe, ds, df) {
   return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal }
 }
 function upkeep (self, foe, ds, df, interactive) {
+  if (self.parry) applyCC(self, 'vuln', 1) // 패링 실패(피격 없이 태세 소진) → 취약 1턴(패링 남발 리스크)
+  if (self.defHealCd > 0) self.defHealCd-- // 방어 회복 2쿨
   self.pendCC = null; self.defending = false; self.parry = false; self.parryHit = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false; self._tick = []
   if (self.comboWin > 0) { self.comboWin--; if (self.comboWin === 0) self.comboStep = 0 } // 무도가 콤보 창 만료(2턴 지나면 리셋)
   if (self.enchantTurns > 0) { self.enchantTurns--; if (self.enchantTurns === 0) self.enchant = null } // 스블 인챈트 만료
@@ -1045,7 +1049,7 @@ function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= 
 function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
 function execAttack (self, foe, ds, df) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
-function execDefend (self, ds) { const before = self.hp; self.hp = Math.min(ds.maxhp, self.hp + ds.maxhp * 0.05 + ds.base.체력 / 2); self.defending = true; self.defCombo++; self.defendedLast = true; if (ds.무기.방어 === '패링') { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 패링 태세: 피격 시 경감(defending) + 즉시 반격턴(게이지 리셋)
+function execDefend (self, ds) { const before = self.hp; if (self.defHealCd === 0) { self.hp = Math.min(ds.maxhp, self.hp + healVar(ds.maxhp * 0.05 + ds.base.체력 / 2)); self.defHealCd = 2 } self.defending = true; self.defCombo++; self.defendedLast = true; if (ds.무기.방어 === '패링') { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 방어=경감(defending) + 회복(2쿨·변동). 패링: 피격 시 즉시 반격턴
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
 const BUFF_SKILLS = new Set(['인스턴트캐스팅', '볼트마법조합', '방패들기', '마법반사', '오토스펠'])
 // 마법 스킬: 침묵 시 사용 불가(물리 스킬은 침묵 무시). 원소·역장·시전·마법 유틸·마법 버프가 대상 (물리 타격·물리 버프·물리 덫은 제외)

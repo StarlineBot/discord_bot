@@ -214,8 +214,8 @@ const PASSIVE_FLAGS = { '완벽방어!': '완벽방어', 행운의여신: '행�
 // 패시브 활성 판정: 플래그 보유 && 잠기지 않음(디스펠). passiveLock=0이면 기존 동작과 동일.
 function psv (f, flag) { return f && f[flag] && !f.passiveLock }
 // 디스펠 대상 버프 필드(실드·시전은 자원/채널이라 제외). clearBuffs=즉시 제거, 개수 반환.
-const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100']
-function clearBuffs (f) { let n = 0; for (const k of BUFF_FIELDS) { if (f[k] > 0) { f[k] = 0; n++ } } f.powMul = 1; return n }
+const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100', 'blessTurns', 'aegisTurns', 'sanctuary', 'frenzy', 'haste']
+function clearBuffs (f, df) { let n = 0; const hadStat = f.blessTurns > 0 || f.aegisTurns > 0; for (const k of BUFF_FIELDS) { if (f[k] > 0) { f[k] = 0; n++ } } f.powMul = 1; f.frenzyWin = 0; if (hadStat) { f.aegisMul = 1; if (df) refreshDerived(f, df) } return n } // 축복·가호(스탯버프) 제거 시 파생스탯 원복(refreshDerived), 성역·광란가속(윈도우 포함)도 즉시 해제
 function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   const magic = dA.마공 > dA.물공
   const ls = { used: false }; const lsD = { used: false }
@@ -719,7 +719,7 @@ const SKILLS = {
   세이지: [
     { name: '오토스펠', tag: '버프', coef: '5턴 — 평타마다 볼트 자동발동 + 턴가속', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => buffVal(x.est * 1.6, s, ds), exec: (s, f, ds, df) => { s.autoSpell = 5; s.cd[0] = 6; s.note = '주문각인' } }, // 순수버프(공격 제거). 지속5=마법의완전이해(autoSpell>1) 낄 창 확보
     // 디스펠: 상대 패시브 N턴 봉인 + 현재 버프 즉시 전부 제거(딜 없음). 쿨=봉인+2. 안티버프/안티패시브 현자 도구
-    { name: '디스펠', tag: '디버프', coef: '상대 패시브 3턴 봉인 + 버프 즉시 제거 (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const buffs = BUFF_FIELDS.filter(k => f[k] > 0).length; const bigPsv = f.passiveLock === 0 && (f.불굴 || f.완벽방어 || f.행운의여신); if (buffs === 0 && !bigPsv) return 0; return x.est * 0.4 + buffs * 45 + (bigPsv ? 30 : 0) }, exec: (s, f, ds, df) => { const L = 3; const cleared = clearBuffs(f); f.passiveLock = L; s.cd[1] = L + 2; s.note = '디스펠' + (cleared ? `(버프${cleared} 제거)` : '') } },
+    { name: '디스펠', tag: '디버프', coef: '상대 패시브 3턴 봉인 + 버프 즉시 제거 (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const buffs = BUFF_FIELDS.filter(k => f[k] > 0).length; const bigPsv = f.passiveLock === 0 && (f.불굴 || f.완벽방어 || f.행운의여신); if (buffs === 0 && !bigPsv) return 0; return x.est * 0.4 + buffs * 45 + (bigPsv ? 30 : 0) }, exec: (s, f, ds, df) => { const L = 3; const cleared = clearBuffs(f, df); f.passiveLock = L; s.cd[1] = L + 2; s.note = '디스펠' + (cleared ? `(버프${cleared} 제거)` : '') } },
     // 마법의 완전이해: 2턴간 볼트·마법 편차 무시(상시 풀댐) — 세이지 볼트 딜 극대화 윈도우
     skFullUnderstanding(2)
   ],
@@ -819,7 +819,7 @@ function dmgSkill (ci, spec) {
 // 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속
 function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 1.8 : 1 }
 // 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
-function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + healVar(ds.maxhp * 0.02 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
+function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭) + 광란가속 스택(유지 시 턴 가속, 최대 5스택 −15%)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + healVar(ds.maxhp * 0.02 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.frenzy = (s.frenzyWin > 0) ? Math.min((s.frenzy || 0) + 1, 5) : 1; s.frenzyWin = 2; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
 function skBloodRage (ci) { const spec = { name: '피의격노', tag: '버프', buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑ (딜 없음, 순수 버프)' }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds), exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; s.cd[ci] = spec.cd; s.note = '피의격노' } }) }
 function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 3, coef: '2턴 스턴 (자기 체력 5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
 // 마법의 완전이해(캐스터): 2턴간 마법 편차 무시(graze100=상시 풀댐) — 순수버프. 창고·세이지 공유(hoisted)
@@ -944,6 +944,8 @@ function mkFighter (d, name, ai) {
     blessTurns: 0, // 축복: 능력치 20%↑
     aegisTurns: 0, // 가호/다이아: 방어력 배율
     aegisMul: 1,
+    frenzy: 0, // 광란가속 스택(1~5): 광전사 본인 버프(BUFF_FIELDS 등록 → 디스펠 가능). 피의갈증 유지 시 턴시간 스택당 3%↓
+    frenzyWin: 0, // 광란가속 윈도우(피의갈증 한 턴이라도 거르면 스택 리셋)
     derBase: null, // 능력치 버프 base 스냅샷(refreshDerived)
 
     boltMaster: (CHARS[name] && CHARS[name].boltMaster) || false, // 볼트마법사 패시브: 볼트마법 사용 시 원소당 확정 5발
@@ -979,7 +981,7 @@ function reviveCheck (f, d) {
 }
 
 // ── 스텝형 전투 엔진 (자동 runBattle + 인터랙티브 공용) ──
-function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 0.3) : 1; return Math.max(d.턴 * (f.autoSpell > 0 ? 0.85 : 1) * (f.haste > 0 ? 0.8 : 1) * fury - (f.rage > 0 ? 2 : 0), 2) + (f.slow > 0 ? f.slowSec : 0) } // 오토스펠: 턴시간 15%↓ / 마나대시 haste: 20%↓ / 광란: 저체력일수록 턴 가속(빈사 ~30%↑)
+function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 0.3) : 1; const frenzy = f.frenzy > 0 ? (1 - f.frenzy * 0.03) : 1; return Math.max(d.턴 * (f.autoSpell > 0 ? 0.85 : 1) * (f.haste > 0 ? 0.8 : 1) * fury * frenzy - (f.rage > 0 ? 2 : 0), 2) + (f.slow > 0 ? f.slowSec : 0) } // 오토스펠: 턴시간 15%↓ / 마나대시 haste: 20%↓ / 광란: 저체력일수록 가속 / 광란가속: 피의갈증 스택당 3%↓(최대 −15%) · 하한 2초
 // 턴 시작 처리(쿨/상태 감소, 기절·시전). 턴이 소모되는 강제 이벤트면 그 이벤트, 아니면 null
 // 시전 1틱 진행: 카운트다운 후 착탄. upkeep 자동진행 + 플레이어 '시전 진행'(턴넘기기) 공용
 function advanceCast (self, foe, ds, df) {
@@ -1007,6 +1009,7 @@ function upkeep (self, foe, ds, df, interactive) {
   // 버프/디버프 지속은 기절·시전 중에도 흐른다 (기절 중 버프 동결 버그 A2 수정)
   if (self.instVuln > 0) self.instVuln--
   if (self.repentWin > 0) { self.repentWin--; if (self.repentWin === 0) self.repentStack = 0 } // 참회 윈도우 만료 → 스택 리셋(2턴 내 재명중 실패)
+  if (self.frenzyWin > 0) { self.frenzyWin--; if (self.frenzyWin === 0) self.frenzy = 0 } // 광란가속 윈도우 만료 → 스택 리셋(피의갈증 걸렀음)
   // 능력치 버프(축복/가호/다이아) 지속·만료 → 만료 턴에 refreshDerived로 base 복원
   if (self.blessTurns > 0 || self.aegisTurns > 0) { if (self.blessTurns > 0) self.blessTurns--; if (self.aegisTurns > 0) self.aegisTurns--; refreshDerived(self, ds) }
   // 성역: 턴당 체력3% 회복 + 상대에게 신성딜(마공×0.7). 지속 감소
@@ -1428,6 +1431,7 @@ function statusGroups (f) {
   if (f.blessTurns > 0) buf.push(`✨축복${f.blessTurns}`)
   if (f.aegisTurns > 0) buf.push(`🛡️가호${f.aegisTurns}`)
   if (f.repentStack > 0) buf.push(`🙏참회 ${f.repentStack}스택(${(f.repentStack * 0.7).toFixed(1)}%)`) // 프리스트 본인 버프(다음 신성딜에 상대 최대체력 비례 추가딜)
+  if (f.frenzy > 0) buf.push(`🩸광란가속 ${f.frenzy}스택(턴 −${f.frenzy * 3}%)`) // 광전사 본인 버프(피의갈증 유지 시 턴 가속, 디스펠 가능)
   if (f.enchant) buf.push(`${ENCHANT_EMO[f.enchant] || '✨'}${f.enchant}인챈트${f.enchantTurns}`) // 스블 마검 인챈트(역장베기 강화)
   if (f.thornsBase > 0) buf.push('🌵가시') // 상시 패시브(턴 없음)
   if (f.shield > 0) buf.push(`🔷실드${f.shield}`)

@@ -605,6 +605,14 @@ const DEBUFFS = [
   { name: '행운봉인', apply: f => applyCC(f, 'luckLock', 3) },
   { name: '회복불가', apply: f => applyCC(f, 'healBlock', 3) }
 ]
+// 무도가 모핑 콤보: 슬롯 1개가 comboStep에 따라 육합권→연환전신장→맹룡과강으로 변신. 적중마다 다음 단계. AI·플레이어 모두 순서 강제(단독 사용 불가)
+function mudoCombo () {
+  const s0 = { name: '육합권(연계스킬)', lvl: 0, exec: (s, f, ds, df) => { const hits = []; let hit = false; for (let i = 0; i < 3; i++) { const raw = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 1.3); if (raw > 0) hit = true; const d = absorb(f, raw); f.hp -= d; hits.push(d) } s.multiHits = hits; if (hit) { s.comboStep = 1; s.comboWin = 3 } s.cd[0] = 0; s.note = '육합권' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 3.9 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) } // 명중 판정=원타격(실드 흡수도 명중 인정)
+  const s1 = { name: '연환전신장', lvl: 1, exec: (s, f, ds, df) => { const hits = []; let hit = false; for (let i = 0; i < 4; i++) { const raw = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 1.3); if (raw > 0) hit = true; const d = absorb(f, raw); f.hp -= d; hits.push(d) } s.multiHits = hits; if (hit) { s.comboStep = 2; s.comboWin = 3 } else { s.comboStep = 0; s.comboWin = 0 } s.cd[0] = 0; s.note = hit ? '연환전신장·연계' : '연환전신장·빗나감' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5.2 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }
+  const s2 = { name: '맹룡과강', lvl: 2, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 9.0); d = absorb(f, d); f.hp -= d; s.comboStep = 0; s.comboWin = 0; s.cd[0] = 3; s.note = '맹룡과강·작렬' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 9.0 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }
+  const stage = (s) => (s.comboStep >= 2 && s.comboWin > 0) ? s2 : (s.comboStep >= 1 && s.comboWin > 0) ? s1 : s0
+  return { name: '연환격', tag: '공격', combo: true, coef: '연계: 육합권(×1.3 3연타)→연환전신장(×1.3 4연타)→맹룡과강(×9.0 피니셔). 적중마다 다음 단계, 맹룡 후 3쿨', stageName: (s) => stage(s).name, stageLevel: (s) => stage(s).lvl, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => { const base = stage(s).score(s, f, ds, df, x); return (s.comboStep >= 1 && s.comboWin > 0) ? base * 1.7 : base }, exec: (s, f, ds, df) => stage(s).exec(s, f, ds, df) } // 콤보 진행 중엔 완성 우선(모멘텀 — 발경 등에 안 끊기게)
+}
 const SKILLS = {
   검투사: [
     // 방어파괴: 딜 + 상대 2턴 받는뎀↑ + 상대 최대체력 6% 고정딜(HP스케일 관통)
@@ -692,16 +700,11 @@ const SKILLS = {
     { name: '마법반사', tag: '버프', coef: '다음 마법 1회 반사 (검방=100% / 그 외=70%)', buff: 1, cd: 4, ready: (s, f, ds, df) => s.cd[4] === 0 && s.magReflect === 0, score: (s, f, ds, df, x) => { const mg = magicShare(f.name); return mg > 0.3 ? df.마공 * 1.2 * mg + 40 : 0 }, exec: (s, f, ds, df) => { s.magReflect = 1; s.cd[4] = 4; s.note = '마법반사 태세' } }
   ],
   무도가: [
-    // 육합권: 물공0.6 ×3연타(무기 다단 무시=hitsOverride1). 콤보 1단계 개시(연환전신장 조건)
-    { name: '육합권', tag: '공격', coef: '물공×1.3 ×3연타 · 콤보 개시', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 3.9 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 1.3); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; if (hits.some(h => h > 0)) { s.comboStep = 1; s.comboWin = 3 } s.cd[0] = 3; s.note = '육합권' } }, // 콤보는 명중해야 개시(전부 빗나가면 연계 없음)
-    // 연환전신장: 콤보(육합권 후 2턴 내) 물공0.7×4 / 단독 물공0.2×4. 콤보 2단계
-    { name: '연환전신장', tag: '공격', coef: '육합권 다음에 사용가능 · 물공×1.3 ×4연타', cd: 2, ready: (s, f, ds, df) => s.cd[1] === 0 && s.comboStep >= 1 && s.comboWin > 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5.2 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 4; i++) { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 1.3); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; const landed = hits.some(h => h > 0); if (landed) { s.comboStep = 2; s.comboWin = 3 } else { s.comboStep = 0; s.comboWin = 0 } s.cd[1] = 2; s.note = landed ? '연환전신장·연계' : '연환전신장·빗나감' } }, // 콤보 전용(육합권 후만 사용). 빗나가면 콤보 끊김
-    // 맹룡과강: 풀콤보(육합권→연환 후 2턴 내) 물공×3.5 폭발 / 단독 물공×0.5. 콤보 마무리
-    { name: '맹룡과강', tag: '공격', coef: '연환전신장 다음에 사용가능 · 물공×9.0 피니셔', cd: 1, ready: (s, f, ds, df) => s.cd[2] === 0 && s.comboStep >= 2 && s.comboWin > 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 9.0 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending, false, false, 1) * 9.0); d = absorb(f, d); f.hp -= d; s.comboStep = 0; s.comboWin = 0; s.cd[2] = 1; s.note = '맹룡과강·작렬' } }, // 콤보 전용(연환 후만 사용). 풀콤보 피니셔
-    // 발경: 적 물공/마공 중 높은쪽 ×1.2 충격딜(방어구·실드 무시). 고공격 상대 카운터
-    { name: '발경', tag: '공격', coef: '물공×(1+상대 높은방어×4) · 충격(방어구·실드 무시, 탱커일수록↑)', cd: 5, dmgType: '충격', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 + Math.max(df.물방, df.마방) * 4), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const base = ds.물공 * (1 + Math.max(df.물방, df.마방) * 4); const d = impactDmg(s, f, ds, df, base); f.hp -= d; s.cd[3] = 5; s.note = '발경' } },
-    // 아수라패황권: 자기 체력→1, 물공×10 충격(방어구·실드 무시, 능동방어 가능), 3턴 자체둔화. 올인 피니셔(시작쿨5)
-    { name: '아수라패황권', tag: '공격', coef: '상대 최대HP×0.8 충격 · 자기 체력→1 · 3턴 자체둔화 (올인 피니셔, 회피 시 사망각)', cd: 14, dmgType: '충격', ready: (s, f, ds, df) => s.cd[4] === 0 && s.hp > 1, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 }, exec: (s, f, ds, df) => { s.hp = 1; const d = impactDmg(s, f, ds, df, df.maxhp * 0.8); f.hp -= d; applyCC(s, 'slow', 3); s.slowSec = Math.max(s.slowSec, Math.round(ds.턴 * 0.5 * 10) / 10); s.cd[4] = 14; s.note = '아수라패황권!' } }
+    mudoCombo(), // 슬롯0(cd0): 모핑 콤보 — 육합권→연환전신장→맹룡과강(적중마다 변신). 연환/맹룡은 스킬창에서 제외(순서 강제)
+    // 발경(슬롯1/cd1): 적 물공/마공 중 높은쪽 ×1.2 충격딜(방어구·실드 무시). 고공격 상대 카운터
+    { name: '발경', tag: '공격', coef: '물공×(1+상대 높은방어×4) · 충격(방어구·실드 무시, 탱커일수록↑)', cd: 5, dmgType: '충격', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 + Math.max(df.물방, df.마방) * 4), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const base = ds.물공 * (1 + Math.max(df.물방, df.마방) * 4); const d = impactDmg(s, f, ds, df, base); f.hp -= d; s.cd[1] = 5; s.note = '발경' } },
+    // 아수라패황권(슬롯2/cd2): 자기 체력→1, 상대 최대HP×0.8 충격, 3턴 자체둔화. 올인 피니셔(시작쿨7)
+    { name: '아수라패황권', tag: '공격', coef: '상대 최대HP×0.8 충격 · 자기 체력→1 · 3턴 자체둔화 (올인 피니셔, 회피 시 사망각)', cd: 14, dmgType: '충격', ready: (s, f, ds, df) => s.cd[2] === 0 && s.hp > 1, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 }, exec: (s, f, ds, df) => { s.hp = 1; const d = impactDmg(s, f, ds, df, df.maxhp * 0.8); f.hp -= d; applyCC(s, 'slow', 3); s.slowSec = Math.max(s.slowSec, Math.round(ds.턴 * 0.5 * 10) / 10); s.cd[2] = 14; s.note = '아수라패황권!' } }
   ],
   프리스트: [
     // 힐: 즉시 체력 30% + 지능×1 회복(짧은 쿨 유지기). 회복불가 중엔 사용 불가
@@ -1207,7 +1210,7 @@ function playerOptions (state) {
   const casting = A.cast > 0 && A.castName !== '메테오' // 시전 중(메테오 제외): 진행/취소만 노출
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
-  const one = (slot) => { const nm = sks[slot].name; let u = playerCanUse(state, slot); if (stunned) u = (nm === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(sks[slot]); if (A.chainBolt > 0 && BOLT_CAST[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst } } // 볼트마법조합 중엔 콜드도 시전이 되므로 버튼 라벨 반영
+  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_CAST[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1 } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
   return { canDefend: !stunned && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
 }
 
@@ -1487,10 +1490,8 @@ function buildBattleRow (state) {
     new ButtonBuilder().setCustomId(cid('skip')).setLabel('⏭️ 턴넘기기').setStyle(ButtonStyle.Secondary)
   ]
   const skillBtns = []
-  // 무도가 콤보 강조: 육합권 후 연환전신장(idx1), 연환 후 맹룡과강(idx2)을 초록+🔥로 표시(창 유효 시)
-  const A = state.A
-  const comboNext = (state.meName === '무도가' && A && A.comboWin > 0) ? (A.comboStep === 1 ? 1 : A.comboStep === 2 ? 2 : -1) : -1
-  o.skills.forEach((sk, i) => { const isCombo = i === comboNext && sk.usable; skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel((isCombo ? '🔥' : '') + skLbl(sk)).setStyle(isCombo ? ButtonStyle.Success : ButtonStyle.Primary).setDisabled(!sk.usable)) })
+  // 모핑 콤보 색상: 육합권=파랑(기본) → 연환전신장=녹색 → 맹룡과강=빨강(점차 강해짐). 콤보 진행(lvl≥1) 시 🔥
+  o.skills.forEach((sk, i) => { const lvl = sk.comboLvl; const style = lvl === 2 ? ButtonStyle.Danger : lvl === 1 ? ButtonStyle.Success : ButtonStyle.Primary; const pre = (lvl >= 1) ? '🔥' : ''; skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(pre + skLbl(sk)).setStyle(style).setDisabled(!sk.usable)) })
   o.passives.forEach((p, i) => { if (skillBtns.length < 5) skillBtns.push(new ButtonBuilder().setCustomId(cid('passive' + i)).setLabel(`🔒 ${p.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true)) })
   const rows = [new ActionRowBuilder().addComponents(actionBtns)]
   if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5)))

@@ -287,7 +287,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     let d = dA.물공 + dA.마공; 고정 = 0
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { d *= dD.무기막기경감; A.lastDef = '무기막기' }
-    d *= (1 - Math.max(dD.물방 * (dA.sigPen ? 0.7 : 1), dD.마방))
+    d *= (1 - Math.max(crushArmor(D, dD.물방) * (dA.sigPen ? 0.7 : 1), crushArmor(D, dD.마방)))
     if (D.sunder > 0) d *= 1.15
     if (rand() < 0.30) { d *= 0.70; A.grazed = true }
     let crit = luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
@@ -412,6 +412,7 @@ function magicGraze (A) { if (A && A.graze100 > 0) return 1; const gr = rand(); 
 function healVar (amount) { return Math.round(Math.max(amount, 0) * magicGraze()) } // 회복 변동(예측 방지): 정해진 수치를 ×0.8~1.2 랜덤. 방어회복·회복스킬 공용
 function hcut (s, amt) { return s.healCut > 0 ? Math.round(Math.max(amt, 0) * 0.2) : amt } // 과다출혈(절개도적): 회복량 80%↓(20%만 적용). 모든 자힐·흡혈 통과
 function woundDodge (D, A) { return D.상처전문가 ? ((A.cutStk || 0) + (A.lacStk || 0)) * 0.02 : 0 } // 상처전문가: 상대(A)에 걸린 출혈 스택당 자신(D) 회피+2%(최대 5+5=+20%)
+function crushArmor (D, armor) { return Math.max(armor - (D.crush || 0) * 0.05, 0) } // 분쇄(검투사): 스택당 물방·마방 -5%p(최대 5스택 -25%p)
 function gashHit (D) { if (D.cutStk > 0) { D.cutStk = Math.min(D.cutStk + 1, 5); D.cutDur = 2 } if (D.lacStk > 0) { D.lacStk = Math.min(D.lacStk + 1, 5); D.lacDur = 2 } } // 절개도적 타격 시: 이미 활성인 출혈 스택 각 +1(최대5)·지속2 갱신. 평타·타격스킬 공통
 function gashAtkBonus (A, D, dD) { if (!A.상처전문가) return 0; let b = 0; if (D.cutStk > 0 && D.cutStk < 5) b += dD.maxhp * 0.015 * 2; if (D.lacStk > 0 && D.lacStk < 5) b += dD.maxhp * (D.cutStk > 0 ? 0.025 : 0.015) * 2; return b } // 절개도적 AI: 활성 출혈<5면 평타로 +1 쌓는 가치를 평타 점수에 가산
 function d20adv (adv) { const a = 1 + Math.floor(rand() * 20); if (!adv) return a; return Math.max(a, 1 + Math.floor(rand() * 20)) } // 2d20 어드밴티지: adv면 2개 중 높은 값
@@ -543,7 +544,7 @@ function trueDmg (A, D, dD, base) {
   return absorb(D, Math.max(Math.round(base), 1)) // 실드 흡수, 방어구·능동방어는 무시
 }
 // 시전 마법(화염구/인캐) 피해: 일반 마법과 동일 — 천운 완전회피 / 마방 감소 / 빗맞힘 / 근성
-function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = (foe.blockUp > 0 ? 0.10 : 0.20); foe.spellBlocked = true }; if (df.무기.주사위 && foe.stun === 0 && foe.cast === 0) blk *= diceBlockMul(atk, foe); let dmg = Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : df.마방)) * magicGraze(), foe, df)), 0); if (atk && foe.magReflect > 0 && dmg > 0) { const rr = (df.무기.방어 === '방패') ? 1.0 : 0.7; atk.hp -= Math.max(Math.round(dmg * rr), 1); atk.lastRefl = rr >= 1 ? 'full' : 'part'; dmg = Math.round(dmg * (1 - rr)); foe.magReflect = 0 }; return dmg } // §13: 실드 있으면 마방 경감 스킵. 마법반사: 시전마법도 반사(검방100%/그외70%) — 시전·즉시 모두 spellDmg 경유라 통일
+function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = (foe.blockUp > 0 ? 0.10 : 0.20); foe.spellBlocked = true }; if (df.무기.주사위 && foe.stun === 0 && foe.cast === 0) blk *= diceBlockMul(atk, foe); let dmg = Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : crushArmor(foe, df.마방))) * magicGraze(), foe, df)), 0); if (atk && foe.magReflect > 0 && dmg > 0) { const rr = (df.무기.방어 === '방패') ? 1.0 : 0.7; atk.hp -= Math.max(Math.round(dmg * rr), 1); atk.lastRefl = rr >= 1 ? 'full' : 'part'; dmg = Math.round(dmg * (1 - rr)); foe.magReflect = 0 }; return dmg } // §13: 실드 있으면 마방 경감 스킵. 마법반사: 시전마법도 반사(검방100%/그외70%) — 시전·즉시 모두 spellDmg 경유라 통일
 // 시전 중 피격 → 5% 시전 중단(취소). 피해가 실제로 들어갔을 때만("정말 운 없을 때")
 function castHit (A, D, fin) { if (D.cast > 0 && fin > 0 && rand() < 0.05) { D.cast = 0; D.castCarry = 1; A.brokeCast = true } } // 취소돼도 충전 일부 남아 다음 시전 -1턴
 // 신성(holy) 피해: 마방 적용 마법피해 + 참회 시너지. 참회 걸린 상대에 신성딜 → 최대체력5% 고정딜(관통) 추가. 매 신성타격마다 참회(1턴) 생성·갱신 → 신성 연타 자체시너지
@@ -551,7 +552,7 @@ function holyDmg (A, D, dA, dD, base) {
   A.holyHit = 0; A.repentHit = 0 // 신성/참회 분리 표기용(내레이션)
   if (D.sanctuary > 0) { D.hp -= 1; A.holyHit = 1; return 1 } // 상대 성역: 1
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { D.hp -= 1; A.holyHit = 1; return 1 }
-  let raw = base * (1 - (D.shield > 0 ? 0 : dD.마방)) * magicGraze() // 마방 적용(실드 있으면 실드가 흡수하므로 마방 스킵) + 편차
+  let raw = base * (1 - (D.shield > 0 ? 0 : crushArmor(D, dD.마방))) * magicGraze() // 마방 적용(실드 있으면 실드가 흡수하므로 마방 스킵) + 편차
   raw = guts(raw, D, dD) // 근성·현자균형
   let dmg = absorb(D, Math.max(Math.round(raw), 1)); if (dmg === 0) dmg = 1 // 실드 흡수 — 단 신성은 마법이라 실드/마방에도 최소 1 관통
   // 참회 스택(1~10): 프리스트 본인의 버프(A 기준). 2턴 내 신성 재명중 시 +1, 아니면 1부터. 내 턴 기준이라 느려도 다음 턴에 유지·사용 가능
@@ -620,13 +621,13 @@ function mudoCombo () {
 }
 const SKILLS = {
   검투사: [
-    // 방어파괴: 딜 + 상대 2턴 받는뎀↑ + 상대 최대체력 6% 고정딜(HP스케일 관통)
-    { name: '방어파괴', tag: '공격', coef: '타격+힘/2+상대HP9% · 2턴 받는뎀↑', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(x.est + ds.힘절반 + df.maxhp * 0.09, 1, ctrlVal(x.foeTurn, 2, 'sunder'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { f.sunder = 2; let d = attack(s, f, ds, df, f.defending) + ds.힘절반 + Math.round(df.maxhp * 0.09); d = absorb(f, d); f.hp -= d; s.cd[0] = 3 } },
-    { name: '돌진', tag: '제어', coef: '돌진 타격 + 2턴 스턴 (자기 체력 8%↓)', cd: 6, ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.돌진딜 * (1 - df.물방), 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.08); s.cd[1] = 6; s.note = '기절' } },
+    // 분쇄: 1쿨 타격 + 상대 물방·마방 감소 스택(스택당 -5%p, 최대5, 지속2). 스팸으로 방어를 깎아 후속딜 증폭
+    { name: '분쇄', tag: '공격', coef: '타격×1.3 + 상대HP2% + 상대 물방·마방 -5%p 스택(최대5·지속2)', cd: 1, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.3 + df.maxhp * 0.02, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const hit = attack(s, f, ds, df, f.defending); if (hit > 0) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } let raw = Math.round(hit * 1.3); if (hit > 0) raw += Math.round(df.maxhp * 0.02); const d = absorb(f, raw); f.hp -= d; s.cd[0] = 1; s.note = hit > 0 ? '분쇄' : '분쇄·빗나감' } },
+    { name: '돌진', tag: '제어', coef: '돌진 타격 + 힘/2 + 상대HP6% + 2턴 스턴 (자기 체력 4%↓)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.돌진딜 * (1 - df.물방) + ds.힘절반 + df.maxhp * 0.06, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1) + ds.힘절반 + Math.round(df.maxhp * 0.06); d = absorb(f, d); f.hp -= d; applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.04); s.cd[1] = 5; s.note = '기절' } },
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
     { name: '방해', tag: '제어', coef: '시전 중이면 차단 / 아니면 1턴 스턴', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
-    { name: '발차기', tag: '제어', coef: '1턴 스턴 (딜 없음)', cd: 4, ready: (s, f, ds, df) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 1, 'stun'), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); s.cd[3] = 4; s.note = '기절' } }
+    { name: '발차기', tag: '제어', coef: '1턴 스턴 (딜 없음)', cd: 3, ready: (s, f, ds, df) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 1, 'stun'), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); s.cd[3] = 3; s.note = '기절' } }
   ],
   광전사: [
     // 개편: 피 태우는 하이리스크(불굴 없음). 저체력→광란(회복↑·속도↑·제어면역) + 격노(피격 시 공격력↑)
@@ -908,6 +909,8 @@ function mkFighter (d, name, ai) {
     cd: skillStartCd(name),
     rage: 0,
     sunder: 0,
+    crush: 0,
+    crushDur: 0, // 분쇄(검투사): 스택형 방어감소(물방·마방 스택당 -5%p, 최대5), 지속2
     weaponBroken: 0,
     luckBuff: 0,
     cast: 0,
@@ -1050,6 +1053,7 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.rage > 0) { self.rage--; if (self.rage === 0) self.cd[0] = 2 }
   if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
   if (foe.sunder > 0) foe.sunder--
+  if (self.crushDur > 0) { self.crushDur--; if (self.crushDur === 0) self.crush = 0 }
   // §13: 마나실드 자가재생 삭제 → 공격 딜 25% 회복(execAttack/execSkill)으로 대체
   if (self.stun > 0) {
     // 메테오: 시전 시작 후엔 돌이킬 수 없음 — 기절 중에도 그대로 진행(끊기 불가)
@@ -1456,6 +1460,7 @@ function statusGroups (f) {
   if (f.sunder > 0) deb.push(`💢방어약화${f.sunder}`)
   if (f.passiveLock > 0) deb.push(`🔒패시브봉인${f.passiveLock}`)
   if (f.weaponBroken > 0) deb.push(`🔨무기파괴${f.weaponBroken}`)
+  if (f.crush > 0) deb.push(`🪓분쇄${f.crush}(방어 -${f.crush * 5}%p)`)
   if (f.cutStk > 0) deb.push(`🩸절개${f.cutStk}(${(f.cutStk * 1.5)}%/턴)`)
   if (f.lacStk > 0) deb.push(`🩸열상${f.lacStk}(${(f.lacStk * (f.cutStk > 0 ? 2.5 : 1.5))}%/턴)`)
   if (f.healCut > 0) deb.push(`💔회복↓${f.healCut}`)

@@ -643,7 +643,9 @@ const SKILLS = {
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
     { name: '방패들기', tag: '버프', coef: '5턴 방패막기 경감 대폭↑', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds), exec: (s, f, ds, df) => { s.blockUp = 5; s.cd[1] = 6; s.note = '방패들기' } },
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
-    { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } }
+    { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
+    // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
+    { name: '도발', tag: '제어', coef: '상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5', cd: 6, ready: (s, f, ds, df) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5, exec: (s, f, ds, df) => { f.taunt = 3; s.powBuff = 2; s.powMul = 1.5; s.cd[3] = 6; s.note = '도발' } }
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). castCarry(취소 잔여)로 -1턴
@@ -924,6 +926,7 @@ function mkFighter (d, name, ai) {
     instCast: 0,
     stun: 0,
     stunned: false,
+    taunt: 0, // 도발(기사): >0이면 강제 평타(스킬·버프·방어 봉인)
     noDefend: 0,
     missDown: 0,
     autoSpell: 0,
@@ -1041,6 +1044,7 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.sanctuary > 0) { self.sanctuary--; let hd = 0; if (foe.hp > 0) hd = holyDmg(self, foe, ds, df, ds.마공 * 0.7); self._tick.push({ type: 'sanctuary', dmg: hd, heal: 0, repent: self.repentHit || 0 }) } // 성역: 무적(받는피해85%↓) + 신성딜만(회복 제거)
   if (self.instCast > 0 && self.cast === 0) self.instCast-- // 인캐 버프 3턴 지속(시전 중엔 유지)
   if (self.powBuff > 0) self.powBuff--
+  if (self.taunt > 0) self.taunt--
   if (self.thorns > 0) self.thorns--
   if (self.blockUp > 0) self.blockUp--
   if (self.dodgeUp > 0) self.dodgeUp--
@@ -1102,6 +1106,7 @@ function aiTurn (self, foe, ds, df) {
   const forced = upkeep(self, foe, ds, df); if (forced) return forced
   if (self.hp <= 0) return { type: 'skip' } // 출혈 등으로 upkeep 중 사망 → 행동 없음(종료는 루프에서)
   if (self.stunned) return execStunSkill(self, foe, ds, df) // 기절 중: 쓸 스킬 있으면 사용(AI는 항상 사용 = 기존 자동발동과 동일)
+  if (self.taunt > 0) return execAttack(self, foe, ds, df) // 도발 중: 강제 평타(스킬·버프·방어 불가)
   // 상대 시전 중이면 AI 유형 무관하게 '차단기'만 우선 사용(방어적도 시전은 끊음)
   if (foe.cast > 0) {
     const cx = ctxFor(self, foe, ds, df)
@@ -1220,6 +1225,7 @@ function playerResolve (state, choice) {
 // 플레이어 스킬 사용 가능 판정(AI 자제 휴리스틱 제외, 진짜 게이트만)
 function playerCanUse (state, slot) {
   const { A, B, dB } = state; const name = SKILLS[state.meName][slot].name
+  if (A.taunt > 0) return { usable: false, reason: '도발' }
   if (A.silence > 0 && MAGIC_SKILLS.has(name)) return { usable: false, reason: '침묵(마법)' }
   if (A.cd[slot] > 0) return { usable: false, reason: `${A.cd[slot]}턴 후` }
   if (name === '처형' && !(B.hp < dB.maxhp * 0.25)) return { usable: false, reason: '상대 HP 25%↓ 필요' }
@@ -1242,7 +1248,7 @@ function playerOptions (state) {
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
   const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_CAST[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1 } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
-  return { canDefend: !stunned && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
+  return { canDefend: !stunned && A.taunt === 0 && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned, taunted: A.taunt > 0, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
 }
 
 // ── UI + 내레이션 ──
@@ -1448,6 +1454,7 @@ function statusGroups (f) {
   const deb = []; const buf = []
   // 디버프(남은턴 표기)
   if (f.stun > 0) deb.push(`😵기절${f.stun}`)
+  if (f.taunt > 0) deb.push(`🗯️도발${f.taunt}(강제평타)`)
   if (f.paralyze > 0) deb.push(`⚡마비${f.paralyze}`)
   if (f.vuln > 0 || f.instVuln > 0) deb.push(`💥취약${Math.max(f.vuln, f.instVuln)}`)
   if (f.slow > 0) deb.push(`🐢둔화${f.slow}`)

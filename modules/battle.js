@@ -214,8 +214,8 @@ const PASSIVE_FLAGS = { '완벽방어!': '완벽방어', 행운의여신: '행�
 // 패시브 활성 판정: 플래그 보유 && 잠기지 않음(디스펠). passiveLock=0이면 기존 동작과 동일.
 function psv (f, flag) { return f && f[flag] && !f.passiveLock }
 // 디스펠 대상 버프 필드(실드·시전은 자원/채널이라 제외). clearBuffs=즉시 제거, 개수 반환.
-const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100', 'blessTurns', 'aegisTurns', 'sanctuary', 'frenzy', 'haste']
-function clearBuffs (f, df) { let n = 0; const hadStat = f.blessTurns > 0 || f.aegisTurns > 0; for (const k of BUFF_FIELDS) { if (f[k] > 0) { f[k] = 0; n++ } } f.powMul = 1; f.frenzyWin = 0; if (hadStat) { f.aegisMul = 1; if (df) refreshDerived(f, df) } return n } // 축복·가호(스탯버프) 제거 시 파생스탯 원복(refreshDerived), 성역·광란가속(윈도우 포함)도 즉시 해제
+const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100', 'blessTurns', 'aegisTurns', 'sanctuary', 'frenzy', 'haste', 'repentStack']
+function clearBuffs (f, df) { let n = 0; const hadStat = f.blessTurns > 0 || f.aegisTurns > 0; for (const k of BUFF_FIELDS) { if (f[k] > 0) { f[k] = 0; n++ } } f.powMul = 1; f.frenzyWin = 0; f.repentWin = 0; if (hadStat) { f.aegisMul = 1; if (df) refreshDerived(f, df) } return n } // 축복·가호(스탯버프) 제거 시 파생스탯 원복(refreshDerived), 성역·광란가속·참회(윈도우 포함)도 즉시 해제
 function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   const magic = dA.마공 > dA.물공
   const ls = { used: false }; const lsD = { used: false }
@@ -1242,7 +1242,7 @@ function preview (name) {
     턴: Math.round(Math.max((10 - step(tempoVal(w, c), 0.7)) * (w.tempoMul || 1), 2) * 10) / 10
   }
 }
-function randomMatch (me) { return { opp: pickArr(NAMES.filter(n => n !== me)), ai: pickArr(AIS) } }
+function randomMatch (me, exclude) { const pool = NAMES.filter(n => n !== me && n !== exclude); return { opp: pickArr(pool.length ? pool : NAMES.filter(n => n !== me)), ai: pickArr(AIS) } } // exclude: 상대 재선택 시 직전 상대 제외
 
 function buildSelectEmbed () {
   return new EmbedBuilder()
@@ -1254,8 +1254,28 @@ function buildSelectEmbed () {
 function buildSelectRows (memberId) {
   const id = (char) => JSON.stringify({ action: 'duel', op: 'pick', char, memberId })
   const btn = (char) => new ButtonBuilder().setCustomId(id(char)).setLabel(`${CHARS[char].emoji} ${char}`).setStyle(ButtonStyle.Secondary)
+  const btns = NAMES.map(btn)
+  btns.push(new ButtonBuilder().setCustomId(id('__RAND__')).setLabel('🎲 랜덤').setStyle(ButtonStyle.Primary)) // 내 캐릭 랜덤 선택
   const rows = []
-  for (let i = 0; i < NAMES.length; i += 5) rows.push(new ActionRowBuilder().addComponents(NAMES.slice(i, i + 5).map(btn)))
+  for (let i = 0; i < btns.length; i += 5) rows.push(new ActionRowBuilder().addComponents(btns.slice(i, i + 5)))
+  return rows
+}
+// 상대(고정) 선택 화면 — 내 캐릭 고른 뒤 상대를 직접 고름(🎲 랜덤 가능). 미러 매치 허용.
+function buildOppSelectEmbed (me) {
+  return new EmbedBuilder()
+    .setTitle('⚔️ 듀얼 — 상대 선택')
+    .setDescription(`${CHARS[me].emoji} **${me}**(으)로 맞설 상대를 골라줘! (🎲 랜덤 = 나 제외 무작위)`)
+    .setColor(0x5865f2)
+    .addFields(NAMES.map(n => ({ name: `${CHARS[n].emoji} ${n}`, value: `${CHARS[n].id}`, inline: true })))
+}
+function buildOppSelectRows (me, memberId) {
+  const id = (opp) => JSON.stringify({ action: 'duel', op: 'pickopp', me, opp, memberId })
+  const btn = (opp) => new ButtonBuilder().setCustomId(id(opp)).setLabel(`${CHARS[opp].emoji} ${opp}`).setStyle(ButtonStyle.Secondary)
+  const btns = NAMES.map(btn)
+  btns.push(new ButtonBuilder().setCustomId(id('__RAND__')).setLabel('🎲 랜덤 상대').setStyle(ButtonStyle.Primary))
+  btns.push(new ButtonBuilder().setCustomId(JSON.stringify({ action: 'duel', op: 'back', memberId })).setLabel('🔙 내 캐릭').setStyle(ButtonStyle.Secondary))
+  const rows = []
+  for (let i = 0; i < btns.length; i += 5) rows.push(new ActionRowBuilder().addComponents(btns.slice(i, i + 5)))
   return rows
 }
 function fighterBlock (name, tail) {
@@ -1275,7 +1295,8 @@ function buildMatchupRow (me, opp, ai, memberId) {
   const cid = (op, ex) => JSON.stringify(Object.assign({ action: 'duel', op, memberId }, ex))
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId(cid('go', { me, opp, ai })).setLabel('⚔️ 전투 시작').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId(cid('reroll', { char: me })).setLabel('🎲 상대 다시').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId(cid('reroll', { char: me, opp })).setLabel('🎲 상대 다시').setStyle(ButtonStyle.Secondary), // opp=직전 상대 → 제외 랜덤
+    new ButtonBuilder().setCustomId(cid('reopp', { char: me })).setLabel('🔀 상대 변경').setStyle(ButtonStyle.Secondary),
     new ButtonBuilder().setCustomId(cid('back', {})).setLabel('🔙 캐릭 변경').setStyle(ButtonStyle.Secondary)
   )
 }
@@ -1343,6 +1364,7 @@ function narrateLine (ev, meName, oppName) {
     case 'bleed': return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${ev.left > 0 ? ` (출혈 ${ev.left}턴 남음)` : ''}`
     case 'ko': return `💀 ${ae} **${A}**${iga(A)} 쓰러졌다! 체력이 바닥났다.`
     case 'skip': return `⏭️ ${ae} **${A}**${iga(A)} 턴을 넘겼다.`
+    case 'surrender': return `🏳️ ${ae} **${A}**${iga(A)} 기권했다. 승부를 포기하고 물러난다…`
     case 'stun': { const base = `😵 ${ae} **${A}**${eun(A)} 기절해 움직이지 못한다.${ev.stunLeft > 0 ? ` (기절 ${ev.stunLeft}턴 남음)` : ' 💫 다음 턴 해제!'}`; return ev.castName ? `${base} 🔮 하지만 ${ev.castName} 시전은 멈추지 않는다… **[${ev.castTotal - ev.castLeft}/${ev.castTotal}]**` : base }
     case 'paralyze': return `⚡ ${ae} **${A}**${eun(A)} 몸이 저려 움직이지 못한다! (마비${ev.paralyzeLeft > 0 ? ` ${ev.paralyzeLeft}턴 남음` : ' 해제'})`
     case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다… ${ev.total ? `**[${ev.total - ev.left}/${ev.total}]**` : ''}`
@@ -1493,14 +1515,16 @@ function buildBattleRow (state) {
   const actionBtns = [
     new ButtonBuilder().setCustomId(cid('attack')).setLabel(o.stunned ? '⚔️ 공격 · 기절' : '⚔️ 공격').setStyle(ButtonStyle.Danger).setDisabled(o.stunned),
     (() => { const isParry = WEAPONS[CHARS[state.meName].무기].방어 === '패링'; const emo = isParry ? '🥊' : '🛡️'; const dl = isParry ? '패링' : '방어'; return new ButtonBuilder().setCustomId(cid('defend')).setLabel(o.canDefend ? `${emo} ${dl}` : (o.stunned ? `${emo} ${dl} · 기절` : `${emo} ${dl} · 봉쇄`)).setStyle(ButtonStyle.Secondary).setDisabled(!o.canDefend) })(),
-    new ButtonBuilder().setCustomId(cid('skip')).setLabel('⏭️ 턴넘기기').setStyle(ButtonStyle.Secondary)
+    new ButtonBuilder().setCustomId(cid('skip')).setLabel('⏭️ 턴넘기기').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId(cid('surrender')).setLabel('🏳️ 기권').setStyle(ButtonStyle.Secondary)
   ]
   const skillBtns = []
   // 모핑 콤보 색상: 육합권=파랑(기본) → 연환전신장=녹색 → 맹룡과강=빨강(점차 강해짐). 콤보 진행(lvl≥1) 시 🔥
   o.skills.forEach((sk, i) => { const lvl = sk.comboLvl; const style = lvl === 2 ? ButtonStyle.Danger : lvl === 1 ? ButtonStyle.Success : ButtonStyle.Primary; const pre = (lvl >= 1) ? '🔥' : ''; skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(pre + skLbl(sk)).setStyle(style).setDisabled(!sk.usable)) })
-  o.passives.forEach((p, i) => { if (skillBtns.length < 5) skillBtns.push(new ButtonBuilder().setCustomId(cid('passive' + i)).setLabel(`🔒 ${p.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true)) })
-  const rows = [new ActionRowBuilder().addComponents(actionBtns)]
-  if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5)))
+  const passiveBtns = o.passives.map((p, i) => new ButtonBuilder().setCustomId(cid('passive' + i)).setLabel(`🔒 ${p.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true))
+  const rows = [new ActionRowBuilder().addComponents(actionBtns)] // 1줄: 공격·방어·턴넘기기·기권
+  if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5))) // 2줄: 액티브 스킬
+  if (passiveBtns.length) rows.push(new ActionRowBuilder().addComponents(passiveBtns.slice(0, 5))) // 3줄: 패시브 스킬(별도 행)
   return rows
 }
 // 선택형 스킬 서브메뉴(스블 마검 인챈트): 룬각인 누르면 이 3버튼 표시 → op 'enchant'로 선택
@@ -1552,8 +1576,18 @@ async function handleButton (interaction, info) {
     return
   }
   const mid = info.memberId
-  if (info.op === 'pick' || info.op === 'reroll') {
-    const me = info.char; const { opp, ai } = randomMatch(me)
+  if (info.op === 'pick') {
+    const me = info.char === '__RAND__' ? pickArr(NAMES) : info.char // 내 캐릭 랜덤/고정 → 상대 선택 화면
+    await interaction.update({ embeds: [buildOppSelectEmbed(me)], components: buildOppSelectRows(me, mid) })
+  } else if (info.op === 'reopp') {
+    await interaction.update({ embeds: [buildOppSelectEmbed(info.char)], components: buildOppSelectRows(info.char, mid) })
+  } else if (info.op === 'pickopp' || info.op === 'reroll') {
+    const me = info.me || info.char
+    let opp
+    if (info.op === 'reroll') opp = randomMatch(me, info.opp).opp // 상대 다시: 직전 상대 제외 랜덤
+    else if (info.opp === '__RAND__') opp = randomMatch(me).opp // 랜덤 상대(나 제외)
+    else opp = info.opp // 고정 상대
+    const ai = pickArr(AIS)
     await interaction.update({ embeds: [buildMatchupEmbed(me, opp, ai, mid)], components: [buildMatchupRow(me, opp, ai, mid)] })
   } else if (info.op === 'back') {
     SESSIONS.delete(interaction.message.id)
@@ -1568,6 +1602,13 @@ async function handleButton (interaction, info) {
     const sess = SESSIONS.get(interaction.message.id)
     if (!sess) { await interaction.reply({ content: '전투 정보가 만료됐어~ `/듀얼`로 다시 시작해줘! ⚔️', ephemeral: true }); return }
     sess.ts = Date.now()
+    // 기권: 즉시 패배 처리(내 체력 0 + winner=opp) 후 결과 화면
+    if (info.c === 'surrender') {
+      sess.state.A.hp = 0; sess.state.winner = 'opp'
+      sess.state.log.push({ who: 'me', type: 'surrender' })
+      await revealTurns(interaction, sess.state, 'end', { me: sess.me, opp: sess.opp, ai: sess.ai, mid, msgId: interaction.message.id })
+      return
+    }
     // 선택형 스킬(룬각인 인챈트 / 올인!! 베팅): 실행 전 서브메뉴 표시
     const m = /^s(\d+)$/.exec(info.c)
     if (m) { const slot = +m[1]; const sk = SKILLS[sess.state.meName] && SKILLS[sess.state.meName][slot]; if (sk && sk.choose && playerCanUse(sess.state, slot).usable) { const row = sk.choose === 'bet' ? buildBetRow(mid, slot) : buildEnchantRow(mid, slot); await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: [row] }); return } }

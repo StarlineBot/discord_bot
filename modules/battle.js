@@ -12,7 +12,8 @@ const CHARS = {
   기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '검방', 완벽방어: true, id: '순수 탱커' },
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', id: '스태프 마법사' },
   볼트마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', boltMaster: true, id: '볼트 마법사' },
-  암살자: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 35, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
+  암살도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 35, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
+  절개도적: { emoji: '🩸', 힘: 60, 지능: 20, 체력: 60, 민첩: 45, 솜씨: 70, 행운: 25, 무기: '단검', 상처전문가: true, id: '출혈 지속딜러' }, // 단검이되 회피물몸(암살) 대비 질긴 근접. 상처전문가=평타로 출혈 스택+상대 출혈만큼 회피↑
   사냥꾼: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, 무기: '활', id: '저격/덫/카이팅' },
   갬블러: { emoji: '🎲', 힘: 30, 지능: 30, 체력: 30, 민첩: 50, 솜씨: 70, 행운: 100, 무기: '주사위', id: '확률/도박' }, // D20 주사위. 저체급·고행운(주사위방어·천운·저점보장). 패시브 없음(5액티브)
   세이지: { emoji: '📖', 힘: 60, 지능: 70, 체력: 55, 민첩: 45, 솜씨: 50, 행운: 30, 무기: '마도서', 원소마스터: true, 현자균형: true, id: '혼합 하이브리드' },
@@ -278,12 +279,12 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     if (ph + mg + bolt > 0) { A.hitPh = ph; A.hitMg = mg }
     if (A._braw && A._braw.length) { A.boltHits = A._braw.slice(); A.boltNames = A._bnames }
     castHit(A, D, fin)
-    if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))
+    if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + hcut(A, Math.round(dA.base.체력 / 2)))
     if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
     return perfectGuard(A, D, fin)
   }
   if (dA.fusion) {
-    if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
+    if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     let d = dA.물공 + dA.마공; 고정 = 0
     if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { d *= dD.무기막기경감; A.lastDef = '무기막기' }
     d *= (1 - Math.max(dD.물방 * (dA.sigPen ? 0.7 : 1), dD.마방))
@@ -308,7 +309,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     if (dD.무기.받는뎀) d *= (1 - dD.무기.받는뎀)
     const fin = Math.max(Math.round(d), 1)
     castHit(A, D, fin)
-    if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))
+    if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + hcut(A, Math.round(dA.base.체력 / 2)))
     if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
     return perfectGuard(A, D, fin)
   }
@@ -321,7 +322,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     dmg = 0
     for (let i = 0; i < hits; i++) {
       if (!guaranteed && !luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) continue // 히트별 명중: 빗나간 히트 스킵
-      if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; continue } // 히트별 회피
+      if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; continue } // 히트별 회피
       let block = 0; let wblk = 1
       if (canDef && dD.무기.주사위) { block = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = dD.무기막기경감; A.lastDef = '무기막기' } // 주사위방어: 중앙(10.5)=현재방어(block1.0×물방), 굴림↑=경감↑, 1=대실패(×2), 20=대성공(×0.02). 히트별 막기
       let h = dA.무기.주사위 ? (atkD === 1 ? 0 : dA.물공 * (atkD === 20 ? 3 : 1 + (atkD - 10.5) * 0.06)) : dA.물공 * physSwing(dA) * perMul // 주사위공격: 중앙(10.5)=현재공격, 굴림↑=딜↑, 1=대실패(0), 20=대성공(×3)
@@ -409,6 +410,10 @@ function physSwing (d) { const pFull = 0.5 + Math.floor(d.base.솜씨 / 10) * 0.
 // 마법 빗맞힘 구간(공유): 30% 풀댐 / 40% 80% / 30% 40% (평균 74%). 마법사 마법 + 볼트 공통
 function magicGraze (A) { if (A && A.graze100 > 0) return 1; const gr = rand(); return gr < 0.10 ? 1.2 : (gr < 0.70 ? 1.0 : 0.8) } // 마법의 완전이해(graze100): 편차 무시 상시 풀댐. A 미전달(시전마법)은 기존 랜덤 편차 유지
 function healVar (amount) { return Math.round(Math.max(amount, 0) * magicGraze()) } // 회복 변동(예측 방지): 정해진 수치를 ×0.8~1.2 랜덤. 방어회복·회복스킬 공용
+function hcut (s, amt) { return s.healCut > 0 ? Math.round(Math.max(amt, 0) * 0.2) : amt } // 과다출혈(절개도적): 회복량 80%↓(20%만 적용). 모든 자힐·흡혈 통과
+function applyGashStack (D) { if (D.cutDur > 0) { D.cutStk = Math.min(D.cutStk + 1, 5); D.cutDur = 3 } if (D.lacDur > 0) { D.lacStk = Math.min(D.lacStk + 1, 5); D.lacDur = 3 } } // 절개도적 평타 명중 시: 활성 표식마다 스택+1(최대5)·지속3 갱신
+function woundDodge (D, A) { return D.상처전문가 ? ((A.cutStk || 0) + (A.lacStk || 0)) * 0.02 : 0 } // 상처전문가: 상대(A)에 걸린 출혈 스택당 자신(D) 회피+2%(최대 5+5=+20%)
+function gashAtkBonus (A, D, dD) { if (!A.상처전문가) return 0; let b = 0; if (D.cutDur > 0 && D.cutStk < 5) b += dD.maxhp * 0.02 * 2; if (D.lacDur > 0 && D.lacStk < 5) b += dD.maxhp * (D.cutStk > 0 ? 0.03 : 0.02) * 2; return b } // 절개도적 AI: 표식 활성+스택<5면 평타로 +1스택 쌓는 가치(다음스택 %×~2턴)를 평타 점수에 가산 → 평타로 스택 빌드
 function d20adv (adv) { const a = 1 + Math.floor(rand() * 20); if (!adv) return a; return Math.max(a, 1 + Math.floor(rand() * 20)) } // 2d20 어드밴티지: adv면 2개 중 높은 값
 // 행운 저점보장(갬블러): 낮은 굴림(thr 이하)이면 행운 비례 확률로 lo~hi 범위 리롤. 행운100=100% 리롤 → 바닥값 회피
 function luckFloor (roll, thr, lo, hi, luck) { if (roll <= thr && rand() < (luck || 0) / 100) return lo + Math.floor(rand() * (hi - lo + 1)); return roll }
@@ -521,7 +526,7 @@ function impactDmg (A, D, dA, dD, base) {
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { A.lastDef = '행운의여신'; return 1 } // 갬블러 운빨방어
   if (canDef && dD.sigDodge && rand() < 0.10) { A.lastDef = '완전회피'; return 0 } // 행운100 시그
   if (canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.천운))) { A.lastDef = '천운'; return 0 } // 천운 완전회피
-  if (canDef && luckRoll(rand() < Math.max(dD.물회 - (dA.sigAim ? 0.05 : 0), 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 } // 회피
+  if (canDef && luckRoll(rand() < Math.max(dD.물회 - (dA.sigAim ? 0.05 : 0), 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 } // 회피
   let blk = 1
   if (canDef && dD.무기.주사위) { blk = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { blk = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { blk = dD.무기막기경감; A.lastDef = '무기막기' } // 주사위 방어(갬블러)는 충격도 경감 / 막기
   let d = base * blk
@@ -629,7 +634,7 @@ const SKILLS = {
     skBloodRage(1), // 피의격노: 체력15%↓ → 공격력 버프
     skClash(2), // 격돌: 2턴 스턴 + 체력5%↓
     // 해방: 긴 쿨(13) 자가 속박 해제 + 5% 회복. 기절 중 사용 가능(stunnable) — 근접 CC 카운터의 오프너 탈출용
-    { name: '해방', tag: '회복', cd: 15, stunnable: true, coef: '체력 15% 즉시회복 + 행동불능 즉시해제', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => (s.hp > 0 && s.hp < ds.maxhp * 0.35) ? x.est * 0.6 : 0, exec: (s, f, ds, df) => { const broke = s.stun > 0 || s.stunned; s.stun = 0; s.stunned = false; s.hp = Math.min(s.hp + healVar(ds.maxhp * 0.15), ds.maxhp); s.cd[3] = 15; s.note = broke ? '해방(속박 해제)' : '해방' } }
+    { name: '해방', tag: '회복', cd: 15, stunnable: true, coef: '체력 15% 즉시회복 + 행동불능 즉시해제', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => (s.hp > 0 && s.hp < ds.maxhp * 0.35) ? x.est * 0.6 : 0, exec: (s, f, ds, df) => { const broke = s.stun > 0 || s.stunned; s.stun = 0; s.stunned = false; s.hp = Math.min(s.hp + hcut(s, healVar(ds.maxhp * 0.15)), ds.maxhp); s.cd[3] = 15; s.note = broke ? '해방(속박 해제)' : '해방' } }
   ],
   기사: [
     // 방패밀쳐내기: 물리딜 + 상대 최대체력 10% 고정딜(방어무시) — HP스케일 관통 탱버스터
@@ -659,12 +664,21 @@ const SKILLS = {
     // 볼트마법조합: 4턴 버프 — 활성 중 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
     { name: '볼트마법조합', tag: '버프', coef: '4턴 — 볼트 시전 시 짝 원소 자동발동 + 둘 다 계수↑(파라 강·라콜 중·콜파 약)', buff: 4, cd: 4, ready: (s, f, ds, df, x) => s.cd[3] === 0 && s.chainBolt <= 1 && x.safe, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds), exec: (s, f, ds, df) => { s.chainBolt = 4; s.cd[3] = 4; s.note = '볼트마법조합' } }
   ],
-  암살자: [
+  암살도적: [
     { name: '암습', tag: '제어', coef: '3턴 스턴 (딜 없음, 후속타로 딜)', cd: 10, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 3, 'stun'), exec: (s, f, ds, df) => { applyCC(f, 'stun', 3); s.cd[0] = 10; s.note = '기절' } }, // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
     { name: '처형', tag: '공격', coef: '물공×5 (상대 HP25%↓ 처형)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = guts(ds.물공 * 5 * physSwing(ds) * (1 - df.물방), f, df); d = absorb(f, Math.max(Math.round(d), 1)); f.hp -= d; s.cd[1] = 5; s.note = '처형' } },
     { name: '백스텝', tag: '공격', coef: '타격×1.5 (암습 스턴 중 ×2.5 콤보)', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.stun > 0 ? 2.5 : 1.5), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const bm = f.stun > 0 ? 2.5 : 1.5; let d = Math.round(attack(s, f, ds, df, f.defending) * bm); d = absorb(f, d); f.hp -= d; s.cd[2] = 4; s.note = bm > 1.5 ? '백스텝·연계' : '백스텝' } }, // 후측 강타. 암습 스턴 중이면 ×2.5 콤보
     // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
     { name: '입막음', tag: '제어', coef: '시전차단 + 2턴 침묵(마법 스킬만)', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est / Math.max(1 - df.물회, 0.3), 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
+  ],
+  절개도적: [
+    // 절개/열상: 평타 딜 + 해당 표식 부여(지속3). 스택은 안 올림 — 스택은 평타 명중 시(상처전문가)만. 절개 있으면 열상 틱 2%→3%
+    { name: '절개', tag: '공격', coef: '평타 딜 + 절개 표식(지속3) · 이후 평타로 스택 적립(스택당 턴당 1.5% 출혈)', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.cutDur === 0 ? df.maxhp * 0.06 : 0), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.cutDur = 3; s.cd[0] = 3; s.note = '절개' } },
+    { name: '열상', tag: '공격', coef: '평타 딜 + 열상 표식(지속3) · 절개 있으면 스택당 턴당 2.5% 출혈', cd: 3, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.lacDur === 0 ? df.maxhp * 0.06 : 0), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.lacDur = 3; s.cd[1] = 3; s.note = '열상' } },
+    // 과다출혈: 즉시 절개·열상 각 2스택 + 3턴 상대 회복 80%↓ (딜 없음). 세팅+힐차단
+    { name: '과다출혈', tag: '디버프', coef: '즉시 절개·열상 각 2스택 부여 + 3턴 상대 회복량 80%↓ (딜 없음)', cd: 6, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => df.maxhp * 0.10 + (f.cutStk + f.lacStk < 4 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { f.cutStk = Math.min((f.cutStk || 0) + 2, 5); f.cutDur = 3; f.lacStk = Math.min((f.lacStk || 0) + 2, 5); f.lacDur = 3; f.healCut = 3; s.cd[2] = 6; s.note = '과다출혈' } },
+    // 파열: 절개+열상 스택 소모 → 합계×1.5 확정딜(방어·실드 무시) 후 초기화. 마무리/힐차단용 즉발
+    { name: '파열', tag: '공격', coef: '절개+열상 스택 소모 → (절개×1.5%+열상×[2.5%/1.5%])×1.5 확정딜(방어·실드 무시) 후 초기화', cd: 8, ready: (s, f, ds, df) => s.cd[3] === 0 && (f.cutStk > 0 || f.lacStk > 0), score: (s, f, ds, df, x) => { const lacRate = f.cutStk > 0 ? 0.025 : 0.015; const total = (f.cutStk * 0.015 + f.lacStk * lacRate) * df.maxhp * 1.5; return dmgVal(total, 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const lacRate = f.cutStk > 0 ? 0.025 : 0.015; const total = (f.cutStk * 0.015 + f.lacStk * lacRate) * df.maxhp * 1.5; const d = trueDmg(s, f, df, total); f.hp -= d; f.cutStk = 0; f.cutDur = 0; f.lacStk = 0; f.lacDur = 0; s.cd[3] = 8; s.note = '파열' } }
   ],
   사냥꾼: [
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
@@ -708,7 +722,7 @@ const SKILLS = {
   ],
   프리스트: [
     // 힐: 즉시 체력 30% + 지능×1 회복(짧은 쿨 유지기). 회복불가 중엔 사용 불가
-    { name: '힐', tag: '회복', coef: '즉시 체력 15% + 지능×1 회복', cd: 6, ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.9 && s.healBlock === 0, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.55 - repentResetCost(s, ds, df), exec: (s, f, ds, df) => { const heal = healVar(ds.maxhp * 0.15 + ds.base.지능); s.hp = Math.min(ds.maxhp, s.hp + heal); s.cd[0] = 6; s.note = '힐' } },
+    { name: '힐', tag: '회복', coef: '즉시 체력 15% + 지능×1 회복', cd: 6, ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.9 && s.healBlock === 0, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.55 - repentResetCost(s, ds, df), exec: (s, f, ds, df) => { const heal = healVar(ds.maxhp * 0.15 + ds.base.지능); s.hp = Math.min(ds.maxhp, s.hp + hcut(s, heal)); s.cd[0] = 6; s.note = '힐' } },
     // 축복: 5턴 전 능력치 20%↑(공격·명중·회피·크리·속도·방어). 근사 구현(refreshDerived)
     { name: '축복', tag: '버프', coef: '5턴 — 능력치 30%↑(공격·명중·회피·크리·속도, 방어 제외)', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[1] === 0 && s.blessTurns === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.4 * 5, s, ds) - repentResetCost(s, ds, df), exec: (s, f, ds, df) => { s.blessTurns = 5; refreshDerived(s, ds); s.cd[1] = 6; s.note = '축복 · 공격·속도 30%↑(5턴)' } },
     // 성역: 3턴 무적급(받는 피해 모두 1) + 턴당 체력3%회복 + 턴당 상대 신성딜(마공×0.7). 강력 → 10쿨·시작쿨5
@@ -740,7 +754,7 @@ const SKILLS = {
 function drawCard (c, s, f, ds, df) {
   if (c === '킹') { const d = trueDmg(s, f, df, df.maxhp * 0.20); f.hp -= d; return '👑킹·상대 체력20% 확정딜' }
   if (c === '퀸') { const d = trueDmg(s, f, df, df.maxhp * 0.10); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.10); return '👸퀸·상대 체력10%+자해10%' }
-  if (c === '하트') { s.hp = Math.min(ds.maxhp, s.hp + healVar(ds.maxhp * 0.10)); return '❤️하트·체력10% 회복' }
+  if (c === '하트') { s.hp = Math.min(ds.maxhp, s.hp + hcut(s, healVar(ds.maxhp * 0.10))); return '❤️하트·체력10% 회복' }
   if (c === '다이아') { s.aegisTurns = 2; s.aegisMul = 1.5; refreshDerived(s, ds); return '♦️다이아·방어 1.5배(2턴)' }
   if (c === '클로버') { s.luckBuff = 2; return '♣️클로버·행운폭주 크리·회피↑(2턴)' }
   if (c === '스페이드') { f.hp = Math.min(df.maxhp, f.hp + Math.round(df.maxhp * 0.05)); return '♠️스페이드·상대 체력5% 회복(꽝)' }
@@ -755,7 +769,7 @@ const CUSTOM_DEFS = {
   연격: (ci) => ({ name: '연격', ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => x.est * 1.2, exec: (s, f, ds, df) => { let d = Math.round(attack(s, f, ds, df, f.defending) * 0.6 + attack(s, f, ds, df, f.defending) * 0.6); d = absorb(f, d); f.hp -= d; s.cd[ci] = 3; s.note = '연격' } }),
   속박: (ci) => ({ name: '속박', ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => x.est + x.foeTurn * 1.5, exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; s.cd[ci] = 4; s.note = '기절' } }),
   철벽: (ci) => ({ name: '철벽', ready: (s, f, ds) => s.cd[ci] === 0 && s.shield < ds.maxhp * 0.15, score: (s, f, ds, df, x) => x.foeTurn + df.물공 * 0.3, exec: (s, f, ds, df) => { s.shield = Math.max(s.shield, Math.round(ds.maxhp * 0.35)); s.cd[ci] = 4; s.note = '철벽' } }),
-  재정비: (ci) => ({ name: '재정비', ready: (s, f, ds) => s.cd[ci] === 0 && s.hp < ds.maxhp * 0.7, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.5, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + Math.round(ds.maxhp * 0.18)); s.cd[ci] = 4; s.note = '회복' } }),
+  재정비: (ci) => ({ name: '재정비', ready: (s, f, ds) => s.cd[ci] === 0 && s.hp < ds.maxhp * 0.7, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.5, exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + hcut(s, Math.round(ds.maxhp * 0.18))); s.cd[ci] = 4; s.note = '회복' } }),
   반격태세: (ci) => ({ name: '반격태세', ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => df.물공 * 0.4, exec: (s, f, ds, df) => { s.defending = true; s.shield = Math.max(s.shield, Math.round(ds.maxhp * 0.12)); s.cd[ci] = 3; s.note = '반격' } })
 }
 // ===== 선언형 딜 스키마 =====
@@ -819,7 +833,7 @@ function dmgSkill (ci, spec) {
 // 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속
 function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 1.8 : 1 }
 // 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
-function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭) + 광란가속 스택(유지 시 턴 가속, 최대 5스택 −15%)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + healVar(ds.maxhp * 0.02 * furyMul(s))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.frenzy = (s.frenzyWin > 0) ? Math.min((s.frenzy || 0) + 1, 5) : 1; s.frenzyWin = 2; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
+function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭) + 광란가속 스택(유지 시 턴 가속, 최대 5스택 −15%)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + hcut(s, healVar(ds.maxhp * 0.02 * furyMul(s)))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.frenzy = (s.frenzyWin > 0) ? Math.min((s.frenzy || 0) + 1, 5) : 1; s.frenzyWin = 2; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
 function skBloodRage (ci) { const spec = { name: '피의격노', tag: '버프', buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑ (딜 없음, 순수 버프)' }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds), exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; s.cd[ci] = spec.cd; s.note = '피의격노' } }) }
 function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 3, coef: '2턴 스턴 (자기 체력 5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
 // 마법의 완전이해(캐스터): 2턴간 마법 편차 무시(graze100=상시 풀댐) — 순수버프. 창고·세이지 공유(hoisted)
@@ -848,7 +862,7 @@ const SKILL_POOL = {
   랜덤디버프룰렛: (ci) => ({ name: '룰렛', tag: '디버프', coef: '상대에게 랜덤 디버프', cd: 3, ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.6, exec: (s, f, ds, df) => { const d = DEBUFFS[Math.floor(rand() * DEBUFFS.length)]; d.apply(f); s.cd[ci] = 3; s.note = '룰렛: ' + d.name } })
 }
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
-const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 7, 역장폭발: 3, 사냥꾼덫: 3, 성역: 5, '올인!!': 3 }
+const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 7, 역장폭발: 3, 사냥꾼덫: 3, 성역: 5, '올인!!': 3, 과다출혈: 3, 파열: 4 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
 // 스킬블록: 선택 캐릭의 스킬슬롯을 필드에서 자동 렌더(번호 없음, 하드코딩 테이블 없음) + 패시브 나열
 function skillsBlock (name) {
@@ -929,7 +943,13 @@ function mkFighter (d, name, ai) {
     광란: (CHARS[name] && (CHARS[name].광란 || CHARS[name].피의굶주림)) || false, // 피의굶주림(광전사)=격노+광란 통합 패시브
     maxhp: d.maxhp, // 광전사 광란: 체력 낮을수록 제어감소+공격력↑(2차곡선)
     마나환류: (CHARS[name] && CHARS[name].마나환류) || false, // 마법사 패시브: 마법딜 시 확률적 실드복구
-    연속타격: (CHARS[name] && CHARS[name].연속타격) || false, // 암살자 패시브: 공격 시 확률적 추가타
+    연속타격: (CHARS[name] && CHARS[name].연속타격) || false, // 암살도적 패시브: 공격 시 확률적 추가타
+    상처전문가: (CHARS[name] && CHARS[name].상처전문가) || false, // 절개도적 패시브: 평타 명중→활성 출혈 스택+1(지속갱신) + 상대 출혈 스택당 자신 회피+2%(최대+20%)
+    cutStk: 0,
+    cutDur: 0, // 절개 출혈: 스택(최대5, 턴당 2%) / 지속(평타 명중 시 3 갱신)
+    lacStk: 0,
+    lacDur: 0, // 열상 출혈: 스택(최대5, 턴당 2%·절개 있으면 3%) / 지속
+    healCut: 0, // 과다출혈: >0이면 회복량 80%↓(20%만) — 남은 턴수
     완벽방어: (CHARS[name] && CHARS[name].완벽방어) || false,
     blockStreak: 0, // 기사 패시브: 연속 방패막기 3회 → 피해 무효
     격노: (CHARS[name] && (CHARS[name].격노 || CHARS[name].피의굶주림)) || false, // 패시브: 체력 낮을수록 공격력↑(회복하면 감소). 피의굶주림=격노+광란 통합
@@ -996,15 +1016,17 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.comboWin > 0) { self.comboWin--; if (self.comboWin === 0) self.comboStep = 0 } // 무도가 콤보 창 만료(2턴 지나면 리셋)
   if (self.enchantTurns > 0) { self.enchantTurns--; if (self.enchantTurns === 0) self.enchant = null } // 스블 인챈트 만료
   for (let i = 0; i < self.cd.length; i++) self.cd[i] = Math.max(0, self.cd[i] - 1) // 전 스킬 슬롯 쿨 감소(3스킬 대응)
-  if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.base.체력 * 0.3))
+  if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + hcut(self, Math.round(ds.base.체력 * 0.3)))
   if (self.autoSpell > 0) self.autoSpell--
   if (self.graze100 > 0) self.graze100--
   if (self.passiveLock > 0) self.passiveLock--
   if (self.chainBolt > 0) self.chainBolt--
   if (self.slow > 0) self.slow--; if (self.silence > 0) self.silence--; if (self.luckLock > 0) self.luckLock--; if (self.blind > 0) self.blind--; if (self.healBlock > 0) self.healBlock--
   if (self.weaponBroken > 0) self.weaponBroken-- // 무기파괴 디버프 감소
-  if (self.healRegen > 0 && self.healBlock === 0) { self.hp = Math.min(ds.maxhp, self.hp + Math.round(ds.base.체력 / 2)); self.healRegen-- }
+  if (self.healRegen > 0 && self.healBlock === 0) { self.hp = Math.min(ds.maxhp, self.hp + hcut(self, Math.round(ds.base.체력 / 2))); self.healRegen-- }
   if (self.bleed > 0) { let bd = Math.max(self.bleedDmg, 0); if (self.sanctuary > 0 && bd > 0) bd = Math.max(Math.round(bd * SANCTUARY_TAKEN), 1); self.hp -= bd; self.bleed--; self._tick.push({ type: 'bleed', dmg: bd, left: self.bleed }) } // 출혈 DoT(방어·실드 무시). 성역 중 85%↓
+  if (self.cutStk > 0 || self.lacStk > 0) { const lacRate = self.cutStk > 0 ? 0.025 : 0.015; let bd = Math.round(ds.maxhp * (self.cutStk * 0.015 + self.lacStk * lacRate)); if (self.sanctuary > 0 && bd > 0) bd = Math.max(Math.round(bd * SANCTUARY_TAKEN), 1); if (bd > 0) self.hp -= bd; if (self.cutDur > 0) { self.cutDur--; if (self.cutDur === 0) self.cutStk = 0 } if (self.lacDur > 0) { self.lacDur--; if (self.lacDur === 0) self.lacStk = 0 } self._tick.push({ type: 'gash', dmg: bd, cut: self.cutStk, lac: self.lacStk }) } // 절개/열상 출혈 DoT(방어·실드 무시, 성역 85%↓). 지속 만료 시 해당 스택 소멸
+  if (self.healCut > 0) self.healCut-- // 과다출혈 회복감소 지속
   if (self.trap > 0) { self.trap--; if (self.trap === 0) { self.gauge += ds.턴 * 0.8; applyCC(self, 'slow', 1); self.slowSec = Math.max(self.slowSec, Math.round(ds.턴 * 0.2 * 10) / 10); self.bleed = 3; self.bleedDmg = self.trapBleed || 0; self._tick.push({ type: 'trapspring', dmg: self.bleedDmg }) } } // 사냥꾼덫 발동: 게이지 밀림 + 1턴 둔화 + 출혈 3턴
   // 버프/디버프 지속은 기절·시전 중에도 흐른다 (기절 중 버프 동결 버그 A2 수정)
   if (self.instVuln > 0) self.instVuln--
@@ -1053,9 +1075,9 @@ function ctxFor (self, foe, ds, df) {
   return { est: estAtk(ds, df), foeTurn: inc, incoming: Math.max(0, inc * 1.3 - self.shield), safe: (self.hp + self.shield) > inc * 4 }
 }
 // 불굴 버스트 완충: 단일 피격이 최대HP 15%↑면 즉시 6% 회복(생존 시). df=피격자 파생. 딜 표기는 회복 전 값 사용
-function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + Math.round(df.maxhp * 0.04)) }
+function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + hcut(foe, Math.round(df.maxhp * 0.04))) }
 function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
-function execAttack (self, foe, ds, df) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
+function execAttack (self, foe, ds, df) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) applyGashStack(foe); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; if (self.defHealCd === 0) { self.hp = Math.min(ds.maxhp, self.hp + healVar(ds.maxhp * 0.05 + ds.base.체력 / 2)); self.defHealCd = 2 } self.defending = true; self.defCombo++; self.defendedLast = true; if (ds.무기.방어 === '패링') { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 방어=경감(defending) + 회복(2쿨·변동). 패링: 피격 시 즉시 반격턴
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
@@ -1086,7 +1108,7 @@ function aiTurn (self, foe, ds, df) {
   if (decideDefend(self, foe, ds, df)) return execDefend(self, ds)
   // 스킬 선택: 점수 최고. 침묵 시 마법 스킬만 제외(물리 스킬은 사용 가능). 제어는 이미 고점수(우선), 버프는 AI 생존여유 게이트
   {
-    const ctx = ctxFor(self, foe, ds, df); const cands = [{ sk: null, sc: ctx.est }] // null=평타
+    const ctx = ctxFor(self, foe, ds, df); const cands = [{ sk: null, sc: ctx.est + gashAtkBonus(self, foe, df) }] // null=평타 (절개도적: 표식 활성 시 스택 빌드 가치 가산)
     for (const sk of SKILLS[self.name]) {
       if (silenced(self, sk.name)) continue
       if (!sk.ready(self, foe, ds, df, ctx)) continue
@@ -1168,7 +1190,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살자: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }] }
+const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살도적: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 절개도적: [{ name: '상처전문가', desc: '평타 명중 시 활성 출혈 표식(절개·열상)마다 스택+1·지속 갱신 · 상대 출혈 스택당 자신 회피 +2%(최대 +20%)' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev
@@ -1362,6 +1384,7 @@ function narrateLine (ev, meName, oppName) {
     case 'sanctuary': { const bits = []; if (ev.heal > 0) bits.push(`체력 **${ev.heal}** 회복`); if (ev.dmg > 0) bits.push(`${te} **${T}**에게 🙏신성 **${ev.dmg}**${ev.repent > 0 ? ` +참회 **${ev.repent}**` : ''}`); return `🙏 ${ae} **${A}** 성역${bits.length ? ' — ' + bits.join(' · ') : ' 유지'} (HP ${ev.selfHp}/${ev.selfMax})` }
     case 'trapspring': return `🪤 ${ae} **${A}**${iga(A)} 사냥꾼덫을 밟았다! 발이 묶이고(둔화) 🩸출혈 시작!`
     case 'bleed': return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${ev.left > 0 ? ` (출혈 ${ev.left}턴 남음)` : ''}`
+    case 'gash': return `🩸 ${ae} **${A}**${eun(A)} 절개·열상 출혈로 **${ev.dmg}** 피해!${(ev.cut + ev.lac) > 0 ? ` (절개${ev.cut}·열상${ev.lac})` : ' (상처 아묾)'}`
     case 'ko': return `💀 ${ae} **${A}**${iga(A)} 쓰러졌다! 체력이 바닥났다.`
     case 'skip': return `⏭️ ${ae} **${A}**${iga(A)} 턴을 넘겼다.`
     case 'surrender': return `🏳️ ${ae} **${A}**${iga(A)} 기권했다. 승부를 포기하고 물러난다…`
@@ -1433,6 +1456,9 @@ function statusGroups (f) {
   if (f.sunder > 0) deb.push(`💢방어약화${f.sunder}`)
   if (f.passiveLock > 0) deb.push(`🔒패시브봉인${f.passiveLock}`)
   if (f.weaponBroken > 0) deb.push(`🔨무기파괴${f.weaponBroken}`)
+  if (f.cutStk > 0) deb.push(`🩸절개${f.cutStk}(${(f.cutStk * 1.5)}%/턴)`)
+  if (f.lacStk > 0) deb.push(`🩸열상${f.lacStk}(${(f.lacStk * (f.cutStk > 0 ? 2.5 : 1.5))}%/턴)`)
+  if (f.healCut > 0) deb.push(`💔회복↓${f.healCut}`)
   if (f.trap > 0) deb.push(`🪤덫${f.trap}`)
   if (f.bleed > 0) deb.push(`🩸출혈${f.bleed}`)
   // 버프(남은턴/스택 표기)

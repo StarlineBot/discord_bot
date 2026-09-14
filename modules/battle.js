@@ -645,7 +645,7 @@ const SKILLS = {
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
     { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
     // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
-    { name: '도발', tag: '제어', coef: '상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5', cd: 6, ready: (s, f, ds, df) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5, exec: (s, f, ds, df) => { f.taunt = 3; s.powBuff = 2; s.powMul = 1.5; s.cd[3] = 6; s.note = '도발' } }
+    { name: '도발', tag: '제어', coef: '상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 공격 ×1.5(강타 2회)', cd: 6, ready: (s, f, ds, df) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5, exec: (s, f, ds, df) => { f.taunt = 3; s.powBuff = 3; s.powMul = 1.5; s.cd[3] = 6; s.note = '도발' } }
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). castCarry(취소 잔여)로 -1턴

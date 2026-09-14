@@ -673,8 +673,8 @@ const SKILLS = {
   ],
   절개도적: [
     // 절개/열상: 평타 딜 + 해당 표식 부여(지속3). 스택은 안 올림 — 스택은 평타 명중 시(상처전문가)만. 절개 있으면 열상 틱 2%→3%
-    { name: '절개', tag: '공격', coef: '평타 딜 + 절개 표식(지속3) · 이후 평타로 스택 적립(스택당 턴당 1.5% 출혈)', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.cutDur === 0 ? df.maxhp * 0.06 : 0), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.cutDur = 3; s.cd[0] = 3; s.note = '절개' } },
-    { name: '열상', tag: '공격', coef: '평타 딜 + 열상 표식(지속3) · 절개 있으면 스택당 턴당 2.5% 출혈', cd: 3, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.lacDur === 0 ? df.maxhp * 0.06 : 0), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.lacDur = 3; s.cd[1] = 3; s.note = '열상' } },
+    { name: '절개', tag: '공격', coef: '평타 딜 + 절개 표식(지속3) · 이후 평타로 스택 적립(스택당 턴당 1.5% 출혈)', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.cutDur === 0 ? df.maxhp * 0.06 : 0), exec: (s, f, ds, df) => { const raw = attack(s, f, ds, df, f.defending); if (raw > 0) f.cutDur = 3; const d = absorb(f, raw); f.hp -= d; s.cd[0] = 3; s.note = raw > 0 ? '절개' : '절개·빗나감' } },
+    { name: '열상', tag: '공격', coef: '평타 딜 + 열상 표식(지속3) · 절개 있으면 스택당 턴당 2.5% 출혈', cd: 3, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.lacDur === 0 ? df.maxhp * 0.06 : 0), exec: (s, f, ds, df) => { const raw = attack(s, f, ds, df, f.defending); if (raw > 0) f.lacDur = 3; const d = absorb(f, raw); f.hp -= d; s.cd[1] = 3; s.note = raw > 0 ? '열상' : '열상·빗나감' } },
     // 과다출혈: 즉시 절개·열상 각 2스택 + 3턴 상대 회복 80%↓ (딜 없음). 세팅+힐차단
     { name: '과다출혈', tag: '디버프', coef: '즉시 절개·열상 각 2스택 부여 + 3턴 상대 회복량 80%↓ (딜 없음)', cd: 6, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => df.maxhp * 0.10 + (f.cutStk + f.lacStk < 4 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { f.cutStk = Math.min((f.cutStk || 0) + 2, 5); f.cutDur = 3; f.lacStk = Math.min((f.lacStk || 0) + 2, 5); f.lacDur = 3; f.healCut = 3; s.cd[2] = 6; s.note = '과다출혈' } },
     // 파열: 절개+열상 스택 소모 → 합계×1.5 확정딜(방어·실드 무시) 후 초기화. 마무리/힐차단용 즉발
@@ -1457,7 +1457,9 @@ function statusGroups (f) {
   if (f.passiveLock > 0) deb.push(`🔒패시브봉인${f.passiveLock}`)
   if (f.weaponBroken > 0) deb.push(`🔨무기파괴${f.weaponBroken}`)
   if (f.cutStk > 0) deb.push(`🩸절개${f.cutStk}(${(f.cutStk * 1.5)}%/턴)`)
+  else if (f.cutDur > 0) deb.push(`🩸절개 표식${f.cutDur}(평타로 적립)`)
   if (f.lacStk > 0) deb.push(`🩸열상${f.lacStk}(${(f.lacStk * (f.cutStk > 0 ? 2.5 : 1.5))}%/턴)`)
+  else if (f.lacDur > 0) deb.push(`🩸열상 표식${f.lacDur}(평타로 적립)`)
   if (f.healCut > 0) deb.push(`💔회복↓${f.healCut}`)
   if (f.trap > 0) deb.push(`🪤덫${f.trap}`)
   if (f.bleed > 0) deb.push(`🩸출혈${f.bleed}`)

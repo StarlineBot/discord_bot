@@ -598,11 +598,11 @@ const SKILLS = {
     // 방패밀쳐내기: 물리딜 + 상대 최대체력 10% 고정딜(방어무시) — HP스케일 관통 탱버스터
     (() => { const spec = { name: '방패밀쳐내기', tag: '공격', type: '물리.일반', mult: 2, dmg: { foeHp: 0.10 }, coef: '타격 + 상대HP10% 관통', cd: 4 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + df.maxhp * 0.10, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 4; s.note = '방패밀쳐내기' } }) })(), // 엔진 이관: attack() 경유(방어기제 작동). mult 재튜닝 대상
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
-    mkSkill(1, { name: '방패들기', tag: '버프', coef: '5턴 방패막기 경감 대폭↑', buff: 5, cd: 6, selfBuff: { blockUp: 5 }, ready: (s, f, ds) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds) }),
+    mkSkill(1, { name: '방패들기', tag: '버프', buff: 5, cd: 6, selfBuff: { blockUp: 5 }, ready: (s, f, ds) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds) }),
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
     { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
     // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
-    mkSkill(3, { name: '도발', tag: '제어', coef: '상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 공격 ×1.5(강타 2회)', cd: 6, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.5 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
+    mkSkill(3, { name: '도발', tag: '제어', cd: 6, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.5 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸
@@ -610,7 +610,7 @@ const SKILLS = {
     // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. uninterruptible=끊기·기절 면역
     { name: '메테오', tag: '시전', coef: '마공×12 · 시전 10턴 (인스턴트 캐스팅 불가 · 시전 끊기 불가)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '메테오') * (1 - df.마방), Math.max(2, 10 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { scheduleCast(s, f, ds, df, CAST_SPELLS.메테오); s.cd[1] = 5 } },
     // 인스턴트캐스팅: 다음 시전 마법을 즉시시전으로(버프·딜 없음). 메테오엔 안 걸림
-    mkSkill(2, { name: '인스턴트캐스팅', tag: '버프', coef: '3턴 — 다음 시전 마법을 즉시 시전(메테오 제외)', buff: 3, cd: 10, selfBuff: { instCast: 3 }, note: '인스턴트 캐스팅', ready: (s) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds) }), // 3턴 시전 리스크 회피 = 고가치
+    mkSkill(2, { name: '인스턴트캐스팅', tag: '버프', buff: 3, cd: 10, selfBuff: { instCast: 3 }, note: '인스턴트 캐스팅', ready: (s) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds) }), // 3턴 시전 리스크 회피 = 고가치
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
     { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 6 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; scheduleCast(s, f, ds, df, CAST_SPELLS.서리구) } },
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
@@ -622,7 +622,7 @@ const SKILLS = {
     boltCastSkill(1, '라이트닝볼트'),
     boltCastSkill(2, '콜드볼트'),
     // 볼트마법조합: 4턴 버프 — 활성 중 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
-    mkSkill(3, { name: '볼트마법조합', tag: '버프', coef: '4턴 — 볼트 시전 시 짝 원소 자동발동(파이어→라이트닝)', buff: 4, cd: 4, selfBuff: { chainBolt: 4 }, note: '볼트마법조합', ready: (s, f, ds, df, x) => s.cd[3] === 0 && s.chainBolt <= 1 && x.safe, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds) })
+    mkSkill(3, { name: '볼트마법조합', tag: '버프', buff: 4, cd: 4, selfBuff: { chainBolt: 4 }, note: '볼트마법조합', ready: (s, f, ds, df, x) => s.cd[3] === 0 && s.chainBolt <= 1 && x.safe, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds) })
   ],
   암살도적: [
     mkSkill(0, { name: '암습', tag: '제어', cc: { stun: 3 }, cd: 10, note: '기절', ready: (s, f) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 3, 'stun') }), // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
@@ -658,7 +658,7 @@ const SKILLS = {
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
     (() => { const spec = { name: '역장폭발', tag: '관통', type: '마법.역장', mult: 4.5, coef: '역장 마공×4.5 관통 · 마나실드엔 흡수 · 시작쿨3', dmgType: '역장', cd: 7 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * 4.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[3] = 7; s.note = '역장폭발' } }) })(), // 엔진 이관: 마법.역장(마나실드 흡수). 침투는 역장베기만
     // 마나대시: 상대 1턴 스턴(아그로 차단) + 본인 5턴 20% 가속. 스턴락 탈출 + 인챈트 셋업 보호
-    mkSkill(4, { name: '마나대시', tag: '버프', coef: '상대 1턴 스턴 + 본인 5턴 턴 20% 가속', buff: 5, cd: 6, cc: { stun: 1 }, selfBuff: { haste: 5 }, note: '마나대시', ready: (s) => s.cd[4] === 0 && s.haste === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.6, s, ds) + (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0) })
+    mkSkill(4, { name: '마나대시', tag: '버프', buff: 5, cd: 6, cc: { stun: 1 }, selfBuff: { haste: 5 }, note: '마나대시', ready: (s) => s.cd[4] === 0 && s.haste === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.6, s, ds) + (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0) })
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
@@ -667,11 +667,11 @@ const SKILLS = {
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
     { name: '시전파괴', tag: '제어', coef: '시전차단 + 2턴 침묵 (캐스터 전용, 딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
     // 무기파괴: 3턴간 상대 딜 1/3(물리·마법 공통). 안티캐스터가 물리 상대에도 통하는 카운터 — 순수 디버프(즉발)
-    mkSkill(2, { name: '무기파괴', tag: '디버프', coef: '4턴 상대 딜 1/3 + 무기막기 불가', cd: 6, debuff: { weaponBroken: 4 }, ready: (s, f) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2 }),
+    mkSkill(2, { name: '무기파괴', tag: '디버프', cd: 6, debuff: { weaponBroken: 4 }, ready: (s, f) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2 }),
     // 파훼: 평소엔 약딜, 무기파괴(약점노출)된 적엔 치명딜. "무기파괴 → 파훼" 처치 콤보
     (() => { const spec = { name: '파훼', tag: '공격', type: '물리.일반', mult: 1.2, bonus: { when: 'foeWeaponBroken', mult: 3.3 }, coef: '타격×1.2 (무기파괴된 적 ×3.3)', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.weaponBroken > 0 ? 3.3 : 1.2), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wb = f.weaponBroken > 0; runDamage(spec, s, f, ds, df); s.cd[3] = 3; s.note = wb ? '파훼 작렬' : '파훼' } }) })(), // 엔진 이관: bonus.when(무기파괴 시 ×3.3)
     // 마법반사: 1턴 마법반사 태세 — 검방(방패)=100% 반사 / 그 외 무기=70% 반사+30% 피격. 마법 평타·볼트 대상(시전마법 제외)
-    mkSkill(4, { name: '마법반사', tag: '버프', coef: '다음 마법 1회 반사 (검방=100% / 그 외=70%)', buff: 1, cd: 4, selfBuff: { magReflect: 1 }, note: '마법반사 태세', ready: (s) => s.cd[4] === 0 && s.magReflect === 0, score: (s, f, ds, df, x) => { const mg = magicShare(f.name); return mg > 0.3 ? df.마공 * 1.2 * mg + 40 : 0 } })
+    mkSkill(4, { name: '마법반사', tag: '버프', buff: 1, cd: 4, selfBuff: { magReflect: 1 }, note: '마법반사 태세', ready: (s) => s.cd[4] === 0 && s.magReflect === 0, score: (s, f, ds, df, x) => { const mg = magicShare(f.name); return mg > 0.3 ? df.마공 * 1.2 * mg + 40 : 0 } })
   ],
   무도가: [
     mudoCombo(), // 슬롯0(cd0): 모핑 콤보 — 육합권→연환전신장→맹룡과강(적중마다 변신). 연환/맹룡은 스킬창에서 제외(순서 강제)
@@ -691,7 +691,7 @@ const SKILLS = {
     { name: '가호', tag: '버프', coef: '3턴 — 물리·마법 방어력 2배', buff: 3, cd: 10, ready: (s, f, ds, df) => s.cd[3] === 0 && s.aegisTurns === 0, score: (s, f, ds, df, x) => x.foeTurn * 2 * (s.hp < ds.maxhp * 0.6 ? 1.2 : 0.6) - repentResetCost(s, ds, df), exec: (s, f, ds, df) => { s.aegisTurns = 3; s.aegisMul = 2; refreshDerived(s, ds); s.cd[3] = 10; s.note = '가호 · 물/마 방어 2배(3턴)' } }
   ],
   세이지: [
-    mkSkill(0, { name: '오토스펠', tag: '버프', coef: '5턴 — 평타마다 볼트 자동발동 + 턴가속', buff: 5, cd: 6, selfBuff: { autoSpell: 5 }, note: '주문각인', ready: (s) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => buffVal(x.est * 1.6, s, ds) }), // 순수버프(공격 제거). 지속5=마법의완전이해(autoSpell>1) 낄 창 확보
+    mkSkill(0, { name: '오토스펠', tag: '버프', buff: 5, cd: 6, selfBuff: { autoSpell: 5 }, note: '주문각인', ready: (s) => s.cd[0] === 0 && s.autoSpell <= 1, score: (s, f, ds, df, x) => buffVal(x.est * 1.6, s, ds) }), // 순수버프(공격 제거). 지속5=마법의완전이해(autoSpell>1) 낄 창 확보
     // 디스펠: 상대 패시브 N턴 봉인 + 현재 버프 즉시 전부 제거(딜 없음). 쿨=봉인+2. 안티버프/안티패시브 현자 도구
     { name: '디스펠', tag: '디버프', coef: '상대 패시브 3턴 봉인 + 버프 즉시 제거 (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const RAMP = { repentStack: 5, frenzy: 4 }; const buffs = BUFF_FIELDS.filter(k => f[k] > 0 && (RAMP[k] ? f[k] >= RAMP[k] : true)).length; const bigPsv = f.passiveLock === 0 && (f.불굴 || f.완벽방어 || f.행운의여신); if (buffs === 0 && !bigPsv) return 0; return x.est * 0.4 + buffs * 45 + (bigPsv ? 30 : 0) }, exec: (s, f, ds, df) => { const L = 3; const cleared = clearBuffs(f, df); f.passiveLock = L; s.cd[1] = L + 2; s.note = '디스펠' + (cleared ? `(버프${cleared} 제거)` : '') } }, // 램프 스택(참회≥5·광란가속≥4)은 임계 이상일 때만 디스펠 발동 가치 인정(1스택 남발 방지). 제거 자체는 clearBuffs가 전부 수행
     // 마법의 완전이해: 2턴간 볼트·마법 편차 무시(상시 풀댐) — 세이지 볼트 딜 극대화 윈도우
@@ -829,7 +829,9 @@ function skillLine (spec) {
 // 스킬 버튼/표시용 쿨 라벨(필드 기반, SKILL_CD 테이블 대체): 시전=시전 / 버프=버프 / 그외=쿨숫자
 function skillCd (sk) { return sk.cast ? '시전' : (sk.buff && sk.cd == null ? '버프' : (sk.cd != null ? sk.cd : '')) }
 // ── 효과 어휘(vocab): heal/cc/selfBuff — 필드로 선언하면 적용+coef 자동 ──
-const CC_LABEL = { stun: '스턴', slow: '둔화', silence: '침묵', vuln: '취약', sunder: '방어약화', missDown: '명중저하', blind: '실명', luckLock: '행운봉인', healBlock: '회복불가', paralyze: '마비', taunt: '도발' }
+const CC_LABEL = { stun: '스턴', slow: '둔화', silence: '침묵', vuln: '취약', sunder: '방어약화', missDown: '명중저하', blind: '실명', luckLock: '행운봉인', healBlock: '회복불가', paralyze: '마비', taunt: '강제평타', weaponBroken: '딜 1/3(무기막기 불가)', healCut: '회복↓' }
+// 버프 필드 → 효과 라벨(selfBuff 자동설명). 동반 필드(powMul·aegisMul·slowSec)는 라벨 없어 자동 생략
+const BUFF_LABEL = { blockUp: '방패막기 경감↑', instCast: '다음 시전 즉발(메테오 제외)', magReflect: '마법 1회 반사', autoSpell: '평타마다 볼트 발동+가속', chainBolt: '볼트 시전 시 짝 원소 자동', graze100: '마법 항상 최대치', haste: '턴 가속', powBuff: '공격력 강화', accBuff: '명중↑', blessTurns: '능력치↑', aegisTurns: '방어력↑', sanctuary: '무적' }
 // 딜 성분 유무: mult>0 / dmg 라이더 / 마법·충격·확정 type / finalDmg·baseFn 중 하나라도 있으면 딜 있음
 function hasDamage (spec) { return (spec.mult > 0) || spec.dmg || spec.finalDmg || spec.baseFn || (spec.type && spec.type !== '물리.일반') }
 // 효과 적용(딜 이후): 회복·CC·자기버프. 스킬은 필드만 선언.
@@ -848,6 +850,8 @@ function effDesc (spec) {
   if (spec.cc) for (const k in spec.cc) p.push(`${spec.cc[k]}턴 ${CC_LABEL[k] || k}`)
   if (spec.debuff) for (const k in spec.debuff) p.push(`${spec.debuff[k]}턴 ${CC_LABEL[k] || k}`)
   if (spec.selfCC) for (const k in spec.selfCC) p.push(`자체 ${spec.selfCC[k]}턴 ${CC_LABEL[k] || k}`)
+  if (spec.selfBuff) for (const k in spec.selfBuff) if (BUFF_LABEL[k]) p.push(`${spec.selfBuff[k]}턴 ${BUFF_LABEL[k]}`) // 라벨 있는 버프 필드만(powMul 등 동반필드 생략)
+  if (spec.selfCost) p.push(`체력 ${Math.round(spec.selfCost * 100)}%↓`) // 자기 체력 대가
   return p.join(' + ')
 }
 // 순수 딜기 팩토리: ready/score/exec를 필드에서 자동 생성(부가효과 없는 스킬). 필드는 그대로 남아 skillLine이 읽음
@@ -871,10 +875,10 @@ function mkSkill (ci, spec) {
 function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 1.8 : 1 }
 // 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
 function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭) + 광란가속 스택(유지 시 턴 가속, 최대 5스택 −15%)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + hcut(s, healVar(ds.maxhp * 0.02 * furyMul(s)))); runDamage(spec, s, f, ds, df); s.frenzy = (s.frenzyWin > 0) ? Math.min((s.frenzy || 0) + 1, 5) : 1; s.frenzyWin = 2; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
-function skBloodRage (ci) { return mkSkill(ci, { name: '피의격노', tag: '버프', buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑ (딜 없음, 순수 버프)', selfBuff: { powBuff: 3, powMul: 1.35, accBuff: 3 }, selfCost: 0.15, note: '피의격노', ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds) }) }
+function skBloodRage (ci) { return mkSkill(ci, { name: '피의격노', tag: '버프', buff: 3, cd: 5, selfBuff: { powBuff: 3, powMul: 1.35, accBuff: 3 }, selfCost: 0.15, note: '피의격노', ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds) }) }
 function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 3, coef: '2턴 스턴 (자기 체력 5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); runDamage(spec, s, f, ds, df); s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
 // 마법의 완전이해(캐스터): 2턴간 마법 편차 무시(graze100=상시 풀댐) — 순수버프. 창고·세이지 공유(hoisted)
-function skFullUnderstanding (ci) { return mkSkill(ci, { name: '마법의완전이해', tag: '버프', buff: 2, cd: 5, coef: '2턴 — 마법 대미지 항상 최대치', selfBuff: { graze100: 2 }, note: '완전이해', ready: (s) => s.cd[ci] === 0 && s.graze100 === 0 && s.autoSpell > 1, score: (s, f, ds, df, x) => buffVal(x.est * 0.7, s, ds) }) } // 볼트 프록 중(오토스펠)일 때만 = 편차무시가 실효
+function skFullUnderstanding (ci) { return mkSkill(ci, { name: '마법의완전이해', tag: '버프', buff: 2, cd: 5, selfBuff: { graze100: 2 }, note: '완전이해', ready: (s) => s.cd[ci] === 0 && s.graze100 === 0 && s.autoSpell > 1, score: (s, f, ds, df, x) => buffVal(x.est * 0.7, s, ds) }) } // 볼트 프록 중(오토스펠)일 때만 = 편차무시가 실효
 // ===== 재사용 스킬 창고(SKILL_POOL) =====
 // 구현만 해두고 배치는 나중에(CHARS/SKILLS에서 참조). ci=쿨슬롯 인덱스. 숫자는 자리표시자(밸런스 차차).
 // 미배치=라이브 무영향(CUSTOM_DEFS와 동일 원칙).

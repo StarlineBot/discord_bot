@@ -235,15 +235,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     // 본 공격 회피 판정(천운/리롤) — 볼트는 별개로 무조건 명중
     const evaded = canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.리롤)) // sigDodge는 상단에서 일괄 처리(물리·마법·혼합 10%)
     const diceB = (canDef && dD.무기.주사위) ? diceBlockMul(A, D) : 1 // 주사위 방어(갬블러): 혼합 공격도 경감(볼트·ph·mg 공통 1회)
-    let bolt = 0
-    if (A.autoSpell > 0 && rand() < 0.90) { // 오토스펠: 공유 볼트(파이어/라이트닝/콜드) 랜덤 발동. 시전 없이 즉발(랜덤발동이라). 1~5연타, 발당 마방·graze
-      const n = rollBoltCount(); const mdef = defMul(D.shield > 0 ? 0 : dD.마방, 마관통); const braw = []; const bnames = []
-      const types = ['파이어볼트', '라이트닝볼트', '콜드볼트']
-      const bn = types[Math.floor(rand() * 3)] // 프록당 원소 1종
-      const em = (psv(A, '원소마스터') && isElemental(bn)) ? ELEM_MASTER : 1 // 원소의 이해: 원소 볼트 대미지 배율
-      for (let i = 0; i < n; i++) { const bb = boltShot(dA, A, bn, mdef, em) * diceB; bolt += bb; braw.push(bb); bnames.push(bn) }
-      A.lastBolt = true; A.boltShots = n; A._braw = braw; A._bnames = bnames
-    }
+    const bolt = 0 // 오토스펠은 execAttack에서 launchBolt로 별도 발사(볼트 전용 딜코드 제거)
     let ph = 0; let mg = 0; let crit = false; 고정 = 0
     if (!evaded) {
       let block = 0
@@ -339,36 +331,13 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     if (dA.무기.스턴확률 && rand() < dA.무기.스턴확률) applyCC(D, 'stun', 1) // 양둔: 확률 스턴
   } else {
     if (canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.천운))) { A.lastDef = '천운'; return 0 } // 마법 완전회피 = 행운 10당 1%(리롤과 분리)
-    // 볼트마법(스킬)을 쓸 때만 볼트 발사(_boltFire). 평타는 매직미사일(단발). 마스터=원소당 확정5발 / 없으면 1~5랜덤
-    const boltTypes = [{ elem: 1.5, bn: '파이어볼트' }, { elem: 1.3, bn: '라이트닝볼트' }, { elem: 1.0, bn: '아이스볼트' }]
-    let boltPlan = null
-    if (A._boltFire) {
-      if (psv(A, 'boltMaster')) {
-        if (A.chainBolt > 0) { const s = [...boltTypes].sort(() => rand() - 0.5); boltPlan = [...Array(BOLT_MASTER_SHOTS).fill(s[0]), ...Array(BOLT_MASTER_SHOTS).fill(s[1])] } else { const t = boltTypes[Math.floor(rand() * 3)]; boltPlan = Array(BOLT_MASTER_SHOTS).fill(t) } // 조합=두 원소 6+6=12발 / 마스터=단일 원소 6발
-      } else { const n = rollBoltCount(); boltPlan = Array.from({ length: n }, () => boltTypes[Math.floor(rand() * 3)]) } // 마스터 없음: 1~5 랜덤
-    }
-    const bolts = boltPlan ? boltPlan.length : 1
+    // 마법 평타 = 매직미사일(단발). 볼트마법은 스킬(runDamage)로 별도 발사 — attack()엔 볼트 코드 없음
     let mBlock = 1
     if (canDef && dD.무기.주사위) { mBlock = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } // 주사위 방어(갬블러)는 마법도 경감 / 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
-    dmg = 0; const braw = []; const bnames = []
     const mdef = defMul(D.shield > 0 ? 0 : dD.마방, 마관통)
-    for (let i = 0; i < bolts; i++) {
-      let b; let bn = null
-      if (boltPlan) { bn = boltPlan[i].bn; b = boltDmg(dA, A, bn, mdef) } else { // 볼트마법(공통 공식) / 매직미사일(완드 평타): 평타계수·마뎀너프, 단발
-        b = dA.마공 * dA.평타계수 * dA.마뎀너프 * mdef * magicGraze(A) // 매직미사일: 마법=크리 없음(magicGraze 편차만)
-      }
-      b *= mBlock
-      if (D.sunder > 0) b *= 1.15
-      dmg += b; braw.push(b); bnames.push(bn)
-    }
-    if (boltPlan && bolts > 1) { // 볼트마법 다단 표시 기록
-      A.lastBolt = true; A._braw = braw; A._bnames = bnames
-      if (A.chainBolt > 0) { // 볼트마법조합(10발): 총딜 감쇠 → 10발이 5발의 2배 안 되게
-        dmg *= BOLT_COMBO_DAMP; for (let k = 0; k < braw.length; k++) braw[k] *= BOLT_COMBO_DAMP; A.boltCombo = true
-      }
-    }
-    // 마법반사(스펠브레이커): 40% 완전반사(시전자가 다 맞음) / 30% 30%만 통과
-    // 마법반사: 시전마법(spellDmg) + 볼트(A.lastBolt)만 반사 — 매직미사일 평타(잔딜)는 무시(반사 낭비 방지)
+    dmg = dA.마공 * dA.평타계수 * dA.마뎀너프 * mdef * magicGraze(A) * mBlock // 매직미사일: 마법=크리 없음(magicGraze 편차만)
+    if (D.sunder > 0) dmg *= 1.15
+    // 마법반사: 볼트만 반사 — 매직미사일 평타(lastBolt false)는 무시(반사 낭비 방지)
     if (D.magReflect > 0 && dmg > 0 && A.lastBolt) { const rr = (dD.무기.방어 === '방패') ? 1.0 : 0.7; A.hp -= Math.max(Math.round(dmg * rr), 1); A.lastRefl = rr >= 1 ? 'full' : 'part'; dmg *= (1 - rr); if (rr >= 1) A._braw = null; D.magReflect = 0 }
   }
   dmg -= 고정
@@ -420,15 +389,9 @@ function d20adv (adv) { const a = 1 + Math.floor(rand() * 20); if (!adv) return 
 function luckFloor (roll, thr, lo, hi, luck) { if (roll <= thr && rand() < (luck || 0) / 100) return lo + Math.floor(rand() * (hi - lo + 1)); return roll }
 // 주사위 방어(갬블러): 피격 시 d20 경감 배율. 중앙10.5=현재방어(×1) / 굴림↑ 경감↑ / 1=대실패(×2) / 20=대성공(×0.02). 방어구·마방·실드 위에 곱해짐. 호출측서 방어자 무기 주사위·능동방어 가능 게이트. A=공격자(굴림 기록용)
 function diceBlockMul (A, D) { const dd = d20adv(D.diceAdv > 0); if (A) { A.diceDef = dd; A.lastDef = '주사위방어' } return dd === 1 ? 2.0 : dd === 20 ? 0.02 : Math.min(Math.max(1 - (dd - 10.5) * 0.06, 0.1), 1.9) }
-function rollBoltCount () { return rand() < 0.10 ? 5 : 1 + Math.floor(rand() * 4) } // 세이지 오토스펠 연타수: 5=10%, 1~4 각 22.5%
-// 공통 볼트마법: 마공 기반 단일 볼트 피해(평타계수·마뎀너프 미적용 — 볼트는 주문이지 무기평타 아님). 세이지·볼트마법사 공유
-const BOLT_ELEM = { 파이어볼트: 1.5, 라이트닝볼트: 1.3, 아이스볼트: 1.0 }
-const BOLT_DAMP = 0.16 // 발당 감쇠(sim 튜닝: 볼트마법사·세이지 공통)
 const SPELL_COEF = { 화염구: 4.8, 메테오: 12, 서리구: 3.1, 충격파: 1.0 } // 시전 마법 = 마공 × 계수 (파생 의존 제거, 마공 기반). 서리구=둔화+짧은시전만큼 낮음 / 메테오=화염구와 raw 딜/턴 1:1(8.4÷유효7 ≈ 4.8÷유효4)이되 시전 길어 착탄 리스크가 대가
 function spellBase (ds, name) { return Math.round(ds.마공 * SPELL_COEF[name]) }
-const BOLT_COMBO_DAMP = 0.85 // 볼트마법조합(10발) 총딜 감쇠 — 마법 무크리 보상 반영(0.7→0.85)
-const ELEM_MASTER = 2.0 // 원소 마스터(세이지 패시브): 볼트마법 대미지 배율 (새 HP스케일 대응 상향 1.5→2.0)
-const BOLT_MASTER_SHOTS = 5 // 볼트마법의 이해(볼트마법사 패시브): 원소당 확정 발수(없으면 1~5 랜덤). 조합 시 두 원소 각 이 발수 (과열 완화 6→5)
+const ELEM_MASTER = 2.0 // 원소 마스터(세이지 패시브): 마법.원소(볼트) 대미지 배율
 // ── 마법 속성 분류(5속성) ──
 // 화염/전격/냉기=원소(마방 적용) · 역장=마방무시 관통 · 무=비원소. 원소의 이해=원소 3종만 강화.
 const MAGIC_ELEM = {
@@ -450,54 +413,34 @@ const ELEMENTAL = new Set(['화염', '전격', '냉기']) // 원소의 이해 �
 function magicElem (name) { return MAGIC_ELEM[name] || '무' }
 function isElemental (name) { return ELEMENTAL.has(magicElem(name)) } // 원소 3종이면 true
 function isPierce (name) { return magicElem(name) === '역장' } // 역장=마방무시 관통
-function boltDmg (dA, A, bn, mdef, scale) {
-  const b = dA.마공 * BOLT_ELEM[bn] * BOLT_DAMP * (scale || 1) * mdef * magicGraze(A) // 마법=크리 없음, 발당 편차는 magicGraze(1.0/0.8/0.4). scale: 세이지 전용 배율
-  return b
+// ── 볼트 = 순수 spec(마법.원소.* + 발수[1,5] + 시전). 볼트 전용 딜코드 없음: 발사는 runDamage로. ──
+// 파이어=고배율/2시전 · 라이트닝=1시전 · 콜드=즉발+둔화(쿨1). 시전형(볼트마법사)·오토스펠(세이지)·조합 공유.
+const BOLT_SPECS = {
+  파이어볼트: { name: '파이어볼트', type: '마법.원소.화염', mult: 0.8, hits: [1, 5], cast: 2 },
+  라이트닝볼트: { name: '라이트닝볼트', type: '마법.원소.전격', mult: 0.5, hits: [1, 5], cast: 1 },
+  콜드볼트: { name: '콜드볼트', type: '마법.원소.얼음', mult: 0.3, hits: [1, 5], cast: 0, cc: { slow: 1 } }
 }
-// ── 시전형 볼트(볼트마법사) ── 화염구처럼 시전마법. 발당 마공×계수, 발수 1~5(볼트마법의 이해면 5고정), 발당 마방·graze 개별.
-// 파이어=고배율/2시전 · 라이트닝=1시전 · 콜드=즉발+둔화(쿨1). 세이지 오토스펠(랜덤 발동)과 무관.
-const BOLT_CAST = { 파이어볼트: { coef: 0.8, cast: 2 }, 라이트닝볼트: { coef: 0.5, cast: 1 }, 콜드볼트: { coef: 0.3, cast: 0, slow: 1 } }
-// 볼트 1발 raw(단일 소스): 마공×계수×배율×마방×graze. 시전형(볼트마법사)·오토스펠(세이지) 공유
-function boltShot (ds, A, bn, mdef, mult) { return ds.마공 * BOLT_CAST[bn].coef * (mult || 1) * mdef * magicGraze(A) }
-// 볼트마법조합(chainBolt): 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
-const BOLT_CHAIN = { 파이어볼트: '라이트닝볼트', 라이트닝볼트: '콜드볼트', 콜드볼트: '파이어볼트' }
-// 볼트마법조합 중 시전한 볼트의 짝 부스트 — 리드+짝 둘 다 이 배율. 파라(파이어리드) 강 / 라콜(라이트닝리드) 중 / 콜파(콜드리드) 약
-const BOLT_COMBO_MULT = { 파이어볼트: 2.0, 라이트닝볼트: 1.7, 콜드볼트: 1.5 }
-function boltChain (s, foe, ds, df, bn, mult) {
-  const cn = BOLT_CHAIN[bn]; if (!cn) return 0 // 발동 여부는 호출측이 판단(시전=시전시작 시점 확정 / 즉발=현재 chainBolt)
-  const mHits = s.boltHits || []; const mNames = s.boltNames || [] // 본 볼트 내역 보존 → 후속과 합쳐 표시
-  let d = boltVolley(s, foe, ds, df, cn, mult); d = absorb(foe, d); foe.hp -= d // mult=리드 볼트의 조합 부스트(짝도 동일 배율)
-  if (BOLT_CAST[cn].slow) { applyCC(foe, 'slow', BOLT_CAST[cn].slow); foe.slowSec = Math.max(foe.slowSec, 1) }
-  s.boltHits = mHits.concat(s.boltHits || []); s.boltNames = mNames.concat(s.boltNames || [])
-  return d
-}
-function boltVolley (s, foe, ds, df, bn, mult) {
-  const shots = psv(s, 'boltMaster') ? BOLT_MASTER_SHOTS : rollBoltCount() // 마스터=확정 / 없으면 1~5
-  const 마관통 = s.tMPen ? 0.25 : 0; const mdef = defMul(df.마방, 마관통)
-  const canDef = foe.stun === 0 && foe.cast === 0
-  if (canDef && rand() < df.리롤) { s.boltDodged = true; s.lastBolt = false; return 0 } // 볼트 전체 완전회피(리롤=운빨, 볼리당 유지)
-  const dice = (canDef && df.무기.주사위) ? diceBlockMul(s, foe) : 1 // 주사위 방어(갬블러): 볼리당 1회 굴림
-  const braw = []; let total = 0
-  for (let i = 0; i < shots; i++) { let mBlock = 1; if (canDef && df.방패막기 && rand() < df.방패막기) { mBlock = (foe.blockUp > 0 ? 0.10 : 0.20); s.lastDef = '방패막기' } let b = boltShot(ds, s, bn, mdef, mult || 1) * mBlock; if (foe.sunder > 0) b *= 1.15; braw.push(b); total += b } // 발당 방패막기·마방·graze 개별(히트별 방어)
-  total = guts(total, foe, df) * dice // 근성·현자균형 + 주사위 방어
-  if (df.마나경감) total *= (1 - df.마나경감)
-  let fin = Math.max(Math.round(total), 1)
-  const sum = braw.reduce((a, b) => a + b, 0) || 1; const hits = braw.map(r => Math.max(1, Math.round(r / sum * fin))); fin = hits.reduce((a, b) => a + b, 0) // 발당 배분(내레이션)
-  s.boltHits = hits; s.boltNames = Array(shots).fill(bn); s.lastBolt = true; s.boltShots = shots
-  return fin
+const BOLT_PAIR = { 파이어볼트: '라이트닝볼트', 라이트닝볼트: '콜드볼트', 콜드볼트: '파이어볼트' } // 볼트마법조합 후속(파이어→라이트닝→콜드→파이어)
+// 볼트 발사: runDamage(볼트 spec) + cc + (조합이면) 짝 볼트 즉시 후속. 시전해소·오토스펠·즉발 공유. 나레이션용 boltHits/boltNames 세팅.
+function launchBolt (s, foe, ds, df, bn, chain) {
+  const one = (nm) => { const sp = BOLT_SPECS[nm]; const r = runDamage(sp, s, foe, ds, df); if (sp.cc && sp.cc.slow && r.landed) { applyCC(foe, 'slow', sp.cc.slow); foe.slowSec = Math.max(foe.slowSec, 1) } return r }
+  const r = one(bn); let hits = r.hits.map(h => h.dealt); let names = r.hits.map(() => bn); let total = r.total
+  if (chain) { const pn = BOLT_PAIR[bn]; const pr = one(pn); hits = hits.concat(pr.hits.map(h => h.dealt)); names = names.concat(pr.hits.map(() => pn)); total += pr.total } // 조합: 짝 볼트 즉시 후속발사
+  s.boltHits = hits; s.boltNames = names; s.lastBolt = true; s.boltShots = hits.length
+  return total
 }
 // 시전형 볼트 스킬 팩토리(창고). 파이어·라이트닝=s.cast 게이트(쿨 없음) / 콜드=즉발(쿨1)
 function boltCastSkill (ci, bn) {
-  const B = BOLT_CAST[bn]
-  const coef = `발당 마공×${B.coef} · 1~5발 · ${B.cast > 0 ? B.cast + '시전' : '즉발'}${B.slow ? ' + 둔화' : ''}`
-  const spec = { name: bn, tag: '공격', coef, cast: B.cast > 0, cd: B.cast > 0 ? null : 1 }
+  const B = BOLT_SPECS[bn]
+  const coef = `발당 마공×${B.mult} · 1~5발 · ${B.cast > 0 ? B.cast + '시전' : '즉발'}${B.cc ? ' + 둔화' : ''}`
+  const spec = { name: bn, tag: '공격', type: B.type, coef, cast: B.cast > 0, cd: B.cast > 0 ? null : 1 }
   return Object.assign({}, spec, {
     // 조합(chainBolt) 중엔 콜드도 1시전이 되므로, 콜드 ready도 시전가능(safe) 요구
     ready: (s, f, ds, df, x) => (B.cast + (s.chainBolt > 0 ? 1 : 0)) > 0 ? (s.cast === 0 && x.safe) : (s.cd[ci] === 0),
-    score: (s, f, ds, df, x) => { const hits = psv(s, 'boltMaster') ? BOLT_MASTER_SHOTS : 3; const combo = s.chainBolt > 0; const cm = combo ? (BOLT_COMBO_MULT[bn] || 1) : 1; const coefSum = B.coef * cm + (combo ? BOLT_CAST[BOLT_CHAIN[bn]].coef * cm : 0); const dmg = ds.마공 * coefSum * hits * (1 - df.마방); const castT = B.cast + (combo ? 1 : 0); return dmgVal(dmg, castT, B.slow ? ctrlVal(x.foeTurn, B.slow, 'slow') : 0, f.hp, x.foeTurn) }, // 조합 중이면 리드+짝 둘 다 부스트(파라 강/라콜 중/콜파 약) → AI가 조합 볼트 우선
+    score: (s, f, ds, df, x) => { const shots = psv(s, 'boltMaster') ? B.hits[1] : 3; const combo = s.chainBolt > 0; const em = psv(s, '원소마스터') ? ELEM_MASTER : 1; const per = ds.마공 * B.mult * em * (1 - df.마방); const dmg = per * shots * (combo ? 2 : 1); const castT = B.cast + (combo ? 1 : 0); return dmgVal(dmg, castT, B.cc ? ctrlVal(x.foeTurn, 1, 'slow') : 0, f.hp, x.foeTurn) }, // 조합=짝 볼트까지 두 발(×2 근사)
     exec: (s, f, ds, df) => {
       const castT = B.cast + (s.chainBolt > 0 ? 1 : 0) // 볼트마법조합: 모든 볼트류 시전 +1(콜드 0→1시전으로 리스크 발생)
-      if (castT > 0) { s.cast = Math.max(1, castT + (ds.무기.castMod || 0)); s.castUninterruptible = false; s.castTotal = s.cast; s.castName = bn; s.castBolt = bn; s.castBoltChain = s.chainBolt > 0; s.cd[ci] = 1; s.note = bn + ' 시전' } else { let d = boltVolley(s, f, ds, df, bn); d = absorb(f, d); f.hp -= d; if (B.slow) { applyCC(f, 'slow', B.slow); f.slowSec = Math.max(f.slowSec, 1) } if (s.chainBolt > 0) boltChain(s, f, ds, df, bn); s.cd[ci] = 1; s.note = bn } // 콜드 즉발(비조합)
+      if (castT > 0) { s.cast = Math.max(1, castT + (ds.무기.castMod || 0)); s.castUninterruptible = false; s.castTotal = s.cast; s.castName = bn; s.castBolt = bn; s.castBoltChain = s.chainBolt > 0; s.cd[ci] = 1; s.note = bn + ' 시전' } else { launchBolt(s, f, ds, df, bn, s.chainBolt > 0); s.cd[ci] = 1; s.note = bn } // 콜드 즉발(비조합/조합)
     }
   })
 }
@@ -973,7 +916,7 @@ function mkFighter (d, name, ai) {
     castUninterruptible: false,
     castDmg: 0,
     castName: null,
-    castBolt: null, // 시전형 볼트(볼트마법사): 착탄 시 boltVolley로 다발 해석
+    castBolt: null, // 시전형 볼트(볼트마법사): 착탄 시 launchBolt로 발사
     castBoltChain: false, // 볼트마법조합: 이 시전볼트가 착탄 시 다음 원소 후속 발동(시전 시작 시점에 확정)
     castTotal: 0,
     instVuln: 0,
@@ -1031,7 +974,6 @@ function mkFighter (d, name, ai) {
     boltMaster: (CHARS[name] && CHARS[name].boltMaster) || false, // 볼트마법사 패시브: 볼트마법 사용 시 원소당 확정 5발
     행운의여신: (CHARS[name] && CHARS[name].행운의여신) ? (CHARS[name].행운 / 1000) : 0, // 갬블러 패시브: 받는 피해마다 이 확률로 피해 1(전 타입)
     boltShots: 0,
-    _boltFire: false,
     diceAdv: 0, // 갬블러 2d20: 주사위를 2개 굴려 높은 값(어드밴티지) 버프
     slow: 0,
     slowSec: 0,
@@ -1066,7 +1008,7 @@ function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - M
 // 시전 1틱 진행: 카운트다운 후 착탄. upkeep 자동진행 + 플레이어 '시전 진행'(턴넘기기) 공용
 function advanceCast (self, foe, ds, df) {
   self.cast--
-  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; self.castBolt = null; const cm = self.castBoltChain ? (BOLT_COMBO_MULT[bn] || 1) : 1; foe.hp -= absorb(foe, boltVolley(self, foe, ds, df, bn, cm)); if (BOLT_CAST[bn].slow) { applyCC(foe, 'slow', BOLT_CAST[bn].slow); foe.slowSec = Math.max(foe.slowSec, 1) } if (self.castBoltChain) { self.castBoltChain = false; boltChain(self, foe, ds, df, bn, cm) } return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df, self)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } }
+  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; const chain = self.castBoltChain; self.castBolt = null; self.castBoltChain = false; launchBolt(self, foe, ds, df, bn, chain); return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df, self)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } }
   return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal }
 }
 function upkeep (self, foe, ds, df, interactive) {
@@ -1139,7 +1081,7 @@ function ctxFor (self, foe, ds, df) {
 // 불굴 버스트 완충: 단일 피격이 최대HP 15%↑면 즉시 6% 회복(생존 시). df=피격자 파생. 딜 표기는 회복 전 값 사용
 function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + hcut(foe, Math.round(df.maxhp * 0.04))) }
 function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
-function execAttack (self, foe, ds, df) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) gashHit(foe); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
+function execAttack (self, foe, ds, df) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) gashHit(foe); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; if (self.autoSpell > 0 && foe.hp > 0 && rand() < 0.90) launchBolt(self, foe, ds, df, ['파이어볼트', '라이트닝볼트', '콜드볼트'][Math.floor(rand() * 3)], false); if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * 0.25)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function execDefend (self, ds) { const before = self.hp; if (self.defHealCd === 0) { self.hp = Math.min(ds.maxhp, self.hp + healVar(ds.maxhp * 0.05 + ds.base.체력 / 2)); self.defHealCd = 2 } self.defending = true; self.defCombo++; self.defendedLast = true; if (ds.무기.방어 === '패링') { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 방어=경감(defending) + 회복(2쿨·변동). 패링: 피격 시 즉시 반격턴
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
@@ -1301,7 +1243,7 @@ function playerOptions (state) {
   const casting = A.cast > 0 && !A.castUninterruptible // 끊기 가능 시전 중: 진행/취소만 노출(끊기불가는 자동진행)
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
-  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_CAST[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1 } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
+  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_SPECS[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1 } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
   return { canDefend: !stunned && A.taunt === 0 && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned, taunted: A.taunt > 0, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
 }
 

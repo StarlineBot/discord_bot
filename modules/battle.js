@@ -1112,7 +1112,7 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.rage > 0) { self.rage--; if (self.rage === 0) self.cd[0] = 2 }
   if (self.luckBuff > 0) { self.luckBuff--; if (self.luckBuff === 0) self.cd[0] = 2 }
   if (foe.sunder > 0) foe.sunder--
-  if (self.crushDur > 0) { self.crushDur--; if (self.crushDur === 0) self.crush = 0 }
+  if (self.crushDur > 0) { self.crushDur--; if (self.crushDur === 0) { self.crush = Math.max(self.crush - 1, 0); if (self.crush > 0) self.crushDur = 2 } } // 분쇄: 지속 만료 시 1스택씩 점감(재부착 지속2) — 출혈과 동일 패턴
   // §13: 마나실드 자가재생 삭제 → 공격 딜 25% 회복(execAttack/execSkill)으로 대체
   if (self.stun > 0) {
     // 끊기 불가 시전(메테오 등): 시작 후엔 돌이킬 수 없음 — 기절 중에도 그대로 진행

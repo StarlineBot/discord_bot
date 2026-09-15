@@ -642,7 +642,7 @@ const SKILLS = {
   ],
   사냥꾼: [
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
-    (() => { const spec = { name: '약점간파', tag: '공격', type: '물리.일반', mult: 2.3, guaranteed: true, forceCrit: true, bonus: { when: 'foeInstVuln', mult: 3.45 }, coef: '타격×2.3 · 확정 크리 · 회피 무시(막기·방어구는 적용)', cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 2.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 4; s.note = '치명타' } }) })(), // 엔진 이관: guaranteed+forceCrit, bonus.when(약점노출 시 ×3.45)
+    (() => { const spec = { name: '약점간파', tag: '공격', type: '물리.일반', mult: 2.3, guaranteed: true, forceCrit: true, bonus: { when: 'foeInstVuln', mult: 3.45 }, coef: '타격×2.3 · 확정 크리 · 회피 무시(막기·방어구는 적용)', cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 2.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 4; s.note = '약점간파' } }) })(), // 엔진 이관: guaranteed+forceCrit, bonus.when(약점노출 시 ×3.45). 치명타는 !! 표기로 대체
     mkSkill(1, { name: '견제사격', tag: '공격', type: '물리.일반', mult: 1, debuff: { missDown: 2 }, note: '명중↓', cd: 4, ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.missDown === 0 ? ctrlVal(x.foeTurn, 2, 'missDown') : 0, f.hp, x.foeTurn) }),
     (() => { const spec = { name: '연발사격', tag: '공격', type: '물리.일반', mult: 1.3, hits: 3, cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 3.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); s.multiHits = r.hits.map(h => h.dealt); s.cd[2] = 5; s.note = '연발' } }) })(), // 엔진 이관: coef 자동생성(타격×1.3×3타), 히트별 interleave
     // 사냥꾼덫: 예약형 — 설치 후 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈). 딜은 출혈로. 카이팅/거리 유지
@@ -1367,7 +1367,7 @@ function narrateLine (ev, meName, oppName) {
   const A = ev.who === 'me' ? meName : oppName
   const T = ev.who === 'me' ? oppName : meName
   const ae = CHARS[A].emoji; const te = CHARS[T].emoji
-  const hurt = (n) => `${te} **${T}**${eun(T)} **${Math.round(n)}**의 피해를 입었다.`
+  const hurt = (n) => `${te} **${T}**${eun(T)} **${Math.round(n)}**${ev.crit ? '!!' : ''}의 피해를 입었다.` // 치명타=숫자 bold + !!
   // 피해 내역: 세이지 혼합(물/마) · 완드 연쇄볼트(발당) · 기본
   // 내역은 흡수(마나실드) 전 값이라, 실제 피해(ev.dmg)에 비례 재배분해 총합과 일치시킴
   const hurtBd = () => {
@@ -1406,13 +1406,12 @@ function narrateLine (ev, meName, oppName) {
   switch (ev.type) {
     case 'attack':
       if (ev.dmg <= 0) return evadeLine()
-      if (ev.crit) return `💥 ${ae} **${A}**의 ${ev.ph != null ? '혼합 ' : ''}공격이 치명타로 적중!${diceTag} ${boltTag}${defTag}${parryTag}${shieldTag}${hurtBd()}${brokeTag}`
       return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}!${diceTag} ${boltTag}${defTag}${parryTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}`
     case 'skill': {
-      const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${ev.note ? ` [${ev.note}]` : ''}`
+      const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${(ev.note && ev.note !== ev.name) ? ` [${ev.note}]` : ''}` // note가 스킬명과 다를 때만 표시(중복 제거)
       const healTag = ev.selfHeal > 0 ? ` 💚**${A}** 체력 **${ev.selfHeal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})` : '' // 힐·회복기 회복량+현재체력
       { const back = ev.selfDmg > 0 ? (ev.def === '완벽방어' ? '' : ` (**${A}** 반동 **${ev.selfDmg}**)`) : '' // 완벽방어 반사는 defTag(반격 X)로 표기 — 반동과 구분
-        if (ev.dmg > 0) return `${head}${diceTag} ${ev.crit ? '치명타! ' : ''}${boltTag}${forceTag}${defTag}${parryTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}${meteorTag}${healTag}${back}`
+        if (ev.dmg > 0) return `${head}${diceTag} ${boltTag}${forceTag}${defTag}${parryTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}${meteorTag}${healTag}${back}`
         if (ev.shieldAbsorb > 0) return `${head} 🔷 ${te} **${T}**${iga(T)} 마나실드로 **${ev.shieldAbsorb}** 흡수!${healTag}${back}` // dmg는 0이지만 실드가 전부 흡수 — 흡수량 표시(마나소각 등)
         if (ev.name === '화염구') return head // 시전 시작(딜 없음)
         if (!ev.attacked) return `${head}${healTag}${back}` // 공격 안 하는 버프/방어 스킬(마력충전 등) → 미스 문구 없이

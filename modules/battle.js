@@ -391,6 +391,17 @@ function luckFloor (roll, thr, lo, hi, luck) { if (roll <= thr && rand() < (luck
 function diceBlockMul (A, D) { const dd = d20adv(D.diceAdv > 0); if (A) { A.diceDef = dd; A.lastDef = '주사위방어' } return dd === 1 ? 2.0 : dd === 20 ? 0.02 : Math.min(Math.max(1 - (dd - 10.5) * 0.06, 0.1), 1.9) }
 const SPELL_COEF = { 화염구: 4.8, 메테오: 12, 서리구: 3.1, 충격파: 1.0 } // 시전 마법 = 마공 × 계수 (파생 의존 제거, 마공 기반). 서리구=둔화+짧은시전만큼 낮음 / 메테오=화염구와 raw 딜/턴 1:1(8.4÷유효7 ≈ 4.8÷유효4)이되 시전 길어 착탄 리스크가 대가
 function spellBase (ds, name) { return Math.round(ds.마공 * SPELL_COEF[name]) }
+// 시전 마법 spec(마법사): 볼트와 동일하게 마법.일반 + 시전턴. 해소는 runDamage. uninterruptible=메테오(끊기·기절 면역), noInstant=인캐 불가.
+const CAST_SPELLS = {
+  화염구: { name: '화염구', type: '마법.일반', mult: SPELL_COEF.화염구, cast: 7 },
+  메테오: { name: '메테오', type: '마법.일반', mult: SPELL_COEF.메테오, cast: 10, uninterruptible: true, noInstant: true },
+  서리구: { name: '서리구', type: '마법.일반', mult: SPELL_COEF.서리구, cast: 6 }
+}
+// 시전 시작: 인캐면 즉발(runDamage), 아니면 예약(castSpec 저장). 반환 true=즉발.
+function scheduleCast (s, f, ds, df, spec) {
+  if (s.instCast > 0 && !spec.noInstant) { s.instCast = 0; runDamage(spec, s, f, ds, df); s.note = '즉시 ' + spec.name; return true }
+  s.cast = Math.max(2, spec.cast + (ds.무기.castMod || 0)); s.castUninterruptible = !!spec.uninterruptible; s.castSpec = spec; s.castTotal = s.cast; s.castName = spec.name; s.note = spec.name + ' 시전'; return false
+}
 const ELEM_MASTER = 2.0 // 원소 마스터(세이지 패시브): 마법.원소(볼트) 대미지 배율
 // ── 마법 속성 분류(5속성) ──
 // 화염/전격/냉기=원소(마방 적용) · 역장=마방무시 관통 · 무=비원소. 원소의 이해=원소 3종만 강화.
@@ -594,13 +605,13 @@ const SKILLS = {
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸
-    { name: '화염구', tag: '시전', coef: '마공×4.8 · 시전 7턴 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '화염구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 7 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(spellBase(ds, '화염구'), f, df, s)); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 7 + (ds.무기.castMod || 0)); s.castUninterruptible = false; s.castDmg = spellBase(ds, '화염구'); s.castTotal = s.cast; s.castName = '화염구'; s.note = '화염구 시전' } } },
+    { name: '화염구', tag: '시전', coef: '마공×4.8 · 시전 7턴 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '화염구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 7 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { scheduleCast(s, f, ds, df, CAST_SPELLS.화염구) } },
     // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. uninterruptible=끊기·기절 면역
-    { name: '메테오', tag: '시전', coef: '마공×12 · 시전 10턴 (인스턴트 캐스팅 불가 · 시전 끊기 불가)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '메테오') * (1 - df.마방), Math.max(2, 10 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { s.cast = Math.max(2, 10 + (ds.무기.castMod || 0)); s.castUninterruptible = true; s.castDmg = spellBase(ds, '메테오'); s.castTotal = s.cast; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
+    { name: '메테오', tag: '시전', coef: '마공×12 · 시전 10턴 (인스턴트 캐스팅 불가 · 시전 끊기 불가)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '메테오') * (1 - df.마방), Math.max(2, 10 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { scheduleCast(s, f, ds, df, CAST_SPELLS.메테오); s.cd[1] = 5 } },
     // 인스턴트캐스팅: 다음 시전 마법을 즉시시전으로(버프·딜 없음). 메테오엔 안 걸림
     { name: '인스턴트캐스팅', tag: '버프', coef: '3턴 — 다음 시전 마법을 즉시 시전(메테오 제외)', buff: 3, cd: 10, ready: (s, f, ds, df) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds), exec: (s, f, ds, df) => { s.instCast = 3; s.cd[2] = 10; s.note = '인스턴트 캐스팅' } }, // 3턴 시전 리스크 회피 = 고가치
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
-    { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 6 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(dmg, f, df, s)); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0)); s.castUninterruptible = false; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
+    { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 6 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; scheduleCast(s, f, ds, df, CAST_SPELLS.서리구) } },
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
     { name: '충격파', tag: '공격', coef: '마공×1.0 + 상대 턴 게이지 초기화 + 1턴 둔화 (기절 중에도 사용)', cd: 8, ready: (s, f, ds, df) => s.cd[4] === 0, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '충격파') * (1 - df.마방), 1, x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 1.5, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df, s); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[4] = 8; s.note = '충격파' }, stunnable: true } // 슬롯4=cd[4] (플레이어 버튼 cd[slot] 정합)
   ],
@@ -914,7 +925,7 @@ function mkFighter (d, name, ai) {
     luckBuff: 0,
     cast: 0,
     castUninterruptible: false,
-    castDmg: 0,
+    castSpec: null,
     castName: null,
     castBolt: null, // 시전형 볼트(볼트마법사): 착탄 시 launchBolt로 발사
     castBoltChain: false, // 볼트마법조합: 이 시전볼트가 착탄 시 다음 원소 후속 발동(시전 시작 시점에 확정)
@@ -1008,7 +1019,7 @@ function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - M
 // 시전 1틱 진행: 카운트다운 후 착탄. upkeep 자동진행 + 플레이어 '시전 진행'(턴넘기기) 공용
 function advanceCast (self, foe, ds, df) {
   self.cast--
-  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; const chain = self.castBoltChain; self.castBolt = null; self.castBoltChain = false; launchBolt(self, foe, ds, df, bn, chain); return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '화염구'), foe, df, self)); return { type: 'castfire', dmg: b - foe.hp, spell: self.castName || '화염구' } }
+  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; const chain = self.castBoltChain; self.castBolt = null; self.castBoltChain = false; launchBolt(self, foe, ds, df, bn, chain); return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); return { type: 'castfire', dmg: b - foe.hp, spell: (sp && sp.name) || self.castName || '화염구' } }
   return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal }
 }
 function upkeep (self, foe, ds, df, interactive) {
@@ -1059,7 +1070,7 @@ function upkeep (self, foe, ds, df, interactive) {
     // 끊기 불가 시전(메테오 등): 시작 후엔 돌이킬 수 없음 — 기절 중에도 그대로 진행
     if (self.cast > 0 && self.castUninterruptible) {
       self.cast--; self.stun--; self.defCombo = 0; self.defendedLast = false
-      if (self.cast === 0) { const b = foe.hp; foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '메테오'), foe, df, self)); return { type: 'castfire', dmg: b - foe.hp, spell: '메테오' } }
+      if (self.cast === 0) { const b = foe.hp; const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); return { type: 'castfire', dmg: b - foe.hp, spell: '메테오' } }
       return { type: 'stun', stunLeft: self.stun, castName: self.castName, castLeft: self.cast, castTotal: self.castTotal } // 기절 중에도 메테오 시전 진행 표시
     }
     if (self.cast > 0) { self.cast = 0 } // 그 외 시전은 기절에 즉시 취소(잔존 없음)
@@ -1202,7 +1213,7 @@ function playerResolve (state, choice) {
   // 시전 중(메테오 제외): '시전 진행'(턴넘기기 그대로 시전 진행) / '시전 취소'(즉시 취소)
   if (A.cast > 0 && !A.castUninterruptible) {
     // 자가 취소 → 시전 스킬 쿨 환불(안 쓴 것으로 처리). 아니면 '시전 진행'
-    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castBolt = null; A.castBoltChain = false; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
+    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castBolt = null; A.castBoltChain = false; A.castSpec = null; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
     recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
     if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
     return advance(state)
@@ -1403,7 +1414,7 @@ function narrateLine (ev, meName, oppName) {
       if (ev.bolt && ev.boltHits && ev.boltHits.length) { const combo = ev.boltNames && new Set(ev.boltNames).size > 1 ? '🔗**원소조합!** ' : ''; return `☄️ ${ae} **${A}**의 ${sp} 작렬! ${combo}${te} **${T}**${eun(T)} ✨${boltGroupStr(ev.boltHits, ev.boltNames, ev.dmg)} 총 **${ev.dmg}**의 피해를 입었다.` } // 시전형 볼트: 발당 분해 표시(파이어볼트(1·3·2·1·4))
       return `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}`
     }
-    case 'castcancel': return `✋ ${ae} **${A}**${iga(A)} ${ev.spell || '시전'}${eul(ev.spell || '시전')} 스스로 취소했다. (충전 일부 잔존)`
+    case 'castcancel': return `✋ ${ae} **${A}**${iga(A)} ${ev.spell || '시전'}${eul(ev.spell || '시전')} 스스로 취소했다.`
     case 'revive': return ev.rtype === 'undying'
       ? `🩸 ${ae} **${A}**${eun(A)} 불굴로 치명상을 버텨내며 일어섰다! (잠시 취약)`
       : `✨ ${ae} **${A}**${eun(A)} 죽음을 딛고 다시 일어섰다!`

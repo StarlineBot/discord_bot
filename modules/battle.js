@@ -7,9 +7,9 @@ const step = (s, per) => Math.floor(s / 10) * per
 const pickArr = (arr) => arr[Math.floor(Math.random() * arr.length)]
 
 const CHARS = {
-  검투사: { emoji: '⚔️', 힘: 85, 지능: 10, 체력: 75, 민첩: 45, 솜씨: 60, 행운: 30, 무기: '검방', 무기의달인: true, id: '무기막기 검투사' },
+  검투사: { emoji: '⚔️', 힘: 85, 지능: 10, 체력: 75, 민첩: 45, 솜씨: 60, 행운: 30, 무기: '소형방패', 무기의달인: true, id: '무기막기 검투사' },
   광전사: { emoji: '🪓', 힘: 100, 지능: 10, 체력: 40, 민첩: 65, 솜씨: 60, 행운: 35, 무기: '양도끼', 피의굶주림: true, id: '물리 광전사' },
-  기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '검방', 완벽방어: true, id: '순수 탱커' },
+  기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '대형방패', 완벽방어: true, id: '순수 탱커' },
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', id: '스태프 마법사' },
   볼트마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', boltMaster: true, id: '볼트 마법사' },
   암살도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 35, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
@@ -28,7 +28,8 @@ const CHARS = {
 const WEAPONS = {
   // 한손 근접=기본배수·속도불변 / 양손(대검류)=평타↑·20%느림 / 쌍검=듀얼(속도불변, 다단) / 활=원거리(공격자 턴+30%)
   // 재설계(§13): 물공배율(기본공 대체)·크리배율·무기막기(무기base 확률)·회피배율·턴배율(tempoMul 대체). 크리확률은 무기 무관(스탯 전담)
-  검방: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 물공배율: 1.2, 크리배율: 1.5, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 1.0, 받는뎀: 0.10, 방어: '방패' },
+  소형방패: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 물공배율: 1.2, 물타: 1.2, 크리배율: 1.7, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.9, 받는뎀: 0.10, 방패경감: 0.50, 방어: '방패' }, // 검투사: 공격형 방패 — 물타1.2·크리배율1.7(한방 크리형)·빠름, 막기 경감 약함(×0.50)
+  대형방패: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 물공배율: 1.1, 물타: 1.1, 크리배율: 1.5, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 1.0, 받는뎀: 0.20, 방패경감: 0.20, 방어: '방패' }, // 기사: 방어형 방패 — 막기 경감 강함(×0.20), 받는뎀 20%(탱), 속도 중립(1.0)
   단검: { 계열: '물리', 평타: '물리', range: '근접', hands: 1, 물공배율: 0.8, 크리배율: 2.5, 무기막기: 0.10, 회피배율: 1.3, 턴배율: 1.0, 방어: '회피' },
   쌍검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.2, 크리배율: 1.8, 무기막기: 0.40, 회피배율: 1.1, 턴배율: 1.0, 다단: 2, 방어: '무기막기' },
   양검: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.8, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 1.1, 방어: '무기막기' },
@@ -45,7 +46,8 @@ const WEAPONS = {
 }
 // 무기 표시 라벨(이모지 + 이름)
 const WEAPON_LABEL = {
-  검방: '🛡️검/방',
+  소형방패: '🗡️🛡소형방패',
+  대형방패: '🛡🛡대형방패',
   단검: '🗡단검',
   쌍검: '🗡🗡쌍검',
   양검: '⚔️양손검',
@@ -207,6 +209,8 @@ function derive (c) {
 }
 function luckRoll (s, ls, p) { if (s) return true; if (ls.used) return false; if (rand() < p) { ls.used = true; return true } return false }
 function gutsMul (d, hp, df, foe) { const coat = 1 - (foe && foe.passiveLock ? 0 : (df.현자균형 || 0)); const p = hp / df.maxhp; if (p >= 0.5) return coat; return coat * (1 - df.근성 * ((0.5 - p) / 0.5)) }
+// 방패막기 경감배율: 막으면 피해 ×이 값(낮을수록 강한 막기). 방패들기(blockUp)=×0.10 / 무기별 방패경감(대형0.20·소형0.50) / 기본 0.20
+function blockMul (D, dD) { return D.blockUp > 0 ? 0.10 : ((dD && dD.무기 && dD.무기.방패경감) || 0.20) }
 // 방어 적용(관통 통합): 방어 × (1 − 관통) 만큼만 감소. 관통 0=방어 전부, 1=방어무시(역장)
 function defMul (def, pen) { return 1 - def * (1 - Math.min(pen || 0, 1)) }
 // ── 패시브 토대 ──
@@ -239,7 +243,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     let ph = 0; let mg = 0; let crit = false; 고정 = 0
     if (!evaded) {
       let block = 0
-      if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' }
+      if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = blockMul(D, dD); A.lastDef = '방패막기' }
       const wBlk = (canDef && !block && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) ? dD.무기막기경감 : 1
       if (wBlk < 1) A.lastDef = '무기막기'
       crit = forceCrit || luckRoll(rand() < (dA.크리 + (A.luckBuff > 0 ? 0.2 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))
@@ -273,12 +277,12 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     castHit(A, D, fin)
     if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + hcut(A, Math.round(dA.base.체력 / 2)))
     if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
-    return perfectGuard(A, D, fin)
+    return perfectGuard(A, D, dD, fin)
   }
   if (dA.fusion) {
     if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 }
     let d = dA.물공 + dA.마공; 고정 = 0
-    if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { d *= dD.무기막기경감; A.lastDef = '무기막기' }
+    if (canDef && dD.방패막기 && rand() < dD.방패막기) { d *= blockMul(D, dD); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { d *= dD.무기막기경감; A.lastDef = '무기막기' }
     d *= (1 - Math.max(crushArmor(D, dD.물방) * (dA.sigPen ? 0.7 : 1), crushArmor(D, dD.마방)))
     if (D.sunder > 0) d *= 1.15
     if (rand() < 0.30) { d *= 0.70; A.grazed = true }
@@ -303,7 +307,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     castHit(A, D, fin)
     if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + hcut(A, Math.round(dA.base.체력 / 2)))
     if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
-    return perfectGuard(A, D, fin)
+    return perfectGuard(A, D, dD, fin)
   }
   if (!magic) {
     // 활(원거리): 근접 공격자가 나를 때리면 자기 다음 턴 지연(거리 비용, 공격자 턴 %)
@@ -316,7 +320,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
       if (!guaranteed && !luckRoll(rand() < (dA.명중 - (A.missDown > 0 ? 0.2 : 0) - (A.blind > 0 ? 0.3 : 0)), ls, (A.luckLock > 0 ? 0 : dA.리롤) + (A.luckBuff > 0 ? 0.2 : 0))) continue // 히트별 명중: 빗나간 히트 스킵
       if (canDef && !guaranteed && luckRoll(rand() < Math.max(dD.물회 - aimCut, 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; continue } // 히트별 회피
       let block = 0; let wblk = 1
-      if (canDef && dD.무기.주사위) { block = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = dD.무기막기경감; A.lastDef = '무기막기' } // 주사위방어: 중앙(10.5)=현재방어(block1.0×물방), 굴림↑=경감↑, 1=대실패(×2), 20=대성공(×0.02). 히트별 막기
+      if (canDef && dD.무기.주사위) { block = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { block = blockMul(D, dD); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { wblk = dD.무기막기경감; A.lastDef = '무기막기' } // 주사위방어: 중앙(10.5)=현재방어(block1.0×물방), 굴림↑=경감↑, 1=대실패(×2), 20=대성공(×0.02). 히트별 막기
       let h = dA.무기.주사위 ? (atkD === 1 ? 0 : dA.물공 * (atkD === 20 ? 3 : 1 + (atkD - 10.5) * 0.06)) : dA.물공 * physSwing(dA) * perMul // 주사위공격: 중앙(10.5)=현재공격, 굴림↑=딜↑, 1=대실패(0), 20=대성공(×3)
       h *= block || wblk
       h *= defMul(D.shield > 0 ? 0 : dD.물방, 물관통) // 물방 × (1-물관통)
@@ -333,7 +337,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
     if (canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.천운))) { A.lastDef = '천운'; return 0 } // 마법 완전회피 = 행운 10당 1%(리롤과 분리)
     // 마법 평타 = 매직미사일(단발). 볼트마법은 스킬(runDamage)로 별도 발사 — attack()엔 볼트 코드 없음
     let mBlock = 1
-    if (canDef && dD.무기.주사위) { mBlock = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { mBlock = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } // 주사위 방어(갬블러)는 마법도 경감 / 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
+    if (canDef && dD.무기.주사위) { mBlock = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { mBlock = blockMul(D, dD); A.lastDef = '방패막기' } // 주사위 방어(갬블러)는 마법도 경감 / 방패는 마법도 막음(최종 마공10% 바닥 보장 → 0딜 방지)
     const mdef = defMul(D.shield > 0 ? 0 : dD.마방, 마관통)
     dmg = dA.마공 * dA.평타계수 * dA.마뎀너프 * mdef * magicGraze(A) * mBlock // 매직미사일: 마법=크리 없음(magicGraze 편차만)
     if (D.sunder > 0) dmg *= 1.15
@@ -364,14 +368,14 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   if (A.tLeech) A.hp = Math.min(dA.maxhp, A.hp + Math.round(dA.base.체력 / 2))
   if (D.tThorns) A.hp -= Math.max(Math.round(fin * 0.05), 1)
   if (A.마나환류 && magic && fin > 0 && rand() < 0.30) A.shield = Math.min(Math.round(dA.maxhp * 0.22), A.shield + Math.round(fin * 0.4)) // 마나환류(마법사 패시브): 마법딜 30% 확률로 40% 실드복구
-  return perfectGuard(A, D, fin)
+  return perfectGuard(A, D, dD, fin)
 }
 function guts (dmg, foe, df) { const p = foe.hp / df.maxhp; if (p < 0.5) dmg *= (1 - df.근성 * ((0.5 - p) / 0.5)); dmg *= (1 - (foe.passiveLock ? 0 : (df.현자균형 || 0))); return dmg }
 // 완벽방어!(기사 패시브): 방패막기를 연속 PERFECT_N회 성공하면 그 순간 받는 피해의 0.7을 공격자에게 즉시 반사(실드 무시 직접딜). 스트릭은 방패막기 외 결과에 리셋. 방패들기(90% 막기)와 강시너지
 const PERFECT_N = 2
-function perfectGuard (A, D, fin) {
+function perfectGuard (A, D, dD, fin) {
   if (!psv(D, '완벽방어')) return fin
-  if (A.lastDef === '방패막기') { D.blockStreak = (D.blockStreak || 0) + 1; if (D.blockStreak >= PERFECT_N) { D.blockStreak = 0; A.lastDef = '완벽방어'; const preBlock = fin / (D.blockUp > 0 ? 0.10 : 0.20); A.hp -= Math.max(Math.round(preBlock * 0.7), 1) } } else { D.blockStreak = 0 }
+  if (A.lastDef === '방패막기') { D.blockStreak = (D.blockStreak || 0) + 1; if (D.blockStreak >= PERFECT_N) { D.blockStreak = 0; A.lastDef = '완벽방어'; const preBlock = fin / blockMul(D, dD); A.hp -= Math.max(Math.round(preBlock * 0.7), 1) } } else { D.blockStreak = 0 }
   return fin
 }
 // 물리 딜 변수: 솜씨 기반 풀댐 확률, 빗맞으면 70~100% 유동 (예측성↓, 명중형=일관/난동형=도박)
@@ -403,7 +407,7 @@ function scheduleCast (s, f, ds, df, spec) {
   const cut = s.castCut > 0 ? 1 : 0; s.castCut = 0 // 시전 끊기·취소 버프 소비: 다음 시전 -1턴
   s.cast = Math.max(2, spec.cast + (ds.무기.castMod || 0) - cut); s.castUninterruptible = !!spec.uninterruptible; s.castSpec = spec; s.castTotal = s.cast; s.castName = spec.name; s.note = spec.name + ' 시전'; return false
 }
-const ELEM_MASTER = 2.0 // 원소 마스터(세이지 패시브): 마법.원소(볼트) 대미지 배율
+const ELEM_MASTER = 1.7 // 원소 마스터(세이지 패시브): 마법.원소(볼트) 대미지 배율
 // ── 마법 속성 분류(5속성) ──
 // 화염/전격/냉기=원소(마방 적용) · 역장=마방무시 관통 · 무=비원소. 원소의 이해=원소 3종만 강화.
 const MAGIC_ELEM = {
@@ -481,7 +485,7 @@ function impactDmg (A, D, dA, dD, base) {
   if (canDef && luckRoll(false, lsD, (D.luckLock > 0 ? 0 : dD.천운))) { A.lastDef = '천운'; return 0 } // 천운 완전회피
   if (canDef && luckRoll(rand() < Math.max(dD.물회 - (dA.sigAim ? 0.05 : 0), 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 } // 회피
   let blk = 1
-  if (canDef && dD.무기.주사위) { blk = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { blk = (D.blockUp > 0 ? 0.10 : 0.20); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { blk = dD.무기막기경감; A.lastDef = '무기막기' } // 주사위 방어(갬블러)는 충격도 경감 / 막기
+  if (canDef && dD.무기.주사위) { blk = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { blk = blockMul(D, dD); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { blk = dD.무기막기경감; A.lastDef = '무기막기' } // 주사위 방어(갬블러)는 충격도 경감 / 막기
   let d = base * blk
   if (rand() < 0.30) { d *= 0.70; A.grazed = true } // 빗맞음
   d *= gutsMul(dD, D.hp, dD, D) // 근성·현자균형(내재 강인함은 적용, 방어구만 관통)
@@ -496,7 +500,7 @@ function trueDmg (A, D, dD, base) {
   return absorb(D, Math.max(Math.round(base), 1)) // 실드 흡수, 방어구·능동방어는 무시
 }
 // 시전 마법(화염구/인캐) 피해: 일반 마법과 동일 — 천운 완전회피 / 마방 감소 / 빗맞힘 / 근성
-function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = (foe.blockUp > 0 ? 0.10 : 0.20); foe.spellBlocked = true }; if (df.무기.주사위 && foe.stun === 0 && foe.cast === 0) blk *= diceBlockMul(atk, foe); let dmg = Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : crushArmor(foe, df.마방))) * magicGraze(), foe, df)), 0); if (atk && foe.magReflect > 0 && dmg > 0) { const rr = (df.무기.방어 === '방패') ? 1.0 : 0.7; atk.hp -= Math.max(Math.round(dmg * rr), 1); atk.lastRefl = rr >= 1 ? 'full' : 'part'; dmg = Math.round(dmg * (1 - rr)); foe.magReflect = 0 }; return dmg } // §13: 실드 있으면 마방 경감 스킵. 마법반사: 시전마법도 반사(검방100%/그외70%) — 시전·즉시 모두 spellDmg 경유라 통일
+function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = blockMul(foe, df); foe.spellBlocked = true }; if (df.무기.주사위 && foe.stun === 0 && foe.cast === 0) blk *= diceBlockMul(atk, foe); let dmg = Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : crushArmor(foe, df.마방))) * magicGraze(), foe, df)), 0); if (atk && foe.magReflect > 0 && dmg > 0) { const rr = (df.무기.방어 === '방패') ? 1.0 : 0.7; atk.hp -= Math.max(Math.round(dmg * rr), 1); atk.lastRefl = rr >= 1 ? 'full' : 'part'; dmg = Math.round(dmg * (1 - rr)); foe.magReflect = 0 }; return dmg } // §13: 실드 있으면 마방 경감 스킵. 마법반사: 시전마법도 반사(방패100%/그외70%) — 시전·즉시 모두 spellDmg 경유라 통일
 // 시전 중 피격 → 5% 시전 중단(취소). 피해가 실제로 들어갔을 때만("정말 운 없을 때")
 function castHit (A, D, fin) { if (D.cast > 0 && !D.castUninterruptible && fin > 0 && rand() < 0.05) { D.cast = 0; D.castCut = 2; A.brokeCast = true } } // 시전 중 피격 5% 시전 취소(끊기 불가 제외) → castCut 버프(다음 시전 -1턴)
 // 신성(holy) 피해: 마방 적용 마법피해 + 참회 시너지. 참회 걸린 상대에 신성딜 → 최대체력5% 고정딜(관통) 추가. 매 신성타격마다 참회(1턴) 생성·갱신 → 신성 연타 자체시너지
@@ -578,10 +582,10 @@ function mudoCombo () {
 const SKILLS = {
   검투사: [
     // 분쇄: 1쿨 타격 + 상대 물방·마방 감소 스택(스택당 -5%p, 최대5, 지속2). 스팸으로 방어를 깎아 후속딜 증폭
-    (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.3, dmg: { foeHp: 0.02 }, stack: '물방·마방 -5%p 스택(적중·최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.3 + df.maxhp * 0.02, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // 엔진 이관: type/mult/dmg 선언 → runDamage. 라이더(상대HP2%)·crush는 명중 게이팅
-    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.06, selfStr: 0.5 }, recoil: 0.04, cc: { stun: 2 }, cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + Math.round(ds.base.힘 * 0.5) + df.maxhp * 0.06, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // 엔진 이관: attack() 경유(패링·경감 자동). 스턴 명중&비패링 게이팅, 반동 recoil 필드. mult 재튜닝 대상
+    (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.6, dmg: { foeHp: 0.03 }, stack: '물방·마방 -5%p 스택(적중·최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.6 + df.maxhp * 0.03, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // 엔진 이관: type/mult/dmg 선언 → runDamage. 라이더(상대HP2%)·crush는 명중 게이팅
+    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.08, selfStr: 0.5 }, recoil: 0.04, cc: { stun: 2 }, cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + Math.round(ds.base.힘 * 0.5) + df.maxhp * 0.08, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // 엔진 이관: attack() 경유(패링·경감 자동). 스턴 명중&비패링 게이팅, 반동 recoil 필드
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
-    { name: '방해', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
+    { name: '방해', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 4 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
     mkSkill(3, { name: '발차기', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 1, 'stun') })
   ],
@@ -594,14 +598,14 @@ const SKILLS = {
     { name: '해방', tag: '회복', cd: 15, stunnable: true, coef: '체력 15% 즉시회복 + 행동불능 즉시해제', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => (s.hp > 0 && s.hp < ds.maxhp * 0.35) ? x.est * 0.6 : 0, exec: (s, f, ds, df) => { const broke = s.stun > 0 || s.stunned; s.stun = 0; s.stunned = false; s.hp = Math.min(s.hp + hcut(s, healVar(ds.maxhp * 0.15)), ds.maxhp); s.cd[3] = 15; s.note = broke ? '해방(속박 해제)' : '해방' } }
   ],
   기사: [
-    // 방패밀쳐내기: 물리딜 + 상대 최대체력 10% 고정딜(방어무시) — HP스케일 관통 탱버스터
-    (() => { const spec = { name: '방패밀쳐내기', tag: '공격', type: '물리.일반', mult: 2, dmg: { foeHp: 0.10 }, cd: 4 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + df.maxhp * 0.10, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 4; s.note = '방패밀쳐내기' } }) })(), // 엔진 이관: attack() 경유(방어기제 작동). mult 재튜닝 대상
+    // 방패밀쳐내기: 물리딜(배율×2) + 상대 최대체력 12%를 배율로 추가 — 스윙 명중 시 합산(회피·막기·실드 모두 적용), HP스케일 탱버스터
+    (() => { const spec = { name: '방패밀쳐내기', tag: '공격', type: '물리.일반', mult: 2, dmg: { foeHp: 0.12 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + df.maxhp * 0.12, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 3; s.note = '방패밀쳐내기' } }) })(), // 엔진 이관: attack() 경유(방어기제 작동)
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
     mkSkill(1, { name: '방패들기', tag: '버프', buff: 5, cd: 6, selfBuff: { blockUp: 5 }, ready: (s, f, ds) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds) }),
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
     { name: '방패가격', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
-    // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
-    mkSkill(3, { name: '도발', tag: '제어', cd: 6, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.5 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
+    // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.8. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
+    mkSkill(3, { name: '도발', tag: '제어', cd: 5, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.8 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸
@@ -669,7 +673,7 @@ const SKILLS = {
     mkSkill(2, { name: '무기파괴', tag: '디버프', cd: 6, debuff: { weaponBroken: 4 }, ready: (s, f) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2 }),
     // 파훼: 평소엔 약딜, 무기파괴(약점노출)된 적엔 치명딜. "무기파괴 → 파훼" 처치 콤보
     (() => { const spec = { name: '파훼', tag: '공격', type: '물리.일반', mult: 1.2, bonus: { when: 'foeWeaponBroken', mult: 3.3 }, cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.weaponBroken > 0 ? 3.3 : 1.2), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wb = f.weaponBroken > 0; runDamage(spec, s, f, ds, df); s.cd[3] = 3; s.note = wb ? '파훼 작렬' : '파훼' } }) })(), // 엔진 이관: bonus.when(무기파괴 시 ×3.3)
-    // 마법반사: 1턴 마법반사 태세 — 검방(방패)=100% 반사 / 그 외 무기=70% 반사+30% 피격. 마법 평타·볼트 대상(시전마법 제외)
+    // 마법반사: 1턴 마법반사 태세 — 방패=100% 반사 / 그 외 무기=70% 반사+30% 피격. 마법 평타·볼트 대상(시전마법 제외)
     mkSkill(4, { name: '마법반사', tag: '버프', buff: 1, cd: 4, selfBuff: { magReflect: 1 }, note: '마법반사 태세', ready: (s) => s.cd[4] === 0 && s.magReflect === 0, score: (s, f, ds, df, x) => { const mg = magicShare(f.name); return mg > 0.3 ? df.마공 * 1.2 * mg + 40 : 0 } })
   ],
   무도가: [

@@ -676,9 +676,9 @@ const SKILLS = {
   무도가: [
     mudoCombo(), // 슬롯0(cd0): 모핑 콤보 — 육합권→연환전신장→맹룡과강(적중마다 변신). 연환/맹룡은 스킬창에서 제외(순서 강제)
     // 발경(슬롯1/cd1): 적 물공/마공 중 높은쪽 ×1.2 충격딜(방어구·실드 무시). 고공격 상대 카운터
-    (() => { const spec = { name: '발경', tag: '공격', type: '물리.충격', coefFn: (ds, df) => 1 + Math.max(df.물방, df.마방) * 4, coef: '물공×(1+상대 높은방어×4) · 충격(방어구·실드 무시, 탱커일수록↑)', dmgType: '충격', cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.coefFn(ds, df), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[1] = 5; s.note = '발경' } }) })(), // 엔진 이관: 물리.충격 + coefFn(식-계수)
+    mkSkill(1, { name: '발경', tag: '공격', type: '물리.충격', coefFn: (ds, df) => 1 + Math.max(df.물방, df.마방) * 4, coefLabel: '물공×(1+상대 높은방어×4)', dmgType: '충격', note: '발경', cd: 5, ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 + Math.max(df.물방, df.마방) * 4), 1, 0, f.hp, x.foeTurn) }), // coef 자동생성(💥충격 + coefLabel)
     // 아수라패황권(슬롯2/cd2): 자기 체력→1, 상대 최대HP×0.8 충격, 3턴 자체둔화. 올인 피니셔(시작쿨7)
-    (() => { const spec = { name: '아수라패황권', tag: '공격', type: '물리.충격', dmg: { foeHp: 0.8 }, recoilCur: 0.99, coef: '상대 최대HP×0.8 충격 · 자기 체력 99%↓ · 3턴 자체둔화 (올인 피니셔, 회피 시 사망각)', dmgType: '충격', cd: 14 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0 && s.hp > 1, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 }, exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); applyCC(s, 'slow', 3); s.slowSec = Math.max(s.slowSec, Math.round(ds.턴 * 0.5 * 10) / 10); s.cd[2] = 14; s.note = '아수라패황권!' } }) })() // 엔진 이관: 물리.충격 + foeHp 라이더 + recoilCur(현재체력 99%)
+    mkSkill(2, { name: '아수라패황권', tag: '공격', type: '물리.충격', dmg: { foeHp: 0.8 }, recoilCur: 0.99, selfCC: { slow: 3 }, dmgType: '충격', note: '아수라패황권!', cd: 14, ready: (s) => s.cd[2] === 0 && s.hp > 1, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 } }) // coef 자동생성(💥충격 + foeHp + recoilCur + selfCC)
   ],
   프리스트: [
     // 힐: 즉시 체력 30% + 지능×1 회복(짧은 쿨 유지기). 회복불가 중엔 사용 불가
@@ -806,18 +806,22 @@ function buffVal (benefit, s, ds) { const hp = (s && ds && ds.maxhp) ? Math.min(
 // 참회 리셋 기회비용(프리스트): 성역 없이 비신성 버프를 쓰면 쌓은 참회가 리셋됨. 성역 활성 중엔 매턴 holy로 유지되니 비용 0, 성역 임박이면 곧 급속 재적재라 비용↓, 성역이 먼 쿨이면 평타로만 느리게 복구라 비용↑. → 축복·가호·힐 스코어에서 차감해 AI가 "성역 없이 고참회 붕괴"를 피하게.
 function repentResetCost (s, ds, df) { if (!df || s.sanctuary > 0 || (s.repentStack || 0) < 4) return 0; const lostPerTurn = df.maxhp * 0.007 * s.repentStack; const rebuildTurns = s.cd[2] <= 2 ? 2 : 5; return lostPerTurn * rebuildTurns * 0.5 } // W=0.5 가중치. cd[2]=성역슬롯
 // 자동 설명: 선언 필드에서 딜 성분 문자열 생성(수동 문자열 없음)
+const TYPE_TAG = { '물리.충격': '💥충격 ', '마법.역장': '🟣역장 ', 확정: '🎯확정 ' } // 딜 전달 타입 마커
 function dmgDesc (spec) {
-  const D = spec.dmg || {}; const p = []; const M = spec.mult != null ? spec.mult : 1
-  if (M) p.push(`타격×${M}${spec.hits ? `×${spec.hits}타` : ''}`)
-  if (D.selfHp) p.push(`자기HP ${Math.round(D.selfHp * 100)}%`)
-  if (D.foeHp) p.push(`상대HP ${Math.round(D.foeHp * 100)}% 관통`)
+  const D = spec.dmg || {}; const p = []; const tag = TYPE_TAG[spec.type] || ''
+  if (spec.coefLabel) p.push(tag + spec.coefLabel) // 식-계수(발경 등): 라벨 텍스트
+  else if (spec.mult > 0) p.push(`${tag}타격×${spec.mult}${spec.hits ? `×${Array.isArray(spec.hits) ? spec.hits.join('~') : spec.hits}타` : ''}`)
+  if (D.foeHp) p.push(`${p.length ? '' : tag}상대 최대체력 ${Math.round(D.foeHp * 100)}%`)
+  if (D.selfHp) p.push(`자기 최대체력 ${Math.round(D.selfHp * 100)}%`)
   if (D.force) p.push(`역장 마공×${D.force}`)
   if (D.selfStr) p.push(`힘×${D.selfStr}`)
+  if (spec.recoil) p.push(`자기체력 ${Math.round(spec.recoil * 100)}%↓`)
+  if (spec.recoilCur) p.push(`자기체력 ${Math.round(spec.recoilCur * 100)}%↓`)
   return p.join(' + ')
 }
-// 스킬 한 줄 자동설명: coef(특수계수 예외 문자열) 우선, 없으면 dmgDesc. cd/buff 자동.
+// 스킬 한 줄 자동설명: coef(수동 예외) 우선, 없으면 dmgDesc(딜)+effDesc(효과) 자동. cd/buff 자동.
 function skillLine (spec) {
-  const auto = [((spec.mult > 0 || spec.dmg) ? dmgDesc(spec) : ''), effDesc(spec)].filter(Boolean).join(' + ')
+  const auto = [dmgDesc(spec), effDesc(spec)].filter(Boolean).join(' + ')
   const body = spec.coef || auto
   const cd = spec.cast ? '' : (spec.cd != null ? ` (쿨${spec.cd})` : (spec.buff ? ` (${spec.buff}턴)` : '')) // 시전 스킬은 tag/coef가 '시전'을 이미 표기 → 접미사 생략
   return `${TAG_EMO[spec.tag] || ''} **${spec.name}** — ${spec.tag}${body ? ' ' + body : ''}${cd}`
@@ -834,6 +838,7 @@ function applyEffects (spec, s, f, ds, df) {
   if (spec.cc) for (const k in spec.cc) { applyCC(f, k, spec.cc[k]); if (k === 'slow') f.slowSec = Math.max(f.slowSec, spec.slowSec || 1) }
   if (spec.debuff) for (const k in spec.debuff) f[k] = Math.max(f[k] || 0, spec.debuff[k]) // 직접 필드 디버프(weaponBroken·healCut 등, applyCC 아님)
   if (spec.selfBuff) for (const k in spec.selfBuff) s[k] = spec.selfBuff[k] // 자기 버프 필드 세팅(powMul 등 배율 포함)
+  if (spec.selfCC) for (const k in spec.selfCC) { applyCC(s, k, spec.selfCC[k]); if (k === 'slow') s.slowSec = Math.max(s.slowSec, Math.round(ds.턴 * 0.5 * 10) / 10) } // 자체 CC(아수라 자체둔화)
   if (spec.selfCost) s.hp -= Math.round(ds.maxhp * spec.selfCost) // 자기 체력 대가(피의격노 등)
 }
 // 효과 설명 자동생성(coef의 효과분)
@@ -842,6 +847,7 @@ function effDesc (spec) {
   if (spec.heal) { const h = spec.heal; const pct = typeof h === 'number' ? h : (h.pct || 0); p.push(`체력 ${Math.round(pct * 100)}%${(typeof h === 'object' && h.stat) ? '+' + h.stat : ''} 회복`) }
   if (spec.cc) for (const k in spec.cc) p.push(`${spec.cc[k]}턴 ${CC_LABEL[k] || k}`)
   if (spec.debuff) for (const k in spec.debuff) p.push(`${spec.debuff[k]}턴 ${CC_LABEL[k] || k}`)
+  if (spec.selfCC) for (const k in spec.selfCC) p.push(`자체 ${spec.selfCC[k]}턴 ${CC_LABEL[k] || k}`)
   return p.join(' + ')
 }
 // 순수 딜기 팩토리: ready/score/exec를 필드에서 자동 생성(부가효과 없는 스킬). 필드는 그대로 남아 skillLine이 읽음

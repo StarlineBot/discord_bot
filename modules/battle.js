@@ -584,7 +584,7 @@ const SKILLS = {
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
     { name: '방해', tag: '제어', coef: '시전 중이면 차단 / 아니면 1턴 스턴', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
-    { name: '발차기', tag: '제어', coef: '1턴 스턴 (딜 없음)', cd: 3, ready: (s, f, ds, df) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 1, 'stun'), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); s.cd[3] = 3; s.note = '기절' } }
+    mkSkill(3, { name: '발차기', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 1, 'stun') })
   ],
   광전사: [
     // 개편: 피 태우는 하이리스크(불굴 없음). 저체력→광란(회복↑·속도↑·제어면역) + 격노(피격 시 공격력↑)
@@ -625,7 +625,7 @@ const SKILLS = {
     { name: '볼트마법조합', tag: '버프', coef: '4턴 — 볼트 시전 시 짝 원소 자동발동 + 둘 다 계수↑(파라 강·라콜 중·콜파 약)', buff: 4, cd: 4, ready: (s, f, ds, df, x) => s.cd[3] === 0 && s.chainBolt <= 1 && x.safe, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds), exec: (s, f, ds, df) => { s.chainBolt = 4; s.cd[3] = 4; s.note = '볼트마법조합' } }
   ],
   암살도적: [
-    { name: '암습', tag: '제어', coef: '3턴 스턴 (딜 없음, 후속타로 딜)', cd: 10, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 3, 'stun'), exec: (s, f, ds, df) => { applyCC(f, 'stun', 3); s.cd[0] = 10; s.note = '기절' } }, // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
+    mkSkill(0, { name: '암습', tag: '제어', cc: { stun: 3 }, cd: 10, note: '기절', ready: (s, f) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 3, 'stun') }), // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
     (() => { const spec = { name: '처형', tag: '공격', type: '물리.일반', mult: 5, coef: '물공×5 (상대 HP25%↓ 처형)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[1] = 5; s.note = '처형' } }) })(), // 엔진 이관: attack() 경유(회피·막기·크리 작동). mult 재튜닝 대상
     (() => { const spec = { name: '백스텝', tag: '공격', type: '물리.일반', mult: 1.5, bonus: { when: 'foeStun', mult: 2.5 }, coef: '타격×1.5 (암습 스턴 중 ×2.5 콤보)', cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.stun > 0 ? 2.5 : 1.5), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const combo = f.stun > 0; runDamage(spec, s, f, ds, df); s.cd[2] = 4; s.note = combo ? '백스텝·연계' : '백스텝' } }) })(), // 엔진 이관: bonus.when(스턴 시 ×2.5)
     // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
@@ -682,7 +682,7 @@ const SKILLS = {
   ],
   프리스트: [
     // 힐: 즉시 체력 30% + 지능×1 회복(짧은 쿨 유지기). 회복불가 중엔 사용 불가
-    { name: '힐', tag: '회복', coef: '즉시 체력 15% + 지능×1 회복', cd: 6, ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.9 && s.healBlock === 0, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.55 - repentResetCost(s, ds, df), exec: (s, f, ds, df) => { const heal = healVar(ds.maxhp * 0.15 + ds.base.지능); s.hp = Math.min(ds.maxhp, s.hp + hcut(s, heal)); s.cd[0] = 6; s.note = '힐' } },
+    mkSkill(0, { name: '힐', tag: '회복', heal: { pct: 0.15, stat: '지능' }, cd: 6, ready: (s, f, ds) => s.cd[0] === 0 && s.hp < ds.maxhp * 0.9 && s.healBlock === 0, score: (s, f, ds, df, x) => (ds.maxhp - s.hp) * 0.55 - repentResetCost(s, ds, df) }),
     // 축복: 5턴 전 능력치 20%↑(공격·명중·회피·크리·속도·방어). 근사 구현(refreshDerived)
     { name: '축복', tag: '버프', coef: '5턴 — 능력치 30%↑(공격·명중·회피·크리·속도, 방어 제외)', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[1] === 0 && s.blessTurns === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.4 * 5, s, ds) - repentResetCost(s, ds, df), exec: (s, f, ds, df) => { s.blessTurns = 5; refreshDerived(s, ds); s.cd[1] = 6; s.note = '축복 · 공격·속도 30%↑(5턴)' } },
     // 성역: 3턴 무적급(받는 피해 모두 1) + 턴당 체력3%회복 + 턴당 상대 신성딜(마공×0.7). 강력 → 10쿨·시작쿨5
@@ -817,18 +817,45 @@ function dmgDesc (spec) {
 }
 // 스킬 한 줄 자동설명: coef(특수계수 예외 문자열) 우선, 없으면 dmgDesc. cd/buff 자동.
 function skillLine (spec) {
-  const body = spec.coef || ((spec.mult != null || spec.dmg) ? dmgDesc(spec) : '')
+  const auto = [((spec.mult > 0 || spec.dmg) ? dmgDesc(spec) : ''), effDesc(spec)].filter(Boolean).join(' + ')
+  const body = spec.coef || auto
   const cd = spec.cast ? '' : (spec.cd != null ? ` (쿨${spec.cd})` : (spec.buff ? ` (${spec.buff}턴)` : '')) // 시전 스킬은 tag/coef가 '시전'을 이미 표기 → 접미사 생략
   return `${TAG_EMO[spec.tag] || ''} **${spec.name}** — ${spec.tag}${body ? ' ' + body : ''}${cd}`
 }
 // 스킬 버튼/표시용 쿨 라벨(필드 기반, SKILL_CD 테이블 대체): 시전=시전 / 버프=버프 / 그외=쿨숫자
 function skillCd (sk) { return sk.cast ? '시전' : (sk.buff && sk.cd == null ? '버프' : (sk.cd != null ? sk.cd : '')) }
+// ── 효과 어휘(vocab): heal/cc/selfBuff — 필드로 선언하면 적용+coef 자동 ──
+const CC_LABEL = { stun: '스턴', slow: '둔화', silence: '침묵', vuln: '취약', sunder: '방어약화', missDown: '명중저하', blind: '실명', luckLock: '행운봉인', healBlock: '회복불가', paralyze: '마비', taunt: '도발' }
+// 딜 성분 유무: mult>0 / dmg 라이더 / 마법·충격·확정 type / finalDmg·baseFn 중 하나라도 있으면 딜 있음
+function hasDamage (spec) { return (spec.mult > 0) || spec.dmg || spec.finalDmg || spec.baseFn || (spec.type && spec.type !== '물리.일반') }
+// 효과 적용(딜 이후): 회복·CC·자기버프. 스킬은 필드만 선언.
+function applyEffects (spec, s, f, ds, df) {
+  if (spec.heal) { const h = spec.heal; const pct = typeof h === 'number' ? h : (h.pct || 0); const flat = (typeof h === 'object' && h.stat && ds.base[h.stat]) || 0; s.hp = Math.min(ds.maxhp, s.hp + hcut(s, healVar(ds.maxhp * pct + flat))) }
+  if (spec.cc) for (const k in spec.cc) { applyCC(f, k, spec.cc[k]); if (k === 'slow') f.slowSec = Math.max(f.slowSec, spec.slowSec || 1) }
+  if (spec.selfBuff) for (const k in spec.selfBuff) s[k] = spec.selfBuff[k]
+}
+// 효과 설명 자동생성(coef의 효과분)
+function effDesc (spec) {
+  const p = []
+  if (spec.heal) { const h = spec.heal; const pct = typeof h === 'number' ? h : (h.pct || 0); p.push(`체력 ${Math.round(pct * 100)}%${(typeof h === 'object' && h.stat) ? '+' + h.stat : ''} 회복`) }
+  if (spec.cc) for (const k in spec.cc) p.push(`${spec.cc[k]}턴 ${CC_LABEL[k] || k}`)
+  return p.join(' + ')
+}
 // 순수 딜기 팩토리: ready/score/exec를 필드에서 자동 생성(부가효과 없는 스킬). 필드는 그대로 남아 skillLine이 읽음
 function dmgSkill (ci, spec) {
   return Object.assign({}, spec, {
     ready: (s) => s.cd[ci] === 0,
     score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn),
     exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[ci] = spec.cd; s.note = spec.name }
+  })
+}
+// 통합 스킬 팩토리: 딜(runDamage) + 효과(applyEffects) 자동 실행. ready/score는 spec 제공(또는 쿨 기본). coef 자동.
+function mkSkill (ci, spec) {
+  const dmgy = hasDamage(spec)
+  return Object.assign({}, spec, {
+    ready: spec.ready || ((s) => s.cd[ci] === 0),
+    score: spec.score,
+    exec: (s, f, ds, df) => { if (dmgy) runDamage(spec, s, f, ds, df); applyEffects(spec, s, f, ds, df); s.cd[ci] = spec.cd; s.note = spec.note || spec.name }
   })
 }
 // 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속

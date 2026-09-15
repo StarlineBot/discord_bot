@@ -733,19 +733,8 @@ const CUSTOM_DEFS = {
   반격태세: (ci) => ({ name: '반격태세', ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => df.물공 * 0.4, exec: (s, f, ds, df) => { s.defending = true; s.shield = Math.max(s.shield, Math.round(ds.maxhp * 0.12)); s.cd[ci] = 3; s.note = '반격' } })
 }
 // ===== 선언형 딜 스키마 =====
-// 스킬 딜 = 기본계수(mult, 기본 1.0)로 attack() 경유분 + 추가계수(dmg{})로 관통 성분.
-// composeDamage=실제 딜(attack 호출=실히트) / estDamage=AI score용 추정(비파괴, attack 미호출).
+// 실제 딜은 runDamage(통합 엔진). estDamage=AI score용 추정(비파괴, attack 미호출).
 const TAG_EMO = { 공격: '⚔️', 시전: '🔮', 버프: '🔺', 디버프: '🔻', 제어: '🌀', 회복: '💚', 관통: '⚡' }
-function composeDamage (spec, s, f, ds, df) {
-  const M = spec.mult != null ? spec.mult : 1; const D = spec.dmg || {}; const hits = spec.hits || 1
-  let total = 0
-  if (M) for (let i = 0; i < hits; i++) total += attack(s, f, ds, df, f.defending) * M // 타격분(물방·막기·크리·guts 적용)
-  if (D.selfHp) total += ds.maxhp * D.selfHp // 자기 최대체력 비례(관통)
-  if (D.foeHp) total += df.maxhp * D.foeHp // 상대 최대체력 비례(관통)
-  if (D.force) total += Math.round(ds.마공 * D.force) // 역장(마공 비례 관통)
-  if (D.selfStr) total += Math.round(ds.base.힘 * D.selfStr) // 힘 스탯 비례(관통)
-  return Math.max(Math.round(total), 1)
-}
 function estDamage (spec, ds, df, x) {
   const M = spec.mult != null ? spec.mult : 1; const D = spec.dmg || {}; let e = 0
   if (M) e += (x ? x.est : estAtk(ds, df)) * M * (spec.hits || 1)
@@ -839,15 +828,15 @@ function dmgSkill (ci, spec) {
   return Object.assign({}, spec, {
     ready: (s) => s.cd[ci] === 0,
     score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn),
-    exec: (s, f, ds, df) => { let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.cd[ci] = spec.cd; s.note = spec.name }
+    exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[ci] = spec.cd; s.note = spec.name }
   })
 }
 // 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속
 function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 1.8 : 1 }
 // 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
-function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭) + 광란가속 스택(유지 시 턴 가속, 최대 5스택 −15%)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + hcut(s, healVar(ds.maxhp * 0.02 * furyMul(s)))); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.frenzy = (s.frenzyWin > 0) ? Math.min((s.frenzy || 0) + 1, 5) : 1; s.frenzyWin = 2; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
+function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭) + 광란가속 스택(유지 시 턴 가속, 최대 5스택 −15%)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + hcut(s, healVar(ds.maxhp * 0.02 * furyMul(s)))); runDamage(spec, s, f, ds, df); s.frenzy = (s.frenzyWin > 0) ? Math.min((s.frenzy || 0) + 1, 5) : 1; s.frenzyWin = 2; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
 function skBloodRage (ci) { const spec = { name: '피의격노', tag: '버프', buff: 3, cd: 5, coef: '체력15%↓ → 3턴 공격력×1.35 + 명중↑ (딜 없음, 순수 버프)' }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[ci] === 0 && s.powBuff === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => buffVal(x.est * 0.35 * 3, s, ds), exec: (s, f, ds, df) => { s.hp -= Math.round(ds.maxhp * 0.15); s.powBuff = 3; s.powMul = 1.35; s.accBuff = 3; s.cd[ci] = spec.cd; s.note = '피의격노' } }) }
-function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 3, coef: '2턴 스턴 (자기 체력 5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); let d = composeDamage(spec, s, f, ds, df); d = absorb(f, d); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
+function skClash (ci) { const spec = { name: '격돌', tag: '제어', mult: 1.0, cd: 3, coef: '2턴 스턴 (자기 체력 5%↓)' }; return Object.assign({}, spec, { ready: (s, f) => s.cd[ci] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'stun', 2); runDamage(spec, s, f, ds, df); s.hp -= Math.round(ds.maxhp * 0.05); s.cd[ci] = spec.cd; s.note = '기절' } }) }
 // 마법의 완전이해(캐스터): 2턴간 마법 편차 무시(graze100=상시 풀댐) — 순수버프. 창고·세이지 공유(hoisted)
 function skFullUnderstanding (ci) { return { name: '마법의완전이해', tag: '버프', buff: 2, cd: 5, coef: '2턴 — 마법 대미지 항상 최대치', ready: (s) => s.cd[ci] === 0 && s.graze100 === 0 && s.autoSpell > 1, score: (s, f, ds, df, x) => buffVal(x.est * 0.7, s, ds), exec: (s, f, ds, df) => { s.graze100 = 2; s.cd[ci] = 5; s.note = '완전이해' } } } // 볼트 프록 중(오토스펠)일 때만 = 편차무시가 실효. score는 딜증분(~35%)만
 // ===== 재사용 스킬 창고(SKILL_POOL) =====

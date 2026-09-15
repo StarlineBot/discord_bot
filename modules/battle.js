@@ -623,7 +623,7 @@ const SKILLS = {
   검투사: [
     // 분쇄: 1쿨 타격 + 상대 물방·마방 감소 스택(스택당 -5%p, 최대5, 지속2). 스팸으로 방어를 깎아 후속딜 증폭
     (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.3, dmg: { foeHp: 0.02 }, coef: '타격×1.3 + 상대HP2% + 상대 물방·마방 -5%p 스택(최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.3 + df.maxhp * 0.02, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // 엔진 이관: type/mult/dmg 선언 → runDamage. 라이더(상대HP2%)·crush는 명중 게이팅
-    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.06, selfStr: 0.5 }, coef: '돌진 타격 + 힘/2 + 상대HP6% + 2턴 스턴 (자기 체력 4%↓)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + Math.round(ds.base.힘 * 0.5) + df.maxhp * 0.06, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.04); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // 엔진 이관: attack() 경유(패링·경감 자동). 스턴은 명중&비패링 게이팅. mult 재튜닝 대상
+    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.06, selfStr: 0.5 }, recoil: 0.04, coef: '돌진 타격 + 힘/2 + 상대HP6% + 2턴 스턴 (자기 체력 4%↓)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + Math.round(ds.base.힘 * 0.5) + df.maxhp * 0.06, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // 엔진 이관: attack() 경유(패링·경감 자동). 스턴 명중&비패링 게이팅, 반동 recoil 필드. mult 재튜닝 대상
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
     { name: '방해', tag: '제어', coef: '시전 중이면 차단 / 아니면 1턴 스턴', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
@@ -719,9 +719,9 @@ const SKILLS = {
   무도가: [
     mudoCombo(), // 슬롯0(cd0): 모핑 콤보 — 육합권→연환전신장→맹룡과강(적중마다 변신). 연환/맹룡은 스킬창에서 제외(순서 강제)
     // 발경(슬롯1/cd1): 적 물공/마공 중 높은쪽 ×1.2 충격딜(방어구·실드 무시). 고공격 상대 카운터
-    { name: '발경', tag: '공격', coef: '물공×(1+상대 높은방어×4) · 충격(방어구·실드 무시, 탱커일수록↑)', cd: 5, dmgType: '충격', ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 + Math.max(df.물방, df.마방) * 4), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const base = ds.물공 * (1 + Math.max(df.물방, df.마방) * 4); const d = impactDmg(s, f, ds, df, base); f.hp -= d; s.cd[1] = 5; s.note = '발경' } },
+    (() => { const spec = { name: '발경', tag: '공격', type: '물리.충격', coefFn: (ds, df) => 1 + Math.max(df.물방, df.마방) * 4, coef: '물공×(1+상대 높은방어×4) · 충격(방어구·실드 무시, 탱커일수록↑)', dmgType: '충격', cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.coefFn(ds, df), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[1] = 5; s.note = '발경' } }) })(), // 엔진 이관: 물리.충격 + coefFn(식-계수)
     // 아수라패황권(슬롯2/cd2): 자기 체력→1, 상대 최대HP×0.8 충격, 3턴 자체둔화. 올인 피니셔(시작쿨7)
-    { name: '아수라패황권', tag: '공격', coef: '상대 최대HP×0.8 충격 · 자기 체력→1 · 3턴 자체둔화 (올인 피니셔, 회피 시 사망각)', cd: 14, dmgType: '충격', ready: (s, f, ds, df) => s.cd[2] === 0 && s.hp > 1, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 }, exec: (s, f, ds, df) => { s.hp = 1; const d = impactDmg(s, f, ds, df, df.maxhp * 0.8); f.hp -= d; applyCC(s, 'slow', 3); s.slowSec = Math.max(s.slowSec, Math.round(ds.턴 * 0.5 * 10) / 10); s.cd[2] = 14; s.note = '아수라패황권!' } }
+    (() => { const spec = { name: '아수라패황권', tag: '공격', type: '물리.충격', dmg: { foeHp: 0.8 }, recoilCur: 0.99, coef: '상대 최대HP×0.8 충격 · 자기 체력 99%↓ · 3턴 자체둔화 (올인 피니셔, 회피 시 사망각)', dmgType: '충격', cd: 14 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0 && s.hp > 1, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 }, exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); applyCC(s, 'slow', 3); s.slowSec = Math.max(s.slowSec, Math.round(ds.턴 * 0.5 * 10) / 10); s.cd[2] = 14; s.note = '아수라패황권!' } }) })() // 엔진 이관: 물리.충격 + foeHp 라이더 + recoilCur(현재체력 99%)
   ],
   프리스트: [
     // 힐: 즉시 체력 30% + 지능×1 회복(짧은 쿨 유지기). 회복불가 중엔 사용 불가
@@ -821,7 +821,7 @@ function bonusCond (when, s, f, ds, df) {
 function runDamage (spec, s, f, ds, df) {
   const type = spec.type || '물리.일반'
   const D = spec.dmg || {}
-  const M = (spec.bonus && bonusCond(spec.bonus.when, s, f, ds, df)) ? spec.bonus.mult : (spec.mult != null ? spec.mult : (type === '물리.일반' ? 1 : 0))
+  const M = spec.coefFn ? spec.coefFn(ds, df, s, f) : ((spec.bonus && bonusCond(spec.bonus.when, s, f, ds, df)) ? spec.bonus.mult : (spec.mult != null ? spec.mult : (type === '물리.일반' ? 1 : 0))) // coefFn=식-계수(발경 등), bonus=조건부, 아니면 상수
   const rider = () => df.maxhp * (D.foeHp || 0) + ds.maxhp * (D.selfHp || 0) + Math.round(ds.base.힘) * (D.selfStr || 0) + ds.마공 * (D.force || 0)
   const hits = []; let landed = false
   if (type === '물리.일반') {
@@ -839,6 +839,8 @@ function runDamage (spec, s, f, ds, df) {
     const dealt = deliverFormula(type, base, s, f, ds, df)
     hits.push({ raw: base, type, dealt }); landed = dealt > 0
   }
+  if (spec.recoil) s.hp -= Math.round(ds.maxhp * spec.recoil) // 반동(최대체력 비율): 돌진 등
+  if (spec.recoilCur) s.hp -= Math.round(s.hp * spec.recoilCur) // 반동(현재체력 비율): 아수라(올인 피니셔)
   return { hits, total: hits.reduce((a, h) => a + (h.dealt || 0), 0), landed }
 }
 // ── AI 스코어러(전부 "이번 턴 HP 가치"로 반환 → bestScore=ctx.est(평타 HP가치)와 직접 비교) ──

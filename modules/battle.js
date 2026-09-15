@@ -681,7 +681,7 @@ const SKILLS = {
     // 과다출혈: 즉시 절개·열상 각 2스택 + 3턴 상대 회복 80%↓ (딜 없음). 세팅+힐차단
     { name: '과다출혈', tag: '디버프', coef: '즉시 절개·열상 각 2스택 부여 + 3턴 상대 회복량 80%↓ (딜 없음)', cd: 6, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => df.maxhp * 0.10 + (f.cutStk + f.lacStk < 4 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { f.cutStk = Math.min((f.cutStk || 0) + 2, 5); f.cutDur = 2; f.lacStk = Math.min((f.lacStk || 0) + 2, 5); f.lacDur = 2; f.healCut = 3; s.cd[2] = 6; s.note = '과다출혈' } },
     // 파열: 절개+열상 스택 소모 → 합계×1.5 확정딜(방어·실드 무시) 후 초기화. 마무리/힐차단용 즉발
-    { name: '파열', tag: '공격', coef: '절개+열상 스택 소모 → (절개×1.5%+열상×[2.5%/1.5%])×1.5 확정딜(방어·실드 무시) 후 초기화', cd: 8, ready: (s, f, ds, df) => s.cd[3] === 0 && (f.cutStk > 0 || f.lacStk > 0), score: (s, f, ds, df, x) => { const lacRate = f.cutStk > 0 ? 0.025 : 0.015; const total = (f.cutStk * 0.015 + f.lacStk * lacRate) * df.maxhp * 1.5; return dmgVal(total, 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const lacRate = f.cutStk > 0 ? 0.025 : 0.015; const total = (f.cutStk * 0.015 + f.lacStk * lacRate) * df.maxhp * 1.5; const d = trueDmg(s, f, df, total); f.hp -= d; f.cutStk = 0; f.cutDur = 0; f.lacStk = 0; f.lacDur = 0; s.cd[3] = 8; s.note = '파열' } }
+    (() => { const spec = { name: '파열', tag: '공격', type: '확정', baseFn: (s, f, ds, df) => (f.cutStk * 0.015 + (f.cutStk > 0 ? 0.025 : 0.015) * f.lacStk) * df.maxhp * 1.5, coef: '절개+열상 스택 소모 → (절개×1.5%+열상×[2.5%/1.5%])×1.5 확정딜(방어·실드 무시) 후 초기화', cd: 8 }; return Object.assign({}, spec, { ready: (s, f) => s.cd[3] === 0 && (f.cutStk > 0 || f.lacStk > 0), score: (s, f, ds, df, x) => dmgVal(spec.baseFn(s, f, ds, df), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); f.cutStk = 0; f.cutDur = 0; f.lacStk = 0; f.lacDur = 0; s.cd[3] = 8; s.note = '파열' } }) })() // 엔진 이관: 확정 + baseFn(스택 소모식). 소모는 exec에서(runDamage가 스택 읽은 뒤)
   ],
   사냥꾼: [
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
@@ -699,7 +699,7 @@ const SKILLS = {
     // 룬각인(마검 인챈트): 순수 버프 — 1턴 소모(딜 없음)가 리스크. 3턴 인챈트 속성 부여로 역장베기를 스펠스트라이크로 변화. AI는 인챈트의 미래 가치로 스코어링(상대 보고 자동선택)
     { name: '룬각인', tag: '버프', coef: '마검 인챈트(🔥화염/❄️얼음/⚡전격) 5턴', buff: 5, cd: 6, choose: 'enchant', ready: (s, f, ds, df) => s.cd[2] === 0 && !s.enchant, score: (s, f, ds, df, x) => { const e0 = s.enchantChoice || pickEnchant(f, df); const fmul = e0 === '화염' ? 2.5 : 2.0; const casts = 2.5; const extra = (fmul - 1.2) * ds.마공 * casts; const ctrl = e0 === '얼음' ? ctrlVal(x.foeTurn, 2, 'slow') : e0 === '전격' ? ctrlVal(x.foeTurn, 3, 'stun') * 0.3 * casts : 0; return dmgVal(extra, 1, ctrl, f.hp, x.foeTurn) + 30 }, exec: (s, f, ds, df) => { const e = s.enchantChoice || pickEnchant(f, df); s.enchantChoice = null; s.enchant = e; s.enchantTurns = 5; s.cd[2] = 6; s.note = ENCHANT_EMO[e] + ' ' + e + ' 인챈트' } },
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
-    { name: '역장폭발', tag: '관통', coef: '역장 마공×4.5 관통 · 마나실드엔 흡수 · 시작쿨3', cd: 7, dmgType: '역장', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * 4.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const force = Math.round(ds.마공 * 4.5); const d = absorb(f, force); f.hp -= d; s.cd[3] = 7; s.note = '역장폭발' } }, // 침투 없음(마나실드 흡수) — 침투는 역장베기만(순삭 콤보 방지). 지연 폭딜
+    (() => { const spec = { name: '역장폭발', tag: '관통', type: '마법.역장', mult: 4.5, coef: '역장 마공×4.5 관통 · 마나실드엔 흡수 · 시작쿨3', dmgType: '역장', cd: 7 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * 4.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[3] = 7; s.note = '역장폭발' } }) })(), // 엔진 이관: 마법.역장(마나실드 흡수). 침투는 역장베기만
     // 마나대시: 상대 1턴 스턴(아그로 차단) + 본인 5턴 20% 가속. 스턴락 탈출 + 인챈트 셋업 보호
     { name: '마나대시', tag: '버프', coef: '상대 1턴 스턴 + 본인 5턴 턴 20% 가속', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[4] === 0 && s.haste === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.6, s, ds) + (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); s.haste = 5; s.cd[4] = 6; s.note = '마나대시' } }
   ],
@@ -835,7 +835,7 @@ function runDamage (spec, s, f, ds, df) {
       hits.push({ raw, type, dealt })
     }
   } else {
-    const base = (type.startsWith('마법') ? ds.마공 : ds.물공) * M + rider()
+    const base = spec.baseFn ? spec.baseFn(s, f, ds, df) : ((type.startsWith('마법') ? ds.마공 : ds.물공) * M + rider()) // baseFn=식-base(파열 등 스택 소모)
     const dealt = deliverFormula(type, base, s, f, ds, df)
     hits.push({ raw: base, type, dealt }); landed = dealt > 0
   }

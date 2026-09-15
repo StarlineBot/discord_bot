@@ -670,7 +670,7 @@ const SKILLS = {
   암살도적: [
     { name: '암습', tag: '제어', coef: '3턴 스턴 (딜 없음, 후속타로 딜)', cd: 10, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 3, 'stun'), exec: (s, f, ds, df) => { applyCC(f, 'stun', 3); s.cd[0] = 10; s.note = '기절' } }, // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
     (() => { const spec = { name: '처형', tag: '공격', type: '물리.일반', mult: 5, coef: '물공×5 (상대 HP25%↓ 처형)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[1] = 5; s.note = '처형' } }) })(), // 엔진 이관: attack() 경유(회피·막기·크리 작동). mult 재튜닝 대상
-    { name: '백스텝', tag: '공격', coef: '타격×1.5 (암습 스턴 중 ×2.5 콤보)', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.stun > 0 ? 2.5 : 1.5), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const bm = f.stun > 0 ? 2.5 : 1.5; let d = Math.round(attack(s, f, ds, df, f.defending) * bm); d = absorb(f, d); f.hp -= d; s.cd[2] = 4; s.note = bm > 1.5 ? '백스텝·연계' : '백스텝' } }, // 후측 강타. 암습 스턴 중이면 ×2.5 콤보
+    (() => { const spec = { name: '백스텝', tag: '공격', type: '물리.일반', mult: 1.5, bonus: { when: 'foeStun', mult: 2.5 }, coef: '타격×1.5 (암습 스턴 중 ×2.5 콤보)', cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.stun > 0 ? 2.5 : 1.5), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const combo = f.stun > 0; runDamage(spec, s, f, ds, df); s.cd[2] = 4; s.note = combo ? '백스텝·연계' : '백스텝' } }) })(), // 엔진 이관: bonus.when(스턴 시 ×2.5)
     // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
     { name: '입막음', tag: '제어', coef: '시전차단 + 2턴 침묵(마법 스킬만)', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est / Math.max(1 - df.물회, 0.3), 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
   ],
@@ -685,7 +685,7 @@ const SKILLS = {
   ],
   사냥꾼: [
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
-    { name: '약점간파', tag: '공격', coef: '타격×2.3 · 확정 크리 · 회피 무시(막기·방어구는 적용)', cd: 4, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 2.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true, true) * 2.3; if (f.instVuln > 0) d *= 1.5; d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '치명타' } },
+    (() => { const spec = { name: '약점간파', tag: '공격', type: '물리.일반', mult: 2.3, guaranteed: true, forceCrit: true, bonus: { when: 'foeInstVuln', mult: 3.45 }, coef: '타격×2.3 · 확정 크리 · 회피 무시(막기·방어구는 적용)', cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 2.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 4; s.note = '치명타' } }) })(), // 엔진 이관: guaranteed+forceCrit, bonus.when(약점노출 시 ×3.45)
     { name: '견제사격', tag: '공격', coef: '타격 + 2턴 상대 명중 -20%', cd: 4, ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.missDown === 0 ? ctrlVal(x.foeTurn, 2, 'missDown') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } },
     (() => { const spec = { name: '연발사격', tag: '공격', type: '물리.일반', mult: 1.3, hits: 3, cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 3.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); s.multiHits = r.hits.map(h => h.dealt); s.cd[2] = 5; s.note = '연발' } }) })(), // 엔진 이관: coef 자동생성(타격×1.3×3타), 히트별 interleave
     // 사냥꾼덫: 예약형 — 설치 후 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈). 딜은 출혈로. 카이팅/거리 유지
@@ -705,14 +705,14 @@ const SKILLS = {
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
-    { name: '마나소각', tag: '공격', coef: '마공×1.5 (마나실드 있으면 ×2.5 + 2턴 둔화)', cd: 5, dmgType: '역장', ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * (f.shield > 0 ? 2.5 : 1.5), 1, f.shield > 0 ? ctrlVal(x.foeTurn, 2, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const sh = f.shield > 0; let d = Math.round(ds.마공 * (sh ? 2.5 : 1.5)); d = absorb(f, d); f.hp -= d; if (sh) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } s.cd[0] = 5; s.note = sh ? '마나소각' : '마나번' } }, // 마공비례 딜 + 마나실드 있으면 2.5배(범용 안티실드)
+    (() => { const spec = { name: '마나소각', tag: '공격', type: '마법.역장', mult: 1.5, bonus: { when: 'foeShield', mult: 2.5 }, coef: '마공×1.5 (마나실드 있으면 ×2.5 + 2턴 둔화)', dmgType: '역장', cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * (f.shield > 0 ? 2.5 : 1.5), 1, f.shield > 0 ? ctrlVal(x.foeTurn, 2, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const sh = f.shield > 0; runDamage(spec, s, f, ds, df); if (sh) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } s.cd[0] = 5; s.note = sh ? '마나소각' : '마나번' } }) })(), // 엔진 이관: 마법.역장 + bonus.when(실드 시 ×2.5+둔화)
     // 시전파괴: 상대 시전 확정 차단 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
     { name: '시전파괴', tag: '제어', coef: '시전차단 + 2턴 침묵 (캐스터 전용, 딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
     // 무기파괴: 3턴간 상대 딜 1/3(물리·마법 공통). 안티캐스터가 물리 상대에도 통하는 카운터 — 순수 디버프(즉발)
     { name: '무기파괴', tag: '디버프', coef: '4턴 상대 딜 1/3 + 무기막기 불가', cd: 6, ready: (s, f, ds, df) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2, exec: (s, f, ds, df) => { f.weaponBroken = 4; s.cd[2] = 6; s.note = '무기파괴' } },
     // 파훼: 평소엔 약딜, 무기파괴(약점노출)된 적엔 치명딜. "무기파괴 → 파훼" 처치 콤보
-    { name: '파훼', tag: '공격', coef: '타격×1.2 (무기파괴된 적 ×3.3)', cd: 3, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.weaponBroken > 0 ? 3.3 : 1.2), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const mult = f.weaponBroken > 0 ? 3.3 : 1.2; let d = Math.round(attack(s, f, ds, df, f.defending) * mult); d = absorb(f, d); f.hp -= d; s.cd[3] = 3; s.note = f.weaponBroken > 0 ? '파훼 작렬' : '파훼' } },
+    (() => { const spec = { name: '파훼', tag: '공격', type: '물리.일반', mult: 1.2, bonus: { when: 'foeWeaponBroken', mult: 3.3 }, coef: '타격×1.2 (무기파괴된 적 ×3.3)', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.weaponBroken > 0 ? 3.3 : 1.2), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wb = f.weaponBroken > 0; runDamage(spec, s, f, ds, df); s.cd[3] = 3; s.note = wb ? '파훼 작렬' : '파훼' } }) })(), // 엔진 이관: bonus.when(무기파괴 시 ×3.3)
     // 마법반사: 1턴 마법반사 태세 — 검방(방패)=100% 반사 / 그 외 무기=70% 반사+30% 피격. 마법 평타·볼트 대상(시전마법 제외)
     { name: '마법반사', tag: '버프', coef: '다음 마법 1회 반사 (검방=100% / 그 외=70%)', buff: 1, cd: 4, ready: (s, f, ds, df) => s.cd[4] === 0 && s.magReflect === 0, score: (s, f, ds, df, x) => { const mg = magicShare(f.name); return mg > 0.3 ? df.마공 * 1.2 * mg + 40 : 0 }, exec: (s, f, ds, df) => { s.magReflect = 1; s.cd[4] = 4; s.note = '마법반사 태세' } }
   ],
@@ -810,10 +810,18 @@ function deliverFormula (type, base, s, f, ds, df) {
   if (type === '확정') { const d = trueDmg(s, f, df, base); f.hp -= d; return d } // 전부 무시(실드 흡수만)
   const d = absorb(f, base); f.hp -= d; return d // 마법.역장: 마방 무시, 실드 흡수
 }
+// 조건부 배율(bonus.when): 조건 충족 시 spec.bonus.mult로 배율 교체. 어휘 고정.
+function bonusCond (when, s, f, ds, df) {
+  if (when === 'foeStun') return f.stun > 0
+  if (when === 'foeWeaponBroken') return f.weaponBroken > 0
+  if (when === 'foeShield') return f.shield > 0
+  if (when === 'foeInstVuln') return f.instVuln > 0
+  return false
+}
 function runDamage (spec, s, f, ds, df) {
   const type = spec.type || '물리.일반'
   const D = spec.dmg || {}
-  const M = spec.mult != null ? spec.mult : (type === '물리.일반' ? 1 : 0)
+  const M = (spec.bonus && bonusCond(spec.bonus.when, s, f, ds, df)) ? spec.bonus.mult : (spec.mult != null ? spec.mult : (type === '물리.일반' ? 1 : 0))
   const rider = () => df.maxhp * (D.foeHp || 0) + ds.maxhp * (D.selfHp || 0) + Math.round(ds.base.힘) * (D.selfStr || 0) + ds.마공 * (D.force || 0)
   const hits = []; let landed = false
   if (type === '물리.일반') {

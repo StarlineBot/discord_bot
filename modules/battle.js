@@ -497,7 +497,7 @@ function boltCastSkill (ci, bn) {
     score: (s, f, ds, df, x) => { const hits = psv(s, 'boltMaster') ? BOLT_MASTER_SHOTS : 3; const combo = s.chainBolt > 0; const cm = combo ? (BOLT_COMBO_MULT[bn] || 1) : 1; const coefSum = B.coef * cm + (combo ? BOLT_CAST[BOLT_CHAIN[bn]].coef * cm : 0); const dmg = ds.마공 * coefSum * hits * (1 - df.마방); const castT = B.cast + (combo ? 1 : 0); return dmgVal(dmg, castT, B.slow ? ctrlVal(x.foeTurn, B.slow, 'slow') : 0, f.hp, x.foeTurn) }, // 조합 중이면 리드+짝 둘 다 부스트(파라 강/라콜 중/콜파 약) → AI가 조합 볼트 우선
     exec: (s, f, ds, df) => {
       const castT = B.cast + (s.chainBolt > 0 ? 1 : 0) // 볼트마법조합: 모든 볼트류 시전 +1(콜드 0→1시전으로 리스크 발생)
-      if (castT > 0) { s.cast = Math.max(1, castT + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castTotal = s.cast; s.castName = bn; s.castBolt = bn; s.castBoltChain = s.chainBolt > 0; s.cd[ci] = 1; s.note = bn + ' 시전' } else { let d = boltVolley(s, f, ds, df, bn); d = absorb(f, d); f.hp -= d; if (B.slow) { applyCC(f, 'slow', B.slow); f.slowSec = Math.max(f.slowSec, 1) } if (s.chainBolt > 0) boltChain(s, f, ds, df, bn); s.cd[ci] = 1; s.note = bn } // 콜드 즉발(비조합)
+      if (castT > 0) { s.cast = Math.max(1, castT + (ds.무기.castMod || 0)); s.castUninterruptible = false; s.castTotal = s.cast; s.castName = bn; s.castBolt = bn; s.castBoltChain = s.chainBolt > 0; s.cd[ci] = 1; s.note = bn + ' 시전' } else { let d = boltVolley(s, f, ds, df, bn); d = absorb(f, d); f.hp -= d; if (B.slow) { applyCC(f, 'slow', B.slow); f.slowSec = Math.max(f.slowSec, 1) } if (s.chainBolt > 0) boltChain(s, f, ds, df, bn); s.cd[ci] = 1; s.note = bn } // 콜드 즉발(비조합)
     }
   })
 }
@@ -544,7 +544,7 @@ function trueDmg (A, D, dD, base) {
 // 시전 마법(화염구/인캐) 피해: 일반 마법과 동일 — 천운 완전회피 / 마방 감소 / 빗맞힘 / 근성
 function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = (foe.blockUp > 0 ? 0.10 : 0.20); foe.spellBlocked = true }; if (df.무기.주사위 && foe.stun === 0 && foe.cast === 0) blk *= diceBlockMul(atk, foe); let dmg = Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : crushArmor(foe, df.마방))) * magicGraze(), foe, df)), 0); if (atk && foe.magReflect > 0 && dmg > 0) { const rr = (df.무기.방어 === '방패') ? 1.0 : 0.7; atk.hp -= Math.max(Math.round(dmg * rr), 1); atk.lastRefl = rr >= 1 ? 'full' : 'part'; dmg = Math.round(dmg * (1 - rr)); foe.magReflect = 0 }; return dmg } // §13: 실드 있으면 마방 경감 스킵. 마법반사: 시전마법도 반사(검방100%/그외70%) — 시전·즉시 모두 spellDmg 경유라 통일
 // 시전 중 피격 → 5% 시전 중단(취소). 피해가 실제로 들어갔을 때만("정말 운 없을 때")
-function castHit (A, D, fin) { if (D.cast > 0 && fin > 0 && rand() < 0.05) { D.cast = 0; D.castCarry = 1; A.brokeCast = true } } // 취소돼도 충전 일부 남아 다음 시전 -1턴
+function castHit (A, D, fin) { if (D.cast > 0 && !D.castUninterruptible && fin > 0 && rand() < 0.05) { D.cast = 0; A.brokeCast = true } } // 시전 중 피격 5% 시전 취소(끊기 불가 시전 제외). 잔존 없음(castCarry 제거)
 // 신성(holy) 피해: 마방 적용 마법피해 + 참회 시너지. 참회 걸린 상대에 신성딜 → 최대체력5% 고정딜(관통) 추가. 매 신성타격마다 참회(1턴) 생성·갱신 → 신성 연타 자체시너지
 function holyDmg (A, D, dA, dD, base) {
   A.holyHit = 0; A.repentHit = 0 // 신성/참회 분리 표기용(내레이션)
@@ -627,7 +627,7 @@ const SKILLS = {
     (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.3, dmg: { foeHp: 0.02 }, coef: '타격×1.3 + 상대HP2% + 상대 물방·마방 -5%p 스택(최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.3 + df.maxhp * 0.02, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // 엔진 이관: type/mult/dmg 선언 → runDamage. 라이더(상대HP2%)·crush는 명중 게이팅
     (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.06, selfStr: 0.5 }, recoil: 0.04, coef: '돌진 타격 + 힘/2 + 상대HP6% + 2턴 스턴 (자기 체력 4%↓)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + Math.round(ds.base.힘 * 0.5) + df.maxhp * 0.06, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // 엔진 이관: attack() 경유(패링·경감 자동). 스턴 명중&비패링 게이팅, 반동 recoil 필드. mult 재튜닝 대상
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
-    { name: '방해', tag: '제어', coef: '시전 중이면 차단 / 아니면 1턴 스턴', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
+    { name: '방해', tag: '제어', coef: '시전 중이면 차단 / 아니면 1턴 스턴', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
     { name: '발차기', tag: '제어', coef: '1턴 스턴 (딜 없음)', cd: 3, ready: (s, f, ds, df) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 1, 'stun'), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); s.cd[3] = 3; s.note = '기절' } }
   ],
@@ -645,19 +645,19 @@ const SKILLS = {
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
     { name: '방패들기', tag: '버프', coef: '5턴 방패막기 경감 대폭↑', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds), exec: (s, f, ds, df) => { s.blockUp = 5; s.cd[1] = 6; s.note = '방패들기' } },
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
-    { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
+    { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
     // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
     { name: '도발', tag: '제어', coef: '상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 공격 ×1.5(강타 2회)', cd: 6, ready: (s, f, ds, df) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5, exec: (s, f, ds, df) => { f.taunt = 3; s.powBuff = 3; s.powMul = 1.5; s.cd[3] = 6; s.note = '도발' } }
   ],
   마법사: [
-    // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). castCarry(취소 잔여)로 -1턴
-    { name: '화염구', tag: '시전', coef: '마공×4.8 · 시전 7턴 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '화염구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 7 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(spellBase(ds, '화염구'), f, df, s)); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 7 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = spellBase(ds, '화염구'); s.castTotal = s.cast; s.castName = '화염구'; s.note = '화염구 시전' } } },
-    // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. 취소돼도 castCarry 유지
-    { name: '메테오', tag: '시전', coef: '마공×12 · 시전 10턴 (인스턴트 캐스팅 불가 · 시전 끊기 불가)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '메테오') * (1 - df.마방), Math.max(2, 10 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { s.cast = Math.max(2, 10 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = spellBase(ds, '메테오'); s.castTotal = s.cast; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
+    // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸
+    { name: '화염구', tag: '시전', coef: '마공×4.8 · 시전 7턴 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '화염구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 7 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(spellBase(ds, '화염구'), f, df, s)); s.note = '즉시 화염구' } else { s.cast = Math.max(1, 7 + (ds.무기.castMod || 0)); s.castUninterruptible = false; s.castDmg = spellBase(ds, '화염구'); s.castTotal = s.cast; s.castName = '화염구'; s.note = '화염구 시전' } } },
+    // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. uninterruptible=끊기·기절 면역
+    { name: '메테오', tag: '시전', coef: '마공×12 · 시전 10턴 (인스턴트 캐스팅 불가 · 시전 끊기 불가)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '메테오') * (1 - df.마방), Math.max(2, 10 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { s.cast = Math.max(2, 10 + (ds.무기.castMod || 0)); s.castUninterruptible = true; s.castDmg = spellBase(ds, '메테오'); s.castTotal = s.cast; s.castName = '메테오'; s.cd[1] = 5; s.note = '메테오 시전' } },
     // 인스턴트캐스팅: 다음 시전 마법을 즉시시전으로(버프·딜 없음). 메테오엔 안 걸림
     { name: '인스턴트캐스팅', tag: '버프', coef: '3턴 — 다음 시전 마법을 즉시 시전(메테오 제외)', buff: 3, cd: 10, ready: (s, f, ds, df) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds), exec: (s, f, ds, df) => { s.instCast = 3; s.cd[2] = 10; s.note = '인스턴트 캐스팅' } }, // 3턴 시전 리스크 회피 = 고가치
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
-    { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 6 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(dmg, f, df, s)); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0) - (s.castCarry || 0)); s.castCarry = 0; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
+    { name: '서리구', tag: '시전', coef: '마공×3.1 + 3턴 둔화 (인스턴트 캐스팅 시 즉발)', cast: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 6 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; const dmg = spellBase(ds, '서리구'); if (s.instCast > 0) { s.instCast = 0; f.hp -= absorb(f, spellDmg(dmg, f, df, s)); s.note = '즉시 서리구' } else { s.cast = Math.max(1, 6 + (ds.무기.castMod || 0)); s.castUninterruptible = false; s.castDmg = dmg; s.castTotal = s.cast; s.castName = '서리구'; s.note = '서리구 시전' } } },
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
     { name: '충격파', tag: '공격', coef: '마공×1.0 + 상대 턴 게이지 초기화 + 1턴 둔화 (기절 중에도 사용)', cd: 8, ready: (s, f, ds, df) => s.cd[4] === 0, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '충격파') * (1 - df.마방), 1, x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 1.5, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df, s); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[4] = 8; s.note = '충격파' }, stunnable: true } // 슬롯4=cd[4] (플레이어 버튼 cd[slot] 정합)
   ],
@@ -674,7 +674,7 @@ const SKILLS = {
     (() => { const spec = { name: '처형', tag: '공격', type: '물리.일반', mult: 5, coef: '물공×5 (상대 HP25%↓ 처형)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.25, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[1] = 5; s.note = '처형' } }) })(), // 엔진 이관: attack() 경유(회피·막기·크리 작동). mult 재튜닝 대상
     (() => { const spec = { name: '백스텝', tag: '공격', type: '물리.일반', mult: 1.5, bonus: { when: 'foeStun', mult: 2.5 }, coef: '타격×1.5 (암습 스턴 중 ×2.5 콤보)', cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * (f.stun > 0 ? 2.5 : 1.5), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const combo = f.stun > 0; runDamage(spec, s, f, ds, df); s.cd[2] = 4; s.note = combo ? '백스텝·연계' : '백스텝' } }) })(), // 엔진 이관: bonus.when(스턴 시 ×2.5)
     // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
-    { name: '입막음', tag: '제어', coef: '시전차단 + 2턴 침묵(마법 스킬만)', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est / Math.max(1 - df.물회, 0.3), 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
+    { name: '입막음', tag: '제어', coef: '시전차단 + 2턴 침묵(마법 스킬만)', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est / Math.max(1 - df.물회, 0.3), 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 5; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
   ],
   절개도적: [
     // 절개/열상: 1.0× 기본공격 + 명중 시 해당 출혈 스택 +1(최대5, 지속2). 절개 있으면 열상 틱 1.5%→2.5%. 지속 만료 시 1스택씩 점감
@@ -710,7 +710,7 @@ const SKILLS = {
     (() => { const spec = { name: '마나소각', tag: '공격', type: '마법.역장', mult: 1.5, bonus: { when: 'foeShield', mult: 2.5 }, coef: '마공×1.5 (마나실드 있으면 ×2.5 + 2턴 둔화)', dmgType: '역장', cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * (f.shield > 0 ? 2.5 : 1.5), 1, f.shield > 0 ? ctrlVal(x.foeTurn, 2, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const sh = f.shield > 0; runDamage(spec, s, f, ds, df); if (sh) { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } s.cd[0] = 5; s.note = sh ? '마나소각' : '마나번' } }) })(), // 엔진 이관: 마법.역장 + bonus.when(실드 시 ×2.5+둔화)
     // 시전파괴: 상대 시전 확정 차단 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
-    { name: '시전파괴', tag: '제어', coef: '시전차단 + 2턴 침묵 (캐스터 전용, 딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castName === '메테오'; if (wc && !meteor) { f.cast = 0; f.castCarry = 1; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
+    { name: '시전파괴', tag: '제어', coef: '시전차단 + 2턴 침묵 (캐스터 전용, 딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
     // 무기파괴: 3턴간 상대 딜 1/3(물리·마법 공통). 안티캐스터가 물리 상대에도 통하는 카운터 — 순수 디버프(즉발)
     { name: '무기파괴', tag: '디버프', coef: '4턴 상대 딜 1/3 + 무기막기 불가', cd: 6, ready: (s, f, ds, df) => s.cd[2] === 0 && f.weaponBroken === 0, score: (s, f, ds, df, x) => x.foeTurn * 2, exec: (s, f, ds, df) => { f.weaponBroken = 4; s.cd[2] = 6; s.note = '무기파괴' } },
     // 파훼: 평소엔 약딜, 무기파괴(약점노출)된 적엔 치명딜. "무기파괴 → 파훼" 처치 콤보
@@ -970,7 +970,7 @@ function mkFighter (d, name, ai) {
     weaponBroken: 0,
     luckBuff: 0,
     cast: 0,
-    castCarry: 0,
+    castUninterruptible: false,
     castDmg: 0,
     castName: null,
     castBolt: null, // 시전형 볼트(볼트마법사): 착탄 시 boltVolley로 다발 해석
@@ -1114,13 +1114,13 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.crushDur > 0) { self.crushDur--; if (self.crushDur === 0) self.crush = 0 }
   // §13: 마나실드 자가재생 삭제 → 공격 딜 25% 회복(execAttack/execSkill)으로 대체
   if (self.stun > 0) {
-    // 메테오: 시전 시작 후엔 돌이킬 수 없음 — 기절 중에도 그대로 진행(끊기 불가)
-    if (self.cast > 0 && self.castName === '메테오') {
+    // 끊기 불가 시전(메테오 등): 시작 후엔 돌이킬 수 없음 — 기절 중에도 그대로 진행
+    if (self.cast > 0 && self.castUninterruptible) {
       self.cast--; self.stun--; self.defCombo = 0; self.defendedLast = false
       if (self.cast === 0) { const b = foe.hp; foe.hp -= absorb(foe, spellDmg(self.castDmg || spellBase(ds, '메테오'), foe, df, self)); return { type: 'castfire', dmg: b - foe.hp, spell: '메테오' } }
       return { type: 'stun', stunLeft: self.stun, castName: self.castName, castLeft: self.cast, castTotal: self.castTotal } // 기절 중에도 메테오 시전 진행 표시
     }
-    if (self.cast > 0) { self.cast = 0; self.castCarry = 1 } // 그 외 시전은 기절에 즉시 취소(충전 일부 잔존)
+    if (self.cast > 0) { self.cast = 0 } // 그 외 시전은 기절에 즉시 취소(잔존 없음)
     self.stun--; self.defCombo = 0; self.defendedLast = false; self.stunned = true
     // 행동불능 중 쓸 스킬(마법사 충격파 / 광전사 재생의광기)이 있으면 플레이어·AI가 선택, 없으면 자동 스킵
     if (!stunSkill(self, foe, ds, df)) return { type: 'stun', stunLeft: self.stun }
@@ -1128,7 +1128,7 @@ function upkeep (self, foe, ds, df, interactive) {
   }
   if (self.paralyze > 0) { self.paralyze--; if (rand() < PARALYZE_CHANCE) { self.defCombo = 0; self.defendedLast = false; return { type: 'paralyze', paralyzeLeft: self.paralyze } } } // 마비: 확률로 이 턴 상실(스턴과 동일 처리)
   // 시전 진행(캐스터 공통): interactive(플레이어)면 메테오 외 시전은 자동진행 대신 멈춤 → '시전 진행/취소' 선택. AI·상대·메테오는 자동진행
-  if (self.cast > 0) { if (interactive && self.castName !== '메테오') return null; return advanceCast(self, foe, ds, df) }
+  if (self.cast > 0) { if (interactive && !self.castUninterruptible) return null; return advanceCast(self, foe, ds, df) }
   return null
 }
 function ctxFor (self, foe, ds, df) {
@@ -1258,9 +1258,9 @@ function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev
   // 시전 중(메테오 제외): '시전 진행'(턴넘기기 그대로 시전 진행) / '시전 취소'(즉시 취소)
-  if (A.cast > 0 && A.castName !== '메테오') {
+  if (A.cast > 0 && !A.castUninterruptible) {
     // 자가 취소 → 시전 스킬 쿨 환불(안 쓴 것으로 처리). 아니면 '시전 진행'
-    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castCarry = 1; A.castBolt = null; A.castBoltChain = false; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
+    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castBolt = null; A.castBoltChain = false; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
     recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
     if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
     return advance(state)
@@ -1298,7 +1298,7 @@ function playerCanUse (state, slot) {
 function playerOptions (state) {
   const { A, B, meName, dA, dB } = state; const sks = SKILLS[meName]
   const stunned = A.stunned === true
-  const casting = A.cast > 0 && A.castName !== '메테오' // 시전 중(메테오 제외): 진행/취소만 노출
+  const casting = A.cast > 0 && !A.castUninterruptible // 끊기 가능 시전 중: 진행/취소만 노출(끊기불가는 자동진행)
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
   const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_CAST[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1 } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨

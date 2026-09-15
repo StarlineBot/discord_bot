@@ -808,10 +808,12 @@ function estDamage (spec, ds, df, x) {
 function deliverFormula (type, base, s, f, ds, df) {
   base = Math.max(Math.round(base), 1)
   if (type === '물리.충격') { const d = impactDmg(s, f, ds, df, base); f.hp -= d; return d } // 방어구·실드 무시
-  if (type === '마법.일반') { const d = spellDmg(base, f, df, s); f.hp -= d; return d } // 천운·마방·마관통
+  if (type === '마법.일반' || type.startsWith('마법.원소')) { const d = spellDmg(base, f, df, s); f.hp -= d; return d } // 천운·마방·마관통 (원소=볼트, 마커만 다름)
   if (type === '확정') { const d = trueDmg(s, f, df, base); f.hp -= d; return d } // 전부 무시(실드 흡수만)
   const d = absorb(f, base); f.hp -= d; return d // 마법.역장: 마방 무시, 실드 흡수
 }
+// 발수: 숫자면 고정, [min,max]면 랜덤 롤(볼트 1~5). 물리·마법 공통.
+function rollHits (spec) { const h = spec.hits; if (Array.isArray(h)) return h[0] + Math.floor(rand() * (h[1] - h[0] + 1)); return h || 1 }
 // 조건부 배율(bonus.when): 조건 충족 시 spec.bonus.mult로 배율 교체. 어휘 고정.
 function bonusCond (when, s, f, ds, df) {
   if (when === 'foeStun') return f.stun > 0
@@ -837,6 +839,10 @@ function runDamage (spec, s, f, ds, df) {
       const dealt = absorb(f, Math.round(raw)); f.hp -= dealt
       hits.push({ raw, type, dealt })
     }
+  } else if (type.startsWith('마법.원소')) { // 볼트: 발당 마공×M을 랜덤 발수(1~5)만큼 spellDmg. 물리 연타와 동일 구조, 딜리버리만 마법
+    const n = (psv(s, 'boltMaster') && Array.isArray(spec.hits)) ? spec.hits[1] : rollHits(spec) // boltMaster=최대 발수 고정
+    const em = psv(s, '원소마스터') ? ELEM_MASTER : 1 // 원소의 이해: 마법.원소 딜 배율
+    for (let i = 0; i < n; i++) { const base = ds.마공 * M * em; const dealt = deliverFormula(type, base, s, f, ds, df); if (dealt > 0) landed = true; hits.push({ raw: base, type, dealt }) }
   } else {
     const base = spec.baseFn ? spec.baseFn(s, f, ds, df) : ((type.startsWith('마법') ? ds.마공 : ds.물공) * M + rider()) // baseFn=식-base(파열 등 스택 소모)
     const dealt = deliverFormula(type, base, s, f, ds, df)

@@ -622,7 +622,7 @@ function mudoCombo () {
 const SKILLS = {
   검투사: [
     // 분쇄: 1쿨 타격 + 상대 물방·마방 감소 스택(스택당 -5%p, 최대5, 지속2). 스팸으로 방어를 깎아 후속딜 증폭
-    { name: '분쇄', tag: '공격', coef: '타격×1.3 + 상대HP2% + 상대 물방·마방 -5%p 스택(최대5·지속2)', cd: 1, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.3 + df.maxhp * 0.02, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const hit = attack(s, f, ds, df, f.defending); if (hit > 0) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } let raw = Math.round(hit * 1.3); if (hit > 0) raw += Math.round(df.maxhp * 0.02); const d = absorb(f, raw); f.hp -= d; s.cd[0] = 1; s.note = hit > 0 ? '분쇄' : '분쇄·빗나감' } },
+    (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.3, dmg: { foeHp: 0.02 }, coef: '타격×1.3 + 상대HP2% + 상대 물방·마방 -5%p 스택(최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.3 + df.maxhp * 0.02, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // 엔진 이관: type/mult/dmg 선언 → runDamage. 라이더(상대HP2%)·crush는 명중 게이팅
     { name: '돌진', tag: '제어', coef: '돌진 타격 + 힘/2 + 상대HP6% + 2턴 스턴 (자기 체력 4%↓)', cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.돌진딜 * (1 - df.물방) + ds.힘절반 + df.maxhp * 0.06, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const parried = f.stun === 0 && f.cast === 0 && f.parry; if (parried) { f.parryHit = true; f.parry = false } let d = guts(ds.돌진딜 * physSwing(ds) * (1 - df.물방), f, df); d = Math.max(Math.round(d), 1) + ds.힘절반 + Math.round(df.maxhp * 0.06); if (parried) d = Math.round(d * 0.10); d = absorb(f, d); f.hp -= d; if (!parried) applyCC(f, 'stun', 2); s.hp -= Math.round(ds.maxhp * 0.04); s.cd[1] = 5; s.note = parried ? '돌진(패링됨)' : '기절' } }, // 딜 있는 CC라 패링 시 흘림(×0.10)+스턴 무효+무도가 반격
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
     { name: '방해', tag: '제어', coef: '시전 중이면 차단 / 아니면 1턴 스턴', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castName === '메테오'; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCarry = 1 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 5 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
@@ -676,8 +676,8 @@ const SKILLS = {
   ],
   절개도적: [
     // 절개/열상: 1.0× 기본공격 + 명중 시 해당 출혈 스택 +1(최대5, 지속2). 절개 있으면 열상 틱 1.5%→2.5%. 지속 만료 시 1스택씩 점감
-    { name: '절개', tag: '공격', coef: '1.0× 기본공격 + 절개 스택+1(최대5, 평타·타격도 +1). 스택당 턴당 1.5% 출혈(방어·실드무시)', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.cutStk < 5 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { const raw = attack(s, f, ds, df, f.defending); if (raw > 0) { f.cutStk = Math.min((f.cutStk || 0) + 1, 5); f.cutDur = 2 } const d = absorb(f, raw); f.hp -= d; s.cd[0] = 3; s.note = raw > 0 ? '절개' : '절개·빗나감' } },
-    { name: '열상', tag: '공격', coef: '1.0× 기본공격 + 열상 스택+1(최대5, 평타·타격도 +1). 스택당 턴당 1.5%·절개 있으면 2.5%', cd: 3, ready: (s, f, ds, df) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.lacStk < 5 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { const raw = attack(s, f, ds, df, f.defending); if (raw > 0) { f.lacStk = Math.min((f.lacStk || 0) + 1, 5); f.lacDur = 2 } const d = absorb(f, raw); f.hp -= d; s.cd[1] = 3; s.note = raw > 0 ? '열상' : '열상·빗나감' } },
+    (() => { const spec = { name: '절개', tag: '공격', type: '물리.일반', coef: '1.0× 기본공격 + 절개 스택+1(최대5, 평타·타격도 +1). 스택당 턴당 1.5% 출혈(방어·실드무시)', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.cutStk < 5 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.cutStk = Math.min((f.cutStk || 0) + 1, 5); f.cutDur = 2 } s.cd[0] = 3; s.note = r.landed ? '절개' : '절개·빗나감' } }) })(), // 엔진 이관: 스택은 명중 게이팅
+    (() => { const spec = { name: '열상', tag: '공격', type: '물리.일반', coef: '1.0× 기본공격 + 열상 스택+1(최대5, 평타·타격도 +1). 스택당 턴당 1.5%·절개 있으면 2.5%', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) + (f.lacStk < 5 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.lacStk = Math.min((f.lacStk || 0) + 1, 5); f.lacDur = 2 } s.cd[1] = 3; s.note = r.landed ? '열상' : '열상·빗나감' } }) })(), // 엔진 이관: 스택은 명중 게이팅
     // 과다출혈: 즉시 절개·열상 각 2스택 + 3턴 상대 회복 80%↓ (딜 없음). 세팅+힐차단
     { name: '과다출혈', tag: '디버프', coef: '즉시 절개·열상 각 2스택 부여 + 3턴 상대 회복량 80%↓ (딜 없음)', cd: 6, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => df.maxhp * 0.10 + (f.cutStk + f.lacStk < 4 ? df.maxhp * 0.05 : 0), exec: (s, f, ds, df) => { f.cutStk = Math.min((f.cutStk || 0) + 2, 5); f.cutDur = 2; f.lacStk = Math.min((f.lacStk || 0) + 2, 5); f.lacDur = 2; f.healCut = 3; s.cd[2] = 6; s.note = '과다출혈' } },
     // 파열: 절개+열상 스택 소모 → 합계×1.5 확정딜(방어·실드 무시) 후 초기화. 마무리/힐차단용 즉발
@@ -687,7 +687,7 @@ const SKILLS = {
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
     { name: '약점간파', tag: '공격', coef: '타격×2.3 · 확정 크리 · 회피 무시(막기·방어구는 적용)', cd: 4, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 2.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending, true, true) * 2.3; if (f.instVuln > 0) d *= 1.5; d = Math.max(Math.round(d), 1); d = absorb(f, d); f.hp -= d; s.cd[0] = 4; s.note = '치명타' } },
     { name: '견제사격', tag: '공격', coef: '타격 + 2턴 상대 명중 -20%', cd: 4, ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.missDown === 0 ? ctrlVal(x.foeTurn, 2, 'missDown') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } },
-    { name: '연발사격', tag: '공격', coef: '타격×1.3 ×3타', cd: 5, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 3.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const hits = []; for (let i = 0; i < 3; i++) { let d = Math.round(attack(s, f, ds, df, f.defending) * 1.3); d = absorb(f, d); f.hp -= d; hits.push(d) } s.multiHits = hits; s.cd[2] = 5; s.note = '연발' } },
+    (() => { const spec = { name: '연발사격', tag: '공격', type: '물리.일반', mult: 1.3, hits: 3, cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 3.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); s.multiHits = r.hits.map(h => h.dealt); s.cd[2] = 5; s.note = '연발' } }) })(), // 엔진 이관: coef 자동생성(타격×1.3×3타), 히트별 interleave
     // 사냥꾼덫: 예약형 — 설치 후 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈). 딜은 출혈로. 카이팅/거리 유지
     { name: '사냥꾼덫', tag: '디버프', coef: '2턴 뒤 발동: 턴 게이지 밀림 + 둔화 + 3턴 출혈(물공×0.3/턴)', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0 && f.trap === 0 && f.bleed === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.8, exec: (s, f, ds, df) => { f.trap = 2; f.trapBleed = Math.round(ds.물공 * 0.3); s.cd[3] = 5; s.note = '덫 설치' } }
   ],
@@ -797,6 +797,41 @@ function estDamage (spec, ds, df, x) {
   if (D.force) e += ds.마공 * D.force
   if (D.selfStr) e += ds.base.힘 * D.selfStr
   return e
+}
+// ===== 통합 딜 실행 엔진 =====
+// spec.type(딜 전달)·mult·hits·dmg{}(라이더)·guaranteed·forceCrit 을 해석해 실제 딜 실행.
+// 반환 { hits:[{raw,type,dealt}], total, landed }. 히트별 내역은 나레이션 공통화(Phase2)에서 소비.
+// 라이더(foeHp/selfHp/selfStr/force)는 "명중 시만" 가산(빗나가면 딜 0) — 분쇄식 배율증가 규칙.
+// 형-base 타입(충격/역장/확정)은 물공/마공×mult + 라이더를 base로 만들어 판정 파이프라인에 태움.
+function deliverFormula (type, base, s, f, ds, df) {
+  base = Math.max(Math.round(base), 1)
+  if (type === '물리.충격') { const d = impactDmg(s, f, ds, df, base); f.hp -= d; return d } // 방어구·실드 무시
+  if (type === '마법.일반') { const d = spellDmg(base, f, df, s); f.hp -= d; return d } // 천운·마방·마관통
+  if (type === '확정') { const d = trueDmg(s, f, df, base); f.hp -= d; return d } // 전부 무시(실드 흡수만)
+  const d = absorb(f, base); f.hp -= d; return d // 마법.역장: 마방 무시, 실드 흡수
+}
+function runDamage (spec, s, f, ds, df) {
+  const type = spec.type || '물리.일반'
+  const D = spec.dmg || {}
+  const M = spec.mult != null ? spec.mult : (type === '물리.일반' ? 1 : 0)
+  const rider = () => df.maxhp * (D.foeHp || 0) + ds.maxhp * (D.selfHp || 0) + Math.round(ds.base.힘) * (D.selfStr || 0) + ds.마공 * (D.force || 0)
+  const hits = []; let landed = false
+  if (type === '물리.일반') {
+    const n = spec.hits || 1
+    for (let i = 0; i < n; i++) { // 히트별 즉시 처리(attack→absorb→차감): 실드 상대에게 히트마다 실드 상태 갱신 반영
+      const swing = attack(s, f, ds, df, f.defending, spec.guaranteed, spec.forceCrit, spec.hits ? 1 : undefined) // hits 지정 시 무기 다단 무시(연타 자체 정의)
+      if (swing > 0) landed = true
+      let raw = swing * M
+      if (i === 0 && swing > 0) raw += rider() // 라이더(상대HP%·힘 등) 명중 게이팅: 첫 히트 적중 시 합산
+      const dealt = absorb(f, Math.round(raw)); f.hp -= dealt
+      hits.push({ raw, type, dealt })
+    }
+  } else {
+    const base = (type.startsWith('마법') ? ds.마공 : ds.물공) * M + rider()
+    const dealt = deliverFormula(type, base, s, f, ds, df)
+    hits.push({ raw: base, type, dealt }); landed = dealt > 0
+  }
+  return { hits, total: hits.reduce((a, h) => a + (h.dealt || 0), 0), landed }
 }
 // ── AI 스코어러(전부 "이번 턴 HP 가치"로 반환 → bestScore=ctx.est(평타 HP가치)와 직접 비교) ──
 // 3분할: 딜점수(공격/관통/시전) · 제어점수(제어/디버프) · 방어점수(버프/회복). tag로 분류.

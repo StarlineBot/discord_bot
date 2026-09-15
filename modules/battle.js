@@ -602,7 +602,7 @@ const SKILLS = {
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
     { name: '방패가격', tag: '제어', coef: '시전차단 / 1턴 스턴', cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
     // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.5. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
-    { name: '도발', tag: '제어', coef: '상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 공격 ×1.5(강타 2회)', cd: 6, ready: (s, f, ds, df) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5, exec: (s, f, ds, df) => { f.taunt = 3; s.powBuff = 3; s.powMul = 1.5; s.cd[3] = 6; s.note = '도발' } }
+    mkSkill(3, { name: '도발', tag: '제어', coef: '상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 공격 ×1.5(강타 2회)', cd: 6, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.5 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸
@@ -622,7 +622,7 @@ const SKILLS = {
     boltCastSkill(1, '라이트닝볼트'),
     boltCastSkill(2, '콜드볼트'),
     // 볼트마법조합: 4턴 버프 — 활성 중 볼트 착탄 시 다음 원소 볼트 자동 후속(파이어→라이트닝→콜드→파이어)
-    { name: '볼트마법조합', tag: '버프', coef: '4턴 — 볼트 시전 시 짝 원소 자동발동 + 둘 다 계수↑(파라 강·라콜 중·콜파 약)', buff: 4, cd: 4, ready: (s, f, ds, df, x) => s.cd[3] === 0 && s.chainBolt <= 1 && x.safe, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds), exec: (s, f, ds, df) => { s.chainBolt = 4; s.cd[3] = 4; s.note = '볼트마법조합' } }
+    mkSkill(3, { name: '볼트마법조합', tag: '버프', coef: '4턴 — 볼트 시전 시 짝 원소 자동발동(파이어→라이트닝)', buff: 4, cd: 4, selfBuff: { chainBolt: 4 }, note: '볼트마법조합', ready: (s, f, ds, df, x) => s.cd[3] === 0 && s.chainBolt <= 1 && x.safe, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds) })
   ],
   암살도적: [
     mkSkill(0, { name: '암습', tag: '제어', cc: { stun: 3 }, cd: 10, note: '기절', ready: (s, f) => s.cd[0] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 3, 'stun') }), // 순수 CC: 확정 3턴 스턴, 딜 없음(후속타로 딜)
@@ -643,7 +643,7 @@ const SKILLS = {
   사냥꾼: [
     // 약점간파: 확정명중(회피 불가) + 확정크리. 단 방패막기·무기막기·방어중은 정식 적용(attack() 경로) — 못 피하지만 막을 순 있다
     (() => { const spec = { name: '약점간파', tag: '공격', type: '물리.일반', mult: 2.3, guaranteed: true, forceCrit: true, bonus: { when: 'foeInstVuln', mult: 3.45 }, coef: '타격×2.3 · 확정 크리 · 회피 무시(막기·방어구는 적용)', cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 2.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 4; s.note = '치명타' } }) })(), // 엔진 이관: guaranteed+forceCrit, bonus.when(약점노출 시 ×3.45)
-    { name: '견제사격', tag: '공격', coef: '타격 + 2턴 상대 명중 -20%', cd: 4, ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.missDown === 0 ? ctrlVal(x.foeTurn, 2, 'missDown') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = attack(s, f, ds, df, f.defending); d = absorb(f, d); f.hp -= d; f.missDown = 2; s.cd[1] = 4; s.note = '명중↓' } },
+    mkSkill(1, { name: '견제사격', tag: '공격', type: '물리.일반', mult: 1, debuff: { missDown: 2 }, note: '명중↓', cd: 4, ready: (s, f, ds, df) => s.cd[1] === 0 && f.missDown === 0 && f.hp > df.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.missDown === 0 ? ctrlVal(x.foeTurn, 2, 'missDown') : 0, f.hp, x.foeTurn) }),
     (() => { const spec = { name: '연발사격', tag: '공격', type: '물리.일반', mult: 1.3, hits: 3, cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 3.9, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); s.multiHits = r.hits.map(h => h.dealt); s.cd[2] = 5; s.note = '연발' } }) })(), // 엔진 이관: coef 자동생성(타격×1.3×3타), 히트별 interleave
     // 사냥꾼덫: 예약형 — 설치 후 상대 2턴 뒤 발동(게이지 밀림 + 1턴 둔화 + 3턴 출혈). 딜은 출혈로. 카이팅/거리 유지
     { name: '사냥꾼덫', tag: '디버프', coef: '2턴 뒤 발동: 턴 게이지 밀림 + 둔화 + 3턴 출혈(물공×0.3/턴)', cd: 5, ready: (s, f, ds, df) => s.cd[3] === 0 && f.trap === 0 && f.bleed === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.8, exec: (s, f, ds, df) => { f.trap = 2; f.trapBleed = Math.round(ds.물공 * 0.3); s.cd[3] = 5; s.note = '덫 설치' } }
@@ -658,7 +658,7 @@ const SKILLS = {
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
     (() => { const spec = { name: '역장폭발', tag: '관통', type: '마법.역장', mult: 4.5, coef: '역장 마공×4.5 관통 · 마나실드엔 흡수 · 시작쿨3', dmgType: '역장', cd: 7 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(ds.마공 * 4.5, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[3] = 7; s.note = '역장폭발' } }) })(), // 엔진 이관: 마법.역장(마나실드 흡수). 침투는 역장베기만
     // 마나대시: 상대 1턴 스턴(아그로 차단) + 본인 5턴 20% 가속. 스턴락 탈출 + 인챈트 셋업 보호
-    { name: '마나대시', tag: '버프', coef: '상대 1턴 스턴 + 본인 5턴 턴 20% 가속', buff: 5, cd: 6, ready: (s, f, ds, df) => s.cd[4] === 0 && s.haste === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.6, s, ds) + (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { applyCC(f, 'stun', 1); s.haste = 5; s.cd[4] = 6; s.note = '마나대시' } }
+    mkSkill(4, { name: '마나대시', tag: '버프', coef: '상대 1턴 스턴 + 본인 5턴 턴 20% 가속', buff: 5, cd: 6, cc: { stun: 1 }, selfBuff: { haste: 5 }, note: '마나대시', ready: (s) => s.cd[4] === 0 && s.haste === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.6, s, ds) + (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0) })
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
@@ -841,6 +841,7 @@ function effDesc (spec) {
   const p = []
   if (spec.heal) { const h = spec.heal; const pct = typeof h === 'number' ? h : (h.pct || 0); p.push(`체력 ${Math.round(pct * 100)}%${(typeof h === 'object' && h.stat) ? '+' + h.stat : ''} 회복`) }
   if (spec.cc) for (const k in spec.cc) p.push(`${spec.cc[k]}턴 ${CC_LABEL[k] || k}`)
+  if (spec.debuff) for (const k in spec.debuff) p.push(`${spec.debuff[k]}턴 ${CC_LABEL[k] || k}`)
   return p.join(' + ')
 }
 // 순수 딜기 팩토리: ready/score/exec를 필드에서 자동 생성(부가효과 없는 스킬). 필드는 그대로 남아 skillLine이 읽음

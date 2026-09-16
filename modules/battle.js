@@ -656,7 +656,7 @@ const SKILLS = {
     // 약점봉인: 순수 CC(딜 없음) — 상대 최고 스탯에 맞는 군중제어만
     { name: '약점봉인', tag: '제어', coef: '상대 최고 스탯 맞춤 CC (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun'), exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 5; s.note = cc } },
     // 역장베기(스펠스트라이크): 타격(확정명중) + 역장 force(마공 flat, 마방 무시). 인챈트 시 성질 변화 — 화염=딜폭발 / 얼음=둔화 / 관통=마나실드 침투
-    (() => { const spec = { name: '역장베기', tag: '공격', type: '마법.역장', coefFn: (ds, df, s) => s.enchant === '화염' ? 3.5 : (s.enchant === '얼음' || s.enchant === '전격') ? 3.0 : 2.4, coef: '역장 마공×2.4 (인챈트: 🔥×3.5 ❄️×3.0+둔화 ⚡×3.0+마비)', dmgType: '역장', cd: 2 }; return Object.assign({}, spec, { ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const e = s.enchant; const ctrl = (e === '얼음' && f.slow === 0) ? ctrlVal(x.foeTurn, 2, 'slow') : (e === '전격' && f.paralyze === 0) ? ctrlVal(x.foeTurn, 3, 'stun') * 0.3 : 0; return dmgVal(ds.마공 * spec.coefFn(ds, df, s), 1, ctrl, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); const e = s.enchant; if (e === '얼음') { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } if (e === '전격') applyCC(f, 'paralyze', 3); s.cd[1] = 2; s.note = e ? (ENCHANT_EMO[e] + ' 역장베기') : '역장베기' } }) })(), // 엔진 이관: 마법.역장 단일화(물리 타격분 제거) + coefFn(인챈트 배율). fmul 재튜닝 대상
+    (() => { const spec = { name: '역장베기', tag: '공격', type: '마법.역장', coefFn: (ds, df, s) => s.enchant === '화염' ? 3.5 : (s.enchant === '얼음' || s.enchant === '전격') ? 3.0 : 2.4, ccFn: (s) => s.enchant === '얼음' ? { slow: 2 } : s.enchant === '전격' ? { paralyze: 3 } : null, coef: '역장 마공×2.4 (인챈트: 🔥×3.5 ❄️×3.0+둔화 ⚡×3.0+마비)', dmgType: '역장', cd: 2 }; return Object.assign({}, spec, { ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); const e = s.enchant; if (e === '얼음') { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } if (e === '전격') applyCC(f, 'paralyze', 3); s.cd[1] = 2; s.note = e ? (ENCHANT_EMO[e] + ' 역장베기') : '역장베기' } }) })(), // 엔진 이관: 마법.역장 단일화(물리 타격분 제거) + coefFn(인챈트 배율). fmul 재튜닝 대상
     // 룬각인(마검 인챈트): 순수 버프 — 1턴 소모(딜 없음)가 리스크. 3턴 인챈트 속성 부여로 역장베기를 스펠스트라이크로 변화. AI는 인챈트의 미래 가치로 스코어링(상대 보고 자동선택)
     { name: '룬각인', tag: '버프', coef: '마검 인챈트(🔥화염/❄️얼음/⚡전격) 5턴', buff: 5, cd: 6, choose: 'enchant', ready: (s, f, ds, df) => s.cd[2] === 0 && !s.enchant, score: (s, f, ds, df, x) => { const e0 = s.enchantChoice || pickEnchant(f, df); const fmul = e0 === '화염' ? 2.5 : 2.0; const casts = 2.5; const extra = (fmul - 1.2) * ds.마공 * casts; const ctrl = e0 === '얼음' ? ctrlVal(x.foeTurn, 2, 'slow') : e0 === '전격' ? ctrlVal(x.foeTurn, 3, 'stun') * 0.3 * casts : 0; return dmgVal(extra, 1, ctrl, f.hp, x.foeTurn) + 30 }, exec: (s, f, ds, df) => { const e = s.enchantChoice || pickEnchant(f, df); s.enchantChoice = null; s.enchant = e; s.enchantTurns = 5; s.cd[2] = 6; s.note = ENCHANT_EMO[e] + ' ' + e + ' 인챈트' } },
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
@@ -666,7 +666,7 @@ const SKILLS = {
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
-    (() => { const spec = { name: '마나소각', tag: '공격', type: '마법.역장', mult: 1.2, bonus: { when: 'foeShield', mult: 3.5 }, coef: '마공×1.2 (마나실드 있으면 ×3.5 + 3턴 둔화)', dmgType: '역장', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x) + (f.shield > 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0), exec: (s, f, ds, df) => { const sh = f.shield > 0; runDamage(spec, s, f, ds, df); if (sh) { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 1) } s.cd[0] = 3; s.note = sh ? '마나소각' : '마나번' } }) })(), // 마법.역장 + bonus.when(실드 시 ×3.5+둔화). 기본1.2(물리딜러엔 약)·실드3.5(캐스터 특화)·쿨3
+    (() => { const spec = { name: '마나소각', tag: '공격', type: '마법.역장', mult: 1.2, bonus: { when: 'foeShield', mult: 3.5 }, ccFn: (s, f) => f.shield > 0 ? { slow: 3 } : null, coef: '마공×1.2 (마나실드 있으면 ×3.5 + 3턴 둔화)', dmgType: '역장', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const sh = f.shield > 0; runDamage(spec, s, f, ds, df); if (sh) { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 1) } s.cd[0] = 3; s.note = sh ? '마나소각' : '마나번' } }) })(), // 마법.역장 + bonus.when(실드 시 ×3.5+둔화). 기본1.2(물리딜러엔 약)·실드3.5(캐스터 특화)·쿨3
     // 시전파괴: 상대 시전 확정 차단 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
     { name: '시전파괴', tag: '제어', interrupt: true, cc: { silence: 2 }, cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
@@ -773,6 +773,7 @@ function autoScore (spec, s, f, ds, df, x) {
   let cc = 0 // 봉쇄형 CC(상대 행동 차단): CC_K 등록 종류만, 이미 걸린 상태면 0
   const addCC = (obj) => { for (const k in obj || {}) if (CC_K[k] != null && !(f[k] > 0)) cc += ctrlVal(x.foeTurn, obj[k], k) }
   addCC(spec.cc); addCC(spec.debuff)
+  if (spec.ccFn) addCC(spec.ccFn(s, f, ds, df)) // 조건부 CC(인챈트·실드 등 상태 의존): 동적 cc 객체 반환
   let weaken = 0 // 약화형 디버프: 상대 산출 감소분(무기파괴=상대딜 2/3, 회복차단 근사)
   if (spec.debuff) {
     const foeEst = estAtk(df, ds)
@@ -841,7 +842,7 @@ function runDamage (spec, s, f, ds, df) {
 }
 // ── AI 스코어러(전부 "이번 턴 HP 가치"로 반환 → bestScore=ctx.est(평타 HP가치)와 직접 비교) ──
 // 3분할: 딜점수(공격/관통/시전) · 제어점수(제어/디버프) · 방어점수(버프/회복). tag로 분류.
-const CC_K = { stun: 0.9, silence: 0.6, slow: 0.4, sunder: 0.35, missDown: 0.25, luckLock: 0.3, blind: 0.3 } // 제어 종류별 봉쇄 효율
+const CC_K = { stun: 0.9, silence: 0.6, slow: 0.4, sunder: 0.35, missDown: 0.25, luckLock: 0.3, blind: 0.3, paralyze: 0.27 } // 제어 종류별 봉쇄 효율. 마비=매턴 30% 턴상실(스턴×0.3≈0.27)
 function ctrlVal (foeTurn, turns, kind) { return foeTurn * (turns || 1) * (CC_K[kind] || 0.3) } // 제어점수: 상대 foeTurn×봉쇄턴×효율 = 막는 HP
 function dmgVal (dmg, castTurns, ccVal, foeHp, foeTurn) { const ct = Math.max(1, castTurns || 1); const risk = foeTurn ? foeTurn * (ct - 1) * 0.2 : 0; const base = dmg / ct + (ccVal || 0) - risk; return (foeHp != null && dmg >= foeHp) ? Math.max(base, dmg + (ccVal || 0) - risk) : base } // 딜점수: 기대딜/커밋턴 + CC − 시전리스크(무방비 턴×foeTurn). 처치 가능하면 총딜 승격(파이어 버스트)
 // 방어점수(버프): 총 이득 × 생존여유(저HP면 버프 대신 생존이 우선 → 감소). 미보유 시만 호출(ready 게이트)

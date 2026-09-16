@@ -453,7 +453,7 @@ function boltCastSkill (ci, bn) {
   return Object.assign({}, spec, {
     // 조합(chainBolt) 중엔 콜드도 1시전이 되므로, 콜드 ready도 시전가능(safe) 요구
     ready: (s, f, ds, df, x) => (B.cast + (s.chainBolt > 0 ? 1 : 0)) > 0 ? (s.cast === 0 && x.safe) : (s.cd[ci] === 0),
-    score: (s, f, ds, df, x) => { const shots = psv(s, 'boltMaster') ? B.hits[1] : 3; const combo = s.chainBolt > 0; const em = psv(s, '원소마스터') ? ELEM_MASTER : 1; const per = ds.마공 * B.mult * em * (1 - df.마방); const dmg = per * shots * (combo ? 2 : 1); const castT = B.cast + (combo ? 1 : 0); return dmgVal(dmg, castT, B.cc ? ctrlVal(x.foeTurn, 1, 'slow') : 0, f.hp, x.foeTurn) }, // 조합=짝 볼트까지 두 발(×2 근사)
+    score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), // 딜(boltMaster 발수·원소마스터·조합×2)·시전(+조합)·cc 전부 estDamage/autoScore가 처리
     exec: (s, f, ds, df) => {
       const castT = B.cast + (s.chainBolt > 0 ? 1 : 0) // 볼트마법조합: 모든 볼트류 시전 +1(콜드 0→1시전으로 리스크 발생)
       if (castT > 0) { const cut = s.castCut > 0 ? 1 : 0; s.castCut = 0; s.cast = Math.max(1, castT + (ds.무기.castMod || 0) - cut); s.castUninterruptible = false; s.castTotal = s.cast; s.castName = bn; s.castBolt = bn; s.castBoltChain = s.chainBolt > 0; s.cd[ci] = 1; s.note = bn + ' 시전' } else { launchBolt(s, f, ds, df, bn, s.chainBolt > 0); s.cd[ci] = 1; s.note = bn } // 콜드 즉발(비조합/조합)
@@ -747,13 +747,18 @@ function estDamage (spec, ds, df, x, s, f) {
   if (spec.coefFn) M = spec.coefFn(ds, df, s, f) // 식-계수(발경 등)
   else if (spec.bonus && s && f && bonusCond(spec.bonus.when, s, f, ds, df)) M = spec.bonus.mult // 조건부(실드/무기파괴/스턴 시)
   const D = spec.dmg || {}; let e = 0
-  const hits = spec.hits ? (Array.isArray(spec.hits) ? (spec.hits[0] + spec.hits[1]) / 2 : spec.hits) : 1
+  let hits = spec.hits ? (Array.isArray(spec.hits) ? (spec.hits[0] + spec.hits[1]) / 2 : spec.hits) : 1
+  let elemX = 1 // 볼트: 원소마스터 배율 × 조합(짝 볼트 ×2)
+  if (t.startsWith('마법.원소')) { // 볼트 발수: boltMaster면 최대치 고정, 조합(chainBolt)이면 짝 볼트까지 ×2
+    if (s && psv(s, 'boltMaster') && Array.isArray(spec.hits)) hits = spec.hits[1]
+    elemX = (s && psv(s, '원소마스터') ? ELEM_MASTER : 1) * ((s && s.chainBolt > 0) ? 2 : 1)
+  }
   if (M) {
     const base = t.startsWith('물리') ? ds.물공 * (ds.무기.물공배율 || 1) * M : ds.마공 * M
     let def = 1 // 역장(마방무시)·충격(방어무시)·확정(전부무시) → 1
     if (t === '물리.일반') def = (1 - df.물방) * (spec.guaranteed ? 1 : Math.max(ds.명중, 0.3)) // guaranteed=명중판정 생략
     else if (t === '마법.일반' || t.startsWith('마법.원소')) def = (1 - df.마방)
-    let swing = base * def * hits
+    let swing = base * def * hits * elemX
     if (spec.forceCrit) swing *= (ds.무기.크리배율 || ds.물크기본 || 1.5) // 확정크리: 무기 크리배율 반영
     e += swing
   }
@@ -768,8 +773,10 @@ const TYPE_W = { '물리.일반': 1.0, '마법.일반': 1.0, '마법.원소.화�
 // 통합 AI 스코어(선언 필드 파생): 딜(타입가중)/캐스트 + 봉쇄CC + 약화디버프 + 인터럽트 − 자해. 버프/힐/RNG은 제외(커스텀).
 function autoScore (spec, s, f, ds, df, x) {
   const dmg = hasDamage(spec) ? estDamage(spec, ds, df, x, s, f) : 0 // 딜 없는 순수CC/디버프는 팬텀딜 방지
-  // 시전턴(커밋 리스크 분모): 인캐 시 1(메테오 등 uninterruptible 제외), 아니면 시전 + 무기 castMod
-  const cast = spec.cast ? ((s.instCast > 0 && !spec.uninterruptible) ? 1 : Math.max(1, spec.cast + (ds.무기.castMod || 0))) : 1
+  // 시전턴(커밋 리스크 분모): 볼트=시전+조합(+1) / 인캐 시 1(메테오 등 uninterruptible 제외) / 아니면 시전+castMod
+  let cast
+  if (spec.type && spec.type.startsWith('마법.원소')) cast = Math.max(1, (spec.cast || 0) + (s.chainBolt > 0 ? 1 : 0) + (ds.무기.castMod || 0))
+  else cast = spec.cast ? ((s.instCast > 0 && !spec.uninterruptible) ? 1 : Math.max(1, spec.cast + (ds.무기.castMod || 0))) : 1
   const tw = TYPE_W[spec.type] || 1
   let cc = 0 // 봉쇄형 CC(상대 행동 차단): CC_K 등록 종류만, 이미 걸린 상태면 0
   const addCC = (obj) => { for (const k in obj || {}) if (CC_K[k] != null && !(f[k] > 0)) cc += ctrlVal(x.foeTurn, obj[k], k) }

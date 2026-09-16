@@ -583,8 +583,8 @@ function mudoCombo () {
 const SKILLS = {
   검투사: [
     // 분쇄: 1쿨 타격 + 상대 물방·마방 감소 스택(스택당 -5%p, 최대5, 지속2). 스팸으로 방어를 깎아 후속딜 증폭
-    (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.6, dmg: { foeHp: 0.03 }, stack: '물방·마방 -5%p·회복 -15% 스택(적중·최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(x.est * 1.6 + df.maxhp * 0.03, 1, 0, f.hp, x.foeTurn) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // 엔진 이관: type/mult/dmg 선언 → runDamage. 라이더(상대HP2%)·crush는 명중 게이팅
-    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.08, selfStr: 0.5 }, recoil: 0.04, cc: { stun: 2 }, cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + Math.round(ds.base.힘 * 0.5) + df.maxhp * 0.08, 1, ctrlVal(x.foeTurn, 2, 'stun'), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // 엔진 이관: attack() 경유(패링·경감 자동). 스턴 명중&비패링 게이팅, 반동 recoil 필드
+    (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.6, dmg: { foeHp: 0.03 }, stack: '물방·마방 -5%p·회복 -15% 스택(적중·최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // autoScore 파일럿: 딜/라이더 자동 + 스택부여 가치 addon
+    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.08, selfStr: 0.5 }, recoil: 0.04, cc: { stun: 2 }, cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // autoScore 파일럿: 딜+라이더+스턴CC+반동 자동
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
     { name: '방해', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 4 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
@@ -600,7 +600,7 @@ const SKILLS = {
   ],
   기사: [
     // 방패밀쳐내기: 물리딜(배율×2) + 상대 최대체력 12%를 배율로 추가 — 스윙 명중 시 합산(회피·막기·실드 모두 적용), HP스케일 탱버스터
-    (() => { const spec = { name: '방패밀쳐내기', tag: '공격', type: '물리.일반', mult: 2, dmg: { foeHp: 0.12 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => dmgVal(ds.물공 * spec.mult * (1 - df.물방) + df.maxhp * 0.12, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 3; s.note = '방패밀쳐내기' } }) })(), // 엔진 이관: attack() 경유(방어기제 작동)
+    (() => { const spec = { name: '방패밀쳐내기', tag: '공격', type: '물리.일반', mult: 2, dmg: { foeHp: 0.12 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 3; s.note = '방패밀쳐내기' } }) })(), // autoScore 파일럿: 딜+상대체력 라이더 자동
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
     mkSkill(1, { name: '방패들기', tag: '버프', buff: 5, cd: 6, selfBuff: { blockUp: 5 }, ready: (s, f, ds) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds) }),
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
@@ -739,14 +739,47 @@ const CUSTOM_DEFS = {
 // ===== 선언형 딜 스키마 =====
 // 실제 딜은 runDamage(통합 엔진). estDamage=AI score용 추정(비파괴, attack 미호출).
 const TAG_EMO = { 공격: '⚔️', 시전: '🔮', 버프: '🔺', 디버프: '🔻', 제어: '🌀', 회복: '💚', 관통: '⚡' }
-function estDamage (spec, ds, df, x) {
-  const M = spec.mult != null ? spec.mult : 1; const D = spec.dmg || {}; let e = 0
-  if (M) e += (x ? x.est : estAtk(ds, df)) * M * (spec.hits || 1)
+// 타입별 기대딜(스펙 선언에서 파생): mult/bonus/coefFn·hits·라이더를 읽어 "상대에게 들어가는 기대 최종딜" 추정.
+// 타입에 맞는 스탯(물공/마공)과 주 방어(물방/마방, 역장·충격·확정은 무시)를 반영 → autoScore의 딜 성분.
+function estDamage (spec, ds, df, x, s, f) {
+  const t = spec.type || '물리.일반'
+  let M = spec.mult != null ? spec.mult : (t === '물리.일반' ? 1 : 0)
+  if (spec.coefFn) M = spec.coefFn(ds, df, s, f) // 식-계수(발경 등)
+  else if (spec.bonus && s && f && bonusCond(spec.bonus.when, s, f, ds, df)) M = spec.bonus.mult // 조건부(실드/무기파괴/스턴 시)
+  const D = spec.dmg || {}; let e = 0
+  const hits = spec.hits ? (Array.isArray(spec.hits) ? (spec.hits[0] + spec.hits[1]) / 2 : spec.hits) : 1
+  if (M) {
+    const base = t.startsWith('물리') ? ds.물공 * (ds.무기.물공배율 || 1) * M : ds.마공 * M
+    let def = 1 // 역장(마방무시)·충격(방어무시)·확정(전부무시) → 1
+    if (t === '물리.일반') def = (1 - df.물방) * Math.max(ds.명중, 0.3)
+    else if (t === '마법.일반' || t.startsWith('마법.원소')) def = (1 - df.마방)
+    e += base * def * hits
+  }
   if (D.selfHp) e += ds.maxhp * D.selfHp
   if (D.foeHp) e += df.maxhp * D.foeHp
   if (D.force) e += ds.마공 * D.force
   if (D.selfStr) e += ds.base.힘 * D.selfStr
   return e
+}
+// 딜 타입별 신뢰도 가중(가산점): 방어 우회·저변동일수록↑. 1.0=중립(파일럿 시작값, 이후 튜닝).
+const TYPE_W = { '물리.일반': 1.0, '마법.일반': 1.0, '마법.원소.화염': 1.0, '마법.원소.전격': 1.0, '마법.원소.얼음': 1.0, '마법.역장': 1.0, '물리.충격': 1.0, 확정: 1.0 }
+// 통합 AI 스코어(선언 필드 파생): 딜(타입가중)/캐스트 + 봉쇄CC + 약화디버프 + 인터럽트 − 자해. 버프/힐/RNG은 제외(커스텀).
+function autoScore (spec, s, f, ds, df, x) {
+  const dmg = estDamage(spec, ds, df, x, s, f)
+  const cast = Math.max(1, spec.cast || 1)
+  const tw = TYPE_W[spec.type] || 1
+  let cc = 0 // 봉쇄형 CC(상대 행동 차단): CC_K 등록 종류만, 이미 걸린 상태면 0
+  const addCC = (obj) => { for (const k in obj || {}) if (CC_K[k] != null && !(f[k] > 0)) cc += ctrlVal(x.foeTurn, obj[k], k) }
+  addCC(spec.cc); addCC(spec.debuff)
+  let weaken = 0 // 약화형 디버프: 상대 산출 감소분(무기파괴=상대딜 2/3, 회복차단 근사)
+  if (spec.debuff) {
+    const foeEst = estAtk(df, ds)
+    if (spec.debuff.weaponBroken && !(f.weaponBroken > 0)) weaken += foeEst * (2 / 3) * Math.min(spec.debuff.weaponBroken, df.턴 ? 4 : 4)
+    if (spec.debuff.healCut && !(f.healCut > 0)) weaken += df.maxhp * 0.03 * spec.debuff.healCut
+  }
+  const intr = (spec.interrupt && f.cast > 0) ? x.foeTurn * 3 : 0 // 인터럽트: 상대 시전 중이면 큰 가치
+  const cost = ((spec.recoil || 0) * ds.maxhp + (spec.recoilCur || 0) * s.hp + (spec.selfCost || 0) * ds.maxhp) * 0.5
+  return dmgVal(dmg * tw, cast, cc + weaken, f.hp, x.foeTurn) + intr - cost
 }
 // ===== 통합 딜 실행 엔진 =====
 // spec.type(딜 전달)·mult·hits·dmg{}(라이더)·guaranteed·forceCrit 을 해석해 실제 딜 실행.

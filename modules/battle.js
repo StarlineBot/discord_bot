@@ -930,9 +930,10 @@ function dmgSkill (ci, spec) {
 // 통합 스킬 팩토리: 딜(runDamage) + 효과(applyEffects) 자동 실행. ready/score는 spec 제공(또는 쿨 기본). coef 자동.
 function mkSkill (ci, spec) {
   const dmgy = hasDamage(spec)
+  const buffKeys = spec.selfBuff ? Object.keys(spec.selfBuff).filter(k => BUFF_FIELDS.includes(k)) : [] // 지속형 버프 필드(멀티플라이어 제외)
   return Object.assign({}, spec, {
-    ready: spec.ready || ((s) => s.cd[ci] === 0),
-    score: spec.score || ((s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)),
+    ready: spec.ready || ((s) => s.cd[ci] === 0 && buffKeys.every(k => !(s[k] > 0))), // 기본: 쿨 + 해당 버프 미보유 시만
+    score: spec.score || ((s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x) + (spec.selfBuff ? buffVal(x.est * (spec.buff || 3) * 0.3, s, ds) : 0)), // 딜/CC=autoScore + 순수버프=buffVal 기본값(없으면 후보로 경쟁)
     exec: (s, f, ds, df) => { if (dmgy) runDamage(spec, s, f, ds, df); applyEffects(spec, s, f, ds, df); s.cd[ci] = spec.cd; s.note = spec.note || spec.name }
   })
 }

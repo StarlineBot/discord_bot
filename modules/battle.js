@@ -610,13 +610,13 @@ const SKILLS = {
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸
-    { name: '화염구', tag: '시전', type: '마법.일반', mult: CAST_SPELLS.화염구.mult, cast: CAST_SPELLS.화염구.cast, ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '화염구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 7 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { scheduleCast(s, f, ds, df, CAST_SPELLS.화염구) } },
+    (() => { const spec = { name: '화염구', tag: '시전', type: '마법.일반', mult: CAST_SPELLS.화염구.mult, cast: CAST_SPELLS.화염구.cast }; return Object.assign({}, spec, { ready: (s, f, ds, df, x) => s.cast === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { scheduleCast(s, f, ds, df, CAST_SPELLS.화염구) } }) })(),
     // 메테오: 긴 시전(9+무기), 인캐 불가(무조건 하드캐스트), 초대형 한 방. uninterruptible=끊기·기절 면역
-    { name: '메테오', tag: '시전', type: '마법.일반', mult: CAST_SPELLS.메테오.mult, cast: CAST_SPELLS.메테오.cast, uninterruptible: true, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '메테오') * (1 - df.마방), Math.max(2, 10 + (ds.무기.castMod || 0)), 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { scheduleCast(s, f, ds, df, CAST_SPELLS.메테오); s.cd[1] = 5 } },
+    (() => { const spec = { name: '메테오', tag: '시전', type: '마법.일반', mult: CAST_SPELLS.메테오.mult, cast: CAST_SPELLS.메테오.cast, uninterruptible: true }; return Object.assign({}, spec, { ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[1] === 0 && x.safe, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { scheduleCast(s, f, ds, df, CAST_SPELLS.메테오); s.cd[1] = 5 } }) })(),
     // 인스턴트캐스팅: 다음 시전 마법을 즉시시전으로(버프·딜 없음). 메테오엔 안 걸림
     mkSkill(2, { name: '인스턴트캐스팅', tag: '버프', buff: 3, cd: 10, selfBuff: { instCast: 3 }, note: '인스턴트 캐스팅', ready: (s) => s.cd[2] === 0 && s.cast === 0 && s.instCast === 0, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds) }), // 3턴 시전 리스크 회피 = 고가치
     // 서리구: 짧은 시전(인캐 가능), 딜은 파볼보다 약하나 상대 3턴 둔화. 인캐 심리전 2번째 선택지
-    { name: '서리구', tag: '시전', type: '마법.일반', mult: CAST_SPELLS.서리구.mult, cast: CAST_SPELLS.서리구.cast, cc: { slow: 3 }, ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '서리구') * (1 - df.마방), s.instCast > 0 ? 1 : Math.max(1, 6 + (ds.무기.castMod || 0)), f.slow === 0 ? ctrlVal(x.foeTurn, 3, 'slow') : 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; scheduleCast(s, f, ds, df, CAST_SPELLS.서리구) } },
+    (() => { const spec = { name: '서리구', tag: '시전', type: '마법.일반', mult: CAST_SPELLS.서리구.mult, cast: CAST_SPELLS.서리구.cast, cc: { slow: 3 } }; return Object.assign({}, spec, { ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && (s.instCast || x.safe), score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 2); s.cd[3] = 3; scheduleCast(s, f, ds, df, CAST_SPELLS.서리구) } }) })(),
     // 충격파: 즉발 소량딜 + 상대 현재 턴 진행 초기화(게이지 풀 리셋) + 1턴 둔화 — 느린 캐스터의 템포/카이팅 도구(딜은 곁다리)
     { name: '충격파', tag: '공격', coef: '마공×1.0 + 상대 턴 게이지 초기화 + 1턴 둔화 (기절 중에도 사용)', cd: 8, ready: (s, f, ds, df) => s.cd[4] === 0, score: (s, f, ds, df, x) => dmgVal(spellBase(ds, '충격파') * (1 - df.마방), 1, x.incoming * (Math.max(df.턴 - f.gauge, 0) / df.턴) * 1.5, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let d = spellDmg(spellBase(ds, '충격파'), f, df, s); d = absorb(f, d); f.hp -= d; f.gauge = Math.max(f.gauge, df.턴); applyCC(f, 'slow', 1); f.slowSec = Math.max(f.slowSec, 1); s.cd[4] = 8; s.note = '충격파' }, stunnable: true } // 슬롯4=cd[4] (플레이어 버튼 cd[slot] 정합)
   ],
@@ -768,7 +768,8 @@ const TYPE_W = { '물리.일반': 1.0, '마법.일반': 1.0, '마법.원소.화�
 // 통합 AI 스코어(선언 필드 파생): 딜(타입가중)/캐스트 + 봉쇄CC + 약화디버프 + 인터럽트 − 자해. 버프/힐/RNG은 제외(커스텀).
 function autoScore (spec, s, f, ds, df, x) {
   const dmg = hasDamage(spec) ? estDamage(spec, ds, df, x, s, f) : 0 // 딜 없는 순수CC/디버프는 팬텀딜 방지
-  const cast = Math.max(1, spec.cast || 1)
+  // 시전턴(커밋 리스크 분모): 인캐 시 1(메테오 등 uninterruptible 제외), 아니면 시전 + 무기 castMod
+  const cast = spec.cast ? ((s.instCast > 0 && !spec.uninterruptible) ? 1 : Math.max(1, spec.cast + (ds.무기.castMod || 0))) : 1
   const tw = TYPE_W[spec.type] || 1
   let cc = 0 // 봉쇄형 CC(상대 행동 차단): CC_K 등록 종류만, 이미 걸린 상태면 0
   const addCC = (obj) => { for (const k in obj || {}) if (CC_K[k] != null && !(f[k] > 0)) cc += ctrlVal(x.foeTurn, obj[k], k) }

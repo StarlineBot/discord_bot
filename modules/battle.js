@@ -1671,12 +1671,13 @@ function buildBattleEmbed (state) {
   const buffLine = (s) => s ? `🟢 ${s}\n` : '' // 버프 = 캐릭명 위
   const debLine = (s) => s ? `🔴 ${s}\n` : '' // 디버프 = 캐릭명 아래
   const cdLine = (nm, f) => { const sks = SKILLS[nm]; if (!sks || !f.cd) return ''; return `⏳ ${sks.map((sk, i) => `${sk.name} ${f.cd[i] > 0 ? f.cd[i] : '✅'}`).join(' · ')}\n` } // 상대 스킬 쿨 실시간(정보대칭)
+  const eMax = (base, f) => Math.round(base * (1 - Math.min(f.erosion || 0, 10) * 0.05)) // 침식: 최대체력 표시에 반영(스택당 -5%). 침식이 "피해"가 아니라 "피통 감소"로 읽히게
   const desc =
     // 상단: 상대 (버프 위 · 이름 · 디버프 아래 · HP)
     buffLine(fr.bBuf) +
     `${CHARS[oppName].emoji} **${oppName}**: ${titleTag(oppTitle)} **${oppNick}** · ${oppAI} AI\n` +
     debLine(fr.bDeb) +
-    `\`${hpBar(fr.bHp, state.maxB, 18)}\`\n` +
+    `\`${hpBar(fr.bHp, eMax(state.maxB, state.B), 18)}\`\n` +
     cdLine(oppName, state.B) +
     '\n' +
     // 중앙: 로그
@@ -1685,7 +1686,7 @@ function buildBattleEmbed (state) {
     buffLine(fr.aBuf) +
     `${CHARS[meName].emoji} **${meName}**: ${titleTag(meTitle)} <@${memberId}>\n` +
     debLine(fr.aDeb) +
-    `\`${hpBar(fr.aHp, state.maxA, 18)}\`\n` +
+    `\`${hpBar(fr.aHp, eMax(state.maxA, state.A), 18)}\`\n` +
     footer
   return new EmbedBuilder().setTitle('⚔️ 듀얼 — 전투 중').setColor(0x3498db)
     .setDescription(desc.length > 4090 ? '…' + desc.slice(-4089) : desc)

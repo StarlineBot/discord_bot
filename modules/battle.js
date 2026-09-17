@@ -19,7 +19,7 @@ const CHARS = {
   세이지: { emoji: '📖', 힘: 60, 지능: 70, 체력: 55, 민첩: 45, 솜씨: 50, 행운: 30, 무기: '마도서', 원소마스터: true, 현자균형: true, id: '혼합 하이브리드' },
   스펠블레이드: { emoji: '⚡', 힘: 65, 지능: 60, 체력: 55, 민첩: 50, 솜씨: 50, 행운: 30, 무기: '검오브', id: '혼합 관통 스펠블레이드' },
   스펠브레이커: { emoji: '🪄', 힘: 30, 지능: 80, 체력: 65, 민첩: 50, 솜씨: 45, 행운: 30, 무기: '마도검', 마도갑주: 0.12, id: '안티캐스터 마딜' },
-  무도가: { emoji: '👊', 힘: 75, 지능: 10, 체력: 50, 민첩: 75, 솜씨: 55, 행운: 40, 무기: '너클', id: '콤보 무투가' },
+  무도가: { emoji: '👊', 힘: 55, 지능: 10, 체력: 50, 민첩: 75, 솜씨: 75, 행운: 40, 무기: '너클', 육합권: true, id: '콤보 무투가' },
   프리스트: { emoji: '✝️', 힘: 55, 지능: 30, 체력: 80, 민첩: 40, 솜씨: 90, 행운: 10, 무기: '양둔', 신성의무: true, id: '신성 탱커' }, // 높은체력·솜씨로 버티는 신성 탱커. 신성의무=물리평타에 신성 스플래시(참회 시너지). 스킬 힐·축복·성역·가호 + 신성한의무 패시브(합 5)
   참회사제: { emoji: '📿', 힘: 10, 지능: 85, 체력: 60, 민첩: 35, 솜씨: 45, 행운: 25, 무기: '스태프', id: '참회 신성 마딜러' }, // 신성 캐스트 램프 딜러. 모든 신성딜이 참회 스택(상대 최대체력% 확정관통)을 쌓고, 쌓일수록 강해짐 → 단죄로 소모·폭발. 스태프(castMod -2)라 시전 base=실효+2. 5액티브(패시브 없음)
   암흑기사: { emoji: '⚰️', 힘: 85, 지능: 10, 체력: 55, 민첩: 45, 솜씨: 55, 행운: 30, 무기: '양검', id: '침식 암흑기사' } // 자기침식(최대체력↓) 도박형 대검. 암흑딜=물공 계수 마법.일반(마방/실드 판정). 침식 쌓아 종말로 전이+폭발, 영혼포식으로 흡혈. 5액티브(패시브 없음)
@@ -581,16 +581,33 @@ const DEBUFFS = [
   { name: '회복불가', apply: f => applyCC(f, 'healBlock', 3) }
 ]
 // 무도가 모핑 콤보: 슬롯 1개가 comboStep에 따라 육합권→연환전신장→맹룡과강으로 변신. 적중마다 다음 단계. AI·플레이어 모두 순서 강제(단독 사용 불가)
+// 무도가 육합권: 패시브 프록(평타 히트당 확률) → 연환격 슬롯(연환전신장→맹룡) 개시. 스펙은 기존 육합권과 동일(×1.3 3타)
+const MUDO_YUK = { name: '육합권', type: '물리.일반', mult: 1.1, hits: 3 }
+const MUDO_MINJAB = 2 // 최소 이만큼 히트(대) 쌓여야 육합권 프록 시작
+const MUDO_PROC = 0.30 // 평타 히트당 프록 확률(너클 다단2 → 턴당 ~51%)
 function mudoCombo () {
-  // 3단계 = 각각 선언형 spec(물리.일반). 너클 다단:2를 hits로 눌러 연타 자체정의. 콤보 전이만 exec에.
-  const st0 = { name: '육합권', type: '물리.일반', mult: 1.3, hits: 3 }
-  const st1 = { name: '연환전신장', type: '물리.일반', mult: 1.3, hits: 4 }
-  const st2 = { name: '맹룡과강', type: '물리.일반', mult: 9.0, hits: 1 }
-  const s0 = Object.assign({}, st0, { name: '육합권(연계스킬)', lvl: 0, exec: (s, f, ds, df) => { const r = runDamage(st0, s, f, ds, df); s.multiHits = r.hits.map(h => h.dealt); if (r.landed) { s.comboStep = 1; s.comboWin = 3 } s.cd[0] = 0; s.note = '육합권' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 3.9 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) })
-  const s1 = Object.assign({}, st1, { lvl: 1, exec: (s, f, ds, df) => { const r = runDamage(st1, s, f, ds, df); s.multiHits = r.hits.map(h => h.dealt); if (r.landed) { s.comboStep = 2; s.comboWin = 3 } else { s.comboStep = 0; s.comboWin = 0 } s.cd[0] = 0; s.note = r.landed ? '연환전신장·연계' : '연환전신장·빗나감' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5.2 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) })
-  const s2 = Object.assign({}, st2, { lvl: 2, exec: (s, f, ds, df) => { runDamage(st2, s, f, ds, df); s.comboStep = 0; s.comboWin = 0; s.cd[0] = 0; s.note = '맹룡과강·작렬' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 9.0 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }) // 맹룡 후 쿨 없음: 재적중(최소 3턴 주기)이 자연 쿨
-  const stage = (s) => (s.comboStep >= 2 && s.comboWin > 0) ? s2 : (s.comboStep >= 1 && s.comboWin > 0) ? s1 : s0
-  return { name: '연환격', tag: '공격', combo: true, coef: '연계: 육합권(×1.3 3연타)→연환전신장(×1.3 4연타)→맹룡과강(×9.0 피니셔)', stageName: (s) => stage(s).name, stageLevel: (s) => stage(s).lvl, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => { const base = stage(s).score(s, f, ds, df, x); return (s.comboStep >= 1 && s.comboWin > 0) ? base * 1.7 : base }, exec: (s, f, ds, df) => stage(s).exec(s, f, ds, df) } // 콤보 진행 중엔 완성 우선(모멘텀 — 발경 등에 안 끊기게)
+  // 육합권은 패시브 프록으로 이관 → 이 슬롯은 프록 후 연환전신장→맹룡과강 연계만. 너클 다단:2를 hits로 눌러 연타 자체정의.
+  const st1 = { name: '연환전신장', type: '물리.일반', mult: 1.2, hits: 4 }
+  const st2 = { name: '맹룡과강', type: '물리.일반', mult: 7.0, hits: 1 }
+  const s1 = Object.assign({}, st1, { lvl: 1, exec: (s, f, ds, df) => { const r = runDamage(st1, s, f, ds, df); s.multiHits = r.hits.map(h => h.dealt); if (r.landed) { s.comboStep = 2; s.comboWin = 3 } else { s.comboStep = 0; s.comboWin = 0 } s.cd[0] = 0; s.note = r.landed ? '연환전신장·연계' : '연환전신장·빗나감' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 4.8 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) })
+  const s2 = Object.assign({}, st2, { lvl: 2, exec: (s, f, ds, df) => { runDamage(st2, s, f, ds, df); s.comboStep = 0; s.comboWin = 0; s.cd[0] = 0; s.note = '맹룡과강·작렬' }, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 7.0 * (1 - df.물방), 1, 0, f.hp, x.foeTurn) }) // 맹룡 후 쿨 없음: 재적중이 자연 쿨
+  const stage = (s) => (s.comboStep >= 2 && s.comboWin > 0) ? s2 : s1
+  return { name: '연환격', tag: '공격', combo: true, coef: '연계(육합권 발동 후): 연환전신장(×1.2 4연타)→맹룡과강(×7.0 피니셔)', stageName: (s) => stage(s).name, stageLevel: (s) => stage(s).lvl, ready: (s, f, ds, df) => s.cd[0] === 0 && s.comboStep >= 1 && s.comboWin > 0, score: (s, f, ds, df, x) => stage(s).score(s, f, ds, df, x) * 1.7, exec: (s, f, ds, df) => stage(s).exec(s, f, ds, df) } // 육합권 프록됐을 때만 사용 가능
+}
+// 육합권 프록 실행: 평타(너클 다단2) + 육합권(×1.3 3타)이 동시에 파바박 → 연계 개시(comboStep=1). 히트를 평타/육합권 분리 저장(나레이션)
+const MUDO_AUTO = { type: '물리.일반', mult: 0.5, hits: 2 } // 너클 평타분(다단2): 히트당 물공×0.5 → 총 ×1.0(정상 평타와 동일)
+function execMudoYukhap (self, foe, ds, df) {
+  const fb = foe.hp; const sb = self.hp; const psh = foe.shield
+  const rAuto = runDamage(MUDO_AUTO, self, foe, ds, df) // 평타 2타
+  const rYuk = runDamage(MUDO_YUK, self, foe, ds, df) // 육합권 3타
+  const dealt = Math.max(fb - foe.hp, 0)
+  if (dealt > 0) { self.comboStep = 1; self.comboWin = 3 } // 연타가 닿으면 연계 개시
+  self.defCombo = 0; self.defendedLast = false
+  { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) }
+  if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null }
+  const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) }
+  bigHitHeal(foe, df, dealt)
+  return { parried: didParry, type: 'attack', name: '육합권', dmg: dealt, autoHits: rAuto.hits.map(h => h.dealt), yukHits: rYuk.hits.map(h => h.dealt), def: self.lastDef, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHp: Math.round(Math.max(self.hp, 0)), selfMax: ds.maxhp }
 }
 const SKILLS = {
   검투사: [
@@ -694,7 +711,7 @@ const SKILLS = {
     // 발경(슬롯1/cd1): 적 물공/마공 중 높은쪽 ×1.2 충격딜(방어구·실드 무시). 고공격 상대 카운터
     mkSkill(1, { name: '발경', tag: '공격', type: '물리.충격', coefFn: (ds, df) => 1 + Math.max(df.물방, df.마방) * 4, coefLabel: '물공×(1+상대 높은방어×4)', dmgType: '충격', note: '발경', cd: 5, ready: (s) => s.cd[1] === 0 }), // coef 자동생성(💥충격 + coefLabel)
     // 아수라패황권(슬롯2/cd2): 자기 체력→1, 상대 최대HP×0.8 충격, 3턴 자체둔화. 올인 피니셔(시작쿨7)
-    mkSkill(2, { name: '아수라패황권', tag: '공격', type: '물리.충격', dmg: { foeHp: 0.8 }, recoilCur: 0.99, selfCC: { slow: 3 }, dmgType: '충격', note: '아수라패황권!', cd: 14, ready: (s) => s.cd[2] === 0 && s.hp > 1, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 } }) // coef 자동생성(💥충격 + foeHp + recoilCur + selfCC)
+    mkSkill(2, { name: '아수라패황권', tag: '공격', type: '물리.충격', dmg: { foeHp: 0.8 }, recoilCur: 0.99, selfCC: { slow: 3 }, dmgType: '충격', note: '아수라패황권!', cd: 14, ready: (s, f, ds) => s.cd[2] === 0 && s.hp > 1 && s.hp <= ds.maxhp * 0.35, score: (s, f, ds, df, x) => { const nuke = df.maxhp * 0.8; return f.hp <= nuke * 0.7 ? dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 1.4 : dmgVal(nuke, 1, 0, f.hp, x.foeTurn) * 0.2 } }) // 저체력(35%↓) 반등용 게이트 — 유리할 땐 콤보로, 궁지에서만 올인(동전던지기 방지)
   ],
   프리스트: [
     // 힐: 즉시 체력 30% + 지능×1 회복(짧은 쿨 유지기). 회복불가 중엔 사용 불가
@@ -1023,7 +1040,10 @@ function decideDefend (self, foe, ds, df) {
   if (self.noDefend > 0) return false
   const est = Math.max(0, estAtk(df, ds) - self.shield) // 예상 피격(기대값)
   const factor = self.ai === '공격적' ? 0.6 : self.ai === '방어적' ? 1.15 : 0.85
-  return est * factor >= self.hp
+  if (est * factor >= self.hp) return true // 치명 방어(기존)
+  // 패링 캐릭(너클): 다음 상대 턴이 내 다음 턴보다 먼저 오면(=이번 턴 넘기면 맞음) 반반 확률로 패링(흘리고 즉시 반격). 100%면 TAS라 50%
+  if (ds.무기.방어 === '패링' && foe.stun === 0 && foe.cast === 0) { const incoming = foe.gauge < self.gauge; if (rand() < (incoming ? 0.4 : 0.2)) return true } // 패링: 맞을 타이밍(40%)엔 자주 / 아닐 때(20%)도 헛패링 → 취약3 리스크. 완벽하지 않게 + 스스로 리스크 감수
+  return false
 }
 // 버프(턴 소모 투자) AI 게이트: 공격적=항상 / 판단형=여유 / 방어적=아주 안전할때만
 function buffOk (ai, hp, est) {
@@ -1099,6 +1119,8 @@ function mkFighter (d, name, ai) {
     maxhp: d.maxhp, // 광전사 광란: 체력 낮을수록 제어감소+공격력↑(2차곡선)
     마나환류: (CHARS[name] && CHARS[name].마나환류) || false, // 마법사 패시브: 마법딜 시 확률적 실드복구
     연속타격: (CHARS[name] && CHARS[name].연속타격) || false, // 암살도적 패시브: 공격 시 확률적 추가타
+    육합권: (CHARS[name] && CHARS[name].육합권) || false, // 무도가 패시브: 평타 히트당 확률로 육합권 발동 → 연계 개시
+    jabStk: 0, // 육합권 프록 전 누적 평타 히트(최소 MUDO_MINJAB 후 프록 시작)
     상처전문가: (CHARS[name] && CHARS[name].상처전문가) || false, // 절개도적 패시브: 평타 명중→활성 출혈 스택+1(지속갱신) + 상대 출혈 스택당 자신 회피+2%(최대+20%)
     cutStk: 0,
     cutDur: 0, // 절개 출혈: 스택(최대5, 턴당 2%) / 지속(평타 명중 시 3 갱신)
@@ -1164,7 +1186,7 @@ function advanceCast (self, foe, ds, df) {
   return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal }
 }
 function upkeep (self, foe, ds, df, interactive) {
-  if (self.parry) applyCC(self, 'vuln', 1) // 패링 실패(피격 없이 태세 소진) → 취약 1턴(패링 남발 리스크)
+  if (self.parry) applyCC(self, 'vuln', 3) // 패링 실패(피격 없이 태세 소진) → 취약 3턴(헛패링 리스크)
   if (self.defHealCd > 0) self.defHealCd-- // 방어 회복 2쿨
   self.pendCC = null; self.defending = false; self.parry = false; self.parryHit = false; self.note = null; self.lastCrit = false; self.lastBolt = false; self.stunned = false; self._tick = []
   if (self.comboWin > 0) { self.comboWin--; if (self.comboWin === 0) self.comboStep = 0 } // 무도가 콤보 창 만료(2턴 지나면 리셋)
@@ -1237,10 +1259,11 @@ function ctxFor (self, foe, ds, df) {
 }
 // 불굴 버스트 완충: 단일 피격이 최대HP 15%↑면 즉시 6% 회복(생존 시). df=피격자 파생. 딜 표기는 회복 전 값 사용
 function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + hcut(foe, Math.round(df.maxhp * 0.04))) }
-function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
-function execAttack (self, foe, ds, df) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) gashHit(foe); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; if (self.autoSpell > 0 && foe.hp > 0 && rand() < 0.90) launchBolt(self, foe, ds, df, ['파이어볼트', '라이트닝볼트', '콜드볼트'][Math.floor(rand() * 3)], false); if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
+function execSkill (self, foe, ds, df, sk) { const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
+function execAttack (self, foe, ds, df) { if (self.육합권 && self.comboStep === 0 && foe.hp > 0) { let pr = false; for (let k = 0; k < 2; k++) { self.jabStk = (self.jabStk || 0) + 1; if (self.jabStk >= MUDO_MINJAB && rand() < MUDO_PROC) { pr = true; break } } if (pr) { self.jabStk = 0; return execMudoYukhap(self, foe, ds, df) } } const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) gashHit(foe); if (foe.vuln > 0) foe.vuln--; dmg = absorb(foe, dmg); foe.hp -= dmg; if (self.autoSpell > 0 && foe.hp > 0 && rand() < 0.90) launchBolt(self, foe, ds, df, ['파이어볼트', '라이트닝볼트', '콜드볼트'][Math.floor(rand() * 3)], false); if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); return { parried: didParry, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
-function execDefend (self, ds) { const before = self.hp; if (self.defHealCd === 0) { self.hp = Math.min(ds.maxhp, self.hp + healVar(ds.maxhp * 0.05 + ds.base.체력 / 2)); self.defHealCd = 2 } self.defending = true; self.defCombo++; self.defendedLast = true; if (ds.무기.방어 === '패링') { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 방어=경감(defending) + 회복(2쿨·변동). 패링: 피격 시 즉시 반격턴
+function parryHeal (foe, df) { if (foe.defHealCd === 0) { foe.hp = Math.min(df.maxhp, foe.hp + healVar(df.maxhp * 0.05 + df.base.체력 / 2)); foe.defHealCd = 2 } } // 패링 성공(피격 흘림) 시에만 회복 — 헛패링·비패링방어는 회복 없음
+function execDefend (self, ds) { const before = self.hp; const parryWpn = ds.무기.방어 === '패링'; if (self.defHealCd === 0 && !parryWpn) { self.hp = Math.min(ds.maxhp, self.hp + healVar(ds.maxhp * 0.05 + ds.base.체력 / 2)); self.defHealCd = 2 } self.defending = true; self.defCombo++; self.defendedLast = true; if (parryWpn) { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 방어=경감(defending)+회복(2쿨). 패링 캐릭은 여기서 회복 X → 패링 성공 시에만(parryHeal)
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
 const BUFF_SKILLS = new Set(['인스턴트캐스팅', '볼트마법조합', '방패들기', '마법반사', '오토스펠'])
 // 마법 스킬: 침묵 시 사용 불가(물리 스킬은 침묵 무시). 원소·역장·시전·마법 유틸·마법 버프가 대상 (물리 타격·물리 버프·물리 덫은 제외)
@@ -1352,7 +1375,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살도적: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 절개도적: [{ name: '상처전문가', desc: '상대에게 걸린 출혈(절개·열상) 스택당 자신 회피 +2%(최대 +20%) — 상처가 깊을수록 날렵해진다' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }] }
+const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살도적: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 절개도적: [{ name: '상처전문가', desc: '상대에게 걸린 출혈(절개·열상) 스택당 자신 회피 +2%(최대 +20%) — 상처가 깊을수록 날렵해진다' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }], 무도가: [{ name: '육합권', desc: '평타 히트당 30% 확률로 육합권 발동(최소 2히트 후) → 연환전신장·맹룡과강 연계 개시. 패링 반격 평타도 발동' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev
@@ -1495,6 +1518,10 @@ function narrateLine (ev, meName, oppName) {
   // 피해 내역: 세이지 혼합(물/마) · 완드 연쇄볼트(발당) · 기본
   // 내역은 흡수(마나실드) 전 값이라, 실제 피해(ev.dmg)에 비례 재배분해 총합과 일치시킴
   const hurtBd = () => {
+    if (ev.yukHits) { // 무도가 육합권 프록: 평타(다단2) + 육합권(3타) 동시 파바박 — 한 줄 분리 표기
+      const fmt = (arr) => (arr || []).map(h => h > 0 ? `**${h}**` : '빗나감').join('·')
+      return `${te} **${T}**${eun(T)} 👊연타(${fmt(ev.autoHits)}) + ⚡육합권 발동!(${fmt(ev.yukHits)}) 총 **${ev.dmg}**의 피해를 입었다.`
+    }
     if (ev.ph != null) { // 세이지 혼합: 물리 + 마법평타 + 오토스펠 볼트(원소묶음)
       const boltRaw = (ev.boltHits || []).reduce((a, b) => a + b, 0)
       const raw = ev.ph + ev.mg + boltRaw

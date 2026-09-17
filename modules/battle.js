@@ -1559,7 +1559,8 @@ function narrateLine (ev, meName, oppName) {
       if (ev.dmg <= 0) return evadeLine()
       return `${ev.ph != null ? '⚔️' : (ev.bolt ? '✨' : '⚔️')} ${ae} **${A}**의 ${ev.ph != null ? '혼합 공격' : '공격'}!${diceTag} ${boltTag}${defTag}${parryTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}`
     case 'skill': {
-      const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${(ev.note && ev.note !== ev.name) ? ` [${ev.note}]` : ''}` // note가 스킬명과 다를 때만 표시(중복 제거)
+      const noteNorm = (s) => (s || '').replace(/[\s!·.,]/g, '') // 공백·느낌표·중점 등 무시하고 비교
+      const head = `⚡ ${ae} **${A}**${iga(A)} '${ev.name}'${eul(ev.name)} 사용!${(ev.note && noteNorm(ev.note) !== noteNorm(ev.name)) ? ` [${ev.note}]` : ''}` // note가 스킬명과 (정규화 후)다를 때만 표시(중복 제거)
       const healTag = ev.selfHeal > 0 ? ` 💚**${A}** 체력 **${ev.selfHeal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})` : '' // 힐·회복기 회복량+현재체력
       { const back = ev.selfDmg > 0 ? (ev.def === '완벽방어' ? '' : ` (**${A}** 반동 **${ev.selfDmg}**)`) : '' // 완벽방어 반사는 defTag(반격 X)로 표기 — 반동과 구분
         if (ev.dmg > 0) return `${head}${diceTag} ${boltTag}${forceTag}${defTag}${parryTag}${grazeTag}${shieldTag}${hurtBd()}${brokeTag}${meteorTag}${healTag}${back}`

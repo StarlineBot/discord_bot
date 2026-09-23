@@ -6,10 +6,17 @@ const battle = require('../../modules/battle')
 const timeout = 3000
 module.exports = async (interaction, client) => {
   if (!interaction.isButton()) return
+  // 이 핸들러는 customId가 JSON인 버튼만 처리한다. 다른 기능(예: 주간일정 'ws|...')의
+  // 버튼은 JSON.parse에서 던지므로, 파싱 실패 시 조용히 넘겨 해당 핸들러가 처리하게 둔다.
+  let buttonInfo
+  try {
+    buttonInfo = JSON.parse(interaction.customId)
+  } catch (e) {
+    return
+  }
   const guildId = interaction.member.guild.id
   const guildInfo = guildModule.getGuildInfo(guildId)
   if (!guildInfo) return
-  const buttonInfo = JSON.parse(interaction.customId)
   const action = buttonInfo.action
   const memberId = buttonInfo.memberId
   const clickMember = interaction.member

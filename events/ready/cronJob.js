@@ -19,6 +19,7 @@ const { getCategoryItems, resolveLeafCategories, matchFavorite } = require('../.
 const { embedFor } = require('../../modules/auctionEmbeds')
 const partyAlerts = require('../../modules/partyAlerts')
 const settings = require('../../modules/guildSettings')
+const weeklySchedule = require('../../modules/weeklySchedule')
 
 const botId = process.env.BOT_ID
 // 봇 로그·헬스체크 모니터 채널 (오미·거뿔보드는 이제 per-guild라 싱글턴 채널 없음)
@@ -200,6 +201,25 @@ module.exports = async (client) => {
 
   console.log('weeklyJob start!')
   weeklyJob.start()
+
+  // 주간일정 롤오버: 매일 0시(KST)에 저장된 보드를 다시 그린다.
+  // 표시 주는 요일에 따라 바뀐다(월요일=다음 주 플립, 목요일=새 주 시작)이라 매일 갱신.
+  // 입력(entries)은 지우지 않고 보존 → '지난 주 그대로 복사, 바뀐 것만 수정' UX.
+  const weeklyScheduleRolloverJob = new cron.CronJob('0 0 * * *', async function () {
+    const boards = weeklySchedule.read()
+    for (const channelId of Object.keys(boards)) {
+      const channel = client.channels.cache.get(channelId)
+      if (!channel) continue
+      try {
+        await weeklySchedule.renderBoard(channel, channelId)
+      } catch (error) {
+        console.error('주간일정 롤오버 갱신 에러:', error.message)
+      }
+    }
+  })
+
+  console.log('weeklyScheduleRolloverJob start!')
+  weeklyScheduleRolloverJob.start()
 
   const partyScheduleJob = new cron.CronJob('* * * * *', async function () {
     const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')

@@ -857,7 +857,7 @@ function autoScore (spec, s, f, ds, df, x) {
 function deliverFormula (type, base, s, f, ds, df) {
   base = Math.max(Math.round(base), 1)
   if (type === '물리.충격') { const d = impactDmg(s, f, ds, df, base); f.hp -= d; return d } // 방어구·실드 무시
-  if (type === '마법.일반' || type.startsWith('마법.원소')) { const d = spellDmg(base, f, df, s); f.hp -= d; return d } // 천운·마방·마관통 (원소=볼트, 마커만 다름)
+  if (type === '마법.일반' || type.startsWith('마법.원소')) { const d = absorb(f, spellDmg(base, f, df, s)); f.hp -= d; return d } // 천운·마방·마관통 + 마나실드 흡수(원소=볼트, 마커만 다름)
   if (type === '마법.신성') return holyDmg(s, f, ds, df, base) // 신성: 마방 적용 + 참회 스택/램프(holyDmg가 f.hp에 직접 적용)
   if (type === '확정') { const d = trueDmg(s, f, df, base); f.hp -= d; return d } // 전부 무시(실드 흡수만)
   const d = absorb(f, base); f.hp -= d; return d // 마법.역장: 마방 무시, 실드 흡수

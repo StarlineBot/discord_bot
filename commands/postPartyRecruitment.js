@@ -4,6 +4,18 @@ const guildModule = require('../modules/getGuildInfo')
 const { startLoading } = require('../modules/loading')
 const botId = process.env.BOT_ID
 
+// 포럼에 name 태그가 없으면 자동 생성하고 태그 객체를 돌려준다.
+// setAvailableTags는 태그 배열을 통째로 교체하므로 기존 태그를 보존한 채 새것만 append.
+// 봇에 '채널 관리' 권한이 없거나(throw) 20개 한도를 넘으면 null 반환 → 호출부에서 안내.
+async function ensureForumTag (forum, name) {
+  const existing = forum.availableTags.find(t => t.name === name)
+  if (existing) return existing
+  if (forum.availableTags.length >= 20) return null // 포럼 태그 한도
+  const preserved = forum.availableTags.map(t => ({ id: t.id, name: t.name, moderated: t.moderated, emoji: t.emoji }))
+  const updated = await forum.setAvailableTags([...preserved, { name }])
+  return updated.availableTags.find(t => t.name === name) || null
+}
+
 const week = ['일', '월', '화', '수', '목', '금', '토']
 const weekOption = week.map(weekDay => ({ name: weekDay, value: weekDay }))
 const maxHour = 24
@@ -43,6 +55,19 @@ const addHeadcountOption = (sub) => sub
       .setMaxValue(maxHeadcount).setMinValue(minHeadcount)
   )
 
+// 인원을 선택지로 받는 던전용(모바출 + 2~4명). 자유입력 대신 드롭다운으로 범위 강제.
+const headcount2to4Choices = [
+  { name: '모바출(0명)', value: 0 },
+  { name: '2명', value: 2 },
+  { name: '3명', value: 3 },
+  { name: '4명', value: 4 }
+]
+const addHeadcount2to4Option = (sub) => sub
+  .addIntegerOption(option =>
+    option.setName('dungeon_headcount').setDescription('출발 인원을 골라줘! (모바출 / 2~4명)').setRequired(true)
+      .addChoices(...headcount2to4Choices)
+  )
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('파티모집')
@@ -61,6 +86,12 @@ module.exports = {
           .addChoices(...difficultChoices)
       )
       addHeadcountOption(subcommand)
+      return subcommand
+    })
+    .addSubcommand(subcommand => {
+      subcommand.setName('탈라가흐').setDescription('탈라가흐 파티모집을 시작해~ (2~4인)')
+      addTimeOptions(subcommand)
+      addHeadcount2to4Option(subcommand)
       return subcommand
     }),
   run: async ({ interaction }) => {
@@ -85,10 +116,18 @@ module.exports = {
     const dungeonDifficult = dungeonName === '믿음의균열' ? '4관' : getOptionValue('dungeon_difficult')
     const dungeonHeadcount = getOptionValue('dungeon_headcount')
 
-    const tagDungeon = partyChannel.availableTags.find(({ name }) => name === dungeonName)
-    const tagDungeonDifficult = partyChannel.availableTags.find(({ name }) => name === dungeonDifficult)
-    if (!tagDungeon || !tagDungeonDifficult) {
-      await interaction.editReply(`포럼 태그를 찾을 수 없어 😢 (필요 태그: ${dungeonName}, ${dungeonDifficult})`)
+    // 필요한 태그가 없으면 자동 생성(난이도 없는 던전은 던전 태그만).
+    let tagDungeon, tagDungeonDifficult
+    try {
+      tagDungeon = await ensureForumTag(partyChannel, dungeonName)
+      tagDungeonDifficult = dungeonDifficult ? await ensureForumTag(partyChannel, dungeonDifficult) : null
+    } catch (err) {
+      console.error('포럼 태그 자동 생성 실패:', err)
+      await interaction.editReply('포럼 태그를 만들지 못했어 😢 봇에 이 포럼의 `채널 관리` 권한이 있는지 확인해줘.')
+      return
+    }
+    if (!tagDungeon || (dungeonDifficult && !tagDungeonDifficult)) {
+      await interaction.editReply(`포럼 태그를 만들거나 찾지 못했어 😢 (필요 태그: ${dungeonName}${dungeonDifficult ? ', ' + dungeonDifficult : ''}) — 태그가 20개 한도를 넘었거나 권한이 없을 수 있어.`)
       return
     }
 
@@ -108,7 +147,7 @@ module.exports = {
       return
     }
 
-    const recruitmentDungeonName = `${dungeonName} ${dungeonDifficult}`
+    const recruitmentDungeonName = dungeonDifficult ? `${dungeonName} ${dungeonDifficult}` : dungeonName
     const recruitmentHeadcount = `${dungeonHeadcount}명`
 
     const title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartHour}시${dungeonStartMinute > 0 ? ' ' + dungeonStartMinute + '분' : ''}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
@@ -121,7 +160,7 @@ module.exports = {
       const partyThreadChannel = await partyChannel.threads.create({
         name: title,
         message: { content: contents },
-        appliedTags: [tagDungeon.id, tagDungeonDifficult.id]
+        appliedTags: tagDungeonDifficult ? [tagDungeon.id, tagDungeonDifficult.id] : [tagDungeon.id]
       })
       await partyThreadChannel.send(`모집던전: ${recruitmentDungeonName}`)
       await partyThreadChannel.send(`출발시간: ${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartHour}시 ${dungeonStartMinute > 0 ? dungeonStartMinute + '분' : '00분'}`)

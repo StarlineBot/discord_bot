@@ -1,4 +1,5 @@
 const guildModule = require('../../modules/getGuildInfo')
+const settings = require('../../modules/guildSettings')
 const { updateUserMessageCount } = require('../../modules/RankingUtil')
 const botId = process.env.BOT_ID
 
@@ -19,7 +20,9 @@ module.exports = async (message, client) => {
     console.error('❌ updateUserMessageCount 실패:', err)
   }
 
-  const partyChannel = client.channels.cache.get(guildInfo.partyChannelId)
+  // 파티모집 채널은 /섯다라인설정(guildSettings)에서 관리 → 설정 우선, 옛 config로 폴백
+  const partyChannelId = settings.get(guildId, 'partyChannelId', null) || guildInfo.partyChannelId
+  const partyChannel = partyChannelId && client.channels.cache.get(partyChannelId)
   if (!partyChannel) return
 
   const threads = [...partyChannel.threads.cache.values()]

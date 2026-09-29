@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../modules/getGuildInfo')
+const settings = require('../modules/guildSettings')
 const { startLoading } = require('../modules/loading')
 const botId = process.env.BOT_ID
 
@@ -97,7 +98,9 @@ module.exports = {
   run: async ({ interaction }) => {
     const guildId = interaction.member.guild.id
     const guildInfo = guildModule.getGuildInfo(guildId)
-    const partyChannel = guildInfo && interaction.client.channels.cache.get(guildInfo.partyChannelId)
+    // 파티모집 채널은 /섯다라인설정(guildSettings)에서 관리 → 설정 우선, 옛 config로 폴백
+    const partyChannelId = settings.get(guildId, 'partyChannelId', null) || (guildInfo && guildInfo.partyChannelId)
+    const partyChannel = partyChannelId && interaction.client.channels.cache.get(partyChannelId)
 
     await startLoading(interaction, '📢 파티모집 글을 올리는 중...')
 

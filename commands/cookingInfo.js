@@ -8,7 +8,7 @@ const filterCookings = cookings.filter(cooking => cooking.isCatering === true)
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('요리')
-    .setDescription('[BETA] 재료를 입력하거나 능력치를 선택하면 포함되는 음식을 찾아줘~')
+    .setDescription('재료를 입력하거나 능력치를 선택하면 포함되는 음식을 찾아줘~')
     .addSubcommand(subcommand =>
       subcommand.setName('재료').setDescription('해당 재료가 포함된 요리 목록')
         .addStringOption(option =>

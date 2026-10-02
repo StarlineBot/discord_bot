@@ -1,6 +1,8 @@
 const fs = require('node:fs')
 const { DateTime } = require('luxon')
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js')
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, AttachmentBuilder } = require('discord.js')
+const settings = require('./guildSettings')
+const { renderCalendar } = require('./scheduleCalendar')
 
 const filePath = './static/json/weeklySchedule.json'
 
@@ -273,6 +275,88 @@ function editContent (board, weekId, userId, selectedLabels) {
   return content
 }
 
+// ── 달력 이미지(가용시간 + 파티모집 파티) ─────────────────────────
+// 파티모집 포럼의 활성 스레드에서 출발시간·던전을 파싱해 날짜별로 모은다(60초 캐시).
+const partyCache = {}
+async function fetchPartiesByDate (guild) {
+  const gid = guild.id
+  if (partyCache[gid] && Date.now() - partyCache[gid].at < 60000) return partyCache[gid].byDate
+  const byDate = {}
+  const forumId = settings.get(gid, 'partyChannelId', null)
+  const forum = forumId && guild.channels.cache.get(forumId)
+  if (forum && forum.threads && typeof forum.threads.fetchActive === 'function') {
+    try {
+      const active = await forum.threads.fetchActive()
+      const year = DateTime.now().setZone('Asia/Seoul').year
+      for (const thread of active.threads.values()) {
+        try {
+          const msgs = await thread.messages.fetch({ limit: 10 })
+          const timeMsg = msgs.find(m => m.content.includes('출발시간:'))
+          if (!timeMsg) continue
+          const dungeonMsg = msgs.find(m => m.content.includes('모집던전:'))
+          const raw = timeMsg.content.split('출발시간:')[1].trim()
+          const dt = DateTime.fromFormat(`${year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', { locale: 'ko' })
+          if (!dt.isValid) continue
+          const key = dt.toFormat('yyyy-MM-dd')
+          const dungeon = dungeonMsg ? dungeonMsg.content.split('모집던전:')[1].trim() : thread.name
+          ;(byDate[key] = byDate[key] || []).push({ dungeon, hour: dt.hour, minute: dt.minute })
+        } catch (e) { /* 스레드 읽기 실패 무시 */ }
+      }
+    } catch (e) { /* 포럼 조회 실패 무시 */ }
+  }
+  partyCache[gid] = { at: Date.now(), byDate }
+  return byDate
+}
+
+// userId → 서버 표시이름(이미지엔 멘션이 안 되므로 실제 이름 필요)
+async function resolveNames (guild, ids) {
+  const map = {}
+  for (const id of ids) {
+    let m = guild.members.cache.get(id)
+    if (!m) m = await guild.members.fetch(id).catch(() => null)
+    map[id] = m ? m.displayName : '알 수 없음'
+  }
+  return map
+}
+
+// 달력 렌더용 모델 생성(이번주/다음주 × 7일, 각 날에 멤버 가용 + 파티)
+async function buildCalendarModel (board, guild) {
+  const [tw, nw] = twoWeeks()
+  const partiesByDate = await fetchPartiesByDate(guild)
+  const idSet = new Set()
+  for (const wk of [tw, nw]) for (const id of enterers(weekEntries(board, wk.weekId))) idSet.add(id)
+  const names = await resolveNames(guild, [...idSet])
+
+  const weeks = [{ label: '이번주', wk: tw }, { label: '다음주', wk: nw }].map(({ label, wk }) => {
+    const entries = weekEntries(board, wk.weekId)
+    const memberIds = enterers(entries)
+    const days = wk.days.map(d => {
+      const avail = []
+      const unavail = []
+      for (const id of memberIds) {
+        const v = dayValue(entries, id, d.idx)
+        const nm = names[id] || '?'
+        if (v === 'x') unavail.push({ text: `${nm} 불가`, type: 'no' })
+        else avail.push({ sort: v, text: `${nm} ${v === 0 ? '종일' : v + '시부터'}`, type: 'ok' })
+      }
+      avail.sort((a, b) => a.sort - b.sort)
+      const lines = [...avail.map(a => ({ text: a.text, type: a.type })), ...unavail]
+      for (const p of (partiesByDate[d.dt.toFormat('yyyy-MM-dd')] || [])) {
+        const t = p.minute ? `${p.hour}시${p.minute}분` : `${p.hour}시`
+        lines.push({ text: `[${p.dungeon}] ${t} 파티`, type: 'party' })
+      }
+      return { weekday: d.label, date: d.date, lines }
+    })
+    return { label, range: wk.range, days }
+  })
+  return { title: board.title || '주간일정', weeks }
+}
+
+async function buildCalendarImage (channel, board) {
+  const model = await buildCalendarModel(board, channel.guild)
+  return new AttachmentBuilder(renderCalendar(model), { name: 'schedule.png' })
+}
+
 // 저장된 보드 메시지를 최신 상태로 다시 그린다(없으면 새로 보냄). 지난 주는 정리.
 async function renderBoard (channel, channelId) {
   const data = read()
@@ -281,7 +365,20 @@ async function renderBoard (channel, channelId) {
   pruneOldWeeks(board)
   write(data)
 
-  const payload = { embeds: [buildEmbed(board)], components: boardComponents() }
+  let payload
+  try {
+    const attachment = await buildCalendarImage(channel, board)
+    payload = {
+      content: `📅 **${board.title || '주간일정'}** — 아래 버튼으로 가능시간을 입력해줘`,
+      embeds: [],
+      attachments: [],
+      files: [attachment],
+      components: boardComponents()
+    }
+  } catch (e) {
+    console.error('주간일정 달력 렌더 실패, 임베드로 대체:', e.message)
+    payload = { content: '', embeds: [buildEmbed(board)], attachments: [], files: [], components: boardComponents() }
+  }
   let msg = null
   if (board.messageId) msg = await channel.messages.fetch(board.messageId).catch(() => null)
   if (msg) {
@@ -294,8 +391,25 @@ async function renderBoard (channel, channelId) {
   return msg
 }
 
+// 파티 목록 캐시 무효화(파티모집 생성/삭제 직후 즉시 반영용)
+function invalidatePartyCache (guildId) {
+  delete partyCache[guildId]
+}
+
+// 해당 길드에 속한 모든 주간일정 보드를 다시 그린다(파티모집 생성 시 자동 새로고침).
+async function refreshGuildBoards (guild) {
+  const data = read()
+  for (const channelId of Object.keys(data)) {
+    if (data[channelId].guildId !== guild.id) continue
+    const channel = guild.channels.cache.get(channelId)
+    if (channel) await renderBoard(channel, channelId).catch(() => {})
+  }
+}
+
 module.exports = {
   LABELS,
+  invalidatePartyCache,
+  refreshGuildBoards,
   read,
   write,
   thisWeek,

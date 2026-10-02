@@ -169,6 +169,12 @@ module.exports = {
       await partyThreadChannel.send(`출발시간: ${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartHour}시 ${dungeonStartMinute > 0 ? dungeonStartMinute + '분' : '00분'}`)
       await partyThreadChannel.send(`모집인원: ${recruitmentHeadcount}`)
       await interaction.editReply(`<#${partyChannel.id}>에 해당 내용으로 작성했어~😎`)
+      // 주간일정 달력이 새 파티를 바로 반영하도록 캐시 무효화 + 보드 새로고침(보드 없으면 무시)
+      try {
+        const ws = require('../modules/weeklySchedule')
+        ws.invalidatePartyCache(guildId)
+        await ws.refreshGuildBoards(interaction.member.guild)
+      } catch (e) { /* 주간일정 보드 없음/새로고침 실패는 무시 */ }
     } catch (err) {
       console.error('파티모집 스레드 생성 실패:', err)
       await interaction.editReply('파티모집 작성 중 문제가 생겼어 😢')

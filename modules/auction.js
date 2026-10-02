@@ -42,6 +42,24 @@ async function getCategoryItems (category) {
   return all
 }
 
+// 정확한 아이템명으로 경매장 매물 조회(auction/list는 item_name 정확히 주면 검색됨).
+// 카테고리를 몰라도 이름으로 찾을 때 사용.
+async function getItemsByName (itemName) {
+  let cursor = null
+  const all = []
+  do {
+    const params = { item_name: itemName }
+    if (cursor) params.cursor = cursor
+    const res = await axios.get(mainUrl + '/mabinogi/v1/auction/list', {
+      params,
+      headers: { 'x-nxopen-api-key': nexonApiKey }
+    })
+    all.push(...(res.data.auction_item || []))
+    cursor = res.data.next_cursor
+  } while (cursor)
+  return all
+}
+
 // 키워드 + 세공 여러 개(AND) 필터. metalwares: [{ name, minLevel }]
 function filterItems (items, { keyword, metalwares = [] } = {}) {
   let result = items
@@ -153,4 +171,4 @@ function matchFavorite (items, fav) {
   return matches
 }
 
-module.exports = { getCategoryItems, filterItems, parseMetalwares, metalwareLevel, koreanGold, parseEchostone, filterEchostones, parseEnchant, filterEnchants, favoriteCategories, resolveLeafCategories, matchFavorite }
+module.exports = { getCategoryItems, getItemsByName, filterItems, parseMetalwares, metalwareLevel, koreanGold, parseEchostone, filterEchostones, parseEnchant, filterEnchants, favoriteCategories, resolveLeafCategories, matchFavorite }

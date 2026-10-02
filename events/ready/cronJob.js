@@ -221,6 +221,37 @@ module.exports = async (client) => {
   console.log('weeklyScheduleRolloverJob start!')
   weeklyScheduleRolloverJob.start()
 
+  // 자동삭제: 설정된 채널의 (N분 지난 · 핀 아닌) 메시지를 30초마다 스윕 삭제.
+  // 봇에 그 채널 '메시지 관리' 권한 필요. 14일 지난 메시지는 bulkDelete 제외(TTL 최대 24h라 무관).
+  const autoDeleteJob = new cron.CronJob('*/30 * * * * *', async function () {
+    for (const guild of client.guilds.cache.values()) {
+      const map = settings.get(guild.id, 'autoDeleteChannels', {})
+      const channelIds = Object.keys(map)
+      if (channelIds.length === 0) continue
+      for (const channelId of channelIds) {
+        const ttlMin = map[channelId]
+        const channel = guild.channels.cache.get(channelId)
+        if (!channel || typeof channel.bulkDelete !== 'function') continue
+        try {
+          const cutoff = Date.now() - ttlMin * 60000
+          const messages = await channel.messages.fetch({ limit: 100 })
+          const expired = messages.filter(m => !m.pinned && m.createdTimestamp < cutoff)
+          if (expired.size === 0) continue
+          if (expired.size === 1) {
+            await expired.first().delete().catch(() => {})
+          } else {
+            await channel.bulkDelete(expired, true) // true: 14일 지난 건 자동 제외
+          }
+        } catch (error) {
+          console.error(`자동삭제 스윕 에러(${channelId}):`, error.message)
+        }
+      }
+    }
+  })
+
+  console.log('autoDeleteJob start!')
+  autoDeleteJob.start()
+
   const partyScheduleJob = new cron.CronJob('* * * * *', async function () {
     const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     client.guilds.cache.forEach(guild => {

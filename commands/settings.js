@@ -102,6 +102,16 @@ data.addSubcommand(sub => {
   return sub
 })
 
+// 자동삭제: 지정 채널의 메시지를 N분 뒤 자동삭제 on/off (핀 메시지 제외). 채널마다 개별 설정.
+data.addSubcommand(sub => {
+  sub.setName('자동삭제').setDescription('지정 채널의 메시지를 일정 시간 뒤 자동삭제 on/off (핀 제외)')
+  sub.addStringOption(stateOption)
+  sub.addChannelOption(channelOption([ChannelType.GuildText], '자동삭제할 채널 (켜기/끄기 모두 지정)'))
+  sub.addIntegerOption(o =>
+    o.setName('분').setDescription('이 시간(분)이 지난 메시지를 삭제 (켤 때 지정, 1~1440)').setMinValue(1).setMaxValue(1440))
+  return sub
+})
+
 // 관리자역할: 봇 관리 명령어(설정·랭킹·메시지삭제)를 쓸 수 있는 역할 지정 (서버장·제작자만)
 data.addSubcommand(sub => {
   sub.setName('관리자역할').setDescription('봇 관리 명령어를 쓸 수 있는 역할 지정 (서버장·제작자만)')
@@ -204,6 +214,41 @@ module.exports = {
       return
     }
 
+    if (sub === '자동삭제') {
+      const on = interaction.options.getString('상태') === 'on'
+      const channel = interaction.options.getChannel('채널')
+      if (!channel) {
+        await interaction.reply({ content: '자동삭제할 채널을 지정해줘~', ephemeral: true })
+        return
+      }
+      // 채널별 TTL(분) 맵: { 채널ID: 분 }
+      const map = { ...settings.get(guildId, 'autoDeleteChannels', {}) }
+      if (!on) {
+        if (map[channel.id] === undefined) {
+          await interaction.reply({ content: `<#${channel.id}> 은 자동삭제가 켜져있지 않아~`, ephemeral: true })
+          return
+        }
+        delete map[channel.id]
+        settings.set(guildId, 'autoDeleteChannels', map)
+        await interaction.reply({ content: `✅ <#${channel.id}> 자동삭제를 **껐어**~`, ephemeral: true })
+        await notifyDeveloper(interaction, `자동삭제 끄기 → <#${channel.id}>`)
+        return
+      }
+      const minutes = interaction.options.getInteger('분')
+      if (!minutes) {
+        await interaction.reply({
+          content: '켤 때는 몇 분 뒤 삭제할지 `분`을 지정해줘~\n예: `/섯다라인설정 자동삭제 상태:켜기 채널:#봇명령 분:1`',
+          ephemeral: true
+        })
+        return
+      }
+      map[channel.id] = minutes
+      settings.set(guildId, 'autoDeleteChannels', map)
+      await interaction.reply({ content: `✅ <#${channel.id}> 메시지를 **${minutes}분** 뒤 자동삭제하도록 켰어~ (핀 메시지 제외, 최대 30초 오차)`, ephemeral: true })
+      await notifyDeveloper(interaction, `자동삭제 켜기 → <#${channel.id}> ${minutes}분`)
+      return
+    }
+
     if (sub === '관리자역할') {
       // 관리자역할 지정은 서버장·제작자만(adminRole 보유자가 스스로 관리자 역할을 바꾸는 것 방지)
       if (!perm.isOwnerOrDev(interaction.member, interaction.guild)) {
@@ -252,7 +297,14 @@ module.exports = {
         `${dot(partyOn)} **파티모집(자동관리)** — ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
         `${dot(boardOn)} **인게임파티모집현황** — ${boardOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('bugleHornChannelId'))}`,
         `${dot(weeklyOn)} **주간랭킹** — ${weeklyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('weeklyMemberChannelId'))}`,
-        `${dot(missionOn)} **오늘의미션 게시** — ${missionOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('todayMissionChannelId'))}`
+        `${dot(missionOn)} **오늘의미션 게시** — ${missionOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('todayMissionChannelId'))}`,
+        (() => {
+          const autoDel = settings.get(guildId, 'autoDeleteChannels', {})
+          const entries = Object.entries(autoDel)
+          return entries.length
+            ? `${dot(true)} **자동삭제** — ${entries.map(([cid, m]) => `<#${cid}> ${m}분`).join(' · ')}`
+            : `${dot(false)} **자동삭제** — 꺼짐`
+        })()
       ]
       const embed = new EmbedBuilder()
         .setTitle(`⚙️ ${interaction.guild.name} 설정`)

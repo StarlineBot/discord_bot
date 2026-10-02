@@ -59,7 +59,7 @@ async function editParty (interaction, forum) {
 
   const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
   const raw = extractField(startMsg.content, '출발시간')
-  const curDt = raw && DateTime.fromFormat(`${now.year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', { locale: 'ko' })
+  const curDt = raw && DateTime.fromFormat(`${now.year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc H시 m분', { locale: 'ko' })
   if (!curDt || !curDt.isValid) { await interaction.editReply('기존 출발시간을 해석하지 못했어 😢'); return }
 
   const newWeekday = interaction.options.getString('출발요일')
@@ -224,7 +224,7 @@ module.exports = {
       if (!meta) continue
       if (readCreatorId(meta.content) !== interaction.user.id) continue // 내 파티만
       const raw = extractField(meta.content, '출발시간')
-      const dt = raw && DateTime.fromFormat(`${now.year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', { locale: 'ko' })
+      const dt = raw && DateTime.fromFormat(`${now.year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc H시 m분', { locale: 'ko' })
       if (dt && dt.isValid && dt < now) continue // 이미 시작한 건 제외
       choices.push({ name: thread.name.slice(0, 100), value: thread.id })
       if (choices.length >= 25) break

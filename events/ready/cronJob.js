@@ -285,7 +285,7 @@ module.exports = async (client) => {
           if (!startRaw) {
             return
           }
-          const startDate = DateTime.fromFormat(`${now.get('year')}년 ${startRaw}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', {
+          const startDate = DateTime.fromFormat(`${now.get('year')}년 ${startRaw}`, 'yyyy년 MM월 dd일 cccc H시 m분', {
             locale: 'ko'
           })
 

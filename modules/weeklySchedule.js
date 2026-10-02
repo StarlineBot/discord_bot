@@ -296,7 +296,7 @@ async function fetchPartiesByDate (guild) {
           if (!timeMsg) continue
           const raw = extractField(timeMsg.content, '출발시간')
           if (!raw) continue
-          const dt = DateTime.fromFormat(`${year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', { locale: 'ko' })
+          const dt = DateTime.fromFormat(`${year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc H시 m분', { locale: 'ko' })
           if (!dt.isValid) continue
           const key = dt.toFormat('yyyy-MM-dd')
           const dungeonMsg = msgs.find(m => m.content.includes('모집던전:'))

@@ -8,4 +8,11 @@ const getDate = function (date) {
   return `${year}-${month}-${day} ${hours}:${min}:${sec}`
 }
 
-module.exports = { getDate }
+// 파티모집 본문/메시지에서 "라벨: 값" 한 줄의 값만 추출(여러 줄·여러 콜론에도 안전).
+// 예: extractField(content, '출발시간') → "10월 02일 금요일 20시 00분"
+const extractField = function (content, label) {
+  const m = (content || '').match(new RegExp(label + ':\\s*([^\\n]+)'))
+  return m ? m[1].trim() : null
+}
+
+module.exports = { getDate, extractField }

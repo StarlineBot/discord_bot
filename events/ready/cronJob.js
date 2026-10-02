@@ -13,7 +13,7 @@ const {
 } = require('../../modules/RankingUtil')
 const axios = require('axios')
 const fs = require('node:fs')
-const { getDate } = require('../../modules/common')
+const { getDate, extractField } = require('../../modules/common')
 const auctionFav = require('../../modules/auctionFavorites')
 const { getCategoryItems, resolveLeafCategories, matchFavorite } = require('../../modules/auction')
 const { embedFor } = require('../../modules/auctionEmbeds')
@@ -280,7 +280,12 @@ module.exports = async (client) => {
           if (typeof startDateMessage === typeof undefined) {
             return
           }
-          const startDate = DateTime.fromFormat(`${now.get('year')}년 ${startDateMessage.content.split(':')[1].trim()}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', {
+          // 본문에 여러 줄·여러 콜론이 있어도 '출발시간:' 줄의 값만 추출(신규=시작메시지, 구=별도메시지 모두 호환)
+          const startRaw = extractField(startDateMessage.content, '출발시간')
+          if (!startRaw) {
+            return
+          }
+          const startDate = DateTime.fromFormat(`${now.get('year')}년 ${startRaw}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', {
             locale: 'ko'
           })
 

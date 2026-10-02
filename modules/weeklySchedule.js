@@ -3,6 +3,7 @@ const { DateTime } = require('luxon')
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, AttachmentBuilder } = require('discord.js')
 const settings = require('./guildSettings')
 const { renderCalendar } = require('./scheduleCalendar')
+const { extractField } = require('./common')
 
 const filePath = './static/json/weeklySchedule.json'
 
@@ -293,12 +294,13 @@ async function fetchPartiesByDate (guild) {
           const msgs = await thread.messages.fetch({ limit: 10 })
           const timeMsg = msgs.find(m => m.content.includes('출발시간:'))
           if (!timeMsg) continue
-          const dungeonMsg = msgs.find(m => m.content.includes('모집던전:'))
-          const raw = timeMsg.content.split('출발시간:')[1].trim()
+          const raw = extractField(timeMsg.content, '출발시간')
+          if (!raw) continue
           const dt = DateTime.fromFormat(`${year}년 ${raw}`, 'yyyy년 MM월 dd일 cccc HH시 mm분', { locale: 'ko' })
           if (!dt.isValid) continue
           const key = dt.toFormat('yyyy-MM-dd')
-          const dungeon = dungeonMsg ? dungeonMsg.content.split('모집던전:')[1].trim() : thread.name
+          const dungeonMsg = msgs.find(m => m.content.includes('모집던전:'))
+          const dungeon = extractField(timeMsg.content, '모집던전') || (dungeonMsg && extractField(dungeonMsg.content, '모집던전')) || thread.name
           ;(byDate[key] = byDate[key] || []).push({ dungeon, hour: dt.hour, minute: dt.minute })
         } catch (e) { /* 스레드 읽기 실패 무시 */ }
       }

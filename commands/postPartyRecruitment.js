@@ -85,7 +85,7 @@ async function editParty (interaction, forum) {
   const dungeonMsg = msgs.find(m => m.content.includes('모집던전:'))
   const dungeon = extractField(startMsg.content, '모집던전') || (dungeonMsg && extractField(dungeonMsg.content, '모집던전')) || thread.name
 
-  const startTimeStr = `${newDt.toFormat('MM월 dd일 cccc')} ${hour}시 ${minute > 0 ? minute + '분' : '00분'}`
+  const startTimeStr = `${newDt.toFormat('MM월 dd일 cccc')} ${String(hour).padStart(2, '0')}시 ${String(minute).padStart(2, '0')}분`
   const newTitle = `${newDt.toFormat('MM월 dd일 cccc')} [${dungeon}] ${hour}시${minute > 0 ? ' ' + minute + '분' : ''}, ${headcount === 0 ? '모이면 바로 출발' : '인원수(' + headcount + '명) 채워지면 출발!'}`
 
   // 출발시간·모집인원 라인이 든 메시지를 찾아 교체(신규=시작메시지 하나 / 구=별도 메시지들)
@@ -290,7 +290,7 @@ module.exports = {
     const recruitmentDungeonName = dungeonDifficult ? `${dungeonName} ${dungeonDifficult}` : dungeonName
     const recruitmentHeadcount = `${dungeonHeadcount}명`
 
-    const startTimeStr = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${dungeonStartHour}시 ${dungeonStartMinute > 0 ? dungeonStartMinute + '분' : '00분'}`
+    const startTimeStr = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${String(dungeonStartHour).padStart(2, '0')}시 ${String(dungeonStartMinute).padStart(2, '0')}분`
     const title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartHour}시${dungeonStartMinute > 0 ? ' ' + dungeonStartMinute + '분' : ''}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
     // 메타데이터(던전·출발시간·인원·작성자)를 '시작 메시지 본문'에 넣는다.
     // → 포럼 글 본문이라 통째로 지우지 않는 한 개별 삭제가 안 됨(알림·달력·수정이 깨지지 않음).

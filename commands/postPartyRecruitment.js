@@ -129,12 +129,8 @@ const maxHeadcount = 8
 const minHeadcount = 0
 
 const difficultChoices = [
-  { name: '전관스피드런', value: '전관스피드런' },
-  { name: '1관클2관클3관클', value: '1관클2관클3관클' },
-  { name: '1관트라이', value: '1관트라이' },
-  { name: '1관클2관클3관트라이', value: '1관클2관클3관트라이' },
-  { name: '1관클2관클', value: '1관클2관클' },
-  { name: '1관클2관트라이', value: '1관클2관트라이' }
+  { name: '1-3 트라이', value: '1-3 트라이' },
+  { name: '1-3 스피드런', value: '1-3 스피드런' }
 ]
 
 // 서브커맨드 공통 옵션(출발 요일/시/분) - 중복 제거
@@ -193,6 +189,12 @@ module.exports = {
     })
     .addSubcommand(subcommand => {
       subcommand.setName('탈라가흐').setDescription('탈라가흐 파티모집을 시작해~ (2~4인)')
+      addTimeOptions(subcommand)
+      addHeadcount2to4Option(subcommand)
+      return subcommand
+    })
+    .addSubcommand(subcommand => {
+      subcommand.setName('크롬바스심연').setDescription('크롬바스 심연 파티모집을 시작해~ (2~4인)')
       addTimeOptions(subcommand)
       addHeadcount2to4Option(subcommand)
       return subcommand

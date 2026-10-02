@@ -1,39 +1,41 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const fs = require('node:fs')
+const path = require('node:path')
+
+// 커맨드 목록은 commands 폴더를 순회해 각 커맨드의 설명에서 자동 생성한다(하드코딩 X).
+// → 새 커맨드를 추가하면 여기에 저절로 반영됨(목록 드리프트 방지).
+// 커스터마이즈: 모듈에서 `hidden: true`로 숨기거나, `help: '...'`로 소개 문구를 따로 지정.
+//              소개 순서는 `order`(작을수록 앞), 미지정은 뒤로 → 그다음 가나다순.
+function loadCommandList () {
+  const dir = __dirname
+  const self = path.basename(__filename)
+  const list = []
+  for (const file of fs.readdirSync(dir)) {
+    if (!file.endsWith('.js') || file === self) continue
+    try {
+      const mod = require(path.join(dir, file))
+      if (!mod || !mod.data || !mod.data.name || mod.hidden) continue
+      list.push({
+        name: mod.data.name,
+        desc: mod.help || mod.data.description || '',
+        order: typeof mod.order === 'number' ? mod.order : Number.MAX_SAFE_INTEGER
+      })
+    } catch (e) { /* 로드 실패한 커맨드는 목록에서 제외 */ }
+  }
+  list.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, 'ko'))
+  return list
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('섯다라인')
     .setDescription('안녕? 난 섯다라인 봇이야!'),
   run: ({ interaction }) => {
-    // 길드별로 해야할일이 있을때
-    // console.log(interaction.member.guild.id)
-
+    const commands = loadCommandList().slice(0, 25) // 임베드 필드 최대 25개
     const embed = new EmbedBuilder()
       .setTitle('섯다라인 명령어 목록')
       .setColor('#3A0729')
-      .addFields(
-        { name: '/요리', value: '재료를 입력하거나 능력치를 선택하면 포함되는 음식을 찾아줘~' }
-        , { name: '/오미', value: '오늘 베테랑 던전과 오늘의 그림자 미션을 보여줘~' }
-        , { name: '/브리레흐주화깡', value: '주화도박을 해보자~' }
-        , { name: '/유물깡', value: '무리아스의 유물을 복원해 랜덤 유물·옵션을 굴리고 이데아 대비 손익까지 계산해줘~ 🏺' }
-        , { name: '/성수깡', value: '무리아스의 성수를 발라 옵션을 굴려봐~ 버튼으로 계속! 💧' }
-        , {
-          name: '/날씨',
-          value: '리얼타임 기준 날씨 정보를 알려주고 발화석은 언제 캘수 있는지 쌍검전사는 언제 스케치 가능한지 알려줘~'
-        }
-        , { name: '/파티모집', value: '폼에 맞게 입력하면 자동으로 파티모집에 글을 작성해줘!' }
-        , { name: '/분배계산기', value: '금액과 인원수를 입력하면 분배금 뚝딱!' }
-        , { name: '/교환인챈트', value: '오늘 복원의 가루로 교환할수 있는 인챈트를 알려줘~' }
-        , { name: '/주사위', value: '1~99의 주사위를 굴려~' }
-        , { name: '/튼주', value: '하프서버의 튼튼한 주머니를 상인별로 불러와~' }
-        , { name: '/경매장', value: '장비·액세서리·에코스톤·인챈트를 세공·접두/접미 등 조건으로 검색해줘~ (데이터는 실제보다 ~10분 지연)' }
-        , { name: '/경매장알림', value: '매물을 알림 등록하면 새 매물이 뜰 때 DM으로 알려줘~ (5분 주기)' }
-        , { name: '/운세', value: '오늘의 운세를 봐줄게~ (하루 한 번 고정, 재미로만!)' }
-        , { name: '/사주팔자', value: '생년월일시로 사주팔자·오행·띠를 뽑아줘~ (재미로만!)' }
-        , { name: '/파티알림', value: '키워드를 등록하면 거뿔 파티모집 제목에 뜰 때 DM으로 알려줘~' }
-        , { name: '/타로점', value: '카드를 셔플해서 과거·현재·미래 3장을 뽑아줘~ (재미로만!) 🔮' }
-        , { name: '/섯다라인설정', value: '서버별 봇 설정 on/off (관리자 전용) ⚙️' }
-      )
+      .addFields(commands.map(c => ({ name: `/${c.name}`, value: c.desc || '​' })))
 
     interaction.reply(
       { content: '안녕?😎 난 섯다라인 봇이야! 지금 사용가능한 명령어를 알려줄게~', embeds: [embed] })

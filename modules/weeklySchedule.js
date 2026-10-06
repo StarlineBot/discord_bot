@@ -213,8 +213,8 @@ function weekChoiceComponents () {
   const [tw, nw] = twoWeeks()
   return [
     new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`ws|wk|${tw.weekId}`).setLabel(`이번주 (${tw.range})`).setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId(`ws|wk|${nw.weekId}`).setLabel(`다음주 (${nw.range})`).setStyle(ButtonStyle.Secondary)
+      new ButtonBuilder().setCustomId(`ws|wk|${tw.weekId}`).setLabel(`이번주 (${tw.range})`).setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId(`ws|wk|${nw.weekId}`).setLabel(`다음주 (${nw.range})`).setStyle(ButtonStyle.Success)
     )
   ]
 }

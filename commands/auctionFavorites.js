@@ -110,7 +110,7 @@ async function registerFav (interaction, fav) {
 
 const data = new SlashCommandBuilder()
   .setName('경매장알림')
-  .setDescription('경매장 매물을 알림 등록하면 새 매물이 뜰 때 DM으로 알려줘~ (5분 주기)')
+  .setDescription('원하는 매물을 등록하면 경매장에 뜰 때 DM으로 알려줘~')
 
 data.addSubcommand(sub => {
   sub.setName('등록').setDescription('알림을 추가해~ (인당 최대 5개)')

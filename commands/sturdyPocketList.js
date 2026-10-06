@@ -24,7 +24,7 @@ const pockets = [
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('튼주')
-    .setDescription('상인별로 전체 채널의 튼튼한 주머니 목록을 보여줘~')
+    .setDescription('각 채널·상인별 튼튼한 주머니 목록을 보여줄게~')
     .addSubcommand(subcommand =>
       subcommand.setName('직접검색')
         .setDescription('모든 주머니를 선택한 채널과 상인에서 찾아봐~')

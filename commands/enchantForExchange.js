@@ -24,7 +24,7 @@ const evenMonth = [
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('교환인챈트')
-    .setDescription('현재 날짜에 맞게 스튜어트에게서 복원의 가루로 교환 가능한 인챈트를 알려줄게!'),
+    .setDescription('오늘 복원의 가루로 교환 가능한 인챈트를 알려줄게~'),
   run: ({ interaction }) => {
     // 길드별로 해야할일이 있을때
     // console.log(interaction.member.guild.id)

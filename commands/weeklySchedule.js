@@ -6,7 +6,7 @@ const ws = require('../modules/weeklySchedule')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('주간일정')
-    .setDescription('이 채널에 파티 주간일정 보드를 만들어 (목~수, 각자 가능시간 입력)')
+    .setDescription('파티원 주간 가능시간이랑 파티 일정을 달력으로 보여줄게~')
     .addStringOption(o =>
       o.setName('제목').setDescription('일정 제목 (생략하면 채널 이름 사용)').setRequired(false))
     .addUserOption(o => o.setName('멤버1').setDescription('파티원 (미입력자 표시용)').setRequired(false))

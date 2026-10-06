@@ -8,7 +8,7 @@ function windowLabel (start, end) {
 
 const data = new SlashCommandBuilder()
   .setName('파티알림')
-  .setDescription('키워드를 등록하면 거뿔 파티모집 제목에 그 단어가 뜰 때 DM으로 알려줘~')
+  .setDescription('등록한 키워드가 거뿔에 뜨면 DM으로 알려줘~')
 
 data.addSubcommand(sub => {
   sub.setName('등록').setDescription('알림 키워드를 추가해~ (인당 최대 5개)')

@@ -8,7 +8,7 @@ const REGION_NAMES = Object.keys(REGIONS)
 
 const build = new SlashCommandBuilder()
   .setName('환전비율계산기')
-  .setDescription('던전 구슬로 어떤 재료를 사서 파는 게 이득인지 경매장 시세로 알려줘~')
+  .setDescription('던전 구슬로 뭘 바꿔 파는 게 이득인지 알려줄게~')
 for (const region of REGION_NAMES) {
   build.addSubcommand(sub =>
     sub.setName(region).setDescription(`${region} 구슬 교환 재료 효율 순위`)
@@ -64,7 +64,7 @@ module.exports = {
       .setTitle(`🔁 ${region} 환전 효율 (구슬당 골드)`)
       .setColor(0x00b894)
       .setDescription(lines.join('\n') + bestLine)
-      .setFooter({ text: '경매장 데이터는 실제보다 ~10분 지연 · 시세 10분 캐시 · 개당 최저가 기준' })
+      .setFooter({ text: '개당 최저가 기준' })
       .setTimestamp()
 
     await generalChannel.send({ embeds: [embed] })

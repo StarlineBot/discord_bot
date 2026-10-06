@@ -39,7 +39,7 @@ const addMetalwareOptions = (sub) => {
 
 const data = new SlashCommandBuilder()
   .setName('경매장')
-  .setDescription('넥슨 경매장 API로 매물을 조회해~ (데이터는 실제보다 ~10분 지연)')
+  .setDescription('아이템 매물 시세를 검색해줘~')
 
 // 장비: 그룹 안에 무기 대분류별 서브커맨드(소분류 선택)
 data.addSubcommandGroup(group => {

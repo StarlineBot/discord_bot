@@ -290,20 +290,21 @@ module.exports = {
       const adminRole = settings.get(guildId, 'adminRole', null) || (gi && gi.adminRole)
       const generalCh = settings.get(guildId, 'generalChannelId', null) || (gi && gi.generalChannelId)
       const lines = [
-        `👑 **관리자 역할** — ${adminRole ? `<@&${adminRole}>` : '미지정 (서버장·제작자만 관리)'}`,
-        `#️⃣ **기본채널** — ${generalCh ? `<#${generalCh}>` : '미지정 (명령어 친 채널에 게시)'}`,
-        `${dot(autoGuestRole)} **손님권한 자동부여** — ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
-        `${dot(auditLog)} **감사로그** — ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}`,
-        `${dot(partyOn)} **파티모집(자동관리)** — ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
-        `${dot(boardOn)} **인게임파티모집현황** — ${boardOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('bugleHornChannelId'))}`,
-        `${dot(weeklyOn)} **주간랭킹** — ${weeklyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('weeklyMemberChannelId'))}`,
-        `${dot(missionOn)} **오늘의미션 게시** — ${missionOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('todayMissionChannelId'))}`,
+        `👑 **관리자 역할** — 봇 관리 명령어를 쓸 수 있는 역할 · ${adminRole ? `<@&${adminRole}>` : '미지정 (서버장·제작자만 관리)'}`,
+        `#️⃣ **기본채널** — 섯다라인 명령어 결과를 모아 올릴 채널 · ${generalCh ? `<#${generalCh}>` : '미지정 (명령어 친 채널에 게시)'}`,
+        `${dot(autoGuestRole)} **손님권한 자동부여** — 입장한 사람에게 손님 역할 자동 지급 · ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
+        `${dot(auditLog)} **감사로그** — 입장/퇴장·역할변경 로그 · ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}`,
+        `${dot(partyOn)} **파티모집(자동관리)** — 파티모집 글 자동작성·오래된 글 정리·출발 10분전 알림 · ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
+        `${dot(boardOn)} **인게임파티모집현황** — 인게임 내 거뿔 파티모집 실시간 게시 · ${boardOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('bugleHornChannelId'))}`,
+        `${dot(weeklyOn)} **주간랭킹** — 디스코드 내 사람들의 매주 채팅·음성 순위 · ${weeklyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('weeklyMemberChannelId'))}`,
+        `${dot(missionOn)} **오늘의미션 게시** — 매일 아침 오늘/내일 미션·베테랑 게시 · ${missionOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('todayMissionChannelId'))}`,
         (() => {
           const autoDel = settings.get(guildId, 'autoDeleteChannels', {})
           const entries = Object.entries(autoDel)
+          const desc = '지정 채널 메시지를 설정 시간 뒤 자동 삭제'
           return entries.length
-            ? `${dot(true)} **자동삭제** — ${entries.map(([cid, m]) => `<#${cid}> ${m}분`).join(' · ')}`
-            : `${dot(false)} **자동삭제** — 꺼짐`
+            ? `${dot(true)} **자동삭제** — ${desc} · ${entries.map(([cid, m]) => `<#${cid}> ${m}분`).join(' · ')}`
+            : `${dot(false)} **자동삭제** — ${desc} · 꺼짐`
         })()
       ]
       const embed = new EmbedBuilder()

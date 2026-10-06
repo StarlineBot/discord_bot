@@ -10,7 +10,7 @@ module.exports = {
     .setName('분배계산기')
     .setDescription('경매장 판매 금액·인원으로 수수료·할인쿠폰까지 반영해 분배금을 계산해줘!')
     .addIntegerOption(option =>
-      option.setName('total_price').setDescription('판매 금액 — 천만 단위! (예: 2=2천만, 20=2억)').setRequired(true).setMinValue(1))
+      option.setName('total_price').setDescription('판매 금액 — 만 단위! (예: 8890=8890만, 20000=2억)').setRequired(true).setMinValue(1))
     .addIntegerOption(option =>
       option.setName('headcount').setDescription('분배할 인원수를 알려줘!').setRequired(true).setMinValue(1).setMaxValue(10))
     .addBooleanOption(option =>
@@ -20,8 +20,8 @@ module.exports = {
       name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname,
       iconURL: interaction.member.user.displayAvatarURL()
     }
-    // 입력은 천만 단위(2 = 2천만, 20 = 2억) → 실제 골드로 환산
-    const totalPrice = interaction.options.get('total_price').value * 10000000
+    // 입력은 만 단위(8890 = 8890만, 20000 = 2억) → 실제 골드로 환산
+    const totalPrice = interaction.options.get('total_price').value * 10000
     const headcount = interaction.options.get('headcount').value
     const membership = interaction.options.getBoolean('멤버십') ?? true
     const generalChannel = resolveGeneralChannel(interaction)
@@ -57,7 +57,7 @@ module.exports = {
       .setTitle('💰 경매장 수수료 분배 계산')
       .setColor(0xffcc00)
       .setDescription(`${header}\n\n${lines.join('\n')}${bestLine}`)
-      .setFooter({ text: '경매장 데이터는 실제보다 ~10분 지연 · 쿠폰가 5분 캐시 · 1인당은 소수점 버림' })
+      .setFooter({ text: '1인당 금액은 소수점 버림' })
       .setTimestamp()
 
     await generalChannel.send({ embeds: [embed] })

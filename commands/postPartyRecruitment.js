@@ -84,9 +84,13 @@ async function editParty (interaction, forum) {
   }
   const dungeonMsg = msgs.find(m => m.content.includes('모집던전:'))
   const dungeon = extractField(startMsg.content, '모집던전') || (dungeonMsg && extractField(dungeonMsg.content, '모집던전')) || thread.name
+  // 릴수는 수정 대상 아님 — 본문에서 읽어 제목에 그대로 유지(본문 릴수 줄은 건드리지 않음)
+  const lapsRaw = extractField(startMsg.content, '릴수')
+  const laps = lapsRaw ? (parseInt(lapsRaw, 10) || 1) : 1
+  const lapPart = ` · ${laps}릴` // 제목엔 항상 표시(1릴 포함)
 
   const startTimeStr = `${newDt.toFormat('MM월 dd일 cccc')} ${String(hour).padStart(2, '0')}시 ${String(minute).padStart(2, '0')}분`
-  const newTitle = `${newDt.toFormat('MM월 dd일 cccc')} [${dungeon}] ${hour}시${minute > 0 ? ' ' + minute + '분' : ''}, ${headcount === 0 ? '모이면 바로 출발' : '인원수(' + headcount + '명) 채워지면 출발!'}`
+  const newTitle = `${newDt.toFormat('MM월 dd일 cccc')} [${dungeon}] ${hour}시${minute > 0 ? ' ' + minute + '분' : ''}${lapPart}, ${headcount === 0 ? '모이면 바로 출발' : '인원수(' + headcount + '명) 채워지면 출발!'}`
 
   // 출발시간·모집인원 라인이 든 메시지를 찾아 교체(신규=시작메시지 하나 / 구=별도 메시지들)
   for (const m of new Set([startMsg, hcMsg].filter(Boolean))) {
@@ -167,14 +171,20 @@ const addHeadcount2to4Option = (sub) => sub
       .addChoices(...headcount2to4Choices)
   )
 
+// 릴수(바퀴) — 선택, 생략 시 1릴. 2릴 이상일 때만 제목·본문에 표시.
+const addLapsOption = (sub) => sub
+  .addIntegerOption(option =>
+    option.setName('릴수').setDescription('몇 바퀴(릴) 돌지 — 생략 시 1릴').setMinValue(1).setMaxValue(20))
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('파티모집')
-    .setDescription('단계별로 작성하면 파티모집 포럼에 섯다라인이 대신 작성해줌!')
+    .setDescription('디스코드 파티모집 글을 명령어로 대신 써줄게~')
     .addSubcommand(subcommand => {
       subcommand.setName('믿음의균열').setDescription('브리레흐 4관 파티모집을 시작해~')
       addTimeOptions(subcommand)
       addHeadcountOption(subcommand)
+      addLapsOption(subcommand)
       return subcommand
     })
     .addSubcommand(subcommand => {
@@ -185,18 +195,21 @@ module.exports = {
           .addChoices(...difficultChoices)
       )
       addHeadcountOption(subcommand)
+      addLapsOption(subcommand)
       return subcommand
     })
     .addSubcommand(subcommand => {
       subcommand.setName('탈라가흐').setDescription('탈라가흐 파티모집을 시작해~ (2~4인)')
       addTimeOptions(subcommand)
       addHeadcount2to4Option(subcommand)
+      addLapsOption(subcommand)
       return subcommand
     })
     .addSubcommand(subcommand => {
       subcommand.setName('크롬바스심연').setDescription('크롬바스 심연 파티모집을 시작해~ (2~4인)')
       addTimeOptions(subcommand)
       addHeadcount2to4Option(subcommand)
+      addLapsOption(subcommand)
       return subcommand
     })
     .addSubcommand(subcommand => {
@@ -255,6 +268,8 @@ module.exports = {
     const dungeonStartMinute = getOptionValue('dungeon_start_minute') ?? 0
     const dungeonDifficult = dungeonName === '믿음의균열' ? '4관' : getOptionValue('dungeon_difficult')
     const dungeonHeadcount = getOptionValue('dungeon_headcount')
+    const laps = getOptionValue('릴수') ?? 1 // 생략 시 1릴
+    const lapPart = ` · ${laps}릴` // 제목엔 항상 표시(1릴 포함)
 
     // 필요한 태그가 없으면 자동 생성(난이도 없는 던전은 던전 태그만).
     let tagDungeon, tagDungeonDifficult
@@ -291,7 +306,7 @@ module.exports = {
     const recruitmentHeadcount = `${dungeonHeadcount}명`
 
     const startTimeStr = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} ${String(dungeonStartHour).padStart(2, '0')}시 ${String(dungeonStartMinute).padStart(2, '0')}분`
-    const title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartHour}시${dungeonStartMinute > 0 ? ' ' + dungeonStartMinute + '분' : ''}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
+    const title = `${dungeonStartDatetime.toFormat('MM월 dd일 cccc')} [${recruitmentDungeonName}] ${dungeonStartHour}시${dungeonStartMinute > 0 ? ' ' + dungeonStartMinute + '분' : ''}${lapPart}, ${(dungeonHeadcount === 0 ? '모이면 바로 출발' : '인원수(' + dungeonHeadcount + '명) 채워지면 출발!')}`
     // 메타데이터(던전·출발시간·인원·작성자)를 '시작 메시지 본문'에 넣는다.
     // → 포럼 글 본문이라 통째로 지우지 않는 한 개별 삭제가 안 됨(알림·달력·수정이 깨지지 않음).
     // → '현재 참가인원' 마커 '위'에 둬서 참가자 추가/삭제 로직(마커 이하만 갱신)에 보존됨.
@@ -301,6 +316,7 @@ module.exports = {
     contents += `\n\n모집던전: ${recruitmentDungeonName}`
     contents += `\n출발시간: ${startTimeStr}`
     contents += `\n모집인원: ${recruitmentHeadcount}`
+    if (laps > 1) contents += `\n릴수: ${laps}릴`
     contents += `\n작성자: <@${interaction.member.id}>`
     contents += `\n\n### 현재 참가인원\n - <@${interaction.member.id}>`
 

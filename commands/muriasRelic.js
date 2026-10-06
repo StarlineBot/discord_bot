@@ -11,7 +11,7 @@ const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('유물깡')
-    .setDescription('무리아스의 유물(이데아)을 복원해 랜덤 유물·옵션을 굴리고 손익까지 계산해~ (재미로만!)'),
+    .setDescription('무리아스의 유물(이데아)을 복원해 랜덤 유물·옵션을 굴리고 손익까지 계산해~'),
   run: async ({ interaction }) => {
     const generalChannel = resolveGeneralChannel(interaction)
     if (!generalChannel) {

@@ -5,7 +5,7 @@ const { buildDailyFortune, starBar } = require('../modules/fortune')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('운세')
-    .setDescription('오늘의 운세를 봐줄게~ (하루 한 번 고정, 재미로만!)'),
+    .setDescription('오늘의 운세를 봐줄게~'),
   run: async ({ interaction }) => {
     const today = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
     const dateStr = today.toFormat('yyyy-MM-dd')

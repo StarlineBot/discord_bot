@@ -18,7 +18,7 @@ async function fetchUnitPrice () {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('성수깡')
-    .setDescription('무리아스의 성수를 발라 옵션을 굴려봐~ 버튼으로 계속! (재미로만!) 💧'),
+    .setDescription('무리아스의 성수를 발라 옵션을 굴려봐~ 버튼으로 계속! 💧'),
   run: async ({ interaction }) => {
     await startLoading(interaction, '💧 무리아스의 성수를 준비하는 중...', { ephemeral: false })
     let unit = null

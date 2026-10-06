@@ -21,7 +21,7 @@ function pillarField (name, p, shishen) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('사주팔자')
-    .setDescription('생년월일시로 사주팔자·오행·십신·대운을 뽑아줄게~ (재미로만!)')
+    .setDescription('생년월일시로 사주팔자·오행·십신·대운을 뽑아줄게~')
     .addStringOption(o => o.setName('생년월일').setDescription('숫자만! 예: 19901010 (양력 기본)').setRequired(true))
     .addIntegerOption(o => o.setName('태어난시').setDescription('0~23시 (모르면 비워둬 → 시주 제외)').setMinValue(0).setMaxValue(23))
     .addStringOption(o => o.setName('음양력').setDescription('기본 양력').addChoices({ name: '양력', value: 'solar' }, { name: '음력', value: 'lunar' }))

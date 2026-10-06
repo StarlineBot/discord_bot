@@ -22,6 +22,10 @@ const pockets = [
 ]
 
 module.exports = {
+  // 사용량이 적고 에러 처리·동시요청 이슈가 있어 당분간 비활성화.
+  // djs-commander가 이 플래그를 보고 Discord에 등록된 /튼주 명령을 삭제한다.
+  // 다시 켜려면 이 줄만 지우면 됨.
+  deleted: true,
   data: new SlashCommandBuilder()
     .setName('튼주')
     .setDescription('각 채널·상인별 튼튼한 주머니 목록을 보여줄게~')

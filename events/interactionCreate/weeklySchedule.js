@@ -52,9 +52,24 @@ module.exports = async (interaction) => {
     })
   }
 
-  // 0) 완료 — 입력 패널 닫기(컴포넌트 제거). 저장은 '구간 추가' 시점에 이미 끝남.
+  // 0) 완료 — 입력 중인 구간이 있으면 저장하고 패널을 닫는다.
+  //    (시작만 고르고 완료 → 종료는 '제한없음'으로 간주해 'N시부터' 저장)
   if (action === 'done') {
-    await interaction.update({ content: '✅ 입력 완료! (이 메시지는 닫아도 돼~)', components: [] }).catch(() => {})
+    const s = ws.parseState(stateStr)
+    let saved = ''
+    if (s.sh != null && daysCsv) {
+      const start = Number(s.sh) + ws.minPart(s.sm)
+      const end = (s.eh == null || s.eh === 'none') ? 24 : Number(s.eh) + ws.minPart(s.em)
+      if (end <= start) {
+        // 종료가 시작보다 빠름 → 저장 불가, 패널 유지하고 안내
+        await showTime(stateStr, `⚠️ 종료(${ws.fmtTime(end)})가 시작(${ws.fmtTime(start)})보다 빨라서 저장 못 했어`)
+        return
+      }
+      ws.addInterval(channelId, weekId, userId, dayIdxsOf(daysCsv), { s: start, e: end })
+      await ws.renderBoard(channel, channelId).catch(() => {})
+      saved = ` ${ws.fmtIntervals([{ s: start, e: end }])} 저장!`
+    }
+    await interaction.update({ content: `✅ 입력 완료!${saved} (이 메시지는 닫아도 돼~)`, components: [] }).catch(() => {})
     return
   }
 

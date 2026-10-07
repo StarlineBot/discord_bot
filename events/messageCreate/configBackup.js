@@ -17,8 +17,8 @@ module.exports = async (message, client) => {
     const m = message.content.match(/<@!?(\d+)>/)
     if (!m) return // 대상 유저 멘션 없음 → 전달 불가
 
-    const file = [...message.attachments.values()].find(a => /\.json$/i.test(a.name || ''))
-    if (!file) return // config.json 첨부 없음
+    const file = [...message.attachments.values()].find(a => /\.(zip|json)$/i.test(a.name || ''))
+    if (!file) return // 설정 백업 첨부(.zip/.json) 없음
 
     const userId = m[1]
     const user = await client.users.fetch(userId).catch(() => null)
@@ -27,7 +27,7 @@ module.exports = async (message, client) => {
     try {
       await user.send({
         content: '🗄️ 섯다라인 설정 백업 파일이야~ 앱에서 **설정 불러오기**로 적용하면 돼!',
-        files: [{ attachment: file.url, name: file.name || 'config.json' }]
+        files: [{ attachment: file.url, name: file.name || 'config-backup.zip' }]
       })
       // 전달 성공 → 릴레이 메시지 정리(권한 없으면 조용히 무시)
       await message.delete().catch(() => {})

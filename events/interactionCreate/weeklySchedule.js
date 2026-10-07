@@ -9,6 +9,7 @@ const ws = require('../../modules/weeklySchedule')
 //  ws|eh|<weekId>|<days>|<state>   종료 시 선택
 //  ws|em|<weekId>|<days>|<state>   종료 분 선택
 //  ws|add|<weekId>|<days>|<state>  입력한 구간 추가(기존에 누적·병합)
+//  ws|done                      입력 패널 닫기(저장은 구간 추가 시점에 끝남)
 //  ws|setx|<weekId>|<days>         선택 요일 불가 처리
 //  ws|clr|<weekId>|<days>          선택 요일 비우기(종일)
 //  ws|copy|<weekId>             이번주 내 입력을 이 주(다음주)로 복사
@@ -49,6 +50,12 @@ module.exports = async (interaction) => {
       content: ws.timeEditContent(ws.getBoard(channelId), weekId, userId, daysCsv, newState, note),
       components: ws.weekTimeComponents(weekId, daysCsv, newState)
     })
+  }
+
+  // 0) 완료 — 입력 패널 닫기(컴포넌트 제거). 저장은 '구간 추가' 시점에 이미 끝남.
+  if (action === 'done') {
+    await interaction.update({ content: '✅ 입력 완료! (이 메시지는 닫아도 돼~)', components: [] }).catch(() => {})
+    return
   }
 
   // 1) 편집창 열기 → 주 선택

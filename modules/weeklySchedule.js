@@ -386,7 +386,8 @@ function weekTimeComponents (weekId, daysCsv, stateStr) {
     new ButtonBuilder().setCustomId(`ws|add|${weekId}|${daysCsv}|${state}`).setLabel('➕ 구간 추가').setStyle(ButtonStyle.Primary),
     new ButtonBuilder().setCustomId(`ws|setx|${weekId}|${daysCsv}`).setLabel('🚫 불가').setStyle(ButtonStyle.Danger),
     new ButtonBuilder().setCustomId(`ws|clr|${weekId}|${daysCsv}`).setLabel('🗑 비우기(종일)').setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId(`ws|wk|${weekId}`).setLabel('◀ 요일 다시').setStyle(ButtonStyle.Secondary)
+    new ButtonBuilder().setCustomId(`ws|wk|${weekId}`).setLabel('◀ 요일 다시').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('ws|done').setLabel('✅ 완료').setStyle(ButtonStyle.Success)
   )
 
   return [

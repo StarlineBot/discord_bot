@@ -502,22 +502,29 @@ async function buildCalendarModel (board, guild) {
     const memberIds = enterers(entries)
     const days = wk.days.map(d => {
       const lines = []
+      // 셀 가로폭이 좁아, 구간이 여럿이면 한 줄에 몰지 말고 줄을 나눠 목록으로 쌓는다.
+      // 첫 구간은 라벨과 같은 줄, 둘째부터는 '  · ' 들여쓰기 연속줄.
+      const pushIntervals = (label, list, type) => {
+        list.forEach((iv, i) => lines.push({ text: (i === 0 ? label : '  · ') + fmtOne(iv), type }))
+      }
       // 상단: 전원 가능시간
       const dc = dayCommon(entries, d.idx)
       if (dc.kind !== 'empty') {
-        if (dc.common.length) lines.push({ text: `전원 ${fmtIntervals(dc.common)}`, type: 'all' })
+        if (dc.common.length) pushIntervals('전원 ', dc.common, 'all')
         else lines.push({ text: '전원 가능시간 없음', type: 'no' })
       }
-      // 멤버별(이른 시작 순)
-      const mem = []
+      // 멤버별(이른 시작 순) — 각 멤버의 구간들을 한 그룹으로 묶어 정렬 후 펼친다
+      const groups = []
       for (const id of memberIds) {
         const av = dayAvail(entries, id, d.idx)
         const nm = names[id] || '?'
-        if (av === null) mem.push({ sort: 9999, text: `${nm} 불가`, type: 'no' })
-        else mem.push({ sort: av.length ? av[0].s : 0, text: `${nm} ${fmtIntervals(av) || '종일'}`, type: 'ok' })
+        if (av === null) { groups.push({ sort: 9999, lines: [{ text: `${nm} 불가`, type: 'no' }] }); continue }
+        const g = []
+        av.forEach((iv, i) => g.push({ text: (i === 0 ? `${nm} ` : '  · ') + fmtOne(iv), type: 'ok' }))
+        groups.push({ sort: av.length ? av[0].s : 0, lines: g })
       }
-      mem.sort((a, b) => a.sort - b.sort)
-      for (const m of mem) lines.push({ text: m.text, type: m.type })
+      groups.sort((a, b) => a.sort - b.sort)
+      for (const g of groups) lines.push(...g.lines)
       // 파티
       for (const p of (partiesByDate[d.dt.toFormat('yyyy-MM-dd')] || [])) {
         const t = p.minute ? `${p.hour}시${p.minute}분` : `${p.hour}시`

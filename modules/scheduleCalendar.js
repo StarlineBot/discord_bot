@@ -12,7 +12,7 @@ const WEEK_LABEL_H = 30
 const DOW_H = 26
 const TITLE_H = 46
 const LINE_H = 22
-const MAX_LINES = 6
+const MAX_LINES = 7
 
 const C = {
   bg: '#2b2d31',

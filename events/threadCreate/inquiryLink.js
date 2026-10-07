@@ -19,7 +19,7 @@ module.exports = async (thread) => {
     // 스타터 메시지(글 본문) 확보 — 웹훅 직후 살짝 늦을 수 있어 1회 재시도
     let starter = await thread.fetchStarterMessage().catch(() => null)
     if (!starter) {
-      await new Promise(r => setTimeout(r, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1000))
       starter = await thread.fetchStarterMessage().catch(() => null)
     }
     if (!starter) return

@@ -39,7 +39,9 @@ const C = {
   party: '#5bc0ff',
   info: '#dddddd'
 }
-const TYPE_COLOR = { ok: C.ok, no: C.no, party: C.party, info: C.info }
+const TYPE_COLOR = { ok: C.ok, no: C.no, party: C.party, info: C.info, all: C.ok, allHead: C.ok, name: C.date }
+// 그룹 헤더(전체 가능일정 / 멤버 이름)는 굵게 그려 구분
+const BOLD_TYPES = new Set(['allHead', 'name'])
 
 function truncate (ctx, text, maxW) {
   if (ctx.measureText(text).width <= maxW) return text
@@ -95,12 +97,12 @@ function renderCalendar (model) {
       ctx.fillStyle = weekend ? C.cellWeekend : C.cell
       ctx.fillRect(x, cy, COL_W - 2, cellH)
 
-      // 셀 내용(라인)
-      ctx.font = '14px NanumGothic'
+      // 셀 내용(라인). 헤더 타입은 굵게.
       const lines = day.lines.slice(0, MAX_CELL_LINES)
       const overflow = day.lines.length - lines.length
       let ly = cy + CELL_TOP
       for (const line of lines) {
+        ctx.font = BOLD_TYPES.has(line.type) ? '14px NanumGothicBold' : '14px NanumGothic'
         ctx.fillStyle = TYPE_COLOR[line.type] || C.info
         ctx.fillText(truncate(ctx, line.text, COL_W - 20), x + 10, ly)
         ly += LINE_H

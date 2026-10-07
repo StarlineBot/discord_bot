@@ -8,7 +8,7 @@ module.exports = {
   category: '👥 파티',
   data: new SlashCommandBuilder()
     .setName('분배계산기')
-    .setDescription('경매장 판매 금액·인원으로 수수료·할인쿠폰까지 반영해 분배금을 계산해줘!')
+    .setDescription('경매장 판매 금액(만 단위)·인원으로 수수료·할인쿠폰까지 반영해 분배금을 계산해줘!')
     .addIntegerOption(option =>
       option.setName('total_price').setDescription('판매 금액 — 만 단위! (예: 8890=8890만, 20000=2억)').setRequired(true).setMinValue(1))
     .addIntegerOption(option =>

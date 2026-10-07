@@ -6,13 +6,22 @@ GlobalFonts.registerFromPath(path.join(__dirname, '../static/fonts/NanumGothic-R
 GlobalFonts.registerFromPath(path.join(__dirname, '../static/fonts/NanumGothic-Bold.ttf'), 'NanumGothicBold')
 
 const COL_W = 178
-const CELL_H = 176
 const PAD = 20
 const WEEK_LABEL_H = 30
 const DOW_H = 26
 const TITLE_H = 46
 const LINE_H = 22
-const MAX_LINES = 7
+// 셀 높이는 내용(줄 수)에 맞춰 그 주에서 가장 많은 날 기준으로 늘어난다(세로로 확장 → 아래가 안 잘림).
+const MIN_CELL_H = 100 // 내용 적은 주도 너무 납작하지 않게
+const CELL_TOP = 20 // 첫 줄 위 여백
+const CELL_BOTTOM = 12 // 마지막 줄 아래 여백
+const MAX_CELL_LINES = 24 // 안전 상한(이보다 많으면 '+N개 더')
+
+// 줄 수 → 셀 높이
+function cellHeight (lineCount) {
+  const shown = Math.min(lineCount, MAX_CELL_LINES) + (lineCount > MAX_CELL_LINES ? 1 : 0)
+  return Math.max(MIN_CELL_H, CELL_TOP + shown * LINE_H + CELL_BOTTOM)
+}
 
 const C = {
   bg: '#2b2d31',
@@ -44,8 +53,9 @@ function renderCalendar (model) {
   const weeks = model.weeks
   const gridW = COL_W * 7
   const width = PAD * 2 + gridW
-  const weekBlockH = WEEK_LABEL_H + DOW_H + CELL_H
-  const height = TITLE_H + PAD + weeks.length * (weekBlockH + PAD)
+  // 주마다 '그 주에서 가장 줄 많은 날' 기준으로 셀 높이 결정(모든 날 같은 높이로 맞춤)
+  const weekCellH = weeks.map(w => cellHeight(Math.max(1, ...w.days.map(d => d.lines.length))))
+  const height = TITLE_H + PAD + weeks.reduce((h, _w, i) => h + WEEK_LABEL_H + DOW_H + weekCellH[i] + PAD, 0)
 
   const canvas = createCanvas(width, height)
   const ctx = canvas.getContext('2d')
@@ -59,7 +69,8 @@ function renderCalendar (model) {
   ctx.fillText(`📅 ${model.title || '주간일정'}`, PAD, 32)
 
   let y = TITLE_H + PAD
-  for (const week of weeks) {
+  weeks.forEach((week, wi) => {
+    const cellH = weekCellH[wi]
     // 주 라벨
     ctx.fillStyle = C.sub
     ctx.font = '18px NanumGothicBold'
@@ -82,13 +93,13 @@ function renderCalendar (model) {
       // 셀 배경
       const cy = y + DOW_H
       ctx.fillStyle = weekend ? C.cellWeekend : C.cell
-      ctx.fillRect(x, cy, COL_W - 2, CELL_H)
+      ctx.fillRect(x, cy, COL_W - 2, cellH)
 
       // 셀 내용(라인)
       ctx.font = '14px NanumGothic'
-      const lines = day.lines.slice(0, MAX_LINES)
+      const lines = day.lines.slice(0, MAX_CELL_LINES)
       const overflow = day.lines.length - lines.length
-      let ly = cy + 20
+      let ly = cy + CELL_TOP
       for (const line of lines) {
         ctx.fillStyle = TYPE_COLOR[line.type] || C.info
         ctx.fillText(truncate(ctx, line.text, COL_W - 20), x + 10, ly)
@@ -99,8 +110,8 @@ function renderCalendar (model) {
         ctx.fillText(`+${overflow}개 더`, x + 10, ly)
       }
     }
-    y += DOW_H + CELL_H + PAD
-  }
+    y += DOW_H + cellH + PAD
+  })
 
   return canvas.toBuffer('image/png')
 }

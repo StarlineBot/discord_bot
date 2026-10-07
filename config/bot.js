@@ -15,5 +15,10 @@ module.exports = {
   // inquiryForumChannelId: 1:1 DM 문의가 모이는 포럼 채널(서버 무관 봇 전역, 모드메일).
   //   유저가 봇에 DM → 이 포럼에 유저별 문의 포스트 생성. 포스트에 답글 쓰면 봇이 그 유저에게 DM relay.
   //   비어 있으면 문의 기능 off.
-  inquiryForumChannelId: '1555444707192995880'
+  inquiryForumChannelId: '1555444707192995880',
+  // configBackupChannelId: 애드온(앱)이 '설정 백업'을 올리는 릴레이 채널(서버 무관 봇 전역).
+  //   앱이 '[설정백업] <@userId>' + config.json 첨부를 이 채널에 올리면,
+  //   봇이 그 유저에게 백업 파일을 DM으로 전달하고 릴레이 메시지는 삭제(채널 정리).
+  //   비어 있으면 설정백업 전달 기능 off.
+  configBackupChannelId: '1557380857373663242'
 }

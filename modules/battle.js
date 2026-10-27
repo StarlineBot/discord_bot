@@ -624,7 +624,7 @@ function execMudoYukhap (self, foe, ds, df) {
   const rAuto = runDamage(MUDO_AUTO, self, foe, ds, df) // 평타 2타
   const rYuk = runDamage(MUDO_YUK, self, foe, ds, df) // 육합권 3타
   const dealt = Math.max(fb - foe.hp, 0)
-  if (dealt > 0) { self.comboStep = 1; self.comboWin = 3 } // 연타가 닿으면 연계 개시
+  if (rAuto.landed || rYuk.landed) { self.comboStep = 1; self.comboWin = 3 } // 연타가 닿으면 연계 개시(마나실드에 흡수돼도 '닿음' — HP 감소 기준이면 실드 상대에게 콤보가 영영 안 열림)
   self.defCombo = 0; self.defendedLast = false
   { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) }
   if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null }

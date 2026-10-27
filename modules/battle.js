@@ -366,7 +366,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   dmg *= gutsMul(dD, D.hp, dD, D)
   if (D.vuln > 0) dmg *= 2.0
   if (D.instVuln > 0) dmg *= 1.5
-  if (D.cast > 0) dmg *= 0.6 // 화염구 시전 중 받는뎀 40%↓
+  if (D.cast > 0) dmg *= 0.6 // 시전 중 받는뎀 40%↓(모든 시전 — 최초 화염구 시전에서 일반화)
   if (A.tFury && A.hp < dA.maxhp * 0.5) dmg *= 1.22
   if (psv(A, '격노') && dA.maxhp) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * FURY_ATK) // 격노: 체력 낮을수록 공격력↑(2차곡선, 빈사 ~+140%). 회복하면 다시 감소(자기조절)
   if (psv(A, '무기의달인') && !magic) dmg *= 1.1 // 무기의 달인: 무기(물리) 배율 소폭↑
@@ -690,8 +690,8 @@ const SKILLS = {
     mkSkill(0, { name: '암습', tag: '제어', cc: { stun: 3 }, cd: 8, note: '기절', ready: (s, f) => s.cd[0] === 0 && f.stun === 0 }), // 순수 CC: 확정 3턴 스턴, 딜 없음(autoScore=봉쇄CC). 쿨은 기절이 풀린 뒤부터
     (() => { const spec = { name: '처형', tag: '공격', type: '물리.일반', mult: 6, coef: '물공×6 (상대 HP30%↓ 처형)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.30, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[1] = 5; s.note = '처형' } }) })(), // 엔진 이관: attack() 경유(회피·막기·크리 작동). mult 재튜닝 대상
     (() => { const spec = { name: '백스텝', tag: '공격', type: '물리.일반', mult: 1.7, bonus: { when: 'foeStun', mult: 2.7 }, cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const combo = f.stun > 0; runDamage(spec, s, f, ds, df); s.cd[2] = 4; s.note = combo ? '백스텝·연계' : '백스텝' } }) })(), // 엔진 이관: bonus.when(스턴 시 ×2.7)
-    // 입막음: 시전 차단 + 3턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
-    { name: '입막음', tag: '제어', interrupt: true, cc: { silence: 3 }, cd: 6, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est / Math.max(1 - df.물회, 0.3), 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 3, 'silence') * magicShare(f.name) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 3); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 6; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
+    // 입막음: 시전 차단 + 2턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
+    { name: '입막음', tag: '제어', interrupt: true, cc: { silence: 2 }, cd: 6, ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => dmgVal(x.est / Math.max(1 - df.물회, 0.3), 1, f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 2); let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wc && !meteor) s.brokeCast = true; if (meteor) s.meteorImmune = true; s.cd[3] = 6; s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }
   ],
   절개도적: [
     // 절개/열상: 1.0× 기본공격 + 명중 시 해당 출혈 스택 +1(최대5, 지속2). 절개 있으면 열상 틱 1.5%→2.5%. 지속 만료 시 1스택씩 점감

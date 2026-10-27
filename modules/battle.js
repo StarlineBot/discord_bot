@@ -1297,7 +1297,7 @@ function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= 
 // 군중제어 쿨 정지: 스킬이 상대에게 CC를 걸면, 그 스킬 쿨은 상대 CC가 모두 풀릴 때까지 돌지 않음(풀린 순간부터 카운트).
 // 턴 시간 가치가 캐릭마다 달라 빠른 쪽이 쿨 중에도 상대를 계속 묶던 문제(암습 고정) 방지. 무기 확률 CC(양둔 스턴 등)는 스킬이 아니라 제외
 const CC_FIELDS = ['stun', 'paralyze', 'silence', 'slow', 'taunt']
-const ASSASSIN_CC = 1.3 // 암습의 대가(암살도적): 군중제어 상태 상대에게 공격력 배율
+const ASSASSIN_CC = 1.5 // 암습의 대가(암살도적): 군중제어 상태 상대에게 공격력 배율
 function ccSnap (f) { return CC_FIELDS.map(k => f[k] || 0) }
 function ccLockAfter (self, foe, ccB, cdB) { // CC가 새로 걸리거나 늘어난 필드 + 이번에 쿨이 새로 잡힌 슬롯을 묶어 기록
   const fields = CC_FIELDS.filter((k, i) => (foe[k] || 0) > ccB[i]); if (!fields.length) return

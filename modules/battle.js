@@ -223,6 +223,16 @@ function psv (f, flag) { return f && f[flag] && !f.passiveLock }
 // 디스펠 대상 버프 필드(실드·시전은 자원/채널이라 제외). clearBuffs=즉시 제거, 개수 반환.
 const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100', 'blessTurns', 'aegisTurns', 'sanctuary', 'frenzy', 'haste', 'repentStack', 'castCut']
 function clearBuffs (f, df) { let n = 0; const hadStat = f.blessTurns > 0 || f.aegisTurns > 0; for (const k of BUFF_FIELDS) { if (f[k] > 0) { f[k] = 0; n++ } } f.powMul = 1; f.frenzyWin = 0; f.repentWin = 0; if (hadStat) { f.aegisMul = 1; if (df) refreshDerived(f, df) } return n } // 축복·가호(스탯버프) 제거 시 파생스탯 원복(refreshDerived), 성역·광란가속·참회(윈도우 포함)도 즉시 해제
+// 패링(너클): 패링 태세 중 나에게 닿는 모든 공격을 흘린다(×0.10 + 첫 피격에 반격턴·회복). 물리 타격은 attack()의 defending 경로가 처리하고,
+// 비물리(마법·신성·역장·충격·확정·주사위)는 각 피해 함수가 parryMul로 같은 규칙을 적용. 지속 피해(출혈·성역·암흑지대 틱)는 공격이 아니라 제외(TICKING)
+let TICKING = false
+function parryMul (D, dD) {
+  if (TICKING || !D.defending || !dD || !dD.무기 || dD.무기.방어 !== '패링') return 1
+  if (D.parry && D.stun === 0 && D.cast === 0) { D.parryHit = true; D.parry = false; D.pendCC = null }
+  return 0.10
+}
+// 시전 착탄처럼 execSkill/execAttack을 거치지 않는 공격의 패링 반격 처리(게이지 리셋 + 성공 회복)
+function resolveParry (foe, df) { if (!foe.parryHit) return false; foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df); return true }
 function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   const magic = dA.마공 > dA.물공
   const ls = { used: false }; const lsD = { used: false }
@@ -510,7 +520,7 @@ function impactDmg (A, D, dA, dD, base) {
   if (canDef && luckRoll(rand() < Math.max(dD.물회 - (dA.sigAim ? 0.05 : 0), 0) * (A.accBuff > 0 ? 0.35 : 1) + (D.dodgeUp > 0 ? 0.4 : 0) + woundDodge(D, A), lsD, (D.luckLock > 0 ? 0 : dD.리롤))) { A.lastDef = '회피'; if (dD.sigEcho) D.echoReady = 1; return 0 } // 회피
   let blk = 1
   if (canDef && dD.무기.주사위) { blk = diceBlockMul(A, D) } else if (canDef && dD.방패막기 && rand() < dD.방패막기) { blk = blockMul(D, dD); A.lastDef = '방패막기' } else if (canDef && dD.무기막기 && D.weaponBroken === 0 && rand() < dD.무기막기) { blk = dD.무기막기경감; A.lastDef = '무기막기' } // 주사위 방어(갬블러)는 충격도 경감 / 막기
-  let d = base * blk
+  let d = base * blk * parryMul(D, dD)
   if (rand() < 0.30) { d *= 0.70; A.grazed = true } // 빗맞음
   d *= gutsMul(dD, D.hp, dD, D) // 근성·현자균형(내재 강인함은 적용, 방어구만 관통)
   if (dD.무기.받는뎀) d *= (1 - dD.무기.받는뎀)
@@ -522,10 +532,10 @@ function trueDmg (A, D, dD, base) {
   A.didAttack = true
   if (D.sanctuary > 0) { A.lastDef = '성역'; return absorb(D, Math.max(Math.round(base * SANCTUARY_TAKEN), 1)) } // 성역 85%↓ 후 실드 흡수
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { A.lastDef = '행운의여신'; return absorb(D, 1) }
-  return absorb(D, Math.max(Math.round(base * wardMul(D)), 1)) // 실드 흡수, 방어구·능동방어는 무시
+  return absorb(D, Math.max(Math.round(base * wardMul(D) * parryMul(D, dD)), 1)) // 실드 흡수, 방어구·능동방어는 무시(패링은 흘림)
 }
 // 시전 마법(화염구/인캐) 피해: 일반 마법과 동일 — 천운 완전회피 / 마방 감소 / 빗맞힘 / 근성
-function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = blockMul(foe, df); foe.spellBlocked = true }; if (df.무기.주사위 && foe.stun === 0 && foe.cast === 0) blk *= diceBlockMul(atk, foe); let dmg = Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : crushArmor(foe, df.마방))) * magicGraze() * wardMul(foe), foe, df)), 0); if (atk && foe.magReflect > 0 && dmg > 0) { const rr = (df.무기.방어 === '방패') ? 1.0 : 0.7; atk.hp -= Math.max(Math.round(dmg * rr), 1); atk.lastRefl = rr >= 1 ? 'full' : 'part'; dmg = Math.round(dmg * (1 - rr)); foe.magReflect = 0 }; return dmg } // §13: 실드 있으면 마방 경감 스킵. 마법반사: 시전마법도 반사(방패100%/그외70%) — 시전·즉시 모두 spellDmg 경유라 통일
+function spellDmg (base, foe, df, atk) { if (psv(foe, '행운의여신') && rand() < foe.행운의여신) return 1; if (rand() < df.리롤) return 0; let blk = 1; if (df.방패막기 && rand() < df.방패막기) { blk = blockMul(foe, df); foe.spellBlocked = true }; if (df.무기.주사위 && foe.stun === 0 && foe.cast === 0) blk *= diceBlockMul(atk, foe); blk *= parryMul(foe, df); let dmg = Math.max(Math.round(guts(base * blk * (1 - (foe.shield > 0 ? 0 : crushArmor(foe, df.마방))) * magicGraze() * wardMul(foe), foe, df)), 0); if (atk && foe.magReflect > 0 && dmg > 0) { const rr = (df.무기.방어 === '방패') ? 1.0 : 0.7; atk.hp -= Math.max(Math.round(dmg * rr), 1); atk.lastRefl = rr >= 1 ? 'full' : 'part'; dmg = Math.round(dmg * (1 - rr)); foe.magReflect = 0 }; return dmg } // §13: 실드 있으면 마방 경감 스킵. 마법반사: 시전마법도 반사(방패100%/그외70%) — 시전·즉시 모두 spellDmg 경유라 통일
 // 시전 중 피격 → 5% 시전 중단(취소). 피해가 실제로 들어갔을 때만("정말 운 없을 때")
 function castHit (A, D, fin) { if (D.cast > 0 && !D.castUninterruptible && fin > 0 && rand() < 0.05) { D.cast = 0; D.castCut = 2; A.brokeCast = true } } // 시전 중 피격 5% 시전 취소(끊기 불가 제외) → castCut 버프(다음 시전 -1턴)
 // 신성(holy) 피해: 마방 적용 마법피해 + 참회 시너지. 참회 걸린 상대에 신성딜 → 최대체력5% 고정딜(관통) 추가. 매 신성타격마다 참회(1턴) 생성·갱신 → 신성 연타 자체시너지
@@ -533,7 +543,7 @@ function holyDmg (A, D, dA, dD, base) {
   A.holyHit = 0; A.repentHit = 0 // 신성/참회 분리 표기용(내레이션)
   if (D.sanctuary > 0) { D.hp -= 1; A.holyHit = 1; return 1 } // 상대 성역: 1
   if (psv(D, '행운의여신') && rand() < D.행운의여신) { D.hp -= 1; A.holyHit = 1; return 1 }
-  let raw = base * (1 - (D.shield > 0 ? 0 : crushArmor(D, dD.마방))) * magicGraze() * wardMul(D) // 마방 적용(실드 있으면 실드가 흡수하므로 마방 스킵) + 편차 + 심연의포옹
+  let raw = base * (1 - (D.shield > 0 ? 0 : crushArmor(D, dD.마방))) * magicGraze() * wardMul(D) * parryMul(D, dD) // 마방 적용(실드 있으면 실드가 흡수하므로 마방 스킵) + 편차 + 심연의포옹 + 패링
   raw = guts(raw, D, dD) // 근성·현자균형
   let dmg = absorb(D, Math.max(Math.round(raw), 1)); if (dmg === 0) dmg = 1 // 실드 흡수 — 단 신성은 마법이라 실드/마방에도 최소 1 관통
   // 참회 스택(1~10): 프리스트 본인의 버프(A 기준). 2턴 내 신성 재명중 시 +1, 아니면 1부터. 내 턴 기준이라 느려도 다음 턴에 유지·사용 가능
@@ -745,7 +755,7 @@ const SKILLS = {
   ],
   갬블러: [
     // 2D20: 주사위 2개(2~40)/10 + 솜씨×0.05 배율만큼 물공 도박딜. 행운 저점보장(낮은 굴림 리롤). 1쿨 주력
-    { name: '2D20', tag: '공격', coef: '(2D20/10 + 솜씨×0.05) 배율 물공 도박딜 · 행운 저점보장', cd: 1, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5.5 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let roll = (1 + Math.floor(rand() * 20)) + (1 + Math.floor(rand() * 20)); roll = luckFloor(roll, 10, 11, 20, ds.base.행운); const mult = roll * 0.1 + ds.base.솜씨 * 0.05; let d = guts(ds.물공 * mult * (1 - df.물방), f, df); d = absorb(f, Math.max(Math.round(d), 1)); f.hp -= d; s.cd[0] = 1; s.note = `🎲2D20=${roll} ×${mult.toFixed(1)}` } },
+    { name: '2D20', tag: '공격', coef: '(2D20/10 + 솜씨×0.05) 배율 물공 도박딜 · 행운 저점보장', cd: 1, ready: (s, f, ds, df) => s.cd[0] === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * 5.5 * (1 - df.물방), 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { let roll = (1 + Math.floor(rand() * 20)) + (1 + Math.floor(rand() * 20)); roll = luckFloor(roll, 10, 11, 20, ds.base.행운); const mult = roll * 0.1 + ds.base.솜씨 * 0.05; let d = guts(ds.물공 * mult * (1 - df.물방), f, df) * parryMul(f, df); d = absorb(f, Math.max(Math.round(d), 1)); f.hp -= d; s.cd[0] = 1; s.note = `🎲2D20=${roll} ×${mult.toFixed(1)}` } },
     // 동전던지기: 앞면=상대 최대체력30% 충격 / 뒷면=자기 10% 자해(둘 다 충격 — 방어구·실드 무시)
     (() => { const spec = { name: '동전던지기', tag: '공격', coef: '동전 던지기 — 앞면: 상대에 큰 확정딜(방어·실드·회피 무시) / 뒷면: 체력 10%↓ (반반 도박)', cd: 2, finalDmg: (s, f, ds, df) => rand() < 0.5 ? { dmg: trueDmg(s, f, df, df.maxhp * 0.30), note: '앞면! 상대 최대체력30%' } : { dmg: 0, selfHp: -Math.round(ds.maxhp * 0.10), note: '뒷면… 자해10%' } }; return Object.assign({}, spec, { ready: (s, f, ds) => s.cd[1] === 0 && s.hp > ds.maxhp * 0.15, score: (s, f, ds, df, x) => dmgVal(df.maxhp * 0.15, 1, 0, f.hp, x.foeTurn), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); s.note = r.note; s.cd[1] = 2 } }) })(), // 엔진 이관: finalDmg(반반 도박), coef 서술형(하드코딩 배율 없음)
     // 불행의룰렛: 상대 랜덤 디버프 + 5%(+행운) 확률 잭팟=모든 상태이상 한 번에
@@ -873,7 +883,7 @@ function deliverFormula (type, base, s, f, ds, df) {
   if (type === '마법.일반' || type.startsWith('마법.원소')) { const d = absorb(f, spellDmg(base, f, df, s)); f.hp -= d; return d } // 천운·마방·마관통 + 마나실드 흡수(원소=볼트, 마커만 다름)
   if (type === '마법.신성') return holyDmg(s, f, ds, df, base) // 신성: 마방 적용 + 참회 스택/램프(holyDmg가 f.hp에 직접 적용)
   if (type === '확정') { const d = trueDmg(s, f, df, base); f.hp -= d; return d } // 전부 무시(실드 흡수만)
-  const d = absorb(f, base); f.hp -= d; return d // 마법.역장: 마방 무시, 실드 흡수
+  const d = absorb(f, Math.max(Math.round(base * parryMul(f, df)), 1)); f.hp -= d; return d // 마법.역장: 마방 무시, 실드 흡수(패링은 흘림)
 }
 // 발수: 숫자면 고정, [min,max]면 랜덤 롤(볼트 1~5). 물리·마법 공통.
 function rollHits (spec) { const h = spec.hits; if (Array.isArray(h)) return h[0] + Math.floor(rand() * (h[1] - h[0] + 1)); return h || 1 }
@@ -1199,7 +1209,7 @@ function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - M
 // 시전 1틱 진행: 카운트다운 후 착탄. upkeep 자동진행 + 플레이어 '시전 진행'(턴넘기기) 공용
 function advanceCast (self, foe, ds, df) {
   self.cast--
-  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; const chain = self.castBoltChain; self.castBolt = null; self.castBoltChain = false; launchBolt(self, foe, ds, df, bn, chain); return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames } } const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); return { type: 'castfire', dmg: b - foe.hp, spell: (sp && sp.name) || self.castName || '화염구' } }
+  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; const chain = self.castBoltChain; self.castBolt = null; self.castBoltChain = false; launchBolt(self, foe, ds, df, bn, chain); return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames, parried: resolveParry(foe, df) } } const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); return { type: 'castfire', dmg: b - foe.hp, spell: (sp && sp.name) || self.castName || '화염구', parried: resolveParry(foe, df) } }
   return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal }
 }
 function upkeep (self, foe, ds, df, interactive) {
@@ -1221,7 +1231,7 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.cutStk > 0 || self.lacStk > 0) { const lacRate = self.cutStk > 0 ? 0.025 : 0.015; let bd = Math.round(ds.maxhp * (self.cutStk * 0.015 + self.lacStk * lacRate)); if (self.sanctuary > 0 && bd > 0) bd = Math.max(Math.round(bd * SANCTUARY_TAKEN), 1); if (bd > 0) self.hp -= bd; if (self.cutDur > 0) { self.cutDur--; if (self.cutDur === 0) { self.cutStk = Math.max(self.cutStk - 1, 0); if (self.cutStk > 0) self.cutDur = 2 } } if (self.lacDur > 0) { self.lacDur--; if (self.lacDur === 0) { self.lacStk = Math.max(self.lacStk - 1, 0); if (self.lacStk > 0) self.lacDur = 2 } } self._tick.push({ type: 'gash', dmg: bd, cut: self.cutStk, lac: self.lacStk }) } // 절개/열상 출혈 DoT(방어·실드 무시, 성역 85%↓). 지속 만료 시 1스택씩 점감(재부착 지속2)
   if (self.healCut > 0) self.healCut-- // 과다출혈 회복감소 지속
   if (self.darkWard > 0) self.darkWard-- // 심연의 포옹(받는뎀↓) 지속
-  if (self.darkZone > 0) { self.darkZone--; const base = Math.round(ds.물공 * (ds.무기.물공배율 || 1) * 1.0); let hd = 0; if (foe.hp > 0) hd = absorb(foe, spellDmg(base, foe, df, self)); if (hd > 0) foe.hp -= hd; const sd = Math.max(Math.round(base * DARKZONE_SELF), 1); self.hp -= sd; addErosion(self, ds, 1); self._tick.push({ type: 'darkzone', dmg: hd, selfDmg: sd, zoneLeft: self.darkZone }) } // 암흑지대: 매턴 상대(마법.일반, 마나실드 흡수) 물공×1.0 + 자신(직격) 물공×0.85 + 자기 침식+1
+  if (self.darkZone > 0) { self.darkZone--; const base = Math.round(ds.물공 * (ds.무기.물공배율 || 1) * 1.0); let hd = 0; TICKING = true; if (foe.hp > 0) hd = absorb(foe, spellDmg(base, foe, df, self)); TICKING = false; if (hd > 0) foe.hp -= hd; const sd = Math.max(Math.round(base * DARKZONE_SELF), 1); self.hp -= sd; addErosion(self, ds, 1); self._tick.push({ type: 'darkzone', dmg: hd, selfDmg: sd, zoneLeft: self.darkZone }) } // 암흑지대: 매턴 상대(마법.일반, 마나실드 흡수) 물공×1.0 + 자신(직격) 물공×0.85 + 자기 침식+1
   if (self.undead) { if (self.deathMark === 0) { self.undead = false; if (self.deathDoom) { self.deathDoom = false; self.hp = 0; self._tick.push({ type: 'deathmark' }) } } else { self.deathMark--; if (undeadFloor(self)) self._tick.push({ type: 'undeadHold', left: self.deathMark }) } } // 살아있는 시체: 내 턴 시작마다 1 소모 + 무적(출혈·암흑지대 틱 포함). 4턴 다 쓰면 창 종료 → 회복 못했으면 사망
   if (self.erosion > 0 && self.hp > emaxHp(self, ds)) self.hp = emaxHp(self, ds) // 침식 상한 클램프(안티힐: 회복해도 상한 초과 불가)
   if (self.trap > 0) { self.trap--; if (self.trap === 0) { self.gauge += ds.턴 * 0.8; applyCC(self, 'slow', 1); self.slowSec = Math.max(self.slowSec, Math.round(ds.턴 * 0.2 * 10) / 10); self.bleed = 3; self.bleedDmg = self.trapBleed || 0; self._tick.push({ type: 'trapspring', dmg: self.bleedDmg }) } } // 사냥꾼덫 발동: 게이지 밀림 + 1턴 둔화 + 출혈 3턴
@@ -1232,7 +1242,7 @@ function upkeep (self, foe, ds, df, interactive) {
   // 능력치 버프(축복/가호/다이아) 지속·만료 → 만료 턴에 refreshDerived로 base 복원
   if (self.blessTurns > 0 || self.aegisTurns > 0) { if (self.blessTurns > 0) self.blessTurns--; if (self.aegisTurns > 0) self.aegisTurns--; refreshDerived(self, ds) }
   // 성역: 턴당 체력3% 회복 + 상대에게 신성딜(마공×0.7). 지속 감소
-  if (self.sanctuary > 0) { self.sanctuary--; let hd = 0; if (foe.hp > 0) hd = holyDmg(self, foe, ds, df, ds.마공 * 0.7); self._tick.push({ type: 'sanctuary', dmg: hd, heal: 0, repent: self.repentHit || 0 }) } // 성역: 무적(받는피해85%↓) + 신성딜만(회복 제거)
+  if (self.sanctuary > 0) { self.sanctuary--; let hd = 0; TICKING = true; if (foe.hp > 0) hd = holyDmg(self, foe, ds, df, ds.마공 * 0.7); TICKING = false; self._tick.push({ type: 'sanctuary', dmg: hd, heal: 0, repent: self.repentHit || 0 }) } // 성역: 무적(받는피해85%↓) + 신성딜만(회복 제거)
   if (self.instCast > 0 && self.cast === 0) self.instCast-- // 인캐 버프 3턴 지속(시전 중엔 유지)
   if (self.powBuff > 0) self.powBuff--
   if (self.taunt > 0) self.taunt--
@@ -1255,7 +1265,7 @@ function upkeep (self, foe, ds, df, interactive) {
     // 끊기 불가 시전(메테오 등): 시작 후엔 돌이킬 수 없음 — 기절 중에도 그대로 진행
     if (self.cast > 0 && self.castUninterruptible) {
       self.cast--; self.stun--; self.defCombo = 0; self.defendedLast = false
-      if (self.cast === 0) { const b = foe.hp; const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); return { type: 'castfire', dmg: b - foe.hp, spell: '메테오' } }
+      if (self.cast === 0) { const b = foe.hp; const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); return { type: 'castfire', dmg: b - foe.hp, spell: '메테오', parried: resolveParry(foe, df) } }
       return { type: 'stun', stunLeft: self.stun, castName: self.castName, castLeft: self.cast, castTotal: self.castTotal } // 기절 중에도 메테오 시전 진행 표시
     }
     if (self.cast > 0) { self.cast = 0; self.castCut = 2 } // 그 외 시전은 기절에 즉시 취소 → castCut 버프
@@ -1606,8 +1616,8 @@ function narrateLine (ev, meName, oppName) {
     case 'castfire': {
       const sp = ev.spell || '화염구'
       if (ev.dmg <= 0) return `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!`
-      if (ev.bolt && ev.boltHits && ev.boltHits.length) { const combo = ev.boltNames && new Set(ev.boltNames).size > 1 ? '🔗**원소조합!** ' : ''; return `☄️ ${ae} **${A}**의 ${sp} 작렬! ${combo}${te} **${T}**${eun(T)} ✨${boltGroupStr(ev.boltHits, ev.boltNames, ev.dmg)} 총 **${ev.dmg}**의 피해를 입었다.` } // 시전형 볼트: 발당 분해 표시(파이어볼트(1·3·2·1·4))
-      return `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬! ${hurt(ev.dmg)}`
+      if (ev.bolt && ev.boltHits && ev.boltHits.length) { const combo = ev.boltNames && new Set(ev.boltNames).size > 1 ? '🔗**원소조합!** ' : ''; return `☄️ ${ae} **${A}**의 ${sp} 작렬!${parryTag} ${combo}${te} **${T}**${eun(T)} ✨${boltGroupStr(ev.boltHits, ev.boltNames, ev.dmg)} 총 **${ev.dmg}**의 피해를 입었다.` } // 시전형 볼트: 발당 분해 표시(파이어볼트(1·3·2·1·4))
+      return `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬!${parryTag} ${hurt(ev.dmg)}`
     }
     case 'castcancel': return `✋ ${ae} **${A}**${iga(A)} ${ev.spell || '시전'}${eul(ev.spell || '시전')} 스스로 취소했다. (다음 시전 -1턴)`
     case 'revive': return ev.rtype === 'undying'

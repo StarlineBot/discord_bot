@@ -356,7 +356,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   if (D.instVuln > 0) dmg *= 1.5
   if (D.cast > 0) dmg *= 0.6 // 화염구 시전 중 받는뎀 40%↓
   if (A.tFury && A.hp < dA.maxhp * 0.5) dmg *= 1.22
-  if (psv(A, '격노') && dA.maxhp) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * 0.6) // 격노: 체력 낮을수록 공격력↑(2차곡선, 빈사 ~+60%). 회복하면 다시 감소(자기조절)
+  if (psv(A, '격노') && dA.maxhp) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * FURY_ATK) // 격노: 체력 낮을수록 공격력↑(2차곡선, 빈사 ~+140%). 회복하면 다시 감소(자기조절)
   if (psv(A, '무기의달인') && !magic) dmg *= 1.1 // 무기의 달인: 무기(물리) 배율 소폭↑
   if (A.powBuff > 0) dmg *= A.powMul
   if (A.weaponBroken > 0) dmg *= (1 / 3) // 무기파괴: 기초딜 1/3
@@ -459,10 +459,11 @@ const BOLT_SPECS = {
   라이트닝볼트: { name: '라이트닝볼트', type: '마법.원소.전격', mult: 0.5, hits: [1, 5], cast: 1 },
   콜드볼트: { name: '콜드볼트', type: '마법.원소.얼음', mult: 0.3, hits: [1, 5], cast: 0, cc: { slow: 1 } }
 }
+const CHAIN_MULT = 1.5 // 볼트마법조합 중 볼트(본 볼트·짝 볼트) 계수 배율 — 볼트마법사 전용(세이지 오토스펠은 조합 없음)
 const BOLT_PAIR = { 파이어볼트: '라이트닝볼트', 라이트닝볼트: '콜드볼트', 콜드볼트: '파이어볼트' } // 볼트마법조합 후속(파이어→라이트닝→콜드→파이어)
 // 볼트 발사: runDamage(볼트 spec) + cc + (조합이면) 짝 볼트 즉시 후속. 시전해소·오토스펠·즉발 공유. 나레이션용 boltHits/boltNames 세팅.
 function launchBolt (s, foe, ds, df, bn, chain) {
-  const one = (nm) => { const sp = BOLT_SPECS[nm]; const r = runDamage(sp, s, foe, ds, df); if (sp.cc && sp.cc.slow && r.landed) { applyCC(foe, 'slow', sp.cc.slow); foe.slowSec = Math.max(foe.slowSec, 1) } return r }
+  const one = (nm) => { const sp = chain ? Object.assign({}, BOLT_SPECS[nm], { mult: BOLT_SPECS[nm].mult * CHAIN_MULT }) : BOLT_SPECS[nm]; const r = runDamage(sp, s, foe, ds, df); if (sp.cc && sp.cc.slow && r.landed) { applyCC(foe, 'slow', sp.cc.slow); foe.slowSec = Math.max(foe.slowSec, 1) } return r }
   const r = one(bn); let hits = r.hits.map(h => h.dealt); let names = r.hits.map(() => bn); let total = r.total
   if (chain) { const pn = BOLT_PAIR[bn]; const pr = one(pn); hits = hits.concat(pr.hits.map(h => h.dealt)); names = names.concat(pr.hits.map(() => pn)); total += pr.total } // 조합: 짝 볼트 즉시 후속발사
   s.boltHits = hits; s.boltNames = names; s.lastBolt = true; s.boltShots = hits.length
@@ -816,7 +817,7 @@ function estDamage (spec, ds, df, x, s, f) {
   let elemX = 1 // 볼트: 원소마스터 배율 × 조합(짝 볼트 ×2)
   if (t.startsWith('마법.원소')) { // 볼트 발수: boltMaster면 최대치 고정, 조합(chainBolt)이면 짝 볼트까지 ×2
     if (s && psv(s, 'boltMaster') && Array.isArray(spec.hits)) hits = spec.hits[1]
-    elemX = (s && psv(s, '원소마스터') ? ELEM_MASTER : 1) * ((s && s.chainBolt > 0) ? 2 : 1)
+    elemX = (s && psv(s, '원소마스터') ? ELEM_MASTER : 1) * ((s && s.chainBolt > 0) ? 2 * CHAIN_MULT : 1)
   }
   if (M) {
     const base = t.startsWith('물리') ? ds.물공 * (ds.무기.물공배율 || 1) * M : ds.마공 * M
@@ -963,7 +964,7 @@ function skillCd (sk) { return sk.cast ? '시전' : (sk.buff && sk.cd == null ? 
 // ── 효과 어휘(vocab): heal/cc/selfBuff — 필드로 선언하면 적용+coef 자동 ──
 const CC_LABEL = { stun: '스턴', slow: '둔화', silence: '침묵', vuln: '취약', sunder: '방어약화', missDown: '명중저하', blind: '실명', luckLock: '행운봉인', healBlock: '회복불가', paralyze: '마비', taunt: '강제평타', weaponBroken: '딜 1/3(무기막기 불가)', healCut: '회복↓' }
 // 버프 필드 → 효과 라벨(selfBuff 자동설명). 동반 필드(powMul·aegisMul·slowSec)는 라벨 없어 자동 생략
-const BUFF_LABEL = { blockUp: '방패막기 경감↑', instCast: '다음 시전 즉발(메테오 제외)', magReflect: '마법 1회 반사', autoSpell: '평타마다 볼트 발동+가속', chainBolt: '볼트 시전 시 짝 원소 자동', graze100: '마법 항상 최대치', haste: '턴 가속', powBuff: '공격력 강화', accBuff: '명중↑', blessTurns: '능력치↑', aegisTurns: '방어력↑', sanctuary: '무적' }
+const BUFF_LABEL = { blockUp: '방패막기 경감↑', instCast: '다음 시전 즉발(메테오 제외)', magReflect: '마법 1회 반사', autoSpell: '평타마다 볼트 발동+가속', chainBolt: `볼트 시전 시 짝 원소 자동 · 볼트 계수 ×${CHAIN_MULT}`, graze100: '마법 항상 최대치', haste: '턴 가속', powBuff: '공격력 강화', accBuff: '명중↑', blessTurns: '능력치↑', aegisTurns: '방어력↑', sanctuary: '무적' }
 // 딜 성분 유무: mult>0 / dmg 라이더 / 마법·충격·확정 type / finalDmg·baseFn 중 하나라도 있으면 딜 있음
 function hasDamage (spec) { return (spec.mult > 0) || spec.dmg || spec.finalDmg || spec.baseFn || (spec.type && spec.type !== '물리.일반') }
 // 효과 적용(딜 이후): 회복·CC·자기버프. 스킬은 필드만 선언.
@@ -1007,6 +1008,7 @@ function mkSkill (ci, spec) {
   })
 }
 // 광란(광전사 패시브): 저체력일수록 회복 계수 증폭(빈사 ~×3.5). 광란 없으면 1. [[격노]]와 함께 하이리스크 지속
+const FURY_ATK = 1.4 // 격노(피의굶주림): 빈사 시 공격력 +N(2차곡선 1+(1-hp%)²×N)
 function furyMul (f) { return (psv(f, '광란') && f.maxhp) ? 1 + Math.pow(1 - Math.max(f.hp, 0) / f.maxhp, 2) * 1.8 : 1 }
 // 광전사 킷(창고+배치 공용, hoisted): 피의갈증=회복(광란 증폭)·피의격노=버프·격돌=제어
 function skBloodThirst (ci) { const spec = { name: '피의갈증', tag: '공격', mult: 1.0, cd: 1, coef: '타격 + 체력회복(체력 낮을수록 증폭) + 광란가속 스택(유지 시 턴 가속, 최대 5스택 −15%)' }; return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => dmgVal(estDamage(spec, ds, df, x), 1, 0, f.hp, x.foeTurn) + (ds.maxhp - s.hp) * 0.3 * furyMul(s), exec: (s, f, ds, df) => { s.hp = Math.min(ds.maxhp, s.hp + hcut(s, healVar(ds.maxhp * 0.02 * furyMul(s)))); runDamage(spec, s, f, ds, df); s.frenzy = (s.frenzyWin > 0) ? Math.min((s.frenzy || 0) + 1, 5) : 1; s.frenzyWin = 2; s.cd[ci] = spec.cd; s.note = '피의갈증' } }) }
@@ -1392,7 +1394,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: '체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+90%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)' }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살도적: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 절개도적: [{ name: '상처전문가', desc: '상대에게 걸린 출혈(절개·열상) 스택당 자신 회피 +2%(최대 +20%) — 상처가 깊을수록 날렵해진다' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }], 무도가: [{ name: '육합권', desc: '평타 히트당 30% 확률로 육합권 발동(최소 2히트 후) → 연환전신장·맹룡과강 연계 개시. 패링 반격 평타도 발동' }] }
+const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: `체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+${Math.round(FURY_ATK * 100)}%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)` }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살도적: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 절개도적: [{ name: '상처전문가', desc: '상대에게 걸린 출혈(절개·열상) 스택당 자신 회피 +2%(최대 +20%) — 상처가 깊을수록 날렵해진다' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }], 무도가: [{ name: '육합권', desc: '평타 히트당 30% 확률로 육합권 발동(최소 2히트 후) → 연환전신장·맹룡과강 연계 개시. 패링 반격 평타도 발동' }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev

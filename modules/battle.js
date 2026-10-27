@@ -12,7 +12,7 @@ const CHARS = {
   기사: { emoji: '🛡', 힘: 60, 지능: 10, 체력: 100, 민첩: 35, 솜씨: 68, 행운: 30, 무기: '대형방패', 완벽방어: true, id: '순수 탱커' },
   마법사: { emoji: '🔮', 힘: 10, 지능: 100, 체력: 60, 민첩: 30, 솜씨: 50, 행운: 45, 무기: '스태프', id: '스태프 마법사' },
   볼트마법사: { emoji: '✨', 힘: 10, 지능: 90, 체력: 50, 민첩: 55, 솜씨: 50, 행운: 45, 무기: '완드', boltMaster: true, id: '볼트 마법사' },
-  암살도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 35, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 연속타격: true, id: '스피드/회피/암살' },
+  암살도적: { emoji: '🗡', 힘: 45, 지능: 15, 체력: 35, 민첩: 100, 솜씨: 55, 행운: 55, 무기: '단검', 암습의대가: true, id: '스피드/회피/암살' },
   절개도적: { emoji: '🩸', 힘: 60, 지능: 20, 체력: 60, 민첩: 45, 솜씨: 70, 행운: 25, 무기: '단검', 상처전문가: true, id: '출혈 지속딜러' }, // 단검이되 회피물몸(암살) 대비 질긴 근접. 상처전문가=평타로 출혈 스택+상대 출혈만큼 회피↑
   사냥꾼: { emoji: '🏹', 힘: 55, 지능: 15, 체력: 45, 민첩: 55, 솜씨: 100, 행운: 40, 무기: '활', id: '저격/덫/카이팅' },
   갬블러: { emoji: '🎲', 힘: 30, 지능: 30, 체력: 30, 민첩: 50, 솜씨: 70, 행운: 100, 무기: '주사위', id: '확률/도박' }, // D20 주사위. 저체급·고행운(주사위방어·천운·저점보장). 패시브 없음(5액티브)
@@ -217,7 +217,7 @@ function blockMul (D, dD) { return D.blockUp > 0 ? 0.10 : ((dD && dD.무기 && d
 function defMul (def, pen) { return 1 - def * (1 - Math.min(pen || 0, 1)) }
 // ── 패시브 토대 ──
 // 패시브 레지스트리: 표시명 → fighter 플래그. 열거·디스펠 타겟·표시 공용. (마도갑주는 derive 물방 baked라 lock 미대응 — 스탯형)
-const PASSIVE_FLAGS = { '완벽방어!': '완벽방어', 행운의여신: '행운의여신', 연속타격: '연속타격', '볼트마법의 이해': 'boltMaster', '원소의 이해': '원소마스터', 불굴: '불굴', 광란: '광란', '현자의 균형': '현자균형', 마도갑주: '마도갑주', 격노: '격노', '무기의 달인': '무기의달인', 투경: '투경' }
+const PASSIVE_FLAGS = { '완벽방어!': '완벽방어', 행운의여신: '행운의여신', 연속타격: '연속타격', '볼트마법의 이해': 'boltMaster', '원소의 이해': '원소마스터', 불굴: '불굴', 광란: '광란', '현자의 균형': '현자균형', 마도갑주: '마도갑주', 격노: '격노', '무기의 달인': '무기의달인', 투경: '투경', '암습의 대가': '암습의대가' }
 // 패시브 활성 판정: 플래그 보유 && 잠기지 않음(디스펠). passiveLock=0이면 기존 동작과 동일.
 function psv (f, flag) { return f && f[flag] && !f.passiveLock }
 // 디스펠 대상 버프 필드(실드·시전은 자원/채널이라 제외). clearBuffs=즉시 제거, 개수 반환.
@@ -370,6 +370,7 @@ function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
   if (A.tFury && A.hp < dA.maxhp * 0.5) dmg *= 1.22
   if (psv(A, '격노') && dA.maxhp) dmg *= (1 + Math.pow(1 - Math.max(A.hp, 0) / dA.maxhp, 2) * FURY_ATK) // 격노: 체력 낮을수록 공격력↑(2차곡선, 빈사 ~+140%). 회복하면 다시 감소(자기조절)
   if (psv(A, '무기의달인') && !magic) dmg *= 1.1 // 무기의 달인: 무기(물리) 배율 소폭↑
+  if (psv(A, '암습의대가') && CC_FIELDS.some(k => (D[k] || 0) > 0)) dmg *= ASSASSIN_CC // 암습의 대가: 상대가 기절·마비·침묵·둔화·도발 중이면 공격력↑
   if (A.powBuff > 0) dmg *= A.powMul
   if (A.weaponBroken > 0) dmg *= (1 / 3) // 무기파괴: 기초딜 1/3
   if (D.tWall) dmg *= 0.90
@@ -686,7 +687,7 @@ const SKILLS = {
     mkSkill(3, { name: '볼트마법조합', tag: '버프', buff: 4, cd: 4, selfBuff: { chainBolt: 4 }, note: '볼트마법조합', ready: (s, f, ds, df, x) => s.cd[3] === 0 && s.chainBolt <= 1 && x.safe, score: (s, f, ds, df, x) => buffVal(x.est * 3, s, ds) })
   ],
   암살도적: [
-    mkSkill(0, { name: '암습', tag: '제어', cc: { stun: 4 }, cd: 10, note: '기절', ready: (s, f) => s.cd[0] === 0 && f.stun === 0 }), // 순수 CC: 확정 4턴 스턴, 딜 없음(autoScore=봉쇄CC). 쿨은 기절이 풀린 뒤부터
+    mkSkill(0, { name: '암습', tag: '제어', cc: { stun: 3 }, cd: 8, note: '기절', ready: (s, f) => s.cd[0] === 0 && f.stun === 0 }), // 순수 CC: 확정 3턴 스턴, 딜 없음(autoScore=봉쇄CC). 쿨은 기절이 풀린 뒤부터
     (() => { const spec = { name: '처형', tag: '공격', type: '물리.일반', mult: 6, coef: '물공×6 (상대 HP30%↓ 처형)', cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.hp < df.maxhp * 0.30, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[1] = 5; s.note = '처형' } }) })(), // 엔진 이관: attack() 경유(회피·막기·크리 작동). mult 재튜닝 대상
     (() => { const spec = { name: '백스텝', tag: '공격', type: '물리.일반', mult: 1.7, bonus: { when: 'foeStun', mult: 2.7 }, cd: 4 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const combo = f.stun > 0; runDamage(spec, s, f, ds, df); s.cd[2] = 4; s.note = combo ? '백스텝·연계' : '백스텝' } }) })(), // 엔진 이관: bonus.when(스턴 시 ×2.7)
     // 입막음: 시전 차단 + 3턴 침묵 + 딜. 목을 노려 주문을 끊는다 — 캐스터 카운터(볼트마법사 봉쇄·마법사 서리구 대응)
@@ -1149,7 +1150,8 @@ function mkFighter (d, name, ai) {
     광란: (CHARS[name] && (CHARS[name].광란 || CHARS[name].피의굶주림)) || false, // 피의굶주림(광전사)=격노+광란 통합 패시브
     maxhp: d.maxhp, // 광전사 광란: 체력 낮을수록 제어감소+공격력↑(2차곡선)
     마나환류: (CHARS[name] && CHARS[name].마나환류) || false, // 마법사 패시브: 마법딜 시 확률적 실드복구
-    연속타격: (CHARS[name] && CHARS[name].연속타격) || false, // 암살도적 패시브: 공격 시 확률적 추가타
+    연속타격: (CHARS[name] && CHARS[name].연속타격) || false, // (미배정 — 커스텀용 보존) 공격 시 확률적 추가타
+    암습의대가: (CHARS[name] && CHARS[name].암습의대가) || false, // 암살도적 패시브: 군중제어 상태의 상대에게 공격력 ×ASSASSIN_CC
     육합권: (CHARS[name] && CHARS[name].육합권) || false, // 무도가 패시브: 평타 히트당 확률로 육합권 발동 → 연계 개시
     jabStk: 0, // 육합권 프록 전 누적 평타 히트(최소 MUDO_MINJAB 후 프록 시작)
     상처전문가: (CHARS[name] && CHARS[name].상처전문가) || false, // 절개도적 패시브: 평타 명중→활성 출혈 스택+1(지속갱신) + 상대 출혈 스택당 자신 회피+2%(최대+20%)
@@ -1295,6 +1297,7 @@ function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= 
 // 군중제어 쿨 정지: 스킬이 상대에게 CC를 걸면, 그 스킬 쿨은 상대 CC가 모두 풀릴 때까지 돌지 않음(풀린 순간부터 카운트).
 // 턴 시간 가치가 캐릭마다 달라 빠른 쪽이 쿨 중에도 상대를 계속 묶던 문제(암습 고정) 방지. 무기 확률 CC(양둔 스턴 등)는 스킬이 아니라 제외
 const CC_FIELDS = ['stun', 'paralyze', 'silence', 'slow', 'taunt']
+const ASSASSIN_CC = 1.3 // 암습의 대가(암살도적): 군중제어 상태 상대에게 공격력 배율
 function ccSnap (f) { return CC_FIELDS.map(k => f[k] || 0) }
 function ccLockAfter (self, foe, ccB, cdB) { // CC가 새로 걸리거나 늘어난 필드 + 이번에 쿨이 새로 잡힌 슬롯을 묶어 기록
   const fields = CC_FIELDS.filter((k, i) => (foe[k] || 0) > ccB[i]); if (!fields.length) return
@@ -1419,7 +1422,7 @@ function advance (state) {
 }
 // 플레이어 행동 실행 후 다음 플레이어 턴까지 진행
 // 캐릭당 패시브 배열(여러 개 가능). 버튼/설명에서 순회. 최대 5(스킬줄 총합).
-const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: `체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+${Math.round(FURY_ATK * 100)}%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)` }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살도적: [{ name: '연속타격', desc: '공격 시 20% 확률로 한 번 더 타격(추가타는 크리 안 터짐)' }], 절개도적: [{ name: '상처전문가', desc: '상대에게 걸린 출혈(절개·열상) 스택당 자신 회피 +2%(최대 +20%) — 상처가 깊을수록 날렵해진다' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }], 무도가: [{ name: '육합권', desc: '평타 히트당 30% 확률로 육합권 발동(최소 2히트 후) → 연환전신장·맹룡과강 연계 개시. 패링 반격 평타도 발동' }, { name: '투경', desc: `모든 타격(평타·육합권·연환격의 각 타)마다 ${Math.round(TUKYUNG_PROC * 100)}% 확률로 방어(물방·마방) 무시 + 마나실드에도 온전히 들어가는 피해` }] }
+const PASSIVES = { 검투사: [{ name: '무기의 달인', desc: '무기막기 강화(확률 힘10당 3% · 성공 시 40% 경감) + 무기 배율 소폭↑' }], 기사: [{ name: '완벽방어!', desc: '방패막기를 연속 2회 성공하면 받는 피해의 70%를 공격자에게 반사' }], 세이지: [{ name: '원소의 이해', desc: '원소(화염/전격/냉기) 마법 대미지 대폭 증가' }, { name: '현자의 균형', desc: '힘·지능 중 낮은 값 10당 받는 대미지 -2.5% (최대 -16%)' }], 광전사: [{ name: '피의굶주림', desc: `체력이 낮을수록 강해진다 — 공격력 급증(빈사 ~+${Math.round(FURY_ATK * 100)}%) + 받는 제어 감소 + 턴 가속 + 회복량 증폭. 회복하면 다시 약해진다(죽어갈수록 강한 버서커)` }], 스펠브레이커: [{ name: '마도갑주', desc: '마법 갑옷 오라 — 상시 물리 방어 +12%p' }], 암살도적: [{ name: '암습의 대가', desc: `군중제어(기절·마비·침묵·둔화·도발) 상태의 상대에게 공격력 ×${ASSASSIN_CC}` }], 절개도적: [{ name: '상처전문가', desc: '상대에게 걸린 출혈(절개·열상) 스택당 자신 회피 +2%(최대 +20%) — 상처가 깊을수록 날렵해진다' }], 볼트마법사: [{ name: '볼트마법의 이해', desc: '볼트마법 사용 시 원소당 확정 5발(없으면 원소당 1~5 랜덤)' }], 프리스트: [{ name: '신성한 의무', desc: '물리 평타에 신성 대미지(마공×0.7) 추가 — 참회 부여(신성딜 받으면 최대체력3% 추가)' }], 무도가: [{ name: '육합권', desc: '평타 히트당 30% 확률로 육합권 발동(최소 2히트 후) → 연환전신장·맹룡과강 연계 개시. 패링 반격 평타도 발동' }, { name: '투경', desc: `모든 타격(평타·육합권·연환격의 각 타)마다 ${Math.round(TUKYUNG_PROC * 100)}% 확률로 방어(물방·마방) 무시 + 마나실드에도 온전히 들어가는 피해` }] }
 function playerResolve (state, choice) {
   const { A, B, dA, dB } = state
   let ev

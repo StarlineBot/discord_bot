@@ -404,7 +404,7 @@ function jongShield (f) { return f.shield > 0 ? JONG_SHIELD : 1 }
 const JONG_MIN = 6 // 종말 최소 침식 스택(쌓아서 터뜨리는 고스택 피니셔 — 저스택 난사 방지)
 const ABYSS_TAKEN = 0.7 // 심연의 포옹: 받는 피해 배율(30%↓)
 const SOUL_COEF = 1.0 // 영혼포식 물공 계수
-function undeadFloor (f) { if (f.undead && f.hp < 1) f.hp = 1 } // 시체 무적: 체력 1 하한
+function undeadFloor (f) { if (f.undead && f.hp < 1) { f.hp = 1; return true } return false } // 시체 무적: 체력 1 하한. 실제로 막았으면 true(나레이션용)
 function wardMul (D) { return (D.darkWard > 0) ? ABYSS_TAKEN : 1 } // 심연의 포옹(암흑기사): 받는 피해 30%↓
 function holyRamp (s, df, hits) { return df.maxhp * 0.007 * (s.repentStack || 0) * (hits || 1) } // 참회 램프 스코어 근사: 히트당 상대 최대체력×0.7%×현재스택
 function jongMul (st) { return (st || 0) * 0.8 } // 종말 계수: 스택당 0.8 (6스택 4.8 ~ 만스택 8.0)
@@ -1220,7 +1220,7 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.healCut > 0) self.healCut-- // 과다출혈 회복감소 지속
   if (self.darkWard > 0) self.darkWard-- // 심연의 포옹(받는뎀↓) 지속
   if (self.darkZone > 0) { self.darkZone--; const base = Math.round(ds.물공 * (ds.무기.물공배율 || 1) * 1.0); let hd = 0; if (foe.hp > 0) hd = absorb(foe, spellDmg(base, foe, df, self)); if (hd > 0) foe.hp -= hd; const sd = Math.max(Math.round(base * DARKZONE_SELF), 1); self.hp -= sd; addErosion(self, ds, 1); self._tick.push({ type: 'darkzone', dmg: hd, selfDmg: sd, zoneLeft: self.darkZone }) } // 암흑지대: 매턴 상대(마법.일반, 마나실드 흡수) 물공×1.0 + 자신(직격) 물공×0.85 + 자기 침식+1
-  if (self.undead) { if (self.deathMark === 0) { self.undead = false; if (self.deathDoom) { self.deathDoom = false; self.hp = 0; self._tick.push({ type: 'deathmark' }) } } else { self.deathMark--; undeadFloor(self) } } // 살아있는 시체: 내 턴 시작마다 1 소모 + 무적(출혈·암흑지대 틱 포함). 4턴 다 쓰면 창 종료 → 회복 못했으면 사망
+  if (self.undead) { if (self.deathMark === 0) { self.undead = false; if (self.deathDoom) { self.deathDoom = false; self.hp = 0; self._tick.push({ type: 'deathmark' }) } } else { self.deathMark--; if (undeadFloor(self)) self._tick.push({ type: 'undeadHold', left: self.deathMark }) } } // 살아있는 시체: 내 턴 시작마다 1 소모 + 무적(출혈·암흑지대 틱 포함). 4턴 다 쓰면 창 종료 → 회복 못했으면 사망
   if (self.erosion > 0 && self.hp > emaxHp(self, ds)) self.hp = emaxHp(self, ds) // 침식 상한 클램프(안티힐: 회복해도 상한 초과 불가)
   if (self.trap > 0) { self.trap--; if (self.trap === 0) { self.gauge += ds.턴 * 0.8; applyCC(self, 'slow', 1); self.slowSec = Math.max(self.slowSec, Math.round(ds.턴 * 0.2 * 10) / 10); self.bleed = 3; self.bleedDmg = self.trapBleed || 0; self._tick.push({ type: 'trapspring', dmg: self.bleedDmg }) } } // 사냥꾼덫 발동: 게이지 밀림 + 1턴 둔화 + 출혈 3턴
   // 버프/디버프 지속은 기절·시전 중에도 흐른다 (기절 중 버프 동결 버그 A2 수정)
@@ -1344,6 +1344,8 @@ function recEntry (state, who, ev) {
   if (state.shown != null) Object.assign(base, snapFrame(state))
   state.log.push(Object.assign(base, ev))
 }
+function floorBoth (state) { return [undeadFloor(state.A), undeadFloor(state.B)] } // 시체 무적 하한 적용(기록 전에 — HP 0 표기 방지)
+function holdRec (state, held) { if (held[0]) recEntry(state, 'me', { type: 'undeadHold', left: state.A.deathMark }); if (held[1]) recEntry(state, 'opp', { type: 'undeadHold', left: state.B.deathMark }) } // 무적으로 버틴 경우 나레이션
 function reviveRec (state, who) { const f = who === 'me' ? state.A : state.B; const mx = who === 'me' ? state.maxA : state.maxB; state.log.push({ who, type: 'revive', hp: Math.max(f.hp, 0), max: mx, rtype: f.reviveType }) }
 // 턴 기록: upkeep이 남긴 tick 이벤트(출혈/덫 발동)를 먼저 로그에 풀고, 본 행동 이벤트를 기록
 function recTurn (state, who, f, ev) { if (f._tick && f._tick.length) { for (const t of f._tick) recEntry(state, who, t); f._tick = [] } if (ev && ev.type === 'skip' && f.hp <= 0) return; recEntry(state, who, ev) } // 출혈로 죽은 턴의 빈 스킵은 기록 생략(koLog가 처리)
@@ -1354,8 +1356,8 @@ function stateResult (state) { return { winner: state.winner, log: state.log, me
 function runBattle (meName, oppName, meAI, oppAI) {
   const state = initBattle(meName, oppName, oppAI); state.A.ai = meAI
   const { A, B, dA, dB } = state; const DT = 0.1
-  const actA = () => { A.gauge = resetGauge(A, dA); const ev = aiTurn(A, B, dA, dB); undeadFloor(A); undeadFloor(B); recTurn(state, 'me', A, ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp') }
-  const actB = () => { B.gauge = resetGauge(B, dB); const ev = aiTurn(B, A, dB, dA); undeadFloor(A); undeadFloor(B); recTurn(state, 'opp', B, ev); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
+  const actA = () => { A.gauge = resetGauge(A, dA); const ev = aiTurn(A, B, dA, dB); const held = floorBoth(state); recTurn(state, 'me', A, ev); holdRec(state, held); if (reviveCheck(B, dB)) reviveRec(state, 'opp') }
+  const actB = () => { B.gauge = resetGauge(B, dB); const ev = aiTurn(B, A, dB, dA); const held = floorBoth(state); recTurn(state, 'opp', B, ev); holdRec(state, held); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
   while (A.hp > 0 && B.hp > 0 && state.t < 600) {
     A.gauge -= DT; B.gauge -= DT; state.t += DT
     const aR = A.gauge <= 0; const bR = B.gauge <= 0
@@ -1378,11 +1380,11 @@ function advance (state) {
       const forced = upkeep(A, B, dA, dB, true) // interactive: 플레이어 시전 턴엔 자동진행 대신 멈춰 진행/취소 선택
       if (A._tick && A._tick.length) { for (const t of A._tick) recEntry(state, 'me', t); A._tick = [] } // 출혈/덫 발동 로그 먼저
       if (A.hp <= 0) { koLog(state); state.winner = 'opp'; return 'end' } // 출혈로 사망 시 종료
-      if (forced) { undeadFloor(A); undeadFloor(B); recEntry(state, 'me', forced); if (reviveCheck(B, dB)) reviveRec(state, 'opp'); if (B.hp <= 0) break; continue }
+      if (forced) { const held = floorBoth(state); recEntry(state, 'me', forced); holdRec(state, held); if (reviveCheck(B, dB)) reviveRec(state, 'opp'); if (B.hp <= 0) break; continue }
       return 'player' // 플레이어 upkeep 완료, 행동 선택 대기
     }
     if (B.hp <= 0) break
-    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); const ev = aiTurn(B, A, dB, dA); undeadFloor(A); undeadFloor(B); recTurn(state, 'opp', B, ev); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
+    if (B.gauge <= 0) { B.gauge = resetGauge(B, dB); const ev = aiTurn(B, A, dB, dA); const held = floorBoth(state); recTurn(state, 'opp', B, ev); holdRec(state, held); if (reviveCheck(A, dA)) reviveRec(state, 'me') }
   }
   koLog(state)
   state.winner = state.t >= 600 ? 'draw' : (A.hp > 0 ? 'me' : 'opp')
@@ -1398,7 +1400,7 @@ function playerResolve (state, choice) {
   if (A.cast > 0 && !A.castUninterruptible) {
     // 자가 취소 → 시전 스킬 쿨 환불(안 쓴 것으로 처리). 아니면 '시전 진행'
     if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castCut = 2; A.castBolt = null; A.castBoltChain = false; A.castSpec = null; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
-    undeadFloor(A); undeadFloor(B); recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
+    const held = floorBoth(state); recEntry(state, 'me', ev); holdRec(state, held); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
     if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
     return advance(state)
   }
@@ -1409,7 +1411,7 @@ function playerResolve (state, choice) {
     const slot = parseInt(choice.slice(1), 10)
     ev = playerCanUse(state, slot).usable ? execSkill(A, B, dA, dB, SKILLS[state.meName][slot]) : execAttack(A, B, dA, dB)
   } else ev = execAttack(A, B, dA, dB)
-  undeadFloor(A); undeadFloor(B); recEntry(state, 'me', ev); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
+  const held = floorBoth(state); recEntry(state, 'me', ev); holdRec(state, held); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
   if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
   return advance(state)
 }
@@ -1588,6 +1590,7 @@ function narrateLine (ev, meName, oppName) {
     case 'defend': return `${ev.parry ? '🥊' : '🛡️'} ${ae} **${A}**${eun(A)} ${ev.parry ? '패링 태세! (피격 시 흘려내고 반격)' : '방어 태세!'}${ev.heal > 0 ? ` 체력을 **${ev.heal}** 회복` : ''} (HP ${ev.selfHp}/${ev.selfMax})`
     case 'sanctuary': { const bits = []; if (ev.heal > 0) bits.push(`체력 **${ev.heal}** 회복`); if (ev.dmg > 0) bits.push(`${te} **${T}**에게 🙏신성 **${ev.dmg}**${ev.repent > 0 ? ` +참회 **${ev.repent}**` : ''}`); return `🙏 ${ae} **${A}** 성역${bits.length ? ' — ' + bits.join(' · ') : ' 유지'} (HP ${ev.selfHp}/${ev.selfMax})` }
     case 'darkzone': return `⚰️ ${ae} **${A}**의 암흑지대 — ${te} **${T}**에게 암흑 **${ev.dmg}**${ev.selfDmg > 0 ? ` · 자신도 침식되며 **${ev.selfDmg}** 피해` : ''}`
+    case 'undeadHold': return `⚰️ ${ae} **${A}**${eun(A)} 살아있는 시체 — 체력이 1 아래로 떨어지지 않는다! (${ev.left > 0 ? `무적 ${ev.left}턴 남음` : '무적 곧 종료'})`
     case 'deathmark': return `☠️ ${ae} **${A}**의 육신이 무너진다! 회복하지 못한 시체가 스러졌다…`
     case 'trapspring': return `🪤 ${ae} **${A}**${iga(A)} 사냥꾼덫을 밟았다! 발이 묶이고(둔화) 🩸출혈 시작!`
     case 'bleed': return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${ev.left > 0 ? ` (출혈 ${ev.left}턴 남음)` : ''}`

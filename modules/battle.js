@@ -398,13 +398,16 @@ function addErosion (f, d, n) { f.erosion = Math.max(0, Math.min((f.erosion || 0
 const UNDEAD_TURNS = 3
 const UNDEAD_EROSION = 8 // 시체 진입 시 침식(종말 스택)
 const UNDEAD_HEAL = 2 // 시체 상태 회복률 배수
-const DARKZONE_SELF = 0.7 // 암흑지대 자해 배율(물공×1.0 중 자신이 받는 비율) — 비용은 HP보다 침식(+1/턴) 쪽에 비중
+const DARKZONE_SELF = 0.85 // 암흑지대 자해 배율(물공×1.0 중 자신이 받는 비율) — 비용은 HP보다 침식(+1/턴) 쪽에 비중
 const JONG_SHIELD = 0.6 // 종말: 마나실드 보유 상대에게 위력 배율(침식은 육체를 좀먹는 힘 — 마나에는 덜 통함)
 function jongShield (f) { return f.shield > 0 ? JONG_SHIELD : 1 }
+const JONG_MIN = 6 // 종말 최소 침식 스택(쌓아서 터뜨리는 고스택 피니셔 — 저스택 난사 방지)
+const ABYSS_TAKEN = 0.7 // 심연의 포옹: 받는 피해 배율(30%↓)
+const SOUL_COEF = 1.0 // 영혼포식 물공 계수
 function undeadFloor (f) { if (f.undead && f.hp < 1) f.hp = 1 } // 시체 무적: 체력 1 하한
-function wardMul (D) { return (D.darkWard > 0) ? 0.5 : 1 } // 심연의 포옹(암흑기사): 받는 피해 50%↓
+function wardMul (D) { return (D.darkWard > 0) ? ABYSS_TAKEN : 1 } // 심연의 포옹(암흑기사): 받는 피해 30%↓
 function holyRamp (s, df, hits) { return df.maxhp * 0.007 * (s.repentStack || 0) * (hits || 1) } // 참회 램프 스코어 근사: 히트당 상대 최대체력×0.7%×현재스택
-function jongMul (st) { return (st || 0) * 0.5 } // 종말 계수: 스택당 0.5 (0스택=0딜, 만스택 5.0)
+function jongMul (st) { return (st || 0) * 0.8 } // 종말 계수: 스택당 0.8 (6스택 4.8 ~ 만스택 8.0)
 function gashHit (D) { if (D.cutStk > 0) { D.cutStk = Math.min(D.cutStk + 1, 5); D.cutDur = 2 } if (D.lacStk > 0) { D.lacStk = Math.min(D.lacStk + 1, 5); D.lacDur = 2 } } // 절개도적 타격 시: 이미 활성인 출혈 스택 각 +1(최대5)·지속2 갱신. 평타·타격스킬 공통
 function gashAtkBonus (A, D, dD) { if (!A.상처전문가) return 0; let b = 0; if (D.cutStk > 0 && D.cutStk < 5) b += dD.maxhp * 0.015 * 2; if (D.lacStk > 0 && D.lacStk < 5) b += dD.maxhp * (D.cutStk > 0 ? 0.025 : 0.015) * 2; return b } // 절개도적 AI: 활성 출혈<5면 평타로 +1 쌓는 가치를 평타 점수에 가산
 function d20adv (adv) { const a = 1 + Math.floor(rand() * 20); if (!adv) return a; return Math.max(a, 1 + Math.floor(rand() * 20)) } // 2d20 어드밴티지: adv면 2개 중 높은 값
@@ -764,14 +767,14 @@ const SKILLS = {
     (() => { const spec = { name: '단죄', tag: '공격', type: '마법.신성', coefFn: (ds, df, s) => 3.0 + (s.repentStack || 0) * 0.5, coef: '신성 마공×(3.0+참회스택×0.5) — 사용 시 참회 초기화', dmgType: '신성', cd: 5 }; return Object.assign({}, spec, { ready: (s) => s.cd[4] === 0, score: (s, f, ds, df, x) => { const st = s.repentStack || 0; return dmgVal(ds.마공 * (3.0 + st * 0.5) * (1 - df.마방) + df.maxhp * 0.007 * st, 1, 0, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.repentStack = 0; s.repentWin = 0; s.cd[4] = 5; s.note = '단죄' } }) })()
   ],
   암흑기사: [
-    // 암흑지대: 5턴 지대 — 매턴 상대에게 물공×1.0 암흑딜(마법.일반) + 자신도 물공×0.7 피해 + 자기 침식 +1/턴
+    // 암흑지대: 5턴 지대 — 매턴 상대에게 물공×1.0 암흑딜(마법.일반) + 자신도 물공×0.85 피해 + 자기 침식 +1/턴
     { name: '암흑지대', tag: '디버프', coef: `5턴 — 매턴 상대에게 물공×1.0 암흑딜 · 자신은 물공×${DARKZONE_SELF} 피해 + 침식+1/턴`, cd: 6, ready: (s, f, ds, df) => s.cd[0] === 0 && s.darkZone === 0, score: (s, f, ds, df, x) => dmgVal(ds.물공 * (ds.무기.물공배율 || 1) * (1 - df.마방) * 5, 5, 0, f.hp, x.foeTurn) + ds.물공 * (ds.무기.물공배율 || 1) * 1.2 * 5 * 0.4, exec: (s, f, ds, df) => { s.darkZone = 5; s.cd[0] = 6; s.note = '암흑지대' } },
-    // 심연의 포옹: 침식 +3 + 3턴 받는 피해 50%↓ (빌드업 중 생존기)
-    { name: '심연의포옹', tag: '버프', coef: '침식 +3 · 2턴 받는 피해 50%↓ (행동불능 중에도 사용)', buff: 2, cd: 4, stunnable: true, ready: (s, f, ds, df) => s.cd[1] === 0 && s.darkWard === 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.5, s, ds) + ds.물공 * (ds.무기.물공배율 || 1) * 1.2 * 3 * 0.4, exec: (s, f, ds, df) => { addErosion(s, ds, 3); s.darkWard = 2; s.cd[1] = 4; s.note = '심연의 포옹' } },
+    // 심연의 포옹: 침식 +3 + 2턴 받는 피해 30%↓ (빌드업 중 생존기)
+    { name: '심연의포옹', tag: '버프', coef: `침식 +3 · 2턴 받는 피해 ${Math.round((1 - ABYSS_TAKEN) * 100)}%↓ (행동불능 중에도 사용)`, buff: 2, cd: 4, stunnable: true, ready: (s, f, ds, df) => s.cd[1] === 0 && s.darkWard === 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.5 * (1 - ABYSS_TAKEN) / 0.5, s, ds) + ds.물공 * (ds.무기.물공배율 || 1) * 1.2 * 3 * 0.4, exec: (s, f, ds, df) => { addErosion(s, ds, 3); s.darkWard = 2; s.cd[1] = 4; s.note = '심연의 포옹' } },
     // 종말: 물공×(침식×1.2) 암흑딜(마법.일반) + 내 침식 전부 상대에게 전이 + 내 침식 정화. 0스택=0딜
-    (() => { const spec = { name: '종말', tag: '공격', type: '마법.일반', baseFn: (s, f, ds, df) => ds.물공 * (ds.무기.물공배율 || 1) * jongMul(s.erosion || 0) * jongShield(f), coef: `암흑딜 물공×(침식스택×${jongMul(1)}) + 침식 전이 + 내 침식 정화 · 마나실드 상대엔 ×${JONG_SHIELD}`, dmgType: '암흑', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0 && s.erosion > 0, score: (s, f, ds, df, x) => { const st = s.erosion || 0; const dmg = ds.물공 * (ds.무기.물공배율 || 1) * jongMul(st) * jongShield(f) * (f.shield > 0 ? 1 : 1 - df.마방); const transfer = df.maxhp * 0.05 * st * 0.5; return dmgVal(dmg, 1, transfer, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const st = s.erosion || 0; runDamage(spec, s, f, ds, df); if (st > 0) addErosion(f, df, st); s.erosion = 0; s.cd[2] = 3; s.note = '종말' } }) })(),
-    // 영혼포식: 물공×1.2 암흑딜 + 상대 침식 있으면 흡혈(상대 최대체력×1%×스택) + 회복 시 즉사 해제(살아있는시체 생존줄, 무적은 3턴 유지)
-    (() => { const spec = { name: '영혼포식', tag: '공격', type: '마법.일반', baseFn: (s, f, ds, df) => ds.물공 * (ds.무기.물공배율 || 1) * 1.2, coef: '암흑딜 물공×1.2 + 상대 침식스택당 최대체력1% 흡혈(회복 시 즉사 해제)', dmgType: '암흑', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => { const dmg = ds.물공 * (ds.무기.물공배율 || 1) * 1.2 * (1 - df.마방); const heal = (f.erosion > 0) ? df.maxhp * 0.01 * f.erosion : 0; const survive = (s.deathDoom && f.erosion > 0) ? ds.maxhp * 2 : 0; return dmgVal(dmg, 1, 0, f.hp, x.foeTurn) + heal * 0.6 + survive }, exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); if (f.erosion > 0) { const heal = Math.round(df.maxhp * 0.01 * f.erosion); s.hp = Math.min(emaxHp(s, ds), s.hp + hcut(s, healVar(heal))); s.deathDoom = false } s.cd[3] = 1; s.note = '영혼포식' } }) })(),
+    (() => { const spec = { name: '종말', tag: '공격', type: '마법.일반', baseFn: (s, f, ds, df) => ds.물공 * (ds.무기.물공배율 || 1) * jongMul(s.erosion || 0) * jongShield(f), coef: `침식 ${JONG_MIN}스택 이상 — 암흑딜 물공×(침식스택×${jongMul(1)}) + 침식 전이 + 내 침식 정화 · 마나실드 상대엔 ×${JONG_SHIELD}`, dmgType: '암흑', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[2] === 0 && s.erosion >= JONG_MIN, score: (s, f, ds, df, x) => { const st = s.erosion || 0; const dmg = ds.물공 * (ds.무기.물공배율 || 1) * jongMul(st) * jongShield(f) * (f.shield > 0 ? 1 : 1 - df.마방); const transfer = df.maxhp * 0.05 * st * 0.5; return dmgVal(dmg, 1, transfer, f.hp, x.foeTurn) }, exec: (s, f, ds, df) => { const st = s.erosion || 0; runDamage(spec, s, f, ds, df); if (st > 0) addErosion(f, df, st); s.erosion = 0; s.cd[2] = 3; s.note = '종말' } }) })(),
+    // 영혼포식: 물공×1.0 암흑딜 + 상대 침식 있으면 흡혈(상대 최대체력×1%×스택) + 회복 시 즉사 해제(살아있는시체 생존줄, 무적은 3턴 유지)
+    (() => { const spec = { name: '영혼포식', tag: '공격', type: '마법.일반', baseFn: (s, f, ds, df) => ds.물공 * (ds.무기.물공배율 || 1) * SOUL_COEF, coef: `암흑딜 물공×${SOUL_COEF.toFixed(1)} + 상대 침식스택당 최대체력1% 흡혈(회복 시 즉사 해제)`, dmgType: '암흑', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => { const dmg = ds.물공 * (ds.무기.물공배율 || 1) * SOUL_COEF * (1 - df.마방); const heal = (f.erosion > 0) ? df.maxhp * 0.01 * f.erosion : 0; const survive = (s.deathDoom && f.erosion > 0) ? ds.maxhp * 2 : 0; return dmgVal(dmg, 1, 0, f.hp, x.foeTurn) + heal * 0.6 + survive }, exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); if (f.erosion > 0) { const heal = Math.round(df.maxhp * 0.01 * f.erosion); s.hp = Math.min(emaxHp(s, ds), s.hp + hcut(s, healVar(heal))); s.deathDoom = false } s.cd[3] = 1; s.note = '영혼포식' } }) })(),
     // 살아있는 시체: 현재HP 1%로 + 침식 8 + 내 3턴간 무적(체력 1 하한)·기절/마비 면역·회복 ×2 — 그 안에 회복(영혼포식) 못하면 3턴 종료 시 사망. 종말 준비 + 마무리각일 때만
     { name: '살아있는시체', tag: '버프', coef: `현재 체력 1%로 + 침식 ${UNDEAD_EROSION} + 내 ${UNDEAD_TURNS}턴간 무적(체력 1 미만으로 안 떨어짐)·기절 면역 · 회복량 ×${UNDEAD_HEAL} · 그 안에 회복 못하면 사망`, cd: 14, ready: (s, f, ds, df) => s.cd[4] === 0 && s.cd[2] === 0 && !s.undead && f.hp < df.maxhp * 0.6, score: (s, f, ds, df, x) => { const jong = ds.물공 * (ds.무기.물공배율 || 1) * jongMul(UNDEAD_EROSION) * jongShield(f) * (f.shield > 0 ? 1 : 1 - df.마방); return (s.cd[2] === 0 && f.hp + f.shield <= jong * 1.1) ? dmgVal(jong, 1, df.maxhp * 0.05 * UNDEAD_EROSION, f.hp, x.foeTurn) : 0 }, exec: (s, f, ds, df) => { s.erosion = UNDEAD_EROSION; s.hp = Math.max(1, Math.round(ds.maxhp * 0.01)); s.undead = true; s.deathMark = UNDEAD_TURNS; s.deathDoom = true; s.cd[4] = 14; s.note = '살아있는 시체!' } }
   ]
@@ -1117,7 +1120,7 @@ function mkFighter (d, name, ai) {
     magReflect: 0,
     erosion: 0, // 침식(암흑기사): 스택당 최대체력 -5%(최대10=-50%). 자기 빌드업 → 종말로 상대에 전이
     darkZone: 0, // 암흑지대 지속(턴): 매턴 양쪽 물공×1.0 + 자기 침식+1
-    darkWard: 0, // 심연의 포옹 지속(턴): 받는 피해 50%↓
+    darkWard: 0, // 심연의 포옹 지속(턴): 받는 피해 30%↓
     undead: false, // 살아있는 시체 무적 창(체력 1 하한)
     deathMark: 0, // 살아있는 시체: 남은 내 턴(0이 된 다음 내 턴 시작에 창 종료)
     deathDoom: false, // 살아있는 시체: 창 종료 시 사망 예정(영혼포식 회복 시 해제)
@@ -1216,7 +1219,7 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.cutStk > 0 || self.lacStk > 0) { const lacRate = self.cutStk > 0 ? 0.025 : 0.015; let bd = Math.round(ds.maxhp * (self.cutStk * 0.015 + self.lacStk * lacRate)); if (self.sanctuary > 0 && bd > 0) bd = Math.max(Math.round(bd * SANCTUARY_TAKEN), 1); if (bd > 0) self.hp -= bd; if (self.cutDur > 0) { self.cutDur--; if (self.cutDur === 0) { self.cutStk = Math.max(self.cutStk - 1, 0); if (self.cutStk > 0) self.cutDur = 2 } } if (self.lacDur > 0) { self.lacDur--; if (self.lacDur === 0) { self.lacStk = Math.max(self.lacStk - 1, 0); if (self.lacStk > 0) self.lacDur = 2 } } self._tick.push({ type: 'gash', dmg: bd, cut: self.cutStk, lac: self.lacStk }) } // 절개/열상 출혈 DoT(방어·실드 무시, 성역 85%↓). 지속 만료 시 1스택씩 점감(재부착 지속2)
   if (self.healCut > 0) self.healCut-- // 과다출혈 회복감소 지속
   if (self.darkWard > 0) self.darkWard-- // 심연의 포옹(받는뎀↓) 지속
-  if (self.darkZone > 0) { self.darkZone--; const base = Math.round(ds.물공 * (ds.무기.물공배율 || 1) * 1.0); let hd = 0; if (foe.hp > 0) hd = absorb(foe, spellDmg(base, foe, df, self)); if (hd > 0) foe.hp -= hd; const sd = Math.max(Math.round(base * DARKZONE_SELF), 1); self.hp -= sd; addErosion(self, ds, 1); self._tick.push({ type: 'darkzone', dmg: hd, selfDmg: sd, zoneLeft: self.darkZone }) } // 암흑지대: 매턴 상대(마법.일반, 마나실드 흡수) 물공×1.0 + 자신(직격) 물공×0.7 + 자기 침식+1
+  if (self.darkZone > 0) { self.darkZone--; const base = Math.round(ds.물공 * (ds.무기.물공배율 || 1) * 1.0); let hd = 0; if (foe.hp > 0) hd = absorb(foe, spellDmg(base, foe, df, self)); if (hd > 0) foe.hp -= hd; const sd = Math.max(Math.round(base * DARKZONE_SELF), 1); self.hp -= sd; addErosion(self, ds, 1); self._tick.push({ type: 'darkzone', dmg: hd, selfDmg: sd, zoneLeft: self.darkZone }) } // 암흑지대: 매턴 상대(마법.일반, 마나실드 흡수) 물공×1.0 + 자신(직격) 물공×0.85 + 자기 침식+1
   if (self.undead) { if (self.deathMark === 0) { self.undead = false; if (self.deathDoom) { self.deathDoom = false; self.hp = 0; self._tick.push({ type: 'deathmark' }) } } else { self.deathMark--; undeadFloor(self) } } // 살아있는 시체: 내 턴 시작마다 1 소모 + 무적(출혈·암흑지대 틱 포함). 4턴 다 쓰면 창 종료 → 회복 못했으면 사망
   if (self.erosion > 0 && self.hp > emaxHp(self, ds)) self.hp = emaxHp(self, ds) // 침식 상한 클램프(안티힐: 회복해도 상한 초과 불가)
   if (self.trap > 0) { self.trap--; if (self.trap === 0) { self.gauge += ds.턴 * 0.8; applyCC(self, 'slow', 1); self.slowSec = Math.max(self.slowSec, Math.round(ds.턴 * 0.2 * 10) / 10); self.bleed = 3; self.bleedDmg = self.trapBleed || 0; self._tick.push({ type: 'trapspring', dmg: self.bleedDmg }) } } // 사냥꾼덫 발동: 게이지 밀림 + 1턴 둔화 + 출혈 3턴

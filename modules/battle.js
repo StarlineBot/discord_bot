@@ -1069,7 +1069,9 @@ function decideDefend (self, foe, ds, df) {
   const factor = self.ai === '공격적' ? 0.6 : self.ai === '방어적' ? 1.15 : 0.85
   if (est * factor >= self.hp) return true // 치명 방어(기존)
   // 패링 캐릭(너클): 다음 상대 턴이 내 다음 턴보다 먼저 오면(=이번 턴 넘기면 맞음) 반반 확률로 패링(흘리고 즉시 반격). 100%면 TAS라 50%
-  if (ds.무기.방어 === '패링' && foe.stun === 0 && foe.cast === 0) { const incoming = foe.gauge < self.gauge; if (rand() < (incoming ? 0.4 : 0.2)) return true } // 패링: 맞을 타이밍(40%)엔 자주 / 아닐 때(20%)도 헛패링 → 취약3 리스크. 완벽하지 않게 + 스스로 리스크 감수
+  if (ds.무기.방어 === '패링' && foe.stun === 0 && foe.cast === 0) { const incoming = foe.gauge < self.gauge; if (rand() < (incoming ? 0.4 : 0.2)) return true }
+  // 패링 vs 시전: 시전은 상대 턴마다 1씩 줄고 0이 되는 턴에 착탄. 내 다음 턴 전에 상대가 움직일 횟수 안에 착탄하면 '맞을 타이밍'(같은 40%). 착탄 전이면 패링 안 함(헛패링 방지)
+  if (ds.무기.방어 === '패링' && foe.stun === 0 && foe.cast > 0) { const before = foe.gauge < self.gauge ? 1 + Math.floor((self.gauge - foe.gauge) / df.턴) : 0; if (foe.cast <= before && rand() < 0.4) return true } // 패링: 맞을 타이밍(40%)엔 자주 / 아닐 때(20%)도 헛패링 → 취약3 리스크. 완벽하지 않게 + 스스로 리스크 감수
   return false
 }
 // 버프(턴 소모 투자) AI 게이트: 공격적=항상 / 판단형=여유 / 방어적=아주 안전할때만

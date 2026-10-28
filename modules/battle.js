@@ -805,24 +805,24 @@ const SKILLS = {
 const physOf = (v) => 10 + v + step(v, 3) + Math.floor(v / 20) * 8 // derive 물공식(스탯 하나로)
 const DRUID_FORMS = {
   인간: { emoji: '🧝' },
-  전투곰: { emoji: '🐻', phys: '힘', atk: 1.7, hp: 2, dodge: 1.5, pdef: 1.5, mdef: 1.1, noWBlock: true, desc: '공격력×1.7 · 최대체력×2 · 회피×1.5 · 물방×1.5 · 마방×1.1 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5) · 패시브 광포한 재생력' },
+  전투곰: { emoji: '🐻', phys: '힘', atk: 1.7, hp: 2.2, acc: 1.3, dodge: 1.5, pdef: 1.5, mdef: 1.1, noWBlock: true, desc: '공격력×1.7 · 최대체력×2.2 · 명중×1.3 · 회피×1.5 · 물방×1.5 · 마방×1.1 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5) · 패시브 광포한 재생력' },
   표범: { emoji: '🐆', phys: '민첩', atk: 1.5, dodge: 2.0, crit: 1.2, critMul: 1.5, turn: 0.8, desc: '공격력×1.5(민첩) · 회피×2 · 치명타 확률×1.2 · 치명타 배율×1.5 · 턴×0.8 · 기력' },
   치타: { emoji: '🐅', phys: '민첩', atk: 0.8, dodge: 2.5, hp: 0.8, turn: 0.8, desc: '공격력×0.8(민첩) · 회피×2.5 · 최대체력×0.8 · 턴×0.8 · 기력' },
   마나부엉이: { emoji: '🦉', hp: 0.6, shield: true, magicAuto: true, desc: '최대체력×0.6 · 마나실드 · 평타=마법(마공=지능)' }
 }
 const DRUID_ORDER = ['전투곰', '표범', '치타', '마나부엉이', '인간']
 const RES_LABEL = { druRage: '분노', druEnergy: '기력' }
-const BEAR_PASSIVE = { name: '광포한 재생력', desc: '소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력 30% 넘는 피해를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복 · 쿨5)' }
+const BEAR_PASSIVE = { name: '광포한 재생력', desc: '소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력 25% 넘는 피해를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복 · 쿨5)' }
 const RAGE_MAX = 100; const BEAR_RAGE_SHIFT = 25; const BEAR_RAGE_HIT = 15; const BEAR_RAGE_CRIT = 30; const BEAR_RAGE_SKILL = 5; const RAGE_DECAY = 5 // 분노: 곰 상태에서 내 턴마다 5 자연감소 · 공격 스킬 적중 시 +5
 const ENERGY_MAX = 100; const ENERGY_REGEN = 10 // 기력: 표범·치타 공용 풀, 100으로 시작 · 내 턴마다 10 회복(형상 무관)
 const DRU_REGEN = 0.03; const CAT_REGEN = 0.08 // 재생(인간·3턴, 형상 유지) / 자연의 재생력(치타·5턴) — 턴당 현재 형상 최대체력 %
-// 광포한 재생력(전투곰 패시브): 소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력의 30% 넘는 피해(또는 죽을 피해)를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복)
-const BEAR_RAGE_HEAL = 0.01 / 5; const BEAR_GUARD_CUT = 0.30; const BEAR_GUARD_HEAL = 0.10; const BEAR_GUARD_CD = 5 // 10% 회복: 내 턴 기준 쿨5(형상 무관하게 흐름)
+// 광포한 재생력(전투곰 패시브): 소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력의 25% 넘는 피해(또는 죽을 피해)를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복)
+const BEAR_RAGE_HEAL = 0.01 / 5; const BEAR_GUARD_CUT = 0.25; const BEAR_GUARD_HEAL = 0.10; const BEAR_GUARD_CD = 5 // 10% 회복: 내 턴 기준 쿨5(형상 무관하게 흐름)
 const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.9 // 웅크리기(치타): 회피×1.2 · 받는 피해×0.8
 const STAR_DOT = 0.05; const METEOR_DOT = 0.07 // 별빛쇄도·별똥별: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수)
 function initDruid (f, d) {
   f.form = '인간'
-  f.druBase = { 물공: d.물공, 마공: d.마공, maxhp: d.maxhp, 물회: d.물회, 물방: d.물방, 마방: d.마방, 크리: d.크리, 무기막기: d.무기막기, 무기: d.무기, 턴: d.턴 }
+  f.druBase = { 물공: d.물공, 마공: d.마공, maxhp: d.maxhp, 물회: d.물회, 물방: d.물방, 마방: d.마방, 크리: d.크리, 무기막기: d.무기막기, 무기: d.무기, 턴: d.턴, 명중: d.명중 }
   f.formCd = {}; f.formLock = {}
   for (const k of DRUID_ORDER) { f.formCd[k] = k === '인간' ? f.cd : DRUID_SKILLS[k].map(() => 0); f.formLock[k] = {} }
   f.ccLock = f.formLock.인간
@@ -838,6 +838,7 @@ function druidStats (f, ds, form = f.form) {
   ds.물회 = B.물회 * (F.dodge || 1) * (form === '치타' && f.crouch > 0 ? CROUCH_DODGE : 1)
   ds.물방 = Math.min(B.물방 * (F.pdef || 1), 0.80); ds.마방 = Math.min(B.마방 * (F.mdef || 1), 0.85)
   ds.크리 = Math.min(B.크리 * (F.crit || 1), 0.9)
+  ds.명중 = B.명중 * (F.acc || 1)
   ds.무기 = F.critMul ? Object.assign({}, B.무기, { 크리배율: B.무기.크리배율 * F.critMul }) : B.무기
   ds.무기막기 = F.noWBlock ? 0 : B.무기막기
   ds.마나실드 = F.shield ? f.owlCap : 0
@@ -887,7 +888,7 @@ const skillsOf = (f) => (f && f.form) ? DRUID_SKILLS[f.form] : (SKILLS[f.name] |
 const bearSkillRage = (s, r) => { if (r.landed) s.druRage = Math.min(RAGE_MAX, s.druRage + BEAR_RAGE_SKILL) } // 곰 공격 스킬 적중 → 분노 +5
 // 자원 소모 스킬 래퍼: ready에 자원 게이트, exec에서 차감. res='druRage'|'druEnergy'
 function druCost (res, cost, sk) { return Object.assign({}, sk, { res, cost, ready: (s, f, ds, df, x) => s[res] >= cost && sk.ready(s, f, ds, df, x), exec: (s, f, ds, df) => { s[res] -= cost; if (res === 'druRage' && s.healBlock === 0) s.hp = Math.min(ds.maxhp, s.hp + hcut(s, Math.round(ds.maxhp * cost * BEAR_RAGE_HEAL))); sk.exec(s, f, ds, df) } }) } // 분노 소모 → 광포한 재생력(5당 1%)
-// 광포한 재생력(전투곰): 한 번에 최대체력 30% 넘는 피해 → 즉시 최대체력 10% 회복 / 죽을 피해 → 맞기 전에 먼저 10% 회복(상한 적용 후 피해 → 버티면 생존). 쿨5(내 턴). 기록은 holdRec에서
+// 광포한 재생력(전투곰): 한 번에 최대체력 25% 넘는 피해 → 즉시 최대체력 10% 회복 / 죽을 피해 → 맞기 전에 먼저 10% 회복(상한 적용 후 피해 → 버티면 생존). 쿨5(내 턴). 기록은 holdRec에서
 function bearGuard (foe, df, dealt) {
   if (foe.form !== '전투곰' || foe.healBlock > 0 || dealt <= 0 || foe.bearGuardCd > 0) return
   const heal = hcut(foe, Math.round(df.maxhp * BEAR_GUARD_HEAL)); const b = foe.hp

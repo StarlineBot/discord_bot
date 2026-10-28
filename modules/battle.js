@@ -827,7 +827,7 @@ function initDruid (f, d) {
   for (const k of DRUID_ORDER) { f.formCd[k] = k === '인간' ? f.cd : DRUID_SKILLS[k].map(() => 0); f.formLock[k] = {} }
   f.ccLock = f.formLock.인간
   f.druRage = 0; f.druEnergy = ENERGY_MAX; f.owlCap = Math.round(d.base.지능 * 14 + d.base.체력 * 7); f.owlShield = f.owlCap // 마나부엉이 실드: 마법무기 공식(지능14+체력7). 해제 시 남은 실드 보관 → 재변신 시 복원(재충전 없음)
-  f.druRegen = 0; f.catRegen = 0; f.bearGuardCd = 0; f.crouch = 0; f.stealth = 0; f.formChoice = null
+  f.druRegen = 0; f.catRegen = 0; f.bearGuardCd = 0; f.cp = 0; f.crouch = 0; f.stealth = 0; f.formChoice = null
   druidStats(f, d)
 }
 // 형상 능력치를 ds에 반영(체력 제외). form 지정 시 그 형상 기준(AI 추정용)
@@ -848,7 +848,7 @@ function druidShift (s, f, ds, df, to) {
   const from = s.form
   if (from === '전투곰') s.druRage = 0 // 곰 해제: 분노 소멸
   if (from === '치타') { s.catRegen = 0; s.crouch = 0 } // 치타 해제: 자연의 재생력·웅크리기 소멸
-  if (from === '표범') s.stealth = 0
+  if (from === '표범') { s.stealth = 0; s.cp = 0 } // 표범 해제: 은신·콤보 소멸
   if (from === '마나부엉이') { s.owlShield = s.shield; s.shield = 0 }
   const ratio = Math.max(s.hp, 0) / ds.maxhp
   s.form = to; s.cd = s.formCd[to]; s.ccLock = s.formLock[to]
@@ -910,6 +910,15 @@ function owlDot (ci, name, key, pct, cd) { // 별빛쇄도·별똥별: 5턴 지�
   const turns = 5
   return { name, tag: '디버프', cd, coef: `${turns}턴간 상대 턴마다 최대체력 ${Math.round(pct * 100)}% 피해(마방 경감·실드 흡수 · 효과가 끝나야 쿨 진행)`, ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => df.maxhp * pct * (turns - (f[key] || 0)) * (1 - (f.shield > 0 ? 0 : df.마방)), exec: (s, f, ds, df) => { f[key] = turns; s.cd[ci] = cd; s.ccLock = s.ccLock || {}; s.ccLock[ci] = [key]; s.note = name } }
 }
+const CP_MAX = 5
+const cpAdd = (s, n) => { s.cp = Math.min(CP_MAX, (s.cp || 0) + n) }
+function cpOnUse (n, sk) { return Object.assign({}, sk, { exec: (s, f, ds, df) => { sk.exec(s, f, ds, df); cpAdd(s, n) } }) } // 사용 시 콤보 +n(은신)
+// 콤보 피니셔: 계수 = 기본 + (최대−기본)×콤보/5 (+ 상대 체력 40%↓면 lowHpAdd). 사용하면 콤보 초기화(빗나가도)
+function cpFinisher (ci, base) {
+  const coefFn = (ds, df, s, f) => base.mult + (base.cpMax - base.mult) * Math.min(s.cp || 0, CP_MAX) / CP_MAX + (base.lowHpAdd && f.hp <= df.maxhp * 0.40 ? base.lowHpAdd : 0)
+  const spec = Object.assign({}, base, { coefFn, coefLabel: `타격×${base.mult}~${base.cpMax}(콤보 0~${CP_MAX}, 소모)${base.lowHpAdd ? ` · 상대 체력 40%↓ +${base.lowHpAdd}` : ''}` })
+  return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const cp = s.cp || 0; runDamage(spec, s, f, ds, df); s.cp = 0; s.cd[ci] = spec.cd; s.note = `${spec.name}(콤보 ${cp})` } })
+}
 const stunSc = (s, f, ds, df, x) => f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') * stunTiming(s, f) : 0
 const DRUID_SKILLS = {
   인간: [
@@ -928,11 +937,13 @@ const DRUID_SKILLS = {
     FORM_SWAP
   ],
   표범: [
-    druCost('druEnergy', 40, dmgSkill(0, { name: '찢어발기기', tag: '공격', type: '물리.일반', mult: 2.0, cd: 1 })),
-    druCost('druEnergy', 40, dmgSkill(1, { name: '흉포한 이빨', tag: '공격', type: '물리.일반', mult: 1.5, bonus: { when: 'foeHp40', mult: 2.5 }, cd: 1 })),
-    // 은신: 상대 1턴 기절 + 다음 턴 암습의 일격 강화(×3.0)
-    druCost('druEnergy', 20, mkSkill(2, { name: '은신', tag: '제어', cc: { stun: 1 }, cd: 3, coef: '상대 1턴 기절 + 다음 턴 암습의 일격 물공×3.0', selfBuff: { stealth: 2 }, note: '은신 — 기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => stunSc(s, f, ds, df, x) + x.est * 1.0 })), // 점수: 기절 + 강화 일격(3.0)이 찢어발기기(2.0)보다 나은 몫(평타 1회분)
-    druCost('druEnergy', 20, (() => { const spec = { name: '암습의 일격', tag: '공격', type: '물리.일반', mult: 0.5, bonus: { when: 'selfStealth', mult: 3.0 }, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const st = s.stealth > 0; runDamage(spec, s, f, ds, df); s.stealth = 0; s.cd[3] = 1; s.note = st ? '암습의 일격·은신 연계' : '암습의 일격' } }) })()),
+    // 콤보 포인트(표범 전용, 최대 5): 평타·은신·암습의 일격 +1, 물기 +2(피해를 입혔을 때 — 은신은 사용 시). 찢어발기기·흉포한 이빨이 소모(사용 시 초기화)하며 포인트당 계수↑
+    druCost('druEnergy', 30, cpFinisher(0, { name: '찢어발기기', tag: '공격', type: '물리.일반', mult: 1.0, cpMax: 2.5, cd: 1 })),
+    druCost('druEnergy', 40, cpFinisher(1, { name: '흉포한 이빨', tag: '공격', type: '물리.일반', mult: 1.5, cpMax: 3.0, lowHpAdd: 1.0, cd: 1 })),
+    // 은신: 상대 1턴 기절 + 다음 턴 암습의 일격 강화(×3.0) + 콤보 1
+    druCost('druEnergy', 20, cpOnUse(1, mkSkill(2, { name: '은신', tag: '제어', cc: { stun: 1 }, cd: 3, coef: '상대 1턴 기절 + 다음 턴 암습의 일격 물공×3.0', selfBuff: { stealth: 2 }, note: '은신 — 기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => stunSc(s, f, ds, df, x) + x.est * 1.0 }))), // 점수: 기절 + 강화 일격(3.0)이 찢어발기기(2.0)보다 나은 몫(평타 1회분)
+    druCost('druEnergy', 20, (() => { const spec = { name: '암습의 일격', tag: '공격', type: '물리.일반', mult: 0.5, bonus: { when: 'selfStealth', mult: 3.0 }, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const st = s.stealth > 0; const r = runDamage(spec, s, f, ds, df); if (r.landed) cpAdd(s, 1); s.stealth = 0; s.cd[3] = 1; s.note = st ? '암습의 일격·은신 연계' : '암습의 일격' } }) })()),
+    druCost('druEnergy', 5, (() => { const spec = { name: '물기', tag: '공격', type: '물리.일반', mult: 1.3, cd: 1 }; return Object.assign({}, spec, { coef: '타격×1.3 + 적중 시 콤보 2', ready: (s) => s.cd[4] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x) + (s.cp < 5 ? x.est * 0.3 * Math.min(2, 5 - s.cp) : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) cpAdd(s, 2); s.cd[4] = 1; s.note = `물기(콤보 ${s.cp})` } }) })()), // 점수: 딜 + 콤보 적립 가치(포인트당 피니셔 +0.3배)
     FORM_SWAP
   ],
   치타: [
@@ -1502,7 +1513,7 @@ function ccLockAfter (self, foe, ccB, cdB) { // CC가 새로 걸리거나 늘어
 function ccLocked (self, foe, i) { const fl = self.ccLock && self.ccLock[i]; if (!fl) return false; if (fl.some(k => (foe[k] || 0) > 0)) return true; delete self.ccLock[i]; return false }
 function execSkill (self, foe, ds, df, sk) { if (sk.selfEvent) return sk.selfEvent(self, foe, ds, df); self.tukyungHits = 0; const ccB = ccSnap(foe); const cdB = self.cd.slice(); const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); ccLockAfter(self, foe, ccB, cdB); return { parried: didParry, tukyung: self.tukyungHits, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
 // 평타 실행 + 드루이드 전투곰 분노 획득(적중 15 · 치명타 30)
-function execAttack (self, foe, ds, df) { const ev = execAttackCore(self, foe, ds, df); if (self.form === '전투곰' && (ev.dmg > 0 || ev.shieldAbsorb > 0)) self.druRage = Math.min(RAGE_MAX, self.druRage + (ev.crit ? BEAR_RAGE_CRIT : BEAR_RAGE_HIT)); return ev }
+function execAttack (self, foe, ds, df) { const ev = execAttackCore(self, foe, ds, df); const hit = ev.dmg > 0 || ev.shieldAbsorb > 0; if (self.form === '전투곰' && hit) self.druRage = Math.min(RAGE_MAX, self.druRage + (ev.crit ? BEAR_RAGE_CRIT : BEAR_RAGE_HIT)); if (self.form === '표범' && hit) cpAdd(self, 1); return ev } // 표범 평타 적중 → 콤보 +1
 function execAttackCore (self, foe, ds, df) { self.tukyungHits = 0; if (self.육합권 && self.comboStep === 0 && foe.hp > 0) { let pr = false; for (let k = 0; k < 2; k++) { self.jabStk = (self.jabStk || 0) + 1; if (self.jabStk >= MUDO_MINJAB && rand() < MUDO_PROC) { pr = true; break } } if (pr) { self.jabStk = 0; return execMudoYukhap(self, foe, ds, df) } } const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) gashHit(foe); if (foe.vuln > 0) foe.vuln--; dmg = fistAbsorb(self, foe, dmg, ds.무기.실드효율); foe.hp -= dmg; if (self.autoSpell > 0 && foe.hp > 0 && rand() < 0.90) launchBolt(self, foe, ds, df, ['파이어볼트', '라이트닝볼트', '콜드볼트'][Math.floor(rand() * 3)], false); if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); return { parried: didParry, tukyung: self.tukyungHits, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function parryHeal (foe, df) { if (foe.defHealCd === 0) { foe.hp = Math.min(df.maxhp, foe.hp + healVar(df.maxhp * 0.05 + df.base.체력 / 2)); foe.defHealCd = 2 } } // 패링 성공(피격 흘림) 시에만 회복 — 헛패링·비패링방어는 회복 없음
@@ -1674,7 +1685,7 @@ function playerOptions (state) {
   const casting = A.cast > 0 && !A.castUninterruptible // 끊기 가능 시전 중: 진행/취소만 노출(끊기불가는 자동진행)
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
-  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_SPECS[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1, cost: skdef.cost ? `${RES_LABEL[skdef.res]}${skdef.cost}` : null } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
+  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_SPECS[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1, swap: skdef.choose === 'form', cost: skdef.cost ? `${RES_LABEL[skdef.res]}${skdef.cost}` : null } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
   return { canDefend: !stunned && A.taunt === 0 && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: A.form === '전투곰' ? [BEAR_PASSIVE] : (PASSIVES[meName] || []), stunned, taunted: A.taunt > 0, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
 }
 
@@ -1920,6 +1931,7 @@ function statusGroups (f) {
     buf.push(`${DRUID_FORMS[f.form].emoji}${f.form}`)
     if (f.form === '전투곰') buf.push(`😤분노 ${f.druRage}/${RAGE_MAX}`, f.bearGuardCd > 0 ? `🐻광포한재생력 ${f.bearGuardCd}턴 후` : '🐻광포한재생력 준비')
     if (f.form === '표범' || f.form === '치타') buf.push(`⚡기력 ${f.druEnergy}/${ENERGY_MAX}`)
+    if (f.form === '표범') buf.push(`🐾콤보 ${f.cp}/${CP_MAX}`)
     if (f.druRegen > 0) buf.push(`🌿재생${f.druRegen}`)
     if (f.catRegen > 0) buf.push(`🐅자연의재생력${f.catRegen}`)
     if (f.crouch > 0) buf.push(`🐾웅크리기${f.crouch}`)
@@ -2013,7 +2025,7 @@ function buildBattleRow (state) {
   ]
   const skillBtns = []
   // 모핑 콤보 색상: 육합권=파랑(기본) → 연환전신장=녹색 → 맹룡과강=빨강(점차 강해짐). 콤보 진행(lvl≥1) 시 🔥
-  o.skills.forEach((sk, i) => { const lvl = sk.comboLvl; const style = lvl === 2 ? ButtonStyle.Danger : lvl === 1 ? ButtonStyle.Success : ButtonStyle.Primary; const pre = (lvl >= 1) ? '🔥' : ''; skillBtns.push(new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(pre + skLbl(sk)).setStyle(style).setDisabled(!sk.usable)) })
+  o.skills.forEach((sk, i) => { const lvl = sk.comboLvl; const style = lvl === 2 ? ButtonStyle.Danger : lvl === 1 ? ButtonStyle.Success : ButtonStyle.Primary; const pre = (lvl >= 1) ? '🔥' : ''; const btn = new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(pre + skLbl(sk)).setStyle(style).setDisabled(!sk.usable); if (sk.swap) actionBtns.push(btn); else skillBtns.push(btn) }) // 형상변환(드루이드)은 1줄 행동 버튼 옆 — 스킬 줄 5칸 확보
   const passiveBtns = o.passives.map((p, i) => new ButtonBuilder().setCustomId(cid('passive' + i)).setLabel(`🔒 ${p.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true))
   const rows = [new ActionRowBuilder().addComponents(actionBtns)] // 1줄: 공격·방어·턴넘기기·기권
   if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5))) // 2줄: 액티브 스킬

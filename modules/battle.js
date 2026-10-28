@@ -22,7 +22,8 @@ const CHARS = {
   무도가: { emoji: '👊', 힘: 55, 지능: 10, 체력: 50, 민첩: 75, 솜씨: 75, 행운: 40, 무기: '너클', 육합권: true, 투경: true, id: '콤보 무투가' },
   프리스트: { emoji: '✝️', 힘: 55, 지능: 30, 체력: 80, 민첩: 40, 솜씨: 90, 행운: 10, 무기: '양둔', 신성의무: true, id: '신성 탱커' }, // 높은체력·솜씨로 버티는 신성 탱커. 신성의무=물리평타에 신성 스플래시(참회 시너지). 스킬 힐·축복·성역·가호 + 신성한의무 패시브(합 5)
   참회사제: { emoji: '📿', 힘: 10, 지능: 85, 체력: 60, 민첩: 35, 솜씨: 45, 행운: 25, 무기: '스태프', id: '참회 신성 마딜러' }, // 신성 캐스트 램프 딜러. 모든 신성딜이 참회 스택(상대 최대체력% 확정관통)을 쌓고, 쌓일수록 강해짐 → 단죄로 소모·폭발. 스태프(castMod -2)라 시전 base=실효+2. 5액티브(패시브 없음)
-  암흑기사: { emoji: '⚰️', 힘: 85, 지능: 10, 체력: 55, 민첩: 45, 솜씨: 55, 행운: 30, 무기: '양검', id: '침식 암흑기사' } // 자기침식(최대체력↓) 도박형 대검. 암흑딜=물공 계수 마법.일반(마방/실드 판정). 침식 쌓아 종말로 전이+폭발, 영혼포식으로 흡혈. 5액티브(패시브 없음)
+  암흑기사: { emoji: '⚰️', 힘: 85, 지능: 10, 체력: 55, 민첩: 45, 솜씨: 55, 행운: 30, 무기: '양검', id: '침식 암흑기사' }, // 자기침식(최대체력↓) 도박형 대검. 암흑딜=물공 계수 마법.일반(마방/실드 판정). 침식 쌓아 종말로 전이+폭발, 영혼포식으로 흡혈. 5액티브(패시브 없음)
+  드루이드: { emoji: '🌿', 힘: 35, 지능: 65, 체력: 55, 민첩: 75, 솜씨: 65, 행운: 10, 무기: '장창', 드루이드: true, id: '형상변환 드루이드' } // 인간형(재생+형상 4종) → 전투곰(탱·분노)/표범(딜·기력)/치타(회피·기력)/마나부엉이(마법·실드). 형상마다 스킬 5개가 통째로 바뀜
 }
 // 무기 정의: 캐릭은 CHARS.무기로 참조, derive()가 속성 병합.
 // 계열(물리/마법)=스킬풀·조직 / 평타(물리/마법/혼합/융합)=엔진 공격분기 / range=근접·원거리(태그)
@@ -44,7 +45,8 @@ const WEAPONS = {
   마도서: { 계열: '마법', 평타: '혼합', range: '근접', hands: 2, tempoStat: '힘지능', 물공배율: 1.1, 크리배율: 1.8, 무기막기: 0.30, 회피배율: 0.8, 턴배율: 0.95, 관통: 0.3, 방어: '마나실드' }, // 세이지: 물리관통30%
   검오브: { 계열: '마법', 평타: '혼합', range: '근접', hands: 1, tempoStat: '힘지능', 물공배율: 0.87, 마타: 0.87, 크리배율: 1.5, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 1.08, 방어: '마나실드' }, // 스블: 물리+마법 혼합
   마도검: { 계열: '마법', 평타: '마법', range: '근접', hands: 1, tempoStat: '지능', 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 0.95, 마방보너스: 0.15, 방어: '마나실드' },
-  주사위: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0, 회피배율: 0.8, 턴배율: 1.0, 주사위: true, 방어: '주사위' } // 갬블러 d20
+  주사위: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.0, 크리배율: 1.2, 무기막기: 0, 회피배율: 0.8, 턴배율: 1.0, 주사위: true, 방어: '주사위' }, // 갬블러 d20
+  장창: { 계열: '물리', 평타: '물리', range: '근접', hands: 2, 물공배율: 1.5, 크리배율: 1.8, 무기막기: 0.15, 회피배율: 1.0, 턴배율: 1.1, 방어: '무기막기' } // 드루이드: 형상변환 시 능력치가 형상별로 바뀜(평타 물리/마법도 형상이 결정)
 }
 // 무기 표시 라벨(이모지 + 이름)
 const WEAPON_LABEL = {
@@ -61,7 +63,8 @@ const WEAPON_LABEL = {
   마도서: '📖마도서',
   검오브: '⚡검/오브',
   마도검: '🗡️✨마도검',
-  주사위: '🎲주사위'
+  주사위: '🎲주사위',
+  장창: '🔱장창'
 }
 const wpnLabel = (key) => WEAPON_LABEL[key] || key || ''
 const NAMES = Object.keys(CHARS).filter(n => !CHARS[n].hidden) // hidden 캐릭은 로스터(선택·전투·시뮬)에서 제외 — 코드는 유지
@@ -221,7 +224,7 @@ const PASSIVE_FLAGS = { '완벽방어!': '완벽방어', 행운의여신: '행�
 // 패시브 활성 판정: 플래그 보유 && 잠기지 않음(디스펠). passiveLock=0이면 기존 동작과 동일.
 function psv (f, flag) { return f && f[flag] && !f.passiveLock }
 // 디스펠 대상 버프 필드(실드·시전은 자원/채널이라 제외). clearBuffs=즉시 제거, 개수 반환.
-const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100', 'blessTurns', 'aegisTurns', 'sanctuary', 'frenzy', 'haste', 'repentStack', 'castCut']
+const BUFF_FIELDS = ['rage', 'powBuff', 'accBuff', 'blockUp', 'dodgeUp', 'magReflect', 'luckBuff', 'diceAdv', 'chainBolt', 'autoSpell', 'healRegen', 'instCast', 'graze100', 'blessTurns', 'aegisTurns', 'sanctuary', 'frenzy', 'haste', 'repentStack', 'castCut', 'druRegen', 'bearRegen', 'catRegen', 'crouch']
 function clearBuffs (f, df) { let n = 0; const hadStat = f.blessTurns > 0 || f.aegisTurns > 0; for (const k of BUFF_FIELDS) { if (f[k] > 0) { f[k] = 0; n++ } } f.powMul = 1; f.frenzyWin = 0; f.repentWin = 0; if (hadStat) { f.aegisMul = 1; if (df) refreshDerived(f, df) } return n } // 축복·가호(스탯버프) 제거 시 파생스탯 원복(refreshDerived), 성역·광란가속·참회(윈도우 포함)도 즉시 해제
 // 패링(너클): 패링 태세 중 나에게 닿는 모든 공격을 흘린다(×0.10 + 첫 피격에 반격턴·회복). 물리 타격은 attack()의 defending 경로가 처리하고,
 // 비물리(마법·신성·역장·충격·확정·주사위)는 각 피해 함수가 parryMul로 같은 규칙을 적용. 지속 피해(출혈·성역·암흑지대 틱)는 공격이 아니라 제외(TICKING)
@@ -234,7 +237,7 @@ function parryMul (D, dD) {
 // 시전 착탄처럼 execSkill/execAttack을 거치지 않는 공격의 패링 반격 처리(게이지 리셋 + 성공 회복)
 function resolveParry (foe, df) { if (!foe.parryHit) return false; foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df); return true }
 function attack (A, D, dA, dD, defending, guaranteed, forceCrit, hitsOverride) {
-  const magic = dA.마공 > dA.물공
+  const magic = dA.평타마법 != null ? dA.평타마법 : dA.마공 > dA.물공 // 평타마법: 형상이 평타 종류를 직접 지정(드루이드 — 인간·곰은 마공>물공이어도 물리)
   const ls = { used: false }; const lsD = { used: false }
   let dmg; let 고정 = 0
   // 관통값 통합: 물리=힘100시그(0.30)+무기관통 / 마법=심연의(0.25). (기존 sigPen·tMPen·무기.관통과 동치)
@@ -418,7 +421,7 @@ const JONG_MIN = 6 // 종말 최소 침식 스택(쌓아서 터뜨리는 고스�
 const ABYSS_TAKEN = 0.7 // 심연의 포옹: 받는 피해 배율(30%↓)
 const SOUL_COEF = 1.0 // 영혼포식 물공 계수
 function undeadFloor (f) { if (f.undead && f.hp < 1) { f.hp = 1; return true } return false } // 시체 무적: 체력 1 하한. 실제로 막았으면 true(나레이션용)
-function wardMul (D) { return (D.darkWard > 0) ? ABYSS_TAKEN : 1 } // 심연의 포옹(암흑기사): 받는 피해 30%↓
+function wardMul (D) { return (D.darkWard > 0 ? ABYSS_TAKEN : 1) * (D.crouch > 0 ? CROUCH_TAKEN : 1) } // 심연의 포옹(암흑기사): 받는 피해 30%↓
 function holyRamp (s, df, hits) { return df.maxhp * 0.007 * (s.repentStack || 0) * (hits || 1) } // 참회 램프 스코어 근사: 히트당 상대 최대체력×0.7%×현재스택
 function jongMul (st) { return (st || 0) * 0.8 } // 종말 계수: 스택당 0.8 (6스택 4.8 ~ 만스택 8.0)
 function gashHit (D) { if (D.cutStk > 0) { D.cutStk = Math.min(D.cutStk + 1, 5); D.cutDur = 2 } if (D.lacStk > 0) { D.lacStk = Math.min(D.lacStk + 1, 5); D.lacDur = 2 } } // 절개도적 타격 시: 이미 활성인 출혈 스택 각 +1(최대5)·지속2 갱신. 평타·타격스킬 공통
@@ -593,7 +596,7 @@ function applyAdaptiveCC (foe, df) {
 function estAtk (a, d) {
   const w = a.무기 || {}
   if (a.hybrid) return (a.물공 * (w.물공배율 || 1) * (1 - d.물방) * Math.max(a.명중, 0.3)) + (a.마공 * (w.마타 || 0.68) * (1 - d.마방))
-  if (w.평타 === '마법') return a.마공 * (a.평타계수 || 1) * (a.마뎀너프 || 1) * (1 - d.마방) // §13: 무기계열 판정(마공>물공 대신) — 스태프0.55·완드0.66 반영
+  if (a.평타마법 || (a.평타마법 == null && w.평타 === '마법')) return a.마공 * (a.평타계수 || 1) * (a.마뎀너프 || 1) * (1 - d.마방) // §13: 무기계열 판정(마공>물공 대신) — 스태프0.55·완드0.66 반영
   return a.물공 * (w.물공배율 || 1) * (1 - d.물방) * Math.max(a.명중, 0.3) // §13: 물공배율 반영
 }
 // 범용 디버프 레지스트리 — 룰렛(갬블러) 등 랜덤 디버프가 여기서 추출. 새 범용 디버프는 여기 한 줄만 추가하면 자동 포함
@@ -795,6 +798,171 @@ const SKILLS = {
   ]
 }
 // 운명의카드 효과: 킹=상대 확정20% / 퀸=상대 확정10%+자해10% / 하트=자힐10% / 다이아=방어1.5배 2턴 / 클로버=행운폭주(크리·회피↑) 2턴 / 스페이드=상대 힐5%(꽝)
+// ===== 드루이드: 형상변환 =====
+// 인간형(재생 + 형상 4종)으로 시작. 형상을 고르면 스킬 5개가 통째로 바뀌고, 해제(다른 형상/인간) 전까지 유지. 변신 = 1턴 소모.
+// 형상 능력치는 인간형 파생(druBase, 타이틀 포함)에서 배율만 재적용 → 해제 시 원래대로. 최대체력은 현재 체력 비율 유지.
+// 물공 스탯: 인간·전투곰=힘 / 표범·치타=민첩. 마공(마나부엉이)=지능. 형상마다 쿨 배열이 따로 있고 비활성 형상 쿨도 흐른다.
+const physOf = (v) => 10 + v + step(v, 3) + Math.floor(v / 20) * 8 // derive 물공식(스탯 하나로)
+const DRUID_FORMS = {
+  인간: { emoji: '🧝' },
+  전투곰: { emoji: '🐻', phys: '힘', atk: 1.2, hp: 2, dodge: 1.5, def: 1.5, noWBlock: true, desc: '공격력×1.2 · 최대체력×2 · 회피×1.5 · 방어×1.5 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30)' },
+  표범: { emoji: '🐆', phys: '민첩', atk: 1.8, dodge: 2.0, crit: 1.5, critMul: 2.0, desc: '공격력×1.8(민첩) · 회피×2 · 치명타 확률×1.5 · 치명타 배율×2 · 기력' },
+  치타: { emoji: '🐅', phys: '민첩', dodge: 2.5, hp: 0.7, desc: '회피×2.5 · 최대체력×0.7 · 물공=민첩 · 기력' },
+  마나부엉이: { emoji: '🦉', matk: 1.5, hp: 1.3, shield: true, magicAuto: true, desc: '마공×1.5 · 최대체력×1.3 · 마나실드 · 평타=마법' }
+}
+const DRUID_ORDER = ['전투곰', '표범', '치타', '마나부엉이', '인간']
+const RES_LABEL = { druRage: '분노', druEnergy: '기력' }
+const RAGE_MAX = 100; const BEAR_RAGE_SHIFT = 25; const BEAR_RAGE_HIT = 15; const BEAR_RAGE_CRIT = 30
+const ENERGY_MAX = 100; const ENERGY_REGEN = 20 // 기력: 표범·치타 공용 풀, 100으로 시작 · 내 턴마다 20 회복(형상 무관)
+const DRU_REGEN = 0.03; const BEAR_REGEN = 0.07; const CAT_REGEN = 0.08 // 재생(인간·3턴, 형상 유지) / 광포한 재생력(곰·5턴) / 자연의 재생력(치타·5턴) — 턴당 현재 형상 최대체력 %
+const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.8 // 웅크리기(치타): 회피×1.2 · 받는 피해×0.8
+const STAR_DOT = 0.05; const METEOR_DOT = 0.07 // 별빛쇄도·별똥별: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수)
+function initDruid (f, d) {
+  f.form = '인간'
+  f.druBase = { 물공: d.물공, 마공: d.마공, maxhp: d.maxhp, 물회: d.물회, 물방: d.물방, 마방: d.마방, 크리: d.크리, 무기막기: d.무기막기, 무기: d.무기 }
+  f.formCd = {}; f.formLock = {}
+  for (const k of DRUID_ORDER) { f.formCd[k] = k === '인간' ? f.cd : DRUID_SKILLS[k].map(() => 0); f.formLock[k] = {} }
+  f.ccLock = f.formLock.인간
+  f.druRage = 0; f.druEnergy = ENERGY_MAX; f.owlCap = Math.round(d.base.지능 * 14 + d.base.체력 * 7); f.owlShield = f.owlCap // 마나부엉이 실드: 마법무기 공식(지능14+체력7). 해제 시 남은 실드 보관 → 재변신 시 복원(재충전 없음)
+  f.druRegen = 0; f.bearRegen = 0; f.catRegen = 0; f.crouch = 0; f.stealth = 0; f.formChoice = null
+  druidStats(f, d)
+}
+// 형상 능력치를 ds에 반영(체력 제외). form 지정 시 그 형상 기준(AI 추정용)
+function druidStats (f, ds, form = f.form) {
+  const B = f.druBase; const F = DRUID_FORMS[form]; const c = ds.base
+  ds.물공 = Math.round(physOf(c[F.phys || '힘']) * (B.물공 / physOf(c.힘)) * (F.atk || 1)) // 형상별 물공 스탯 × 타이틀 배율 유지
+  ds.마공 = Math.round(B.마공 * (F.matk || 1))
+  ds.물회 = B.물회 * (F.dodge || 1) * (form === '치타' && f.crouch > 0 ? CROUCH_DODGE : 1)
+  ds.물방 = Math.min(B.물방 * (F.def || 1), 0.80); ds.마방 = Math.min(B.마방 * (F.def || 1), 0.85)
+  ds.크리 = Math.min(B.크리 * (F.crit || 1), 0.9)
+  ds.무기 = F.critMul ? Object.assign({}, B.무기, { 크리배율: B.무기.크리배율 * F.critMul }) : B.무기
+  ds.무기막기 = F.noWBlock ? 0 : B.무기막기
+  ds.마나실드 = F.shield ? f.owlCap : 0
+  ds.평타마법 = !!F.magicAuto
+}
+function druidShift (s, f, ds, df, to) {
+  const from = s.form
+  if (from === '전투곰') { s.bearRegen = 0; s.druRage = 0 } // 곰 해제: 광포한 재생력·분노 소멸
+  if (from === '치타') { s.catRegen = 0; s.crouch = 0 } // 치타 해제: 자연의 재생력·웅크리기 소멸
+  if (from === '표범') s.stealth = 0
+  if (from === '마나부엉이') { s.owlShield = s.shield; s.shield = 0 }
+  const ratio = Math.max(s.hp, 0) / ds.maxhp
+  s.form = to; s.cd = s.formCd[to]; s.ccLock = s.formLock[to]
+  druidStats(s, ds)
+  ds.maxhp = Math.round(s.druBase.maxhp * (DRUID_FORMS[to].hp || 1)); s.maxhp = ds.maxhp
+  s.hp = Math.max(1, Math.round(ds.maxhp * ratio))
+  if (to === '전투곰') s.druRage = BEAR_RAGE_SHIFT
+  if (to === '마나부엉이') s.shield = s.owlShield
+  s.defCombo = 0; s.defendedLast = false
+  return { type: 'shift', from, to, rage: to === '전투곰' ? s.druRage : 0 }
+}
+function druidUpkeep (self, foe, ds, df) {
+  for (const k of DRUID_ORDER) { const cd = self.formCd[k]; if (cd === self.cd) continue; const lk = self.formLock[k]; for (let i = 0; i < cd.length; i++) { if (lk[i]) { if (lk[i].some(fl => (foe[fl] || 0) > 0)) continue; delete lk[i] } cd[i] = Math.max(0, cd[i] - 1) } } // 비활성 형상 쿨도 흐름(그 형상에서 건 CC가 남았으면 정지)
+  self.druEnergy = Math.min(ENERGY_MAX, self.druEnergy + ENERGY_REGEN)
+  if (self.stealth > 0) self.stealth--
+  if (self.crouch > 0) self.crouch--
+  let heal = 0
+  const tick = (k, pct) => { if (self[k] > 0) { self[k]--; if (self.healBlock === 0) heal += Math.round(ds.maxhp * pct) } }
+  tick('druRegen', DRU_REGEN); tick('bearRegen', BEAR_REGEN); tick('catRegen', CAT_REGEN)
+  if (heal > 0) { const b = self.hp; self.hp = Math.min(ds.maxhp, self.hp + hcut(self, heal)); self._tick.push({ type: 'druregen', heal: Math.round(self.hp - b) }) }
+  druidStats(self, ds)
+}
+// 별빛쇄도·별똥별 틱: 피격자 upkeep에서 최대체력 % × (1−마방), 근성·받는뎀 감소 적용 후 마나실드 흡수. 지속 피해라 회피·막기·패링 없음
+function starDotTick (self, ds) {
+  let pct = 0
+  if (self.starDot > 0) { self.starDot--; pct += STAR_DOT }
+  if (self.meteorDot > 0) { self.meteorDot--; pct += METEOR_DOT }
+  let d = ds.maxhp * pct * (1 - (self.shield > 0 ? 0 : crushArmor(self, ds.마방)))
+  d = guts(d * wardMul(self), self, ds)
+  const psh = self.shield; d = absorb(self, Math.max(Math.round(d), 1)); self.hp -= d
+  self._tick.push({ type: 'stardot', dmg: d, absorbed: Math.max(psh - self.shield, 0), star: self.starDot, meteor: self.meteorDot })
+}
+const skillsOf = (f) => (f && f.form) ? DRUID_SKILLS[f.form] : (SKILLS[f.name] || [])
+// 자원 소모 스킬 래퍼: ready에 자원 게이트, exec에서 차감. res='druRage'|'druEnergy'
+function druCost (res, cost, sk) { return Object.assign({}, sk, { res, cost, ready: (s, f, ds, df, x) => s[res] >= cost && sk.ready(s, f, ds, df, x), exec: (s, f, ds, df) => { s[res] -= cost; sk.exec(s, f, ds, df) } }) }
+// AI 자원 비축: 체력 50% 미만이고 재생기 쿨이 곧 돌아오면, 다른 스킬은 재생 비용을 남길 때만 사용(점수 0) — 플레이어 사용 가능 여부와는 무관
+function druReserve (s, ds, res, cost, regenSlot, regenCost, regenKey) { return !(s.hp < ds.maxhp * 0.5 && !(s[regenKey] > 0) && s.cd[regenSlot] <= 1 && s[res] - cost < regenCost) }
+const BEAR_RSV = (cost, sc) => (s, f, ds, df, x) => druReserve(s, ds, 'druRage', cost, 2, 40, 'bearRegen') ? sc(s, f, ds, df, x) : 0
+const CAT_RSV = (cost, sc) => (s, f, ds, df, x) => druReserve(s, ds, 'druEnergy', cost, 1, 50, 'catRegen') ? sc(s, f, ds, df, x) : 0
+const healScore = (s, ds, pct, turns) => Math.min(ds.maxhp - s.hp, ds.maxhp * pct * turns) * 0.55 // 회복기 점수(힐과 동일 계수): 잃은 체력 한도 내 총회복량
+function shiftSkill (to) { return { name: `${to}형상`, tag: '버프', shift: to, coef: `${DRUID_FORMS[to].emoji} ${DRUID_FORMS[to].desc} (변신 1턴)`, ready: (s) => s.form !== to && s.cast === 0, score: () => 0, selfEvent: (s, f, ds, df) => druidShift(s, f, ds, df, to) } }
+const FORM_SWAP = { name: '형상변환', tag: '버프', choose: 'form', coef: '전투곰·표범·치타·마나부엉이·인간 중 골라 변신 (변신 1턴)', ready: (s) => s.cast === 0, score: () => 0, selfEvent: (s, f, ds, df) => { let to = s.formChoice || druidPickForm(s, f, ds, df, true); s.formChoice = null; if (!DRUID_FORMS[to] || to === s.form) to = '인간'; return druidShift(s, f, ds, df, to) } }
+function owlCast (ci, spec) { // 마나부엉이 시전 마법: 볼트식(최소 1시전), 착탄 시 runDamage(castSpec)
+  return Object.assign({}, spec, { ready: (s, f, ds, df, x) => s.cast === 0 && (!x || x.safe), score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const cut = s.castCut > 0 ? 1 : 0; s.castCut = 0; s.cast = Math.max(1, spec.cast - cut); s.castUninterruptible = false; s.castSpec = spec; s.castTotal = s.cast; s.castName = spec.name; s.note = spec.name + ' 시전' } })
+}
+function owlDot (ci, name, key, pct, cd) { // 별빛쇄도·별똥별: 5턴 지속 피해 부여(재사용 시 지속 갱신). AI 점수=남은 지속 보충분의 기대 총딜
+  const turns = 5
+  return { name, tag: '디버프', cd, coef: `${turns}턴간 상대 턴마다 최대체력 ${Math.round(pct * 100)}% 피해(마방 경감·실드 흡수)`, ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => df.maxhp * pct * (turns - (f[key] || 0)) * (1 - (f.shield > 0 ? 0 : df.마방)), exec: (s, f, ds, df) => { f[key] = turns; s.cd[ci] = cd; s.note = name } }
+}
+const stunSc = (s, f, ds, df, x) => f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') * stunTiming(s, f) : 0
+const DRUID_SKILLS = {
+  인간: [
+    shiftSkill('전투곰'), shiftSkill('표범'), shiftSkill('치타'), shiftSkill('마나부엉이'),
+    // 재생: 3턴간 턴당 3% 회복 — 형상을 바꿔도 유지
+    mkSkill(4, { name: '재생', tag: '회복', cd: 5, coef: `3턴간 턴당 체력 ${DRU_REGEN * 100}% 회복(총 ${DRU_REGEN * 300}% · 형상 변신 후에도 유지)`, selfBuff: { druRegen: 3 }, note: '재생', ready: (s, f, ds) => s.cd[4] === 0 && s.druRegen === 0 && s.hp < ds.maxhp, score: (s, f, ds) => healScore(s, ds, DRU_REGEN, 3) })
+  ],
+  전투곰: [
+    druCost('druRage', 20, (() => { const spec = { name: '후려갈기기', tag: '공격', type: '물리.일반', mult: 1.5, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: BEAR_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 1; s.note = '후려갈기기' } }) })()),
+    // 포효: 기사 도발과 동일(상대 3턴 강제평타 + 자신 3턴 공격 ×1.8)
+    druCost('druRage', 10, mkSkill(1, { name: '포효', tag: '제어', cd: 4, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.8 }, note: '도발', ready: (s, f) => s.cd[1] === 0 && f.taunt === 0, score: BEAR_RSV(10, (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5) })),
+    druCost('druRage', 40, mkSkill(2, { name: '광포한 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${BEAR_REGEN * 100}% 회복(총 ${BEAR_REGEN * 500}% · 곰 해제 시 소멸)`, selfBuff: { bearRegen: 5 }, note: '광포한 재생력', ready: (s, f, ds) => s.cd[2] === 0 && s.bearRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, BEAR_REGEN, 5) })),
+    druCost('druRage', 25, mkSkill(3, { name: '야생의돌진', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: BEAR_RSV(25, stunSc) })),
+    FORM_SWAP
+  ],
+  표범: [
+    druCost('druEnergy', 40, dmgSkill(0, { name: '찢어발기기', tag: '공격', type: '물리.일반', mult: 2.0, cd: 1 })),
+    druCost('druEnergy', 40, dmgSkill(1, { name: '흉포한 이빨', tag: '공격', type: '물리.일반', mult: 1.5, bonus: { when: 'foeHp40', mult: 2.5 }, cd: 1 })),
+    // 은신: 상대 1턴 기절 + 다음 턴 암습의 일격 강화(×3.0)
+    druCost('druEnergy', 20, mkSkill(2, { name: '은신', tag: '제어', cc: { stun: 1 }, cd: 3, coef: '상대 1턴 기절 + 다음 턴 암습의 일격 물공×3.0', selfBuff: { stealth: 2 }, note: '은신 — 기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => stunSc(s, f, ds, df, x) + x.est * 1.0 })), // 점수: 기절 + 강화 일격(3.0)이 찢어발기기(2.0)보다 나은 몫(평타 1회분)
+    druCost('druEnergy', 20, (() => { const spec = { name: '암습의 일격', tag: '공격', type: '물리.일반', mult: 0.5, bonus: { when: 'selfStealth', mult: 3.0 }, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const st = s.stealth > 0; runDamage(spec, s, f, ds, df); s.stealth = 0; s.cd[3] = 1; s.note = st ? '암습의 일격·은신 연계' : '암습의 일격' } }) })()),
+    FORM_SWAP
+  ],
+  치타: [
+    druCost('druEnergy', 20, (() => { const spec = { name: '물기', tag: '공격', type: '물리.일반', mult: 1.0, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: CAT_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 1; s.note = '물기' } }) })()),
+    druCost('druEnergy', 50, mkSkill(1, { name: '자연의 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${CAT_REGEN * 100}% 회복(총 ${CAT_REGEN * 500}% · 치타 해제 시 소멸)`, selfBuff: { catRegen: 5 }, note: '자연의 재생력', ready: (s, f, ds) => s.cd[1] === 0 && s.catRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, CAT_REGEN, 5) })),
+    druCost('druEnergy', 40, mkSkill(2, { name: '야생의돌진', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: CAT_RSV(40, stunSc) })),
+    // 웅크리기: 2턴 회피×1.2 · 받는 피해×0.8. 점수=2턴간 줄어드는 기대 피격량
+    druCost('druEnergy', 60, mkSkill(3, { name: '웅크리기', tag: '버프', cd: 3, coef: `2턴간 회피×${CROUCH_DODGE} · 받는 피해×${CROUCH_TAKEN}`, selfBuff: { crouch: 2 }, note: '웅크리기', ready: (s) => s.cd[3] === 0 && s.crouch === 0, score: CAT_RSV(60, (s, f, ds, df, x) => { const d = Math.min(ds.물회, 0.8); return buffVal(x.foeTurn * 2 * (1 - (1 - Math.min(d * CROUCH_DODGE, 0.95)) * CROUCH_TAKEN / (1 - d)), s, ds) }) })),
+    FORM_SWAP
+  ],
+  마나부엉이: [
+    owlCast(0, { name: '달빛섬광', tag: '시전', type: '마법.일반', mult: 1.1, cast: 1 }),
+    owlCast(1, { name: '별빛섬광', tag: '시전', type: '마법.일반', mult: 1.2, hits: 2, cast: 2 }),
+    owlDot(2, '별빛쇄도', 'starDot', STAR_DOT, 5),
+    owlDot(3, '별똥별', 'meteorDot', METEOR_DOT, 7),
+    FORM_SWAP
+  ]
+}
+SKILLS.드루이드 = DRUID_SKILLS.인간
+// ── 드루이드 AI: 형상 선택 ──
+// 형상별 추정: 버팀 턴(현재 체력비율×형상 최대체력(+실드) ÷ 받을 턴당 피해) / 처치 턴(상대 체력 ÷ 내 턴당 딜)
+// ratio = 버팀÷처치(>1이면 레이스 승). 이기는 형상(ratio≥1.2) 중 가장 빨리 잡는 형상, 없으면 ratio 최대(시간제한 무승부 방지: 안 죽기만 하는 형상 회피)
+// 회피는 상대가 물리 평타일 때만, 재생기는 턴당 회복만큼 받는 피해에서 차감.
+const FORM_SKILL_X = { 인간: 1, 전투곰: 1.25, 표범: 1.5, 치타: 1, 마나부엉이: 1 } // 스킬 평균 배율 근사(곰: 후려갈기기 1.5 격턴 / 표범: 찢어발기기 2.0 격턴 / 치타·부엉이: 평타급)
+const FORM_HEAL = { 전투곰: BEAR_REGEN, 치타: CAT_REGEN }
+function druidFormEst (s, f, ds, df, form) {
+  const o = Object.assign({}, ds); druidStats(s, o, form); o.maxhp = Math.round(s.druBase.maxhp * (DRUID_FORMS[form].hp || 1))
+  let my = estAtk(o, df) * FORM_SKILL_X[form]
+  if (form === '마나부엉이') my += df.maxhp * (STAR_DOT + METEOR_DOT * 5 / 7) * (1 - df.마방) // 별빛쇄도(5%×5턴/쿨5)+별똥별(7%×5턴/쿨7) 턴당 근사
+  const foePhys = !(df.평타마법 || (df.평타마법 == null && df.무기.평타 === '마법'))
+  const raw = estAtk(df, o) * (foePhys ? 1 - Math.min(o.물회, 0.9) : 1)
+  const inc = Math.max(raw - o.maxhp * (FORM_HEAL[form] || 0), raw * 0.1, 1)
+  const hp = Math.max(s.hp, 0) / ds.maxhp * o.maxhp + (form === '마나부엉이' ? (s.form === form ? s.shield : s.owlShield) : 0)
+  const kill = Math.max(my, 1) / Math.max(f.hp + f.shield, 1)
+  return { k: form, ratio: (hp / inc) * kill, kill }
+}
+// 형상 중엔 더 나은 형상이 30% 이상 앞설 때만 변경(잦은 변신 방지), 자기 재생기 지속 중엔 유지. forced=형상변환 메뉴(현재 형상 제외)
+function druidPickForm (s, f, ds, df, forced) {
+  const ev = DRUID_ORDER.filter(k => k !== '인간').map(k => druidFormEst(s, f, ds, df, k))
+  const pool = forced ? ev.filter(e => e.k !== s.form) : ev
+  const win = pool.filter(e => e.ratio >= 1.2)
+  const best = win.length ? win.reduce((a, b) => b.kill > a.kill ? b : a) : pool.reduce((a, b) => b.ratio > a.ratio ? b : a)
+  if (forced || s.form === '인간') return best.k
+  if (s.bearRegen > 0 || s.catRegen > 0) return s.form
+  const cur = ev.find(e => e.k === s.form)
+  const better = win.length ? (cur.ratio < 1.2 || best.kill > cur.kill * 1.3) : best.ratio > cur.ratio * 1.3
+  return better ? best.k : s.form
+}
 function drawCard (c, s, f, ds, df) {
   if (c === '킹') { const d = trueDmg(s, f, df, df.maxhp * 0.20); f.hp -= d; return '👑킹·상대 체력20% 확정딜' }
   if (c === '퀸') { const d = trueDmg(s, f, df, df.maxhp * 0.10); f.hp -= d; s.hp -= Math.round(ds.maxhp * 0.10); return '👸퀸·상대 체력10%+자해10%' }
@@ -897,6 +1065,8 @@ function bonusCond (when, s, f, ds, df) {
   if (when === 'foeWeaponBroken') return f.weaponBroken > 0
   if (when === 'foeShield') return f.shield > 0
   if (when === 'foeInstVuln') return f.instVuln > 0
+  if (when === 'foeHp40') return f.hp <= df.maxhp * 0.40
+  if (when === 'selfStealth') return s.stealth > 0
   return false
 }
 function runDamage (spec, s, f, ds, df) {
@@ -923,6 +1093,8 @@ function runDamage (spec, s, f, ds, df) {
   } else if (type === '마법.신성') { // 신성: 히트마다 holyDmg(참회 스택 +1·램프 보너스). 다단이면 히트수만큼 스택 가속 + 각 히트 램프 적용
     const n = spec.hits || 1
     for (let i = 0; i < n; i++) { if (f.hp <= 0) break; const base = Math.max(ds.마공 * M + (i === 0 ? rider() : 0), 1); const dealt = deliverFormula(type, base, s, f, ds, df); if (dealt > 0) landed = true; hits.push({ raw: base, type, dealt }) }
+  } else if (type === '마법.일반' && spec.hits > 1) { // 마법 다단(별빛섬광 등): 히트마다 spellDmg·실드 흡수
+    for (let i = 0; i < spec.hits; i++) { if (f.hp <= 0) break; const base = ds.마공 * M + (i === 0 ? rider() : 0); const dealt = deliverFormula(type, base, s, f, ds, df); if (dealt > 0) landed = true; hits.push({ raw: base, type, dealt }) }
   } else {
     const base = spec.baseFn ? spec.baseFn(s, f, ds, df) : ((type.startsWith('마법') ? ds.마공 : ds.물공) * M + rider()) // baseFn=식-base(파열 등 스택 소모)
     const dealt = deliverFormula(type, base, s, f, ds, df)
@@ -946,7 +1118,7 @@ function buffVal (benefit, s, ds) { const hp = (s && ds && ds.maxhp) ? Math.min(
 function repentResetCost (s, ds, df) { if (!df || s.sanctuary > 0 || (s.repentStack || 0) < 4) return 0; const lostPerTurn = df.maxhp * 0.007 * s.repentStack; const rebuildTurns = s.cd[2] <= 2 ? 2 : 5; return lostPerTurn * rebuildTurns * 0.5 } // W=0.5 가중치. cd[2]=성역슬롯
 // 자동 설명: 선언 필드에서 딜 성분 문자열 생성(수동 문자열 없음)
 const TYPE_TAG = { '물리.충격': '💥충격 ', '마법.역장': '🟣역장 ', 확정: '🎯확정 ' } // 딜 전달 타입 마커
-const WHEN_LABEL = { foeStun: '스턴 중', foeWeaponBroken: '무기파괴 시', foeShield: '실드 시', foeInstVuln: '약점노출 시' } // bonus.when 조건 라벨
+const WHEN_LABEL = { foeStun: '스턴 중', foeWeaponBroken: '무기파괴 시', foeShield: '실드 시', foeInstVuln: '약점노출 시', foeHp40: '상대 체력 40%↓', selfStealth: '은신 직후' } // bonus.when 조건 라벨
 function dmgDesc (spec) {
   const D = spec.dmg || {}; const p = []; const tag = TYPE_TAG[spec.type] || ''
   const mLbl = (spec.type && spec.type.startsWith('마법')) ? '마공' : '타격'
@@ -973,7 +1145,8 @@ function dmgDesc (spec) {
 function skillLine (spec) {
   const auto = [dmgDesc(spec), effDesc(spec)].filter(Boolean).join(' + ')
   const body = spec.coef || auto
-  const cd = spec.cast ? '' : (spec.cd != null ? ` (쿨${spec.cd})` : (spec.buff ? ` (${spec.buff}턴)` : '')) // 시전 스킬은 tag/coef가 '시전'을 이미 표기 → 접미사 생략
+  const cost = spec.cost ? ` · ${RES_LABEL[spec.res]} ${spec.cost}` : '' // 드루이드 자원(분노·기력) 소모량
+  const cd = (spec.cast ? '' : (spec.cd != null ? ` (쿨${spec.cd}${cost})` : (spec.buff ? ` (${spec.buff}턴${cost})` : (cost ? ` (${cost.slice(3)})` : '')))) // 시전 스킬은 tag/coef가 '시전'을 이미 표기 → 접미사 생략
   return `${TAG_EMO[spec.tag] || ''} **${spec.name}** — ${spec.tag}${body ? ' ' + body : ''}${cd}`
 }
 // 스킬 버튼/표시용 쿨 라벨(필드 기반, SKILL_CD 테이블 대체): 시전=시전 / 버프=버프 / 그외=쿨숫자
@@ -1063,6 +1236,7 @@ const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 
 function skillsBlock (name) {
   const lines = SKILLS[name].map(sk => skillLine(sk))
   for (const p of PASSIVES[name] || []) lines.push(`🔒 **${p.name}** — 패시브 ${p.desc}`)
+  if (CHARS[name].드루이드) for (const k of DRUID_ORDER.slice(0, 4)) lines.push(`└ ${DRUID_FORMS[k].emoji} **${k}**: ${DRUID_SKILLS[k].slice(0, 4).map(sk => sk.name).join(' · ')}`) // 형상별 스킬(이름만 — 매치업 화면 길이 제한)
   return lines.join('\n')
 }
 // 방어 결정 = AI 리스크 톨러런스. 예상딜은 추정치(실제는 변동) → 계수로 낙관/비관 표현
@@ -1086,7 +1260,7 @@ function buffOk (ai, hp, est) {
 }
 function mkFighter (d, name, ai) {
   // 게이지에 랜덤 미세오프셋 → 속도 동률 시 선공을 공정하게(플레이어 선공 고정 방지)
-  return {
+  const f = {
     name,
     hp: d.maxhp,
     gauge: d.턴 + Math.random() * 0.3,
@@ -1205,6 +1379,8 @@ function mkFighter (d, name, ai) {
     echoStack: 0,
     revive: 0 // §13: 체력100 시그 부활 삭제(CC-1·방어+5%p·HP+10%로 대체)
   }
+  if (CHARS[name] && CHARS[name].드루이드) initDruid(f, d)
+  return f
 }
 function reviveCheck (f, d) {
   undeadFloor(f) // 살아있는 시체 무적(부활 아님)
@@ -1230,6 +1406,8 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.comboWin > 0) { self.comboWin--; if (self.comboWin === 0) self.comboStep = 0 } // 무도가 콤보 창 만료(2턴 지나면 리셋)
   if (self.enchantTurns > 0) { self.enchantTurns--; if (self.enchantTurns === 0) self.enchant = null } // 스블 인챈트 만료
   for (let i = 0; i < self.cd.length; i++) { if (!ccLocked(self, foe, i)) self.cd[i] = Math.max(0, self.cd[i] - 1) } // 전 스킬 슬롯 쿨 감소(3스킬 대응). 상대에게 건 CC가 남아 있으면 그 스킬 쿨은 정지
+  if (self.form) druidUpkeep(self, foe, ds, df) // 드루이드: 비활성 형상 쿨·기력 회복·재생 틱·형상 능력치 갱신
+  if (self.starDot > 0 || self.meteorDot > 0) starDotTick(self, ds) // 별빛쇄도·별똥별(마나부엉이) 지속 피해
   if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + hcut(self, Math.round(ds.base.체력 * 0.3)))
   if (self.autoSpell > 0) self.autoSpell--
   if (self.graze100 > 0) self.graze100--
@@ -1308,21 +1486,23 @@ function ccLockAfter (self, foe, ccB, cdB) { // CC가 새로 걸리거나 늘어
   self.cd.forEach((v, i) => { if (v > (cdB[i] || 0)) { self.ccLock = self.ccLock || {}; self.ccLock[i] = fields } })
 }
 function ccLocked (self, foe, i) { const fl = self.ccLock && self.ccLock[i]; if (!fl) return false; if (fl.some(k => (foe[k] || 0) > 0)) return true; delete self.ccLock[i]; return false }
-function execSkill (self, foe, ds, df, sk) { self.tukyungHits = 0; const ccB = ccSnap(foe); const cdB = self.cd.slice(); const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); ccLockAfter(self, foe, ccB, cdB); return { parried: didParry, tukyung: self.tukyungHits, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
-function execAttack (self, foe, ds, df) { self.tukyungHits = 0; if (self.육합권 && self.comboStep === 0 && foe.hp > 0) { let pr = false; for (let k = 0; k < 2; k++) { self.jabStk = (self.jabStk || 0) + 1; if (self.jabStk >= MUDO_MINJAB && rand() < MUDO_PROC) { pr = true; break } } if (pr) { self.jabStk = 0; return execMudoYukhap(self, foe, ds, df) } } const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) gashHit(foe); if (foe.vuln > 0) foe.vuln--; dmg = fistAbsorb(self, foe, dmg, ds.무기.실드효율); foe.hp -= dmg; if (self.autoSpell > 0 && foe.hp > 0 && rand() < 0.90) launchBolt(self, foe, ds, df, ['파이어볼트', '라이트닝볼트', '콜드볼트'][Math.floor(rand() * 3)], false); if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); return { parried: didParry, tukyung: self.tukyungHits, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
+function execSkill (self, foe, ds, df, sk) { if (sk.selfEvent) return sk.selfEvent(self, foe, ds, df); self.tukyungHits = 0; const ccB = ccSnap(foe); const cdB = self.cd.slice(); const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.didAttack = false; self.lastDef = null; self.meteorImmune = false; self.multiHits = null; sk.exec(self, foe, ds, df); self.defCombo = 0; self.defendedLast = false; const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dealt > 0) self.hp -= Math.max(Math.round(dealt * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); ccLockAfter(self, foe, ccB, cdB); return { parried: didParry, tukyung: self.tukyungHits, type: 'skill', name: sk.name, dmg: dealt, note: self.note, crit: self.lastCrit, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, attacked: self.didAttack, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), selfHeal: Math.max(self.hp - sb, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, meteorImmune: self.meteorImmune, multiHits: self.multiHits, dmgType: sk.dmgType } }
+// 평타 실행 + 드루이드 전투곰 분노 획득(적중 15 · 치명타 30)
+function execAttack (self, foe, ds, df) { const ev = execAttackCore(self, foe, ds, df); if (self.form === '전투곰' && (ev.dmg > 0 || ev.shieldAbsorb > 0)) self.druRage = Math.min(RAGE_MAX, self.druRage + (ev.crit ? BEAR_RAGE_CRIT : BEAR_RAGE_HIT)); return ev }
+function execAttackCore (self, foe, ds, df) { self.tukyungHits = 0; if (self.육합권 && self.comboStep === 0 && foe.hp > 0) { let pr = false; for (let k = 0; k < 2; k++) { self.jabStk = (self.jabStk || 0) + 1; if (self.jabStk >= MUDO_MINJAB && rand() < MUDO_PROC) { pr = true; break } } if (pr) { self.jabStk = 0; return execMudoYukhap(self, foe, ds, df) } } const fb = foe.hp; const sb = self.hp; const psh = foe.shield; self.holyHit = 0; self.repentHit = 0; let dmg = attack(self, foe, ds, df, foe.defending); if (self.상처전문가 && dmg > 0) gashHit(foe); if (foe.vuln > 0) foe.vuln--; dmg = fistAbsorb(self, foe, dmg, ds.무기.실드효율); foe.hp -= dmg; if (self.autoSpell > 0 && foe.hp > 0 && rand() < 0.90) launchBolt(self, foe, ds, df, ['파이어볼트', '라이트닝볼트', '콜드볼트'][Math.floor(rand() * 3)], false); if (self.신성의무 && ds.마공 && foe.hp > 0) { self.holySplash = holyDmg(self, foe, ds, df, ds.마공 * 0.7) } const dealt = Math.max(fb - foe.hp, 0); if (ds.마나실드 && dealt > 0) self.shield = Math.min(ds.마나실드, self.shield + Math.round(dealt * SHIELD_REGEN)); self.defCombo = 0; self.defendedLast = false; { const tp = Math.max(foe.thornsBase || 0, foe.thorns > 0 ? foe.thornsPct : 0); if (tp > 0 && dmg > 0) self.hp -= Math.max(Math.round(dmg * tp), 1) } if (foe.pendCC) { for (const _c of foe.pendCC) foe[_c[0]] = Math.max(foe[_c[0]], _c[1]); foe.pendCC = null } const didParry = foe.parryHit; if (didParry) { foe.gauge = 0; foe.parryHit = false; parryHeal(foe, df) } bigHitHeal(foe, df, dealt); return { parried: didParry, tukyung: self.tukyungHits, type: 'attack', dmg: dealt, crit: self.lastCrit, bolt: self.lastBolt, ph: self.hitPh, mg: self.hitMg, boltName: self.boltName, boltHits: self.boltHits, boltNames: self.boltNames, boltCombo: self.boltCombo, boltShots: self.boltShots, def: self.lastDef, broke: self.brokeCast, grazed: self.grazed, shieldAbsorb: Math.max(psh - foe.shield, 0), selfDmg: Math.max(sb - self.hp, 0), diceAtk: self.diceAtk, diceDef: self.diceDef, holy: self.신성의무 ? (self.holyHit || 0) : 0, repent: self.신성의무 ? (self.repentHit || 0) : 0 } }
 // 방어 회복: maxhp 5% + 체력/2 고정(장기전 복리 완화)
 function parryHeal (foe, df) { if (foe.defHealCd === 0) { foe.hp = Math.min(df.maxhp, foe.hp + healVar(df.maxhp * 0.05 + df.base.체력 / 2)); foe.defHealCd = 2 } } // 패링 성공(피격 흘림) 시에만 회복 — 헛패링·비패링방어는 회복 없음
 function execDefend (self, ds) { const before = self.hp; const parryWpn = ds.무기.방어 === '패링'; if (self.defHealCd === 0 && !parryWpn) { self.hp = Math.min(ds.maxhp, self.hp + healVar(ds.maxhp * 0.05 + ds.base.체력 / 2) * (self.undead ? UNDEAD_HEAL : 1)); self.defHealCd = 2 } self.defending = true; self.defCombo++; self.defendedLast = true; if (parryWpn) { self.parry = true; self.note = '패링 태세' } return { type: 'defend', heal: Math.round(self.hp - before), parry: !!self.parry } } // 방어=경감(defending)+회복(2쿨). 패링 캐릭은 여기서 회복 X → 패링 성공 시에만(parryHeal)
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
 const BUFF_SKILLS = new Set(['인스턴트캐스팅', '볼트마법조합', '방패들기', '마법반사', '오토스펠'])
 // 마법 스킬: 침묵 시 사용 불가(물리 스킬은 침묵 무시). 원소·역장·시전·마법 유틸·마법 버프가 대상 (물리 타격·물리 버프·물리 덫은 제외)
-const MAGIC_SKILLS = new Set(['화염구', '메테오', '인스턴트캐스팅', '서리구', '충격파', '파이어볼트', '라이트닝볼트', '콜드볼트', '볼트마법조합', '오토스펠', '디스펠', '마법의완전이해', '룬각인', '역장폭발', '약점봉인', '마나소각', '시전파괴', '마법반사', '안식', '성스러운빛'])
+const MAGIC_SKILLS = new Set(['화염구', '메테오', '인스턴트캐스팅', '서리구', '충격파', '파이어볼트', '라이트닝볼트', '콜드볼트', '볼트마법조합', '오토스펠', '디스펠', '마법의완전이해', '룬각인', '역장폭발', '약점봉인', '마나소각', '시전파괴', '마법반사', '안식', '성스러운빛', '달빛섬광', '별빛섬광', '별빛쇄도', '별똥별'])
 const silenced = (s, name) => s.silence > 0 && MAGIC_SKILLS.has(name)
 // 침묵 AI 가치: 상대의 마법 스킬 비율(0~1). 순수 물리 상대에겐 침묵이 무의미하므로 0 → 침묵 점수 소멸(딜만 남음)
 const _magicShare = {}
 const magicShare = name => { if (_magicShare[name] != null) return _magicShare[name]; const s = SKILLS[name] || []; return (_magicShare[name] = s.length ? s.filter(sk => MAGIC_SKILLS.has(sk.name)).length / s.length : 0) }
 // 행동불능(기절) 중 쓸 수 있는 스킬 — 스킬의 stunnable 플래그 + 기존 ready 조건 재사용(하드코딩 제거). 없으면 null
-function stunUsableSkill (self, foe, ds, df) { return (SKILLS[self.name] || []).find(s => s.stunnable && s.ready(self, foe, ds, df)) || null }
+function stunUsableSkill (self, foe, ds, df) { return skillsOf(self).find(s => s.stunnable && s.ready(self, foe, ds, df)) || null }
 function stunSkill (self, foe, ds, df) { const sk = stunUsableSkill(self, foe, ds, df); return sk ? sk.name : null }
 // 기절 중 실행: 동작이 다르면 stunExec(예: 재생의광기=회복만), 아니면 일반 exec 재사용(충격파)
 function execStunSkill (self, foe, ds, df) { const sk = stunUsableSkill(self, foe, ds, df); if (!sk) return { type: 'skip' }; return sk.stunExec ? sk.stunExec(self, foe, ds, df) : execSkill(self, foe, ds, df, sk) }
@@ -1335,15 +1515,16 @@ function aiTurn (self, foe, ds, df) {
   // 상대 시전 중이면 AI 유형 무관하게 '차단기'만 우선 사용(방어적도 시전은 끊음)
   if (foe.cast > 0) {
     const cx = ctxFor(self, foe, ds, df)
-    const intr = SKILLS[self.name].find(sk => ['방해', '돌진', '암습', '약점봉인', '시전파괴', '입막음', '방패가격'].includes(sk.name) && !silenced(self, sk.name) && sk.ready(self, foe, ds, df, cx))
+    const intr = skillsOf(self).find(sk => ['방해', '돌진', '암습', '약점봉인', '시전파괴', '입막음', '방패가격'].includes(sk.name) && !silenced(self, sk.name) && sk.ready(self, foe, ds, df, cx))
     if (intr) return execSkill(self, foe, ds, df, intr)
   }
   // 방어 판단(AI별): 공격적=치명일 때만 / 방어적=저HP 선제 / 판단형=치명 직전. (회복스킬은 아래 스킬선택서 HP게이트로 처리)
   if (decideDefend(self, foe, ds, df)) return execDefend(self, ds)
+  if (self.form && self.cast === 0) { const want = druidPickForm(self, foe, ds, df); if (want !== self.form) return druidShift(self, foe, ds, df, want) } // 드루이드: 형상 판단(변신=1턴)
   // 스킬 선택: 점수 최고. 침묵 시 마법 스킬만 제외(물리 스킬은 사용 가능). 제어는 이미 고점수(우선), 버프는 AI 생존여유 게이트
   {
     const ctx = ctxFor(self, foe, ds, df); const cands = [{ sk: null, sc: ctx.est + gashAtkBonus(self, foe, df) }] // null=평타 (절개도적: 활성 출혈<5면 평타로 스택 빌드 가치 가산)
-    for (const sk of SKILLS[self.name]) {
+    for (const sk of skillsOf(self)) {
       if (silenced(self, sk.name)) continue
       if (!sk.ready(self, foe, ds, df, ctx)) continue
       if (BUFF_SKILLS.has(sk.name) && !buffOk(self.ai, self.hp, Math.max(0, ctx.foeTurn - self.shield))) continue // 버프는 여유 있을 때만(공격적은 항상)
@@ -1363,7 +1544,7 @@ function initBattle (meName, oppName, oppAI) {
   if (tA.d) tA.d(dA); if (tB.d) tB.d(dB)
   const A = mkFighter(dA, meName, null); const B = mkFighter(dB, oppName, oppAI)
   if (tA.flag) A[tA.flag] = true; if (tB.flag) B[tB.flag] = true
-  return { A, B, dA, dB, maxA: dA.maxhp, maxB: dB.maxhp, meName, oppName, oppAI, oppNick: pickArr(NICKS), meTitle: tA.name, oppTitle: tB.name, t: 0, log: [] }
+  return { A, B, dA, dB, get maxA () { return this.dA.maxhp }, get maxB () { return this.dB.maxhp }, meName, oppName, oppAI, oppNick: pickArr(NICKS), meTitle: tA.name, oppTitle: tB.name, t: 0, log: [] }
 }
 // 현재 시점 프레임: 양쪽 HP + 버프/디버프(위아래 분리용) 스냅샷
 function snapFrame (state) {
@@ -1433,7 +1614,7 @@ function playerResolve (state, choice) {
   // 시전 중(메테오 제외): '시전 진행'(턴넘기기 그대로 시전 진행) / '시전 취소'(즉시 취소)
   if (A.cast > 0 && !A.castUninterruptible) {
     // 자가 취소 → 시전 스킬 쿨 환불(안 쓴 것으로 처리). 아니면 '시전 진행'
-    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = SKILLS[state.meName].findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castCut = 2; A.castBolt = null; A.castBoltChain = false; A.castSpec = null; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
+    if (choice === 'castcancel') { ev = { type: 'castcancel', spell: A.castName || '시전' }; const cslot = skillsOf(A).findIndex(sk => sk.name === A.castName); if (cslot >= 0) A.cd[cslot] = 0; A.cast = 0; A.castCut = 2; A.castBolt = null; A.castBoltChain = false; A.castSpec = null; A.castName = null } else { ev = advanceCast(A, B, dA, dB) }
     const held = floorBoth(state); recEntry(state, 'me', ev); holdRec(state, held); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
     if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
     return advance(state)
@@ -1443,7 +1624,7 @@ function playerResolve (state, choice) {
   else if (choice === 'defend') ev = execDefend(A, dA)
   else if (/^s\d+$/.test(choice)) {
     const slot = parseInt(choice.slice(1), 10)
-    ev = playerCanUse(state, slot).usable ? execSkill(A, B, dA, dB, SKILLS[state.meName][slot]) : execAttack(A, B, dA, dB)
+    ev = playerCanUse(state, slot).usable ? execSkill(A, B, dA, dB, skillsOf(A)[slot]) : execAttack(A, B, dA, dB)
   } else ev = execAttack(A, B, dA, dB)
   const held = floorBoth(state); recEntry(state, 'me', ev); holdRec(state, held); if (reviveCheck(B, dB)) reviveRec(state, 'opp')
   if (B.hp <= 0) { koLog(state); state.winner = 'me'; return 'end' }
@@ -1451,10 +1632,15 @@ function playerResolve (state, choice) {
 }
 // 플레이어 스킬 사용 가능 판정(AI 자제 휴리스틱 제외, 진짜 게이트만)
 function playerCanUse (state, slot) {
-  const { A, B, dB } = state; const name = SKILLS[state.meName][slot].name
+  const { A, B, dB } = state; const sk = skillsOf(A)[slot]; const name = sk.name
   if (A.taunt > 0) return { usable: false, reason: '도발' }
   if (A.silence > 0 && MAGIC_SKILLS.has(name)) return { usable: false, reason: '침묵(마법)' }
   if (A.cd[slot] > 0) return { usable: false, reason: `${A.cd[slot]}턴 후` }
+  if (A.form) { // 드루이드: 자원·형상·스킬 조건(ready)
+    if (sk.res && A[sk.res] < sk.cost) return { usable: false, reason: `${RES_LABEL[sk.res]} ${A[sk.res]}/${sk.cost}` }
+    if (sk.cast && A.cast > 0) return { usable: false, reason: '시전 중' }
+    if (!sk.ready(A, B, state.dA, dB)) return { usable: false, reason: sk.shift ? '현재 형상' : sk.tag === '회복' ? (A[Object.keys(sk.selfBuff || {})[0]] > 0 ? '유지 중' : '체력 충분') : sk.name === '웅크리기' ? '유지 중' : sk.cc && sk.cc.stun ? '상대 기절 중' : sk.name === '포효' ? '상대 도발 중' : '사용 불가' }
+  }
   if (name === '처형' && !(B.hp < dB.maxhp * 0.25)) return { usable: false, reason: '상대 HP 25%↓ 필요' }
   if ((name === '암습' || name === '돌진') && B.stun > 0) return { usable: false, reason: '상대 기절 중' }
   if ((name === '화염구' || name === '메테오' || name === '서리구') && A.cast > 0) return { usable: false, reason: '시전 중' }
@@ -1469,12 +1655,12 @@ function playerCanUse (state, slot) {
   return { usable: true }
 }
 function playerOptions (state) {
-  const { A, B, meName, dA, dB } = state; const sks = SKILLS[meName]
+  const { A, B, meName, dA, dB } = state; const sks = skillsOf(A)
   const stunned = A.stunned === true
   const casting = A.cast > 0 && !A.castUninterruptible // 끊기 가능 시전 중: 진행/취소만 노출(끊기불가는 자동진행)
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
-  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_SPECS[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1 } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
+  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_SPECS[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1, cost: skdef.cost ? `${RES_LABEL[skdef.res]}${skdef.cost}` : null } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
   return { canDefend: !stunned && A.taunt === 0 && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: PASSIVES[meName] || [], stunned, taunted: A.taunt > 0, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
 }
 
@@ -1627,6 +1813,9 @@ function narrateLine (ev, meName, oppName) {
     case 'darkzone': return `⚰️ ${ae} **${A}**의 암흑지대 — ${te} **${T}**에게 암흑 **${ev.dmg}**${ev.selfDmg > 0 ? ` · 자신도 침식되며 **${ev.selfDmg}** 피해` : ''}`
     case 'undeadHold': return `⚰️ ${ae} **${A}**${eun(A)} 살아있는 시체 — 체력이 1 아래로 떨어지지 않는다! (${ev.left > 0 ? `무적 ${ev.left}턴 남음` : '무적 곧 종료'})`
     case 'deathmark': return `☠️ ${ae} **${A}**의 육신이 무너진다! 회복하지 못한 시체가 스러졌다…`
+    case 'shift': { const F = DRUID_FORMS[ev.to]; return ev.to === '인간' ? `🧝 ${ae} **${A}**${iga(A)} 형상을 풀고 인간의 모습으로 돌아왔다. (HP ${ev.selfHp}/${ev.selfMax})` : `${F.emoji} ${ae} **${A}**${iga(A)} **${ev.to}** 형상으로 변신했다!${ev.rage ? ` 😤분노 ${ev.rage}` : ''} (HP ${ev.selfHp}/${ev.selfMax})` }
+    case 'druregen': return `🌿 ${ae} **${A}**${eun(A)} 재생의 힘으로 체력 **${ev.heal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})`
+    case 'stardot': { const bits = []; if (ev.star > 0) bits.push(`별빛쇄도 ${ev.star}턴`); if (ev.meteor > 0) bits.push(`별똥별 ${ev.meteor}턴`); return `🌟 ${ae} **${A}**${iga(A)} 쏟아지는 별빛에 **${ev.dmg}** 피해!${ev.absorbed > 0 ? ` 🔷*마나실드 ${ev.absorbed} 흡수*` : ''}${bits.length ? ` (${bits.join(' · ')} 남음)` : ''}` }
     case 'trapspring': return `🪤 ${ae} **${A}**${iga(A)} 사냥꾼덫을 밟았다! 발이 묶이고(둔화) 🩸출혈 시작!`
     case 'bleed': return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${ev.left > 0 ? ` (출혈 ${ev.left}턴 남음)` : ''}`
     case 'gash': { const gp = []; if (ev.cut > 0) gp.push(`절개${ev.cut}`); if (ev.lac > 0) gp.push(`열상${ev.lac}`); return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${gp.length ? ` (${gp.join('·')})` : ''}` }
@@ -1710,6 +1899,18 @@ function statusGroups (f) {
   if (f.undead) deb.push(f.deathDoom ? `☠️시체 무적${f.deathMark}(회복 못하면 사망)` : `⚰️시체 무적${f.deathMark}(즉사 해제)`)
   if (f.trap > 0) deb.push(`🪤덫${f.trap}`)
   if (f.bleed > 0) deb.push(`🩸출혈${f.bleed}`)
+  if (f.starDot > 0) deb.push(`🌟별빛쇄도${f.starDot}`)
+  if (f.meteorDot > 0) deb.push(`☄️별똥별${f.meteorDot}`)
+  if (f.form) { // 드루이드: 형상·자원·재생
+    buf.push(`${DRUID_FORMS[f.form].emoji}${f.form}`)
+    if (f.form === '전투곰') buf.push(`😤분노 ${f.druRage}/${RAGE_MAX}`)
+    if (f.form === '표범' || f.form === '치타') buf.push(`⚡기력 ${f.druEnergy}/${ENERGY_MAX}`)
+    if (f.druRegen > 0) buf.push(`🌿재생${f.druRegen}`)
+    if (f.bearRegen > 0) buf.push(`🐻광포한재생력${f.bearRegen}`)
+    if (f.catRegen > 0) buf.push(`🐅자연의재생력${f.catRegen}`)
+    if (f.crouch > 0) buf.push(`🐾웅크리기${f.crouch}`)
+    if (f.stealth > 0) buf.push('🌑은신')
+  }
   // 버프(남은턴/스택 표기)
   if (f.rage > 0) buf.push(`🔥광폭${f.rage}`)
   if (f.powBuff > 0) buf.push(`💪공격강화${f.powBuff}`)
@@ -1751,7 +1952,7 @@ function buildBattleEmbed (state) {
   const fr = frameAt(state, shown) // 공개 시점 프레임(체력·버프·디버프 실시간 동기화)
   const buffLine = (s) => s ? `🟢 ${s}\n` : '' // 버프 = 캐릭명 위
   const debLine = (s) => s ? `🔴 ${s}\n` : '' // 디버프 = 캐릭명 아래
-  const cdLine = (nm, f) => { const sks = SKILLS[nm]; if (!sks || !f.cd) return ''; return `⏳ ${sks.map((sk, i) => `${sk.name} ${f.cd[i] > 0 ? f.cd[i] : '✅'}`).join(' · ')}\n` } // 상대 스킬 쿨 실시간(정보대칭)
+  const cdLine = (nm, f) => { const sks = skillsOf(f); if (!sks || !f.cd) return ''; return `⏳ ${f.form ? DRUID_FORMS[f.form].emoji + f.form + ' · ' : ''}${sks.map((sk, i) => `${sk.name} ${f.cd[i] > 0 ? f.cd[i] : '✅'}`).join(' · ')}\n` } // 상대 스킬 쿨 실시간(정보대칭)
   const eMax = (base, f) => Math.round(base * (1 - Math.min(f.erosion || 0, 10) * 0.05)) // 침식: 최대체력 표시에 반영(스택당 -5%). 침식이 "피해"가 아니라 "피통 감소"로 읽히게
   const desc =
     // 상단: 상대 (버프 위 · 이름 · 디버프 아래 · HP)
@@ -1787,7 +1988,7 @@ function buildBattleRow (state) {
     if (!s.usable) return `${s.name} · ${s.reason}`
     const pre = s.inst === '즉시' ? '⚡' : '✨'
     const suf = s.inst ? ` · ${s.inst}` : ''
-    return `${pre} ${s.name}${suf}${typeof s.base === 'number' ? ` (쿨${s.base})` : (s.base ? ` (${s.base})` : '')}`
+    return `${pre} ${s.name}${suf}${typeof s.base === 'number' ? ` (쿨${s.base})` : (s.base ? ` (${s.base})` : '')}${s.cost ? ` · ${s.cost}` : ''}`
   }
   // 1줄=행동(공격/방어), 2줄=스킬(+패시브) — 스킬 쿨타임 항상 노출. 스킬 4개까지 대비
   const actionBtns = [
@@ -1813,6 +2014,13 @@ function buildEnchantRow (mid, slot) {
     new ButtonBuilder().setCustomId(cid('얼음')).setLabel('❄️ 얼음 · 둔화').setStyle(ButtonStyle.Primary),
     new ButtonBuilder().setCustomId(cid('전격')).setLabel('⚡ 전격 · 마비').setStyle(ButtonStyle.Secondary)
   )
+}
+// 드루이드 형상변환 선택: 5형상 버튼(현재 형상 자리는 ↩️ 취소 — 원래 행동 선택으로)
+function buildFormRow (mid, slot, cur) {
+  const cid = (f) => JSON.stringify({ action: 'duel', op: 'form', f, slot, memberId: mid })
+  return new ActionRowBuilder().addComponents(DRUID_ORDER.map(k => k === cur
+    ? new ButtonBuilder().setCustomId(JSON.stringify({ action: 'duel', op: 'formback', memberId: mid })).setLabel(`↩️ 취소(${DRUID_FORMS[k].emoji}${k})`).setStyle(ButtonStyle.Secondary)
+    : new ButtonBuilder().setCustomId(cid(k)).setLabel(`${DRUID_FORMS[k].emoji} ${k}`).setStyle(k === '인간' ? ButtonStyle.Secondary : ButtonStyle.Primary)))
 }
 // 올인!! 베팅 선택(체력 몇 %를 걸지) — 룬각인 인챈트와 동일한 choose 서브메뉴 패턴
 function buildBetRow (mid, slot) {
@@ -1889,14 +2097,20 @@ async function handleButton (interaction, info) {
     }
     // 선택형 스킬(룬각인 인챈트 / 올인!! 베팅): 실행 전 서브메뉴 표시
     const m = /^s(\d+)$/.exec(info.c)
-    if (m) { const slot = +m[1]; const sk = SKILLS[sess.state.meName] && SKILLS[sess.state.meName][slot]; if (sk && sk.choose && playerCanUse(sess.state, slot).usable) { const row = sk.choose === 'bet' ? buildBetRow(mid, slot) : buildEnchantRow(mid, slot); await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: [row] }); return } }
+    if (m) { const slot = +m[1]; const sk = skillsOf(sess.state.A)[slot]; if (sk && sk.choose && playerCanUse(sess.state, slot).usable) { const row = sk.choose === 'bet' ? buildBetRow(mid, slot) : sk.choose === 'form' ? buildFormRow(mid, slot, sess.state.A.form) : buildEnchantRow(mid, slot); await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: [row] }); return } }
     const phase = playerResolve(sess.state, info.c)
     await revealTurns(interaction, sess.state, phase, { me: sess.me, opp: sess.opp, ai: sess.ai, mid, msgId: interaction.message.id })
-  } else if (info.op === 'enchant' || info.op === 'bet') {
+  } else if (info.op === 'formback') { // 형상변환 메뉴 취소 → 원래 행동 버튼
+    const sess = SESSIONS.get(interaction.message.id)
+    if (!sess) { await interaction.reply({ content: '전투 정보가 만료됐어~ `/듀얼`로 다시 시작해줘! ⚔️', ephemeral: true }); return }
+    sess.ts = Date.now()
+    await interaction.update({ embeds: [buildBattleEmbed(sess.state)], components: buildBattleRow(sess.state) })
+  } else if (info.op === 'enchant' || info.op === 'bet' || info.op === 'form') {
     const sess = SESSIONS.get(interaction.message.id)
     if (!sess) { await interaction.reply({ content: '전투 정보가 만료됐어~ `/듀얼`로 다시 시작해줘! ⚔️', ephemeral: true }); return }
     sess.ts = Date.now()
     if (info.op === 'enchant') sess.state.A.enchantChoice = info.e // 플레이어가 고른 인챈트 → 룬각인 exec가 사용
+    else if (info.op === 'form') sess.state.A.formChoice = info.f // 플레이어가 고른 형상 → 형상변환이 사용
     else sess.state.A.betChoice = info.pct // 플레이어가 고른 베팅% → 올인!! exec가 사용
     const phase = playerResolve(sess.state, 's' + info.slot)
     await revealTurns(interaction, sess.state, phase, { me: sess.me, opp: sess.opp, ai: sess.ai, mid, msgId: interaction.message.id })

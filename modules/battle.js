@@ -812,12 +812,13 @@ const DRUID_FORMS = {
 }
 const DRUID_ORDER = ['전투곰', '표범', '치타', '마나부엉이', '인간']
 const RES_LABEL = { druRage: '분노', druEnergy: '기력' }
-const BEAR_PASSIVE = { name: '광포한 재생력', desc: '소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력 25% 넘는 피해를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복 · 쿨5)' }
+const BEAR_PASSIVE = { name: '광포한 재생력', desc: '소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력 30% 이상 피해를 받으면 최대체력 5% 회복, 분노 40 이상이면 30을 소모해 +5%(죽을 피해는 맞기 전에 먼저 회복 · 쿨5)' }
 const RAGE_MAX = 100; const BEAR_RAGE_SHIFT = 25; const BEAR_RAGE_HIT = 15; const BEAR_RAGE_CRIT = 30; const BEAR_RAGE_SKILL = 5; const RAGE_DECAY = 5 // 분노: 곰 상태에서 내 턴마다 5 자연감소 · 공격 스킬 적중 시 +5
 const ENERGY_MAX = 100; const ENERGY_REGEN = 10 // 기력: 표범·치타 공용 풀, 100으로 시작 · 내 턴마다 10 회복(형상 무관)
 const DRU_REGEN = 0.03; const CAT_REGEN = 0.08 // 재생(인간·3턴, 형상 유지) / 자연의 재생력(치타·5턴) — 턴당 현재 형상 최대체력 %
-// 광포한 재생력(전투곰 패시브): 소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력의 25% 넘는 피해(또는 죽을 피해)를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복)
-const BEAR_RAGE_HEAL = 0.01 / 5; const BEAR_GUARD_CUT = 0.25; const BEAR_GUARD_HEAL = 0.10; const BEAR_GUARD_CD = 5 // 10% 회복: 내 턴 기준 쿨5(형상 무관하게 흐름)
+// 광포한 재생력(전투곰 패시브): 소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력의 30% 이상 피해(또는 죽을 피해)를 받으면 최대체력 5% 회복 + 분노 40 이상이면 30 소모해 +5%(죽을 피해는 맞기 전에 먼저 회복)
+const BEAR_RAGE_HEAL = 0.01 / 5; const BEAR_GUARD_CUT = 0.30; const BEAR_GUARD_HEAL = 0.05; const BEAR_GUARD_CD = 5 // 5% 회복: 내 턴 기준 쿨5(형상 무관하게 흐름)
+const BEAR_GUARD_RAGE = 30; const BEAR_GUARD_RAGE_MIN = 40; const BEAR_GUARD_RAGE_HEAL = 0.05 // 분노 40 이상이면 30 소모해 +5% 추가(이 소모분엔 분노 소모 회복 미적용)
 const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.9 // 웅크리기(치타): 회피×1.2 · 받는 피해×0.8
 const STAR_DOT = 0.05; const METEOR_DOT = 0.07 // 별빛쇄도·별똥별: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수)
 function initDruid (f, d) {
@@ -888,15 +889,16 @@ const skillsOf = (f) => (f && f.form) ? DRUID_SKILLS[f.form] : (SKILLS[f.name] |
 const bearSkillRage = (s, r) => { if (r.landed) s.druRage = Math.min(RAGE_MAX, s.druRage + BEAR_RAGE_SKILL) } // 곰 공격 스킬 적중 → 분노 +5
 // 자원 소모 스킬 래퍼: ready에 자원 게이트, exec에서 차감. res='druRage'|'druEnergy'
 function druCost (res, cost, sk) { return Object.assign({}, sk, { res, cost, ready: (s, f, ds, df, x) => s[res] >= cost && sk.ready(s, f, ds, df, x), exec: (s, f, ds, df) => { s[res] -= cost; if (res === 'druRage' && s.healBlock === 0) s.hp = Math.min(ds.maxhp, s.hp + hcut(s, Math.round(ds.maxhp * cost * BEAR_RAGE_HEAL))); sk.exec(s, f, ds, df) } }) } // 분노 소모 → 광포한 재생력(5당 1%)
-// 광포한 재생력(전투곰): 한 번에 최대체력 25% 넘는 피해 → 즉시 최대체력 10% 회복 / 죽을 피해 → 맞기 전에 먼저 10% 회복(상한 적용 후 피해 → 버티면 생존). 쿨5(내 턴). 기록은 holdRec에서
+// 광포한 재생력(전투곰): 한 번에 최대체력 30% 이상 피해 → 즉시 최대체력 5% 회복(분노 40 이상이면 30 소모해 +5%) / 죽을 피해 → 같은 양을 맞기 전에 먼저 회복(상한 적용 후 피해 → 버티면 생존). 쿨5(내 턴). 기록은 holdRec에서
 function bearGuard (foe, df, dealt) {
   if (foe.form !== '전투곰' || foe.healBlock > 0 || dealt <= 0 || foe.bearGuardCd > 0) return
-  const heal = hcut(foe, Math.round(df.maxhp * BEAR_GUARD_HEAL)); const b = foe.hp
-  if (foe.hp <= 0) foe.hp = Math.min(df.maxhp, foe.hp + dealt + heal) - dealt // 죽을 피해: 선회복(맞기 전 체력 + 10%, 최대체력 상한) 후 피해
-  else if (dealt > df.maxhp * BEAR_GUARD_CUT) foe.hp = Math.min(df.maxhp, foe.hp + heal)
-  else return
+  if (!(foe.hp <= 0 || dealt >= df.maxhp * BEAR_GUARD_CUT)) return
+  let pct = BEAR_GUARD_HEAL; if (foe.druRage >= BEAR_GUARD_RAGE_MIN) { foe.druRage -= BEAR_GUARD_RAGE; pct += BEAR_GUARD_RAGE_HEAL; foe._guardRage = true }
+  const heal = hcut(foe, Math.round(df.maxhp * pct)); const b = foe.hp
+  if (foe.hp <= 0) foe.hp = Math.min(df.maxhp, foe.hp + dealt + heal) - dealt // 죽을 피해: 선회복(맞기 전 체력 + 회복량, 최대체력 상한) 후 피해
+  else foe.hp = Math.min(df.maxhp, foe.hp + heal)
   foe.bearGuardCd = BEAR_GUARD_CD
-  foe._guardHeal = (foe._guardHeal || 0) + Math.round(foe.hp - b); foe._guardFail = foe.hp <= 0 // 선회복해도 피해가 더 크면 사망(내레이션 구분)
+  foe._guardHeal = (foe._guardHeal || 0) + Math.round(foe.hp - b); foe._guardFail = foe.hp <= 0; foe._guardRageUsed = !!foe._guardRage; foe._guardRage = false // 선회복해도 피해가 더 크면 사망(내레이션 구분)
 }
 // AI 자원 비축(치타): 체력 50% 미만이고 자연의 재생력 쿨이 곧 돌아오면, 다른 스킬은 재생 비용(기력50)을 남길 때만 사용(점수 0) — 플레이어 사용 가능 여부와는 무관
 function druReserve (s, ds, res, cost, regenSlot, regenCost, regenKey) { return !(s.hp < ds.maxhp * 0.5 && !(s[regenKey] > 0) && s.cd[regenSlot] <= 1 && s[res] - cost < regenCost) }
@@ -1587,7 +1589,7 @@ function recEntry (state, who, ev) {
   state.log.push(Object.assign(base, ev))
 }
 function floorBoth (state) { return [undeadFloor(state.A), undeadFloor(state.B)] } // 시체 무적 하한 적용(기록 전에 — HP 0 표기 방지)
-function holdRec (state, held) { if (held[0]) recEntry(state, 'me', { type: 'undeadHold', left: state.A.deathMark }); if (held[1]) recEntry(state, 'opp', { type: 'undeadHold', left: state.B.deathMark }); for (const [w, f] of [['me', state.A], ['opp', state.B]]) if (f._guardHeal) { recEntry(state, w, { type: 'bearguard', heal: f._guardHeal, fail: !!f._guardFail }); f._guardHeal = 0; f._guardFail = false } } // + 광포한 재생력(곰) 즉시 회복 기록 // 무적으로 버틴 경우 나레이션
+function holdRec (state, held) { if (held[0]) recEntry(state, 'me', { type: 'undeadHold', left: state.A.deathMark }); if (held[1]) recEntry(state, 'opp', { type: 'undeadHold', left: state.B.deathMark }); for (const [w, f] of [['me', state.A], ['opp', state.B]]) if (f._guardHeal) { recEntry(state, w, { type: 'bearguard', heal: f._guardHeal, fail: !!f._guardFail, rage: !!f._guardRageUsed }); f._guardHeal = 0; f._guardFail = false; f._guardRageUsed = false } } // + 광포한 재생력(곰) 즉시 회복 기록 // 무적으로 버틴 경우 나레이션
 function reviveRec (state, who) { const f = who === 'me' ? state.A : state.B; const mx = who === 'me' ? state.maxA : state.maxB; state.log.push({ who, type: 'revive', hp: Math.max(f.hp, 0), max: mx, rtype: f.reviveType }) }
 // 턴 기록: upkeep이 남긴 tick 이벤트(출혈/덫 발동)를 먼저 로그에 풀고, 본 행동 이벤트를 기록
 function recTurn (state, who, f, ev) { if (f._tick && f._tick.length) { for (const t of f._tick) recEntry(state, who, t); f._tick = [] } if (ev && ev.type === 'skip' && f.hp <= 0) return; recEntry(state, who, ev) } // 출혈로 죽은 턴의 빈 스킵은 기록 생략(koLog가 처리)
@@ -1841,7 +1843,7 @@ function narrateLine (ev, meName, oppName) {
     case 'undeadHold': return `⚰️ ${ae} **${A}**${eun(A)} 살아있는 시체 — 체력이 1 아래로 떨어지지 않는다! (${ev.left > 0 ? `무적 ${ev.left}턴 남음` : '무적 곧 종료'})`
     case 'deathmark': return `☠️ ${ae} **${A}**의 육신이 무너진다! 회복하지 못한 시체가 스러졌다…`
     case 'shift': { const F = DRUID_FORMS[ev.to]; return ev.to === '인간' ? `🧝 ${ae} **${A}**${iga(A)} 형상을 풀고 인간의 모습으로 돌아왔다. (HP ${ev.selfHp}/${ev.selfMax})` : `${F.emoji} ${ae} **${A}**${iga(A)} **${ev.to}** 형상으로 변신했다!${ev.rage ? ` 😤분노 ${ev.rage}` : ''} (HP ${ev.selfHp}/${ev.selfMax})` }
-    case 'bearguard': return ev.fail ? `🐻 ${ae} **${A}**의 광포한 재생력! 체력 **${ev.heal}**을 먼저 회복했지만 일격을 버티지 못했다…` : `🐻 ${ae} **${A}**의 광포한 재생력! 큰 타격에 즉시 체력 **${ev.heal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})`
+    case 'bearguard': { const rg = ev.rage ? ' 😤분노 30 소모' : ''; return ev.fail ? `🐻 ${ae} **${A}**의 광포한 재생력!${rg} 체력 **${ev.heal}**을 먼저 회복했지만 일격을 버티지 못했다…` : `🐻 ${ae} **${A}**의 광포한 재생력!${rg} 큰 타격에 즉시 체력 **${ev.heal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})` }
     case 'druregen': return `🌿 ${ae} **${A}**${eun(A)} 재생의 힘으로 체력 **${ev.heal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})`
     case 'stardot': { const bits = []; if (ev.star > 0) bits.push(`별빛쇄도 ${ev.star}턴`); if (ev.meteor > 0) bits.push(`별똥별 ${ev.meteor}턴`); return `🌟 ${ae} **${A}**${iga(A)} 쏟아지는 별빛에 **${ev.dmg}** 피해!${ev.absorbed > 0 ? ` 🔷*마나실드 ${ev.absorbed} 흡수*` : ''}${bits.length ? ` (${bits.join(' · ')} 남음)` : ''}` }
     case 'trapspring': return `🪤 ${ae} **${A}**${iga(A)} 사냥꾼덫을 밟았다! 발이 묶이고(둔화) 🩸출혈 시작!`

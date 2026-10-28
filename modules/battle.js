@@ -805,7 +805,7 @@ const SKILLS = {
 const physOf = (v) => 10 + v + step(v, 3) + Math.floor(v / 20) * 8 // derive 물공식(스탯 하나로)
 const DRUID_FORMS = {
   인간: { emoji: '🧝' },
-  전투곰: { emoji: '🐻', phys: '힘', atk: 1.7, hp: 2, dodge: 1.5, def: 1.5, noWBlock: true, desc: '공격력×1.7 · 최대체력×2 · 회피×1.5 · 방어×1.5 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5) · 패시브 광포한 재생력' },
+  전투곰: { emoji: '🐻', phys: '힘', atk: 1.7, hp: 2, dodge: 1.5, pdef: 1.5, mdef: 1.1, noWBlock: true, desc: '공격력×1.7 · 최대체력×2 · 회피×1.5 · 물방×1.5 · 마방×1.1 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5) · 패시브 광포한 재생력' },
   표범: { emoji: '🐆', phys: '민첩', atk: 1.5, dodge: 2.0, crit: 1.2, critMul: 1.5, turn: 0.9, desc: '공격력×1.5(민첩) · 회피×2 · 치명타 확률×1.2 · 치명타 배율×1.5 · 턴×0.9 · 기력' },
   치타: { emoji: '🐅', phys: '민첩', atk: 0.8, dodge: 2.5, hp: 0.8, turn: 0.8, desc: '공격력×0.8(민첩) · 회피×2.5 · 최대체력×0.8 · 턴×0.8 · 기력' },
   마나부엉이: { emoji: '🦉', hp: 0.6, shield: true, magicAuto: true, desc: '최대체력×0.6 · 마나실드 · 평타=마법(마공=지능)' }
@@ -836,7 +836,7 @@ function druidStats (f, ds, form = f.form) {
   ds.물공 = Math.round(physOf(c[F.phys || '힘']) * (B.물공 / physOf(c.힘)) * (F.atk || 1)) // 형상별 물공 스탯 × 타이틀 배율 유지
   ds.마공 = Math.round(B.마공 * (F.matk || 1))
   ds.물회 = B.물회 * (F.dodge || 1) * (form === '치타' && f.crouch > 0 ? CROUCH_DODGE : 1)
-  ds.물방 = Math.min(B.물방 * (F.def || 1), 0.80); ds.마방 = Math.min(B.마방 * (F.def || 1), 0.85)
+  ds.물방 = Math.min(B.물방 * (F.pdef || 1), 0.80); ds.마방 = Math.min(B.마방 * (F.mdef || 1), 0.85)
   ds.크리 = Math.min(B.크리 * (F.crit || 1), 0.9)
   ds.무기 = F.critMul ? Object.assign({}, B.무기, { 크리배율: B.무기.크리배율 * F.critMul }) : B.무기
   ds.무기막기 = F.noWBlock ? 0 : B.무기막기
@@ -914,6 +914,8 @@ const DRUID_SKILLS = {
     // 포효: 상대 4턴 강제평타(자신 공격력 증가 없음 — 기사 도발과 별개)
     druCost('druRage', 10, mkSkill(1, { name: '포효', tag: '제어', cd: 4, debuff: { taunt: 4 }, note: '포효', ready: (s, f) => s.cd[1] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') })),
     druCost('druRage', 15, (() => { const spec = { name: '야생의돌진', tag: '제어', type: '물리.일반', mult: 1.0, cc: { stun: 1 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => estDamage(spec, ds, df, x, s, f) + stunSc(s, f, ds, df, x), exec: (s, f, ds, df) => { bearSkillRage(s, runDamage(spec, s, f, ds, df)); applyCC(f, 'stun', 1); s.cd[2] = 3; s.note = '기절' } }) })()), // 물공×1.0 + 1턴 기절(기절은 적중 무관)
+    // 두개골강타: 물공×1.5 + 적중 시 2턴 기절
+    druCost('druRage', 15, (() => { const spec = { name: '두개골강타', tag: '제어', type: '물리.일반', mult: 1.5, cc: { stun: 2 }, cd: 5 }; return Object.assign({}, spec, { coef: '타격×1.5 + 적중 시 2턴 스턴', ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => estDamage(spec, ds, df, x, s, f) + (f.stun === 0 ? ctrlVal(x.foeTurn, 2, 'stun') * stunTiming(s, f) : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); bearSkillRage(s, r); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[3] = 5; s.note = r.landed ? '기절' : '두개골강타·빗나감' } }) })()),
     FORM_SWAP
   ],
   표범: [

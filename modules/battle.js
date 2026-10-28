@@ -805,17 +805,17 @@ const SKILLS = {
 const physOf = (v) => 10 + v + step(v, 3) + Math.floor(v / 20) * 8 // derive 물공식(스탯 하나로)
 const DRUID_FORMS = {
   인간: { emoji: '🧝' },
-  전투곰: { emoji: '🐻', phys: '힘', atk: 1.5, hp: 2, dodge: 1.5, def: 1.5, noWBlock: true, desc: '공격력×1.5 · 최대체력×2 · 회피×1.5 · 방어×1.5 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 턴당 -5)' },
+  전투곰: { emoji: '🐻', phys: '힘', atk: 1.7, hp: 2, dodge: 1.5, def: 1.5, noWBlock: true, desc: '공격력×1.7 · 최대체력×2 · 회피×1.5 · 방어×1.5 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5)' },
   표범: { emoji: '🐆', phys: '민첩', atk: 1.5, dodge: 2.0, crit: 1.2, critMul: 1.5, turn: 0.8, desc: '공격력×1.5(민첩) · 회피×2 · 치명타 확률×1.2 · 치명타 배율×1.5 · 턴×0.8 · 기력' },
-  치타: { emoji: '🐅', phys: '민첩', dodge: 2.5, hp: 0.8, desc: '회피×2.5 · 최대체력×0.8 · 물공=민첩 · 기력' },
+  치타: { emoji: '🐅', phys: '민첩', atk: 0.8, dodge: 2.5, hp: 0.8, desc: '공격력×0.8(민첩) · 회피×2.5 · 최대체력×0.8 · 기력' },
   마나부엉이: { emoji: '🦉', hp: 0.6, shield: true, magicAuto: true, desc: '최대체력×0.6 · 마나실드 · 평타=마법(마공=지능)' }
 }
 const DRUID_ORDER = ['전투곰', '표범', '치타', '마나부엉이', '인간']
 const RES_LABEL = { druRage: '분노', druEnergy: '기력' }
-const RAGE_MAX = 100; const BEAR_RAGE_SHIFT = 25; const BEAR_RAGE_HIT = 15; const BEAR_RAGE_CRIT = 30; const RAGE_DECAY = 5 // 분노: 곰 상태에서 내 턴마다 5 자연감소
+const RAGE_MAX = 100; const BEAR_RAGE_SHIFT = 25; const BEAR_RAGE_HIT = 15; const BEAR_RAGE_CRIT = 30; const BEAR_RAGE_SKILL = 5; const RAGE_DECAY = 5 // 분노: 곰 상태에서 내 턴마다 5 자연감소 · 공격 스킬 적중 시 +5
 const ENERGY_MAX = 100; const ENERGY_REGEN = 20 // 기력: 표범·치타 공용 풀, 100으로 시작 · 내 턴마다 20 회복(형상 무관)
 const DRU_REGEN = 0.03; const BEAR_REGEN = 0.07; const CAT_REGEN = 0.08 // 재생(인간·3턴, 형상 유지) / 광포한 재생력(곰·5턴) / 자연의 재생력(치타·5턴) — 턴당 현재 형상 최대체력 %
-const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.8 // 웅크리기(치타): 회피×1.2 · 받는 피해×0.8
+const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.9 // 웅크리기(치타): 회피×1.2 · 받는 피해×0.8
 const STAR_DOT = 0.05; const METEOR_DOT = 0.07 // 별빛쇄도·별똥별: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수)
 function initDruid (f, d) {
   f.form = '인간'
@@ -880,6 +880,7 @@ function starDotTick (self, ds) {
   self._tick.push({ type: 'stardot', dmg: d, absorbed: Math.max(psh - self.shield, 0), star: self.starDot, meteor: self.meteorDot })
 }
 const skillsOf = (f) => (f && f.form) ? DRUID_SKILLS[f.form] : (SKILLS[f.name] || [])
+const bearSkillRage = (s, r) => { if (r.landed) s.druRage = Math.min(RAGE_MAX, s.druRage + BEAR_RAGE_SKILL) } // 곰 공격 스킬 적중 → 분노 +5
 // 자원 소모 스킬 래퍼: ready에 자원 게이트, exec에서 차감. res='druRage'|'druEnergy'
 function druCost (res, cost, sk) { return Object.assign({}, sk, { res, cost, ready: (s, f, ds, df, x) => s[res] >= cost && sk.ready(s, f, ds, df, x), exec: (s, f, ds, df) => { s[res] -= cost; sk.exec(s, f, ds, df) } }) }
 // AI 자원 비축: 체력 50% 미만이고 재생기 쿨이 곧 돌아오면, 다른 스킬은 재생 비용을 남길 때만 사용(점수 0) — 플레이어 사용 가능 여부와는 무관
@@ -904,11 +905,12 @@ const DRUID_SKILLS = {
     mkSkill(4, { name: '재생', tag: '회복', cd: 5, coef: `3턴간 턴당 체력 ${Math.round(DRU_REGEN * 100)}% 회복(총 ${Math.round(DRU_REGEN * 300)}% · 형상 변신 후에도 유지)`, selfBuff: { druRegen: 3 }, note: '재생', ready: (s, f, ds) => s.cd[4] === 0 && s.druRegen === 0 && s.hp < ds.maxhp, score: (s, f, ds) => healScore(s, ds, DRU_REGEN, 3) })
   ],
   전투곰: [
-    druCost('druRage', 20, (() => { const spec = { name: '후려갈기기', tag: '공격', type: '물리.일반', mult: 1.5, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: BEAR_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 1; s.note = '후려갈기기' } }) })()),
+    // 후려갈기기: 물공×1.8 + 자기 최대체력 3%(방패밀쳐내기식 — 곰 체력이 곧 화력, 명중 시 합산)
+    druCost('druRage', 20, (() => { const spec = { name: '후려갈기기', tag: '공격', type: '물리.일반', mult: 1.8, dmg: { selfHp: 0.03 }, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: BEAR_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { bearSkillRage(s, runDamage(spec, s, f, ds, df)); s.cd[0] = 1; s.note = '후려갈기기' } }) })()),
     // 포효: 상대 4턴 강제평타(자신 공격력 증가 없음 — 기사 도발과 별개)
     druCost('druRage', 10, mkSkill(1, { name: '포효', tag: '제어', cd: 4, debuff: { taunt: 4 }, note: '포효', ready: (s, f) => s.cd[1] === 0 && f.taunt === 0, score: BEAR_RSV(10, (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun')) })),
     druCost('druRage', 40, mkSkill(2, { name: '광포한 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${Math.round(BEAR_REGEN * 100)}% 회복(총 ${Math.round(BEAR_REGEN * 500)}% · 곰 해제 시 소멸)`, selfBuff: { bearRegen: 5 }, note: '광포한 재생력', ready: (s, f, ds) => s.cd[2] === 0 && s.bearRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, BEAR_REGEN, 5) })),
-    druCost('druRage', 25, mkSkill(3, { name: '야생의돌진', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: BEAR_RSV(25, stunSc) })),
+    druCost('druRage', 15, (() => { const spec = { name: '야생의돌진', tag: '제어', type: '물리.일반', mult: 1.0, cc: { stun: 1 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: BEAR_RSV(15, (s, f, ds, df, x) => estDamage(spec, ds, df, x, s, f) + stunSc(s, f, ds, df, x)), exec: (s, f, ds, df) => { bearSkillRage(s, runDamage(spec, s, f, ds, df)); applyCC(f, 'stun', 1); s.cd[3] = 3; s.note = '기절' } }) })()), // 물공×1.0 + 1턴 기절(기절은 적중 무관)
     FORM_SWAP
   ],
   표범: [
@@ -920,9 +922,9 @@ const DRUID_SKILLS = {
     FORM_SWAP
   ],
   치타: [
-    druCost('druEnergy', 20, (() => { const spec = { name: '물기', tag: '공격', type: '물리.일반', mult: 1.0, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: CAT_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 1; s.note = '물기' } }) })()),
+    druCost('druEnergy', 20, (() => { const spec = { name: '물기', tag: '공격', type: '물리.일반', mult: 1.1, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: CAT_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 1; s.note = '물기' } }) })()),
     druCost('druEnergy', 50, mkSkill(1, { name: '자연의 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${Math.round(CAT_REGEN * 100)}% 회복(총 ${Math.round(CAT_REGEN * 500)}% · 치타 해제 시 소멸)`, selfBuff: { catRegen: 5 }, note: '자연의 재생력', ready: (s, f, ds) => s.cd[1] === 0 && s.catRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, CAT_REGEN, 5) })),
-    druCost('druEnergy', 40, mkSkill(2, { name: '야생의돌진', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: CAT_RSV(40, stunSc) })),
+    druCost('druEnergy', 40, (() => { const spec = { name: '야생의돌진', tag: '제어', type: '물리.일반', mult: 1.0, cc: { stun: 1 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: CAT_RSV(40, (s, f, ds, df, x) => estDamage(spec, ds, df, x, s, f) + stunSc(s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); applyCC(f, 'stun', 1); s.cd[2] = 3; s.note = '기절' } }) })()), // 물공×1.0 + 1턴 기절
     // 웅크리기: 2턴 회피×1.2 · 받는 피해×0.8. 점수=2턴간 줄어드는 기대 피격량
     druCost('druEnergy', 60, mkSkill(3, { name: '웅크리기', tag: '버프', cd: 3, coef: `2턴간 회피×${CROUCH_DODGE} · 받는 피해×${CROUCH_TAKEN}`, selfBuff: { crouch: 2 }, note: '웅크리기', ready: (s) => s.cd[3] === 0 && s.crouch === 0, score: CAT_RSV(60, (s, f, ds, df, x) => { const d = Math.min(ds.물회, 0.8); return buffVal(x.foeTurn * 2 * (1 - (1 - Math.min(d * CROUCH_DODGE, 0.95)) * CROUCH_TAKEN / (1 - d)), s, ds) }) })),
     FORM_SWAP
@@ -937,35 +939,28 @@ const DRUID_SKILLS = {
 }
 SKILLS.드루이드 = DRUID_SKILLS.인간
 // ── 드루이드 AI: 형상 선택 ──
-// 형상별 추정: 버팀 턴(현재 체력비율×형상 최대체력(+실드) ÷ 받을 턴당 피해) / 처치 턴(상대 체력 ÷ 내 턴당 딜)
-// ratio = 버팀÷처치(>1이면 레이스 승). 이기는 형상(ratio≥1.2) 중 가장 빨리 잡는 형상, 없으면 ratio 최대(시간제한 무승부 방지: 안 죽기만 하는 형상 회피)
-// 회피는 상대가 물리 평타일 때만, 재생기는 턴당 회복만큼 받는 피해에서 차감.
-const FORM_SKILL_X = { 인간: 1, 전투곰: 1.25, 표범: 1.5, 치타: 1, 마나부엉이: 1 } // 스킬 평균 배율 근사(곰: 후려갈기기 1.5 격턴 / 표범: 찢어발기기 2.0 격턴 / 치타·부엉이: 평타급)
-const FORM_HEAL = { 전투곰: BEAR_REGEN, 치타: CAT_REGEN }
-function druidFormEst (s, f, ds, df, form) {
-  const o = Object.assign({}, ds); druidStats(s, o, form); o.maxhp = Math.round(s.druBase.maxhp * (DRUID_FORMS[form].hp || 1))
-  const critX = (a) => (a.평타마법 || (a.평타마법 == null && a.무기.평타 === '마법')) ? 1 : 1 + a.크리 * ((a.무기.크리배율 || 1.5) - 1) // 물리 기대 치명타 배율(estAtk엔 치명타 없음)
-  let my = estAtk(o, df) * critX(o) * FORM_SKILL_X[form]
-  if (form === '마나부엉이') my += df.maxhp * (STAR_DOT * 5 / 10 + METEOR_DOT * 5 / 12) * (1 - df.마방) // 별빛쇄도(5%×5턴, 끝난 뒤 쿨5)+별똥별(7%×5턴, 끝난 뒤 쿨7) 턴당 근사
-  const osh = form === '마나부엉이' ? (s.form === form ? s.shield : s.owlShield) : 0; if (osh > 0) o.물방 = 0 // 실드가 있으면 물리 피격은 물방 무시(엔진 규칙)
-  const foePhys = !(df.평타마법 || (df.평타마법 == null && df.무기.평타 === '마법'))
-  const raw = estAtk(df, o) * critX(df) * (foePhys ? 1 - Math.min(o.물회, 0.9) : 1)
-  const inc = Math.max(raw - o.maxhp * (FORM_HEAL[form] || 0), raw * 0.1, 1)
-  const hp = Math.max(s.hp, 0) / ds.maxhp * o.maxhp + (form === '마나부엉이' ? (s.form === form ? s.shield : s.owlShield) : 0)
-  const kill = Math.max(my, 1) / Math.max(f.hp + f.shield, 1)
-  return { k: form, ratio: (hp / inc) * kill, kill }
+// 형상 역할(AI, 규칙 기반 — 추정식은 상대 스킬딜을 못 봐서 곰 버팀을 과대평가):
+// · 급히 회복(체력 35% 미만): 빠른 상대면 치타(회피하며 자연의 재생력), 아니면 전투곰(버티며 광포한 재생력). 재생 중엔 그 형상 유지
+// · 느리고 마나실드에 약한 상대(물리 평타 + 부엉이 실드를 평타 10회 이상 버팀)면 마나부엉이
+// · 그 외(느리고 잡을만한 상대 · 빠른 상대) 표범
+const FAST_FOE = 0.8 // 상대 턴 ≤ 드루이드 기본 턴 × 이 값 → 빠른 상대
+const OWL_HOLD = 10 // 부엉이 실드가 상대 평타 이만큼 버티면 "마나실드에 약함"
+function foeFast (s, df) { return df.턴 <= s.druBase.턴 * FAST_FOE }
+function shieldWeak (s, ds, df) {
+  if (df.hybrid || df.평타마법 || (df.평타마법 == null && df.무기.평타 === '마법')) return false // 물리 평타만
+  const o = Object.assign({}, ds); druidStats(s, o, '마나부엉이'); o.물방 = 0 // 실드 중 물리 피격은 물방 무시
+  const hit = estAtk(df, o) * (1 + df.크리 * ((df.무기.크리배율 || 1.5) - 1))
+  return s.owlCap / Math.max(hit, 1) >= OWL_HOLD
 }
-// 형상 중엔 더 나은 형상이 30% 이상 앞설 때만 변경(잦은 변신 방지), 자기 재생기 지속 중엔 유지. forced=형상변환 메뉴(현재 형상 제외)
 function druidPickForm (s, f, ds, df, forced) {
-  const ev = DRUID_ORDER.filter(k => k !== '인간').map(k => druidFormEst(s, f, ds, df, k))
-  const pool = forced ? ev.filter(e => e.k !== s.form) : ev
-  const win = pool.filter(e => e.ratio >= 1.2)
-  const best = win.length ? win.reduce((a, b) => b.kill > a.kill ? b : a) : pool.reduce((a, b) => b.ratio > a.ratio ? b : a)
-  if (forced || s.form === '인간') return best.k
-  if (s.bearRegen > 0 || s.catRegen > 0) return s.form
-  const cur = ev.find(e => e.k === s.form)
-  const better = win.length ? (cur.ratio < 1.2 || best.kill > cur.kill * 1.3) : best.ratio > cur.ratio * 1.3
-  return better ? best.k : s.form
+  if (!forced && (s.bearRegen > 0 || s.catRegen > 0)) return s.form
+  const ok = (k) => !forced || k !== s.form
+  if (s.hp < ds.maxhp * 0.35) { // 급히 회복
+    if (foeFast(s, df)) { if (ok('치타') && s.formCd.치타[1] === 0 && s.druEnergy >= 50) return '치타' } else if (ok('전투곰') && s.formCd.전투곰[2] === 0) return '전투곰'
+    if (!forced && (s.form === '치타' || s.form === '전투곰')) return s.form // 회복기 쿨 대기 중엔 버팀 형상 유지
+  }
+  const main = (!foeFast(s, df) && shieldWeak(s, ds, df)) ? '마나부엉이' : '표범'
+  return ok(main) ? main : (main === '표범' ? '마나부엉이' : '표범')
 }
 function drawCard (c, s, f, ds, df) {
   if (c === '킹') { const d = trueDmg(s, f, df, df.maxhp * 0.20); f.hp -= d; return '👑킹·상대 체력20% 확정딜' }

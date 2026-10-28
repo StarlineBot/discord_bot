@@ -657,14 +657,14 @@ const SKILLS = {
     { name: '해방', tag: '회복', cd: 15, stunnable: true, coef: '체력 15% 즉시회복 + 행동불능 즉시해제', ready: (s, f, ds, df) => s.cd[3] === 0, score: (s, f, ds, df, x) => (s.hp > 0 && s.hp < ds.maxhp * 0.35) ? x.est * 0.6 : 0, exec: (s, f, ds, df) => { const broke = s.stun > 0 || s.stunned; s.stun = 0; s.stunned = false; s.hp = Math.min(s.hp + hcut(s, healVar(ds.maxhp * 0.15)), ds.maxhp); s.cd[3] = 15; s.note = broke ? '해방(속박 해제)' : '해방' } }
   ],
   기사: [
-    // 방패밀쳐내기: 물리딜(배율×2) + 상대 최대체력 12% + 자기 최대체력 4%(버티는 체력이 곧 화력)를 배율로 추가 — 스윙 명중 시 합산(회피·막기·실드 모두 적용), HP스케일 탱버스터
-    (() => { const spec = { name: '방패밀쳐내기', tag: '공격', type: '물리.일반', mult: 2, dmg: { foeHp: 0.12, selfHp: 0.04 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 3; s.note = '방패밀쳐내기' } }) })(), // autoScore 파일럿: 딜+상대체력 라이더 자동
+    // 방패밀쳐내기: 물리딜(배율×2) + 상대 최대체력 12% + 자기 최대체력 3%(버티는 체력이 곧 화력)를 배율로 추가 — 스윙 명중 시 합산(회피·막기·실드 모두 적용), HP스케일 탱버스터
+    (() => { const spec = { name: '방패밀쳐내기', tag: '공격', type: '물리.일반', mult: 2, dmg: { foeHp: 0.12, selfHp: 0.03 }, cd: 3 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[0] === 0 && s.hp > ds.maxhp * 0.3, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 3; s.note = '방패밀쳐내기' } }) })(), // autoScore 파일럿: 딜+상대체력 라이더 자동
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
     mkSkill(1, { name: '방패들기', tag: '버프', buff: 5, cd: 6, selfBuff: { blockUp: 5 }, ready: (s, f, ds) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds) }),
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
     { name: '방패가격', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 3, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 3 } },
     // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.8. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
-    mkSkill(3, { name: '도발', tag: '제어', cd: 3, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.8 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
+    mkSkill(3, { name: '도발', tag: '제어', cd: 4, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.8 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸

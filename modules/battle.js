@@ -812,12 +812,12 @@ const DRUID_FORMS = {
 }
 const DRUID_ORDER = ['전투곰', '표범', '치타', '마나부엉이', '인간']
 const RES_LABEL = { druRage: '분노', druEnergy: '기력' }
-const BEAR_PASSIVE = { name: '광포한 재생력', desc: '소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력 30% 넘는 피해를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복)' }
+const BEAR_PASSIVE = { name: '광포한 재생력', desc: '소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력 30% 넘는 피해를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복 · 쿨5)' }
 const RAGE_MAX = 100; const BEAR_RAGE_SHIFT = 25; const BEAR_RAGE_HIT = 15; const BEAR_RAGE_CRIT = 30; const BEAR_RAGE_SKILL = 5; const RAGE_DECAY = 5 // 분노: 곰 상태에서 내 턴마다 5 자연감소 · 공격 스킬 적중 시 +5
 const ENERGY_MAX = 100; const ENERGY_REGEN = 10 // 기력: 표범·치타 공용 풀, 100으로 시작 · 내 턴마다 10 회복(형상 무관)
 const DRU_REGEN = 0.03; const CAT_REGEN = 0.08 // 재생(인간·3턴, 형상 유지) / 자연의 재생력(치타·5턴) — 턴당 현재 형상 최대체력 %
 // 광포한 재생력(전투곰 패시브): 소모한 분노 5당 최대체력 1% 회복 + 한 번에 최대체력의 30% 넘는 피해(또는 죽을 피해)를 받으면 최대체력 10% 회복(죽을 피해는 맞기 전에 먼저 회복)
-const BEAR_RAGE_HEAL = 0.01 / 5; const BEAR_GUARD_CUT = 0.30; const BEAR_GUARD_HEAL = 0.10
+const BEAR_RAGE_HEAL = 0.01 / 5; const BEAR_GUARD_CUT = 0.30; const BEAR_GUARD_HEAL = 0.10; const BEAR_GUARD_CD = 5 // 10% 회복: 내 턴 기준 쿨5(형상 무관하게 흐름)
 const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.9 // 웅크리기(치타): 회피×1.2 · 받는 피해×0.8
 const STAR_DOT = 0.05; const METEOR_DOT = 0.07 // 별빛쇄도·별똥별: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수)
 function initDruid (f, d) {
@@ -827,7 +827,7 @@ function initDruid (f, d) {
   for (const k of DRUID_ORDER) { f.formCd[k] = k === '인간' ? f.cd : DRUID_SKILLS[k].map(() => 0); f.formLock[k] = {} }
   f.ccLock = f.formLock.인간
   f.druRage = 0; f.druEnergy = ENERGY_MAX; f.owlCap = Math.round(d.base.지능 * 14 + d.base.체력 * 7); f.owlShield = f.owlCap // 마나부엉이 실드: 마법무기 공식(지능14+체력7). 해제 시 남은 실드 보관 → 재변신 시 복원(재충전 없음)
-  f.druRegen = 0; f.catRegen = 0; f.crouch = 0; f.stealth = 0; f.formChoice = null
+  f.druRegen = 0; f.catRegen = 0; f.bearGuardCd = 0; f.crouch = 0; f.stealth = 0; f.formChoice = null
   druidStats(f, d)
 }
 // 형상 능력치를 ds에 반영(체력 제외). form 지정 시 그 형상 기준(AI 추정용)
@@ -865,6 +865,7 @@ function druidUpkeep (self, foe, ds, df) {
   self.druEnergy = Math.min(ENERGY_MAX, self.druEnergy + ENERGY_REGEN)
   if (self.form === '전투곰') self.druRage = Math.max(0, self.druRage - RAGE_DECAY)
   if (self.stealth > 0) self.stealth--
+  if (self.bearGuardCd > 0) self.bearGuardCd--
   if (self.crouch > 0) self.crouch--
   let heal = 0
   const tick = (k, pct) => { if (self[k] > 0) { self[k]--; if (self.healBlock === 0) heal += Math.round(ds.maxhp * pct) } }
@@ -886,13 +887,14 @@ const skillsOf = (f) => (f && f.form) ? DRUID_SKILLS[f.form] : (SKILLS[f.name] |
 const bearSkillRage = (s, r) => { if (r.landed) s.druRage = Math.min(RAGE_MAX, s.druRage + BEAR_RAGE_SKILL) } // 곰 공격 스킬 적중 → 분노 +5
 // 자원 소모 스킬 래퍼: ready에 자원 게이트, exec에서 차감. res='druRage'|'druEnergy'
 function druCost (res, cost, sk) { return Object.assign({}, sk, { res, cost, ready: (s, f, ds, df, x) => s[res] >= cost && sk.ready(s, f, ds, df, x), exec: (s, f, ds, df) => { s[res] -= cost; if (res === 'druRage' && s.healBlock === 0) s.hp = Math.min(ds.maxhp, s.hp + hcut(s, Math.round(ds.maxhp * cost * BEAR_RAGE_HEAL))); sk.exec(s, f, ds, df) } }) } // 분노 소모 → 광포한 재생력(5당 1%)
-// 광포한 재생력(전투곰): 한 번에 최대체력 30% 넘는 피해 → 즉시 최대체력 10% 회복 / 죽을 피해 → 맞기 전에 먼저 10% 회복(상한 적용 후 피해 → 버티면 생존). 기록은 holdRec에서
+// 광포한 재생력(전투곰): 한 번에 최대체력 30% 넘는 피해 → 즉시 최대체력 10% 회복 / 죽을 피해 → 맞기 전에 먼저 10% 회복(상한 적용 후 피해 → 버티면 생존). 쿨5(내 턴). 기록은 holdRec에서
 function bearGuard (foe, df, dealt) {
-  if (foe.form !== '전투곰' || foe.healBlock > 0 || dealt <= 0) return
+  if (foe.form !== '전투곰' || foe.healBlock > 0 || dealt <= 0 || foe.bearGuardCd > 0) return
   const heal = hcut(foe, Math.round(df.maxhp * BEAR_GUARD_HEAL)); const b = foe.hp
   if (foe.hp <= 0) foe.hp = Math.min(df.maxhp, foe.hp + dealt + heal) - dealt // 죽을 피해: 선회복(맞기 전 체력 + 10%, 최대체력 상한) 후 피해
   else if (dealt > df.maxhp * BEAR_GUARD_CUT) foe.hp = Math.min(df.maxhp, foe.hp + heal)
   else return
+  foe.bearGuardCd = BEAR_GUARD_CD
   foe._guardHeal = (foe._guardHeal || 0) + Math.round(foe.hp - b)
 }
 // AI 자원 비축(치타): 체력 50% 미만이고 자연의 재생력 쿨이 곧 돌아오면, 다른 스킬은 재생 비용(기력50)을 남길 때만 사용(점수 0) — 플레이어 사용 가능 여부와는 무관
@@ -1916,7 +1918,7 @@ function statusGroups (f) {
   if (f.meteorDot > 0) deb.push(`☄️별똥별${f.meteorDot}`)
   if (f.form) { // 드루이드: 형상·자원·재생
     buf.push(`${DRUID_FORMS[f.form].emoji}${f.form}`)
-    if (f.form === '전투곰') buf.push(`😤분노 ${f.druRage}/${RAGE_MAX}`)
+    if (f.form === '전투곰') buf.push(`😤분노 ${f.druRage}/${RAGE_MAX}`, f.bearGuardCd > 0 ? `🐻광포한재생력 ${f.bearGuardCd}턴 후` : '🐻광포한재생력 준비')
     if (f.form === '표범' || f.form === '치타') buf.push(`⚡기력 ${f.druEnergy}/${ENERGY_MAX}`)
     if (f.druRegen > 0) buf.push(`🌿재생${f.druRegen}`)
     if (f.catRegen > 0) buf.push(`🐅자연의재생력${f.catRegen}`)

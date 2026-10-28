@@ -642,11 +642,11 @@ const SKILLS = {
   검투사: [
     // 분쇄: 1쿨 타격 + 상대 물방·마방 감소 스택(스택당 -5%p, 최대5, 지속2). 스팸으로 방어를 깎아 후속딜 증폭
     (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.6, dmg: { foeHp: 0.03 }, stack: '물방·마방 -5%p·회복 -15% 스택(적중·최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // autoScore 파일럿: 딜/라이더 자동 + 스택부여 가치 addon
-    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.08, selfStr: 0.5 }, recoil: 0.04, cc: { stun: 2 }, cd: 5 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 5; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // autoScore 파일럿: 딜+라이더+스턴CC+반동 자동
+    (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.08, selfStr: 0.5 }, recoil: 0.04, cc: { stun: 2 }, cd: 4 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 4; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // autoScore 파일럿: 딜+라이더+스턴CC+반동 자동
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
-    { name: '방해', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 4 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
+    { name: '방해', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 3, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 3 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
-    mkSkill(3, { name: '발차기', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0 })
+    mkSkill(3, { name: '발차기', tag: '제어', cc: { stun: 1 }, cd: 2, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0 })
   ],
   광전사: [
     // 개편: 피 태우는 하이리스크(불굴 없음). 저체력→광란(회복↑·속도↑·제어면역) + 격노(피격 시 공격력↑)
@@ -662,9 +662,9 @@ const SKILLS = {
     // 방패들기: 3턴간 방패막기 경감 강화(30%→90%). + 패시브 가시방패(상시 20% 반사)
     mkSkill(1, { name: '방패들기', tag: '버프', buff: 5, cd: 6, selfBuff: { blockUp: 5 }, ready: (s, f, ds) => s.cd[1] === 0 && s.blockUp === 0 && ds.방패막기 > 0, score: (s, f, ds, df, x) => buffVal(x.foeTurn * 1.2, s, ds) }),
     // 방패가격: 시전 중이면 즉시 차단(취소)+공격력 소폭↑ / 아니면 1턴 스턴. 기사의 유일한 제어기(캐스터 견제·시전끊기)
-    { name: '방패가격', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 4, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 4 } },
+    { name: '방패가격', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 3, ready: (s, f, ds, df) => s.cd[2] === 0, score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), exec: (s, f, ds, df) => { const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true; s.powBuff = 3; s.powMul = 1.15; s.note = '시전 차단' } else if (meteor) { s.meteorImmune = true; s.note = '메테오 방해 실패' } else { applyCC(f, 'stun', 1); s.note = '기절' } s.cd[2] = 3 } },
     // 도발: 상대 3턴 강제평타(스킬·버프·방어 봉인) + 자신 2턴 공격 ×1.8. 상대를 강제로 때리게 묶고 강화된 반격으로 처벌(느린 기사도 자기 클럭 버프라 확실)
-    mkSkill(3, { name: '도발', tag: '제어', cd: 5, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.8 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
+    mkSkill(3, { name: '도발', tag: '제어', cd: 3, debuff: { taunt: 3 }, selfBuff: { powBuff: 3, powMul: 1.8 }, note: '도발', ready: (s, f) => s.cd[3] === 0 && f.taunt === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun') + x.est * 0.5 })
   ],
   마법사: [
     // 화염구: 인캐 걸려있으면 즉발, 아니면 시전(스태프 castMod로 -2턴). 끊기면 잔존 없이 소멸
@@ -712,7 +712,7 @@ const SKILLS = {
   ],
   스펠블레이드: [
     // 약점봉인: 순수 CC(딜 없음) — 상대 최고 스탯에 맞는 군중제어만
-    { name: '약점봉인', tag: '제어', coef: '상대 최고 스탯 맞춤 CC (딜 없음)', cd: 5, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun'), exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 5; s.note = cc } },
+    { name: '약점봉인', tag: '제어', coef: '상대 최고 스탯 맞춤 CC (딜 없음)', cd: 3, ready: (s, f, ds, df) => s.cd[0] === 0 && f.stun === 0 && f.slow === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun'), exec: (s, f, ds, df) => { const cc = applyAdaptiveCC(f, df); s.cd[0] = 3; s.note = cc } },
     // 역장베기(스펠스트라이크): 타격(확정명중) + 역장 force(마공 flat, 마방 무시). 인챈트 시 성질 변화 — 화염=딜폭발 / 얼음=둔화 / 관통=마나실드 침투
     (() => { const spec = { name: '역장베기', tag: '공격', type: '마법.역장', coefFn: (ds, df, s) => s.enchant === '화염' ? 3.5 : (s.enchant === '얼음' || s.enchant === '전격') ? 3.0 : 2.4, ccFn: (s) => s.enchant === '얼음' ? { slow: 2 } : s.enchant === '전격' ? { paralyze: 3 } : null, coef: '역장 마공×2.4 (인챈트: 🔥×3.5 ❄️×3.0+둔화 ⚡×3.0+마비)', dmgType: '역장', cd: 2 }; return Object.assign({}, spec, { ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); const e = s.enchant; if (e === '얼음') { applyCC(f, 'slow', 2); f.slowSec = Math.max(f.slowSec, 1) } if (e === '전격') applyCC(f, 'paralyze', 3); s.cd[1] = 2; s.note = e ? (ENCHANT_EMO[e] + ' 역장베기') : '역장베기' } }) })(), // 엔진 이관: 마법.역장 단일화(물리 타격분 제거) + coefFn(인챈트 배율). fmul 재튜닝 대상
     // 룬각인(마검 인챈트): 순수 버프 — 1턴 소모(딜 없음)가 리스크. 3턴 인챈트 속성 부여로 역장베기를 스펠스트라이크로 변화. AI는 인챈트의 미래 가치로 스코어링(상대 보고 자동선택)
@@ -720,14 +720,14 @@ const SKILLS = {
     // 역장폭발: 큰 역장피해(방어 무시 관통) — 대신 이후 2턴 취약(받는뎀 +50%). 고위험 버스트
     (() => { const spec = { name: '역장폭발', tag: '관통', type: '마법.역장', mult: 4.5, dmgType: '역장', cd: 7 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[3] = 7; s.note = '역장폭발' } }) })(), // 엔진 이관: 마법.역장(마나실드 흡수). 침투는 역장베기만
     // 마나대시: 상대 1턴 스턴(아그로 차단) + 본인 5턴 20% 가속. 스턴락 탈출 + 인챈트 셋업 보호
-    mkSkill(4, { name: '마나대시', tag: '버프', buff: 5, cd: 6, cc: { stun: 1 }, selfBuff: { haste: 5 }, note: '마나대시', ready: (s) => s.cd[4] === 0 && s.haste === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.6, s, ds) + (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0) })
+    mkSkill(4, { name: '마나대시', tag: '버프', buff: 5, cd: 3, cc: { stun: 1 }, selfBuff: { haste: 5 }, note: '마나대시', ready: (s) => s.cd[4] === 0 && s.haste === 0, score: (s, f, ds, df, x) => buffVal(x.est * 0.6, s, ds) + (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0) })
   ],
   스펠브레이커: [
     // 마나소각: 마나실드 파괴 + 마공 딜(실드 있었으면 ×1.5) — 마나실드 캐스터 카운터
     (() => { const spec = { name: '마나소각', tag: '공격', type: '마법.역장', mult: 1.2, bonus: { when: 'foeShield', mult: 3.5 }, ccFn: (s, f) => f.shield > 0 ? { slow: 3 } : null, coef: '마공×1.2 (마나실드 있으면 ×3.5 + 3턴 둔화)', dmgType: '역장', cd: 3 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const sh = f.shield > 0; runDamage(spec, s, f, ds, df); if (sh) { applyCC(f, 'slow', 3); f.slowSec = Math.max(f.slowSec, 1) } s.cd[0] = 3; s.note = sh ? '마나소각' : '마나번' } }) })(), // 마법.역장 + bonus.when(실드 시 ×3.5+둔화). 기본1.2(물리딜러엔 약)·실드3.5(캐스터 특화)·쿨3
     // 시전파괴: 상대 시전 확정 차단 + 3턴 침묵 + 딜 — 마법사 하드카운터
     // 시전파괴: 캐스터(지능70+) 상대면 침묵락+시전 차단+딜(대박) / 물딜러 상대면 자기 기절(리스크). AI는 캐스터에게만 사용
-    { name: '시전파괴', tag: '제어', interrupt: true, cc: { silence: 2 }, cd: 5, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 5; const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
+    { name: '시전파괴', tag: '제어', interrupt: true, cc: { silence: 2 }, cd: 3, ready: (s, f, ds, df) => s.cd[1] === 0 && df.base.지능 >= 70 && (f.silence <= 1 || f.cast > 0), score: (s, f, ds, df, x) => f.cast > 0 ? x.foeTurn * 3 : (f.silence === 0 ? ctrlVal(x.foeTurn, 2, 'silence') * magicShare(f.name) : 0), exec: (s, f, ds, df) => { s.cd[1] = 3; const wc = f.cast > 0; const meteor = wc && f.castUninterruptible; if (wc && !meteor) { f.cast = 0; f.castCut = 2; s.brokeCast = true } if (meteor) s.meteorImmune = true; applyCC(f, 'silence', 2); s.note = meteor ? '메테오 방해 실패' : (wc ? '시전 차단' : '침묵') } }, // 딜 없음: 침묵 2턴 + 시전 즉시차단(캐스터 전용)
     // 무기파괴: 3턴간 상대 딜 1/3(물리·마법 공통). 안티캐스터가 물리 상대에도 통하는 카운터 — 순수 디버프(즉발)
     mkSkill(2, { name: '무기파괴', tag: '디버프', cd: 6, debuff: { weaponBroken: 4 }, ready: (s, f) => s.cd[2] === 0 && f.weaponBroken === 0 }),
     // 파훼: 마공딜 + 상대 버프 즉시 전부 제거 — 버프·패시브 의존 캐스터(세이지 오토스펠·프리 성역·광전 격노 등) 카운터
@@ -1294,13 +1294,14 @@ function ctxFor (self, foe, ds, df) {
 }
 // 불굴 버스트 완충: 단일 피격이 최대HP 15%↑면 즉시 6% 회복(생존 시). df=피격자 파생. 딜 표기는 회복 전 값 사용
 function bigHitHeal (foe, df, dealt) { if (foe.불굴 && foe.hp > 0 && dealt >= df.maxhp * 0.15) foe.hp = Math.min(df.maxhp, foe.hp + hcut(foe, Math.round(df.maxhp * 0.04))) }
-// 군중제어 쿨 정지: 스킬이 상대에게 CC를 걸면, 그 스킬 쿨은 상대 CC가 모두 풀릴 때까지 돌지 않음(풀린 순간부터 카운트).
+// 군중제어 쿨 정지: 스킬이 상대에게 CC(기절·마비·침묵·도발, 둔화 제외)를 걸면, 그 스킬 쿨은 상대 CC가 모두 풀릴 때까지 돌지 않음(풀린 순간부터 카운트).
 // 턴 시간 가치가 캐릭마다 달라 빠른 쪽이 쿨 중에도 상대를 계속 묶던 문제(암습 고정) 방지. 무기 확률 CC(양둔 스턴 등)는 스킬이 아니라 제외
-const CC_FIELDS = ['stun', 'paralyze', 'silence', 'slow', 'taunt']
+const CC_FIELDS = ['stun', 'paralyze', 'silence', 'slow', 'taunt'] // 군중제어(암습의 대가 판정 등)
+const CC_LOCK_FIELDS = ['stun', 'paralyze', 'silence', 'taunt'] // 쿨 정지 대상 — 둔화는 딜 스킬 부가효과가 많아 제외
 const ASSASSIN_CC = 1.5 // 암습의 대가(암살도적): 군중제어 상태 상대에게 공격력 배율
-function ccSnap (f) { return CC_FIELDS.map(k => f[k] || 0) }
+function ccSnap (f) { return CC_LOCK_FIELDS.map(k => f[k] || 0) }
 function ccLockAfter (self, foe, ccB, cdB) { // CC가 새로 걸리거나 늘어난 필드 + 이번에 쿨이 새로 잡힌 슬롯을 묶어 기록
-  const fields = CC_FIELDS.filter((k, i) => (foe[k] || 0) > ccB[i]); if (!fields.length) return
+  const fields = CC_LOCK_FIELDS.filter((k, i) => (foe[k] || 0) > ccB[i]); if (!fields.length) return
   self.cd.forEach((v, i) => { if (v > (cdB[i] || 0)) { self.ccLock = self.ccLock || {}; self.ccLock[i] = fields } })
 }
 function ccLocked (self, foe, i) { const fl = self.ccLock && self.ccLock[i]; if (!fl) return false; if (fl.some(k => (foe[k] || 0) > 0)) return true; delete self.ccLock[i]; return false }

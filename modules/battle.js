@@ -917,7 +917,8 @@ function cpOnUse (n, sk) { return Object.assign({}, sk, { exec: (s, f, ds, df) =
 function cpFinisher (ci, base) {
   const coefFn = (ds, df, s, f) => base.mult + (base.cpMax - base.mult) * Math.min(s.cp || 0, CP_MAX) / CP_MAX + (base.lowHpAdd && f.hp <= df.maxhp * 0.40 ? base.lowHpAdd : 0)
   const spec = Object.assign({}, base, { coefFn, coefLabel: `타격×${base.mult}~${base.cpMax}(콤보 0~${CP_MAX}, 소모)${base.lowHpAdd ? ` · 상대 체력 40%↓ +${base.lowHpAdd}` : ''}` })
-  return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const cp = s.cp || 0; runDamage(spec, s, f, ds, df); s.cp = 0; s.cd[ci] = spec.cd; s.note = `${spec.name}(콤보 ${cp})` } })
+  // AI: 콤보 4 이상이거나 이번 한 방으로 잡을 수 있을 때만 소모(저콤보 낭비 방지)
+  return Object.assign({}, spec, { ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => ((s.cp || 0) >= 4 || estDamage(spec, ds, df, x, s, f) >= f.hp + f.shield) ? autoScore(spec, s, f, ds, df, x) : 0, exec: (s, f, ds, df) => { const cp = s.cp || 0; runDamage(spec, s, f, ds, df); s.cp = 0; s.cd[ci] = spec.cd; s.note = `${spec.name}(콤보 ${cp})` } })
 }
 const stunSc = (s, f, ds, df, x) => f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') * stunTiming(s, f) : 0
 const DRUID_SKILLS = {
@@ -941,9 +942,9 @@ const DRUID_SKILLS = {
     druCost('druEnergy', 30, cpFinisher(0, { name: '찢어발기기', tag: '공격', type: '물리.일반', mult: 1.0, cpMax: 2.5, cd: 1 })),
     druCost('druEnergy', 40, cpFinisher(1, { name: '흉포한 이빨', tag: '공격', type: '물리.일반', mult: 1.5, cpMax: 3.0, lowHpAdd: 1.0, cd: 1 })),
     // 은신: 상대 1턴 기절 + 다음 턴 암습의 일격 강화(×3.0) + 콤보 1
-    druCost('druEnergy', 20, cpOnUse(1, mkSkill(2, { name: '은신', tag: '제어', cc: { stun: 1 }, cd: 3, coef: '상대 1턴 기절 + 다음 턴 암습의 일격 물공×3.0', selfBuff: { stealth: 2 }, note: '은신 — 기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => stunSc(s, f, ds, df, x) + x.est * 1.0 }))), // 점수: 기절 + 강화 일격(3.0)이 찢어발기기(2.0)보다 나은 몫(평타 1회분)
+    druCost('druEnergy', 20, cpOnUse(1, mkSkill(2, { name: '은신', tag: '제어', cc: { stun: 1 }, cd: 3, coef: '상대 1턴 기절 + 다음 턴 암습의 일격 물공×3.0', selfBuff: { stealth: 2 }, note: '은신 — 기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => s.druEnergy >= 40 ? stunSc(s, f, ds, df, x) + x.est * 1.0 : 0 }))), // 점수: 기절 + 강화 일격 몫(평타 1회분). AI는 일격까지 쓸 기력(40)이 있을 때만
     druCost('druEnergy', 20, (() => { const spec = { name: '암습의 일격', tag: '공격', type: '물리.일반', mult: 0.5, bonus: { when: 'selfStealth', mult: 3.0 }, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[3] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const st = s.stealth > 0; const r = runDamage(spec, s, f, ds, df); if (r.landed) cpAdd(s, 1); s.stealth = 0; s.cd[3] = 1; s.note = st ? '암습의 일격·은신 연계' : '암습의 일격' } }) })()),
-    druCost('druEnergy', 5, (() => { const spec = { name: '물기', tag: '공격', type: '물리.일반', mult: 1.3, cd: 1 }; return Object.assign({}, spec, { coef: '타격×1.3 + 적중 시 콤보 2', ready: (s) => s.cd[4] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x) + (s.cp < 5 ? x.est * 0.3 * Math.min(2, 5 - s.cp) : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) cpAdd(s, 2); s.cd[4] = 1; s.note = `물기(콤보 ${s.cp})` } }) })()), // 점수: 딜 + 콤보 적립 가치(포인트당 피니셔 +0.3배)
+    druCost('druEnergy', 5, (() => { const spec = { name: '물기', tag: '공격', type: '물리.일반', mult: 1.3, cd: 1 }; return Object.assign({}, spec, { coef: '타격×1.3 + 적중 시 콤보 2', ready: (s) => s.cd[4] === 0, score: (s, f, ds, df, x) => s.cp >= CP_MAX ? 0 : autoScore(spec, s, f, ds, df, x) + x.est * 0.3 * Math.min(2, CP_MAX - s.cp), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) cpAdd(s, 2); s.cd[4] = 1; s.note = `물기(콤보 ${s.cp})` } }) })()), // 점수: 딜 + 콤보 적립 가치(포인트당 피니셔 +0.3배)
     FORM_SWAP
   ],
   치타: [

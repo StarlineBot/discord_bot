@@ -644,9 +644,9 @@ const SKILLS = {
     (() => { const spec = { name: '분쇄', tag: '공격', type: '물리.일반', mult: 1.6, dmg: { foeHp: 0.03 }, stack: '물방·마방 -5%p·회복 -15% 스택(적중·최대5·지속2)', cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x) + (f.crush < 5 ? df.maxhp * 0.03 : 0), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed) { f.crush = Math.min((f.crush || 0) + 1, 5); f.crushDur = 2 } s.cd[0] = 1; s.note = r.landed ? '분쇄' : '분쇄·빗나감' } }) })(), // autoScore 파일럿: 딜/라이더 자동 + 스택부여 가치 addon
     (() => { const spec = { name: '돌진', tag: '제어', type: '물리.일반', mult: 2, dmg: { foeHp: 0.08, selfStr: 0.5 }, recoil: 0.04, cc: { stun: 2 }, cd: 4 }; return Object.assign({}, spec, { ready: (s, f, ds, df) => s.cd[1] === 0 && f.stun === 0 && s.hp > ds.maxhp * 0.2, score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const r = runDamage(spec, s, f, ds, df); if (r.landed && !f.parryHit) applyCC(f, 'stun', 2); s.cd[1] = 4; s.note = f.parryHit ? '돌진(패링됨)' : '기절' } }) })(), // autoScore 파일럿: 딜+라이더+스턴CC+반동 자동
     // 방해: 시전 중이면 취소+1턴 침묵 / 아니면 1턴 스턴 + 딜. 캐스터·물리 양쪽 대응(범용)
-    { name: '방해', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 3, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 3 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
+    { name: '방해', tag: '제어', interrupt: true, cc: { stun: 1 }, cd: 3, ready: (s, f, ds, df) => s.cd[2] === 0 && f.stun === 0, score: (s, f, ds, df, x) => dmgVal(x.est, 1, f.cast > 0 ? x.foeTurn * 3 : (f.stun === 0 ? ctrlVal(x.foeTurn, 1, 'stun') * stunTiming(s, f) : 0), f.hp, x.foeTurn), exec: (s, f, ds, df) => { const wasCasting = f.cast > 0; const meteor = wasCasting && f.castUninterruptible; if (wasCasting) { if (!meteor) { f.cast = 0; f.castCut = 2 } applyCC(f, 'silence', 1); s.note = meteor ? '메테오 방해 실패' : '시전 차단'; if (meteor) s.meteorImmune = true } else { applyCC(f, 'stun', 1); s.note = '기절' } let d = attack(s, f, ds, df, f.defending, true); d = absorb(f, d); f.hp -= d; if (wasCasting && !meteor) s.brokeCast = true; s.cd[2] = 3 } }, // guaranteed=true: 확정 명중(딜×1.0). 시전 끊으면 brokeCast
     // 발차기: 순수 CC(딜 없음) — 자잘한 군중제어. 1턴 스턴, 쿨4
-    mkSkill(3, { name: '발차기', tag: '제어', cc: { stun: 1 }, cd: 2, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0 })
+    mkSkill(3, { name: '발차기', tag: '제어', cc: { stun: 1 }, cd: 2, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: (s, f, ds, df, x) => ctrlVal(x.foeTurn, 1, 'stun') * stunTiming(s, f) })
   ],
   광전사: [
     // 개편: 피 태우는 하이리스크(불굴 없음). 저체력→광란(회복↑·속도↑·제어면역) + 격노(피격 시 공격력↑)
@@ -935,6 +935,9 @@ function runDamage (spec, s, f, ds, df) {
 // ── AI 스코어러(전부 "이번 턴 HP 가치"로 반환 → bestScore=ctx.est(평타 HP가치)와 직접 비교) ──
 // 3분할: 딜점수(공격/관통/시전) · 제어점수(제어/디버프) · 방어점수(버프/회복). tag로 분류.
 const CC_K = { stun: 0.9, silence: 0.6, slow: 0.4, sunder: 0.35, missDown: 0.25, luckLock: 0.3, blind: 0.3, paralyze: 0.27 } // 제어 종류별 봉쇄 효율. 마비=매턴 30% 턴상실(스턴×0.3≈0.27)
+// 단발 기절 타이밍(검투사 방해·발차기 AI): 상대가 내 다음 턴보다 먼저 움직일 때 끊으면 그 공격을 막으니 가치 ×2, 아니면 ×0.5
+// — 쿨1 분쇄 연타에 밀려 단발 CC를 전혀 안 쓰던 문제(발차기 판당 0회)
+function stunTiming (s, f) { return f.gauge < s.gauge ? 2.0 : 0.5 }
 function ctrlVal (foeTurn, turns, kind) { return foeTurn * (turns || 1) * (CC_K[kind] || 0.3) } // 제어점수: 상대 foeTurn×봉쇄턴×효율 = 막는 HP
 function dmgVal (dmg, castTurns, ccVal, foeHp, foeTurn) { const ct = Math.max(1, castTurns || 1); const risk = foeTurn ? foeTurn * (ct - 1) * 0.2 : 0; const base = dmg / ct + (ccVal || 0) - risk; return (foeHp != null && dmg >= foeHp) ? Math.max(base, dmg + (ccVal || 0) - risk) : base } // 딜점수: 기대딜/커밋턴 + CC − 시전리스크(무방비 턴×foeTurn). 처치 가능하면 총딜 승격(파이어 버스트)
 // 방어점수(버프): 총 이득 × 생존여유(저HP면 버프 대신 생존이 우선 → 감소). 미보유 시만 호출(ready 게이트)

@@ -808,7 +808,7 @@ const DRUID_FORMS = {
   전투곰: { emoji: '🐻', phys: '힘', atk: 1.5, hp: 2.2, acc: 1.3, dodge: 1.5, pdef: 1.5, mdef: 1.1, desc: '공격력×1.5 · 최대체력×2.2 · 명중×1.3 · 회피×1.5 · 물방×1.5 · 마방×1.1 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5) · 패시브 광포한 재생력' },
   표범: { emoji: '🐆', phys: '민첩', atk: 1.5, hp: 0.9, dodge: 2.0, crit: 1.2, critMul: 1.5, turn: 0.75, desc: '공격력×1.5(민첩) · 최대체력×0.9 · 회피×2 · 치명타 확률×1.2 · 치명타 배율×1.5 · 턴×0.75 · 기력' },
   치타: { emoji: '🐅', phys: '민첩', atk: 0.8, dodge: 2.5, hp: 0.8, turn: 0.7, desc: '공격력×0.8(민첩) · 회피×2.5 · 최대체력×0.8 · 턴×0.7 · 기력' },
-  마나부엉이: { emoji: '🦉', hp: 0.6, shield: true, magicAuto: true, desc: '최대체력×0.6 · 마나실드 · 평타=마법(마공=지능)' }
+  마나부엉이: { emoji: '🦉', hp: 0.6, shield: true, magicAuto: true, desc: '최대체력×0.6 · 마나실드 · 평타=마법(마공=지능) · 일월식(달↔별 교차 충전으로 강화)' }
 }
 const DRUID_ORDER = ['전투곰', '표범', '치타', '마나부엉이', '인간']
 const RES_LABEL = { druRage: '분노', druEnergy: '기력' }
@@ -820,15 +820,19 @@ const DRU_REGEN = 0.03; const CAT_REGEN = 0.08 // 재생(인간·3턴, 형상 �
 const BEAR_RAGE_HEAL = 0.01 / 5; const BEAR_GUARD_CUT = 0.30; const BEAR_GUARD_HEAL = 0.05; const BEAR_GUARD_CD = 5 // 5% 회복: 내 턴 기준 쿨5(형상 무관하게 흐름)
 const BEAR_GUARD_RAGE = 30; const BEAR_GUARD_RAGE_MIN = 40; const BEAR_GUARD_RAGE_HEAL = 0.05 // 분노 40 이상이면 30 소모해 +5% 추가(이 소모분엔 분노 소모 회복 미적용)
 const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.9 // 웅크리기(치타): 회피×1.2 · 받는 피해×0.8
-const STAR_DOT = 0.05; const METEOR_DOT = 0.07 // 별빛쇄도·별똥별: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수)
+// 마나부엉이 일월식(docs/druid-owl-eclipse.md): 🌙달 스킬 → ⭐별 충전 +1, ⭐별 스킬 → 🌙달 충전 +1. 충전 2 → 반대편 식 진입(강화 2회분)
+// ☀️일식=별 스킬 강화 / 🌑월식=달 스킬 강화 + 달 스킬마다 실드 최대치 10% 충전. 새 식 진입 시 이전 식 소멸. 천체 정렬 중엔 둘 다 강화(횟수 소모 없음). 부엉이 해제 시 전부 초기화
+const MOON_DOT = 0.06 // 월광: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수). 기획 초안 4% → 시뮬 조정 6%(4%는 부엉이 주력 29.5%로 구 버전 42.4%보다 크게 약함)
+const ECL_NEED = 2; const ECL_USES = 2; const LUNAR_SHIELD = 0.10; const ALIGN_TURNS = 3; const ALIGN_SHIELD = 0.30
 function initDruid (f, d) {
   f.form = '인간'
   f.druBase = { 물공: d.물공, 마공: d.마공, maxhp: d.maxhp, 물회: d.물회, 물방: d.물방, 마방: d.마방, 크리: d.크리, 무기막기: d.무기막기, 무기: d.무기, 턴: d.턴, 명중: d.명중 }
   f.formCd = {}; f.formLock = {}
-  for (const k of DRUID_ORDER) { f.formCd[k] = k === '인간' ? f.cd : DRUID_SKILLS[k].map(() => 0); f.formLock[k] = {} }
+  for (const k of DRUID_ORDER) { f.formCd[k] = k === '인간' ? f.cd : DRUID_SKILLS[k].map(sk => SKILL_STARTCD[sk.name] || 0); f.formLock[k] = {} } // 시작 쿨(천체 정렬 등)은 모든 형상 배열에 적용
   f.ccLock = f.formLock.인간
   f.druRage = 0; f.druEnergy = ENERGY_MAX; f.owlCap = Math.round(d.base.지능 * 14 + d.base.체력 * 7); f.owlShield = f.owlCap // 마나부엉이 실드: 마법무기 공식(지능14+체력7). 해제 시 남은 실드 보관 → 재변신 시 복원(재충전 없음)
   f.druRegen = 0; f.catRegen = 0; f.bearGuardCd = 0; f.cp = 0; f.crouch = 0; f.stealth = 0; f.formChoice = null
+  f.solarCh = 0; f.lunarCh = 0; f.ecl = null; f.eclLeft = 0; f.align = 0 // 일월식: ⭐별 충전(→일식)·🌙달 충전(→월식)·현재 식·남은 강화·천체 정렬
   druidStats(f, d)
 }
 // 형상 능력치를 ds에 반영(체력 제외). form 지정 시 그 형상 기준(AI 추정용)
@@ -851,7 +855,7 @@ function druidShift (s, f, ds, df, to) {
   if (from === '전투곰') s.druRage = 0 // 곰 해제: 분노 소멸
   if (from === '치타') { s.catRegen = 0; s.crouch = 0 } // 치타 해제: 자연의 재생력·웅크리기 소멸
   if (from === '표범') { s.stealth = 0; s.cp = 0 } // 표범 해제: 은신·콤보 소멸
-  if (from === '마나부엉이') { s.owlShield = s.shield; s.shield = 0 }
+  if (from === '마나부엉이') { s.owlShield = s.shield; s.shield = 0; s.solarCh = 0; s.lunarCh = 0; s.ecl = null; s.eclLeft = 0; s.align = 0 } // 부엉이 해제: 실드 보관, 일월식 초기화
   const ratio = Math.max(s.hp, 0) / ds.maxhp
   s.form = to; s.cd = s.formCd[to]; s.ccLock = s.formLock[to]
   druidStats(s, ds)
@@ -868,6 +872,7 @@ function druidUpkeep (self, foe, ds, df) {
   if (self.form === '전투곰') self.druRage = Math.max(0, self.druRage - RAGE_DECAY)
   if (self.stealth > 0) self.stealth--
   if (self.bearGuardCd > 0) self.bearGuardCd--
+  if (self.align > 0) self.align--
   if (self.crouch > 0) self.crouch--
   let heal = 0
   const tick = (k, pct) => { if (self[k] > 0) { self[k]--; if (self.healBlock === 0) heal += Math.round(ds.maxhp * pct) } }
@@ -875,16 +880,13 @@ function druidUpkeep (self, foe, ds, df) {
   if (heal > 0) { const b = self.hp; self.hp = Math.min(ds.maxhp, self.hp + hcut(self, heal)); self._tick.push({ type: 'druregen', heal: Math.round(self.hp - b) }) }
   druidStats(self, ds)
 }
-// 별빛쇄도·별똥별 틱: 피격자 upkeep에서 최대체력 % × (1−마방), 근성·받는뎀 감소 적용 후 마나실드 흡수. 지속 피해라 회피·막기·패링 없음
-function starDotTick (self, ds) {
-  let pct = 0
-  if (self.starDot > 0) { self.starDot--; pct += STAR_DOT }
-  if (self.meteorDot > 0) { self.meteorDot--; pct += METEOR_DOT }
-  let d = ds.maxhp * pct * (1 - (self.shield > 0 ? 0 : crushArmor(self, ds.마방)))
-  d = guts(d * wardMul(self), self, ds)
-  const psh = self.shield; d = absorb(self, Math.max(Math.round(d), 1)); self.hp -= d
-  self._tick.push({ type: 'stardot', dmg: d, absorbed: Math.max(psh - self.shield, 0), star: self.starDot, meteor: self.meteorDot })
+// 월광 피해(틱 수만큼): 최대체력 % × (1−마방) · 근성·받는뎀 감소 → 마나실드 흡수. 지속 피해라 회피·막기·패링 없음(별똥별 폭발도 동일 식)
+function moonDotHit (v, dv, ticks) {
+  let d = dv.maxhp * MOON_DOT * ticks * (1 - (v.shield > 0 ? 0 : crushArmor(v, dv.마방)))
+  d = guts(d * wardMul(v), v, dv)
+  const r = absorb(v, Math.max(Math.round(d), 1)); v.hp -= r; return r
 }
+function moonDotTick (self, ds) { self.moonDot--; const psh = self.shield; const d = moonDotHit(self, ds, 1); self._tick.push({ type: 'moondot', dmg: d, absorbed: Math.max(psh - self.shield, 0), left: self.moonDot }) }
 const skillsOf = (f) => (f && f.form) ? DRUID_SKILLS[f.form] : (SKILLS[f.name] || [])
 const bearSkillRage = (s, r) => { if (r.landed) s.druRage = Math.min(RAGE_MAX, s.druRage + BEAR_RAGE_SKILL) } // 곰 공격 스킬 적중 → 분노 +5
 // 자원 소모 스킬 래퍼: ready에 자원 게이트, exec에서 차감. res='druRage'|'druEnergy'
@@ -906,13 +908,23 @@ const CAT_RSV = (cost, sc) => (s, f, ds, df, x) => druReserve(s, ds, 'druEnergy'
 const healScore = (s, ds, pct, turns) => Math.min(ds.maxhp - s.hp, ds.maxhp * pct * turns) * 0.55 // 회복기 점수(힐과 동일 계수): 잃은 체력 한도 내 총회복량
 function shiftSkill (to) { return { name: `${to}형상`, tag: '버프', shift: to, coef: `${DRUID_FORMS[to].emoji} ${DRUID_FORMS[to].desc} · 무기막기 불가 (변신 1턴)`, ready: (s) => s.form !== to && s.cast === 0, score: () => 0, selfEvent: (s, f, ds, df) => druidShift(s, f, ds, df, to) } }
 const FORM_SWAP = { name: '형상변환', tag: '버프', choose: 'form', coef: '전투곰·표범·치타·마나부엉이·인간 중 골라 변신 (변신 1턴)', ready: (s) => s.cast === 0, score: () => 0, selfEvent: (s, f, ds, df) => { let to = s.formChoice || druidPickForm(s, f, ds, df, true); s.formChoice = null; if (!DRUID_FORMS[to] || to === s.form) to = '인간'; return druidShift(s, f, ds, df, to) } }
-function owlCast (ci, spec) { // 마나부엉이 시전 마법: 볼트식(최소 1시전), 착탄 시 runDamage(castSpec)
-  return Object.assign({}, spec, { ready: (s, f, ds, df, x) => s.cast === 0 && (!x || x.safe), score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const cut = s.castCut > 0 ? 1 : 0; s.castCut = 0; s.cast = Math.max(1, spec.cast - cut); s.castUninterruptible = false; s.castSpec = spec; s.castTotal = s.cast; s.castName = spec.name; s.note = spec.name + ' 시전' } })
+// ── 일월식 헬퍼 ──
+function owlEnh (s, side) { return s.align > 0 || (s.ecl === (side === 'moon' ? 'lunar' : 'solar') && s.eclLeft > 0) } // side='moon'|'star' 강화 여부
+function owlUse (s, side, enh) { // 강화 사용: 식 1회 소모(정렬 중엔 소모 없음) + 월식 달 스킬은 실드 최대치 10% 충전(깨진 실드도 다시 생김)
+  if (!enh) return ''
+  if (!(s.align > 0)) { s.eclLeft--; if (s.eclLeft <= 0) { s.ecl = null; s.eclLeft = 0 } }
+  if (side !== 'moon') return ''
+  const b = s.shield; s.shield = Math.min(s.owlCap, s.shield + Math.round(s.owlCap * LUNAR_SHIELD)); return s.shield > b ? `🌑실드 +${s.shield - b}` : ''
 }
-function owlDot (ci, name, key, pct, cd) { // 별빛쇄도·별똥별: 5턴 지속 피해 부여(재사용 시 지속 갱신). 군중제어처럼 상대에게서 효과가 끝나야 쿨이 돈다(ccLock). AI 점수=남은 지속 보충분의 기대 총딜
-  const turns = 5
-  return { name, tag: '디버프', cd, coef: `${turns}턴간 상대 턴마다 최대체력 ${Math.round(pct * 100)}% 피해(마방 경감·실드 흡수 · 효과가 끝나야 쿨 진행)`, ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => df.maxhp * pct * (turns - (f[key] || 0)) * (1 - (f.shield > 0 ? 0 : df.마방)), exec: (s, f, ds, df) => { f[key] = turns; s.cd[ci] = cd; s.ccLock = s.ccLock || {}; s.ccLock[ci] = [key]; s.note = name } }
+function owlCharge (s, side) { // 발동(착탄) 시 반대편 충전 → 2 모이면 그 식 진입(이전 식 소멸)
+  const key = side === 'moon' ? 'solarCh' : 'lunarCh'; s[key] = (s[key] || 0) + 1
+  if (s[key] < ECL_NEED) return ''
+  s[key] = 0; s.ecl = side === 'moon' ? 'solar' : 'lunar'; s.eclLeft = ECL_USES; return side === 'moon' ? '☀️일식!' : '🌑월식!'
 }
+const owlTail = (...t) => t.filter(Boolean).join(' ')
+const owlOpen = (s, side, x) => ((side === 'moon' ? s.solarCh : s.lunarCh) === ECL_NEED - 1 ? x.est * 0.5 : 0) // AI: 이번 발동으로 반대편 식이 열리면 가산
+function owlCastStart (s, spec, cast) { const cut = s.castCut > 0 ? 1 : 0; s.castCut = 0; s.cast = Math.max(1, cast - cut); s.castUninterruptible = false; s.castSpec = spec; s.castTotal = s.cast; s.castName = spec.name; s.note = spec.name + ' 시전' } // 시전 1턴 이상(castCut으로도 0 안 됨)
+const owlSafe = (s, x) => !x || x.safe
 const CP_MAX = 5
 const cpAdd = (s, n) => { s.cp = Math.min(CP_MAX, (s.cp || 0) + n) }
 function cpOnUse (n, sk) { return Object.assign({}, sk, { exec: (s, f, ds, df) => { sk.exec(s, f, ds, df); cpAdd(s, n) } }) } // 사용 시 콤보 +n(은신)
@@ -959,10 +971,17 @@ const DRUID_SKILLS = {
     FORM_SWAP
   ],
   마나부엉이: [
-    owlCast(0, { name: '달빛섬광', tag: '시전', type: '마법.일반', mult: 1.7, cast: 1 }),
-    owlCast(1, { name: '별빛섬광', tag: '시전', type: '마법.일반', mult: 1.5, hits: 2, cast: 2 }),
-    owlDot(2, '별빛쇄도', 'starDot', STAR_DOT, 5),
-    owlDot(3, '별똥별', 'meteorDot', METEOR_DOT, 7),
+    // 🌙 달빛섬광: 시전1턴 마공×1.6 / 🌑월식: 즉발 + 실드 10%
+    (() => { const base = { name: '달빛섬광', tag: '시전', type: '마법.일반', mult: 1.6, cast: 1 }; const inst = Object.assign({}, base, { cast: 0 }); return Object.assign({}, base, { side: 'moon', coef: '🌙 시전1턴 · 마공×1.6 / 🌑월식: 즉발 + 마나실드 최대치 10% 충전', ready: (s, f, ds, df, x) => s.cast === 0 && (owlEnh(s, 'moon') || owlSafe(s, x)), score: (s, f, ds, df, x) => { const enh = owlEnh(s, 'moon'); return autoScore(enh ? inst : base, s, f, ds, df, x) + owlOpen(s, 'moon', x) + (enh ? s.owlCap * LUNAR_SHIELD * 0.5 : 0) }, exec: (s, f, ds, df) => { if (owlEnh(s, 'moon')) { runDamage(inst, s, f, ds, df); s.note = owlTail('달빛섬광 즉발', owlUse(s, 'moon', true), owlCharge(s, 'moon')) } else owlCastStart(s, Object.assign({}, base, { onLand: (a) => owlCharge(a, 'moon') }), 1) } }) })(),
+    // 🌙 월광: 5턴 지속 4%/턴(효과가 끝나야 쿨) / 🌑월식: 즉시 1틱 + 7턴 + 실드 10%
+    { name: '월광', tag: '디버프', side: 'moon', cd: 5, coef: `🌙 5턴간 상대 턴마다 최대체력 ${Math.round(MOON_DOT * 100)}% 피해(마방 경감·실드 흡수 · 효과가 끝나야 쿨 진행) / 🌑월식: 즉시 1틱 + 7턴 + 실드 10%`, ready: (s) => s.cd[1] === 0, score: (s, f, ds, df, x) => { const enh = owlEnh(s, 'moon'); const t = Math.max((enh ? 8 : 5) - (f.moonDot || 0), 0); return df.maxhp * MOON_DOT * t * (1 - (f.shield > 0 ? 0 : df.마방)) + owlOpen(s, 'moon', x) + (enh ? s.owlCap * LUNAR_SHIELD * 0.5 : 0) }, exec: (s, f, ds, df) => { const enh = owlEnh(s, 'moon'); if (enh) moonDotHit(f, df, 1); f.moonDot = Math.max(f.moonDot || 0, enh ? 7 : 5); s.cd[1] = 5; s.ccLock = s.ccLock || {}; s.ccLock[1] = ['moonDot']; s.note = owlTail(enh ? '월광·월식(즉시 1틱+7턴)' : '월광', owlUse(s, 'moon', enh), owlCharge(s, 'moon')) } },
+    // ⭐ 별빛섬광: 시전2턴 마공×1.4×2 / ☀️일식: 시전1턴 3타
+    (() => { const base = { name: '별빛섬광', tag: '시전', type: '마법.일반', mult: 1.4, hits: 2, cast: 2 }; const sol = Object.assign({}, base, { hits: 3, cast: 1 }); return Object.assign({}, base, { side: 'star', coef: '⭐ 시전2턴 · 마공×1.4×2타 / ☀️일식: 시전1턴 · 3타', ready: (s, f, ds, df, x) => s.cast === 0 && owlSafe(s, x), score: (s, f, ds, df, x) => autoScore(owlEnh(s, 'star') ? sol : base, s, f, ds, df, x) + owlOpen(s, 'star', x), exec: (s, f, ds, df) => { const enh = owlEnh(s, 'star'); owlUse(s, 'star', enh); owlCastStart(s, Object.assign({}, enh ? sol : base, { onLand: (a) => owlCharge(a, 'star') }), enh ? 1 : 2) } }) })(),
+    // ⭐ 별똥별: 시전2턴 마공×2.6 단발(쿨4) / ☀️일식: 착탄 시 상대 월광 남은 피해 전부 즉시 폭발(월광 종료 → 월광 쿨 진행)
+    // AI: 일식 + 월광 3틱 이상 남았을 때만 폭발 가치 가산(기획서)
+    (() => { const base = { name: '별똥별', tag: '시전', type: '마법.일반', mult: 2.6, cast: 2 }; return Object.assign({}, base, { side: 'star', cd: 4, coef: '⭐ 시전2턴 · 마공×2.6 / ☀️일식: 착탄 시 상대 월광의 남은 피해 전부 즉시 폭발 (쿨4)', ready: (s, f, ds, df, x) => s.cast === 0 && s.cd[3] === 0 && owlSafe(s, x), score: (s, f, ds, df, x) => { const enh = owlEnh(s, 'star'); const boom = (enh && (f.moonDot || 0) >= 3) ? df.maxhp * MOON_DOT * f.moonDot * (1 - df.마방) * 0.3 : 0; return autoScore(base, s, f, ds, df, x) + boom + owlOpen(s, 'star', x) }, exec: (s, f, ds, df) => { const enh = owlEnh(s, 'star'); owlUse(s, 'star', enh); s.cd[3] = 4; owlCastStart(s, Object.assign({}, base, { onLand: (a, fo, da, dfo) => { let t = ''; if (enh && fo.moonDot > 0 && fo.hp > 0) { const n = fo.moonDot; fo.moonDot = 0; t = `☄️월광 폭발 ${moonDotHit(fo, dfo, n)}(${n}틱)` } return owlTail(t, owlCharge(a, 'star')) } }), 2) } }) })(),
+    // ✨ 천체 정렬: 3턴간 월식+일식 동시(모든 스킬 강화, 횟수 소모 없음) + 실드 최대치 30% (쿨12 · 시작쿨3)
+    { name: '천체 정렬', tag: '버프', cd: 12, coef: `✨ ${ALIGN_TURNS}턴간 월식·일식 동시(모든 스킬 강화) + 마나실드 최대치 ${Math.round(ALIGN_SHIELD * 100)}% 충전 (쿨12)`, ready: (s) => s.cd[4] === 0 && !(s.align > 0), score: (s, f, ds, df, x) => (f.hp <= df.maxhp * 0.3 || (s.shield === 0 && s.hp < ds.maxhp * 0.4)) ? x.est * 3 : 0, exec: (s, f, ds, df) => { s.align = ALIGN_TURNS + 1; const b = s.shield; s.shield = Math.min(s.owlCap, s.shield + Math.round(s.owlCap * ALIGN_SHIELD)); s.cd[4] = 12; s.note = `✨천체 정렬! 해와 달과 별이 한 줄로 섰다 (실드 +${s.shield - b})` } },
     FORM_SWAP
   ]
 }
@@ -1259,7 +1278,7 @@ const SKILL_POOL = {
   랜덤디버프룰렛: (ci) => ({ name: '룰렛', tag: '디버프', coef: '상대에게 랜덤 디버프', cd: 3, ready: (s) => s.cd[ci] === 0, score: (s, f, ds, df, x) => x.foeTurn * 1.6, exec: (s, f, ds, df) => { const d = DEBUFFS[Math.floor(rand() * DEBUFFS.length)]; d.apply(f); s.cd[ci] = 3; s.note = '룰렛: ' + d.name } })
 }
 // 스킬 종류별 "시작 쿨"(오프닝 봉인). 공격기=0(즉시), CC=2, 인캐=3. 마법사=슬로우스타터
-const SKILL_STARTCD = { 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 7, 역장폭발: 3, 사냥꾼덫: 3, 성역: 5, '올인!!': 3, 과다출혈: 3, 파열: 4, 살아있는시체: 6, 단죄: 3 }
+const SKILL_STARTCD = { '천체 정렬': 3, 돌진: 2, 암습: 2, 약점봉인: 2, 도발: 2, 중력베기: 2, 인스턴트캐스팅: 3, 메테오: 13, 속박: 2, 아수라패황권: 7, 역장폭발: 3, 사냥꾼덫: 3, 성역: 5, '올인!!': 3, 과다출혈: 3, 파열: 4, 살아있는시체: 6, 단죄: 3 }
 const skillStartCd = (name) => SKILLS[name].map(sk => SKILL_STARTCD[sk.name] || 0)
 // 스킬블록: 선택 캐릭의 스킬슬롯을 필드에서 자동 렌더(번호 없음, 하드코딩 테이블 없음) + 패시브 나열
 function skillsBlock (name) {
@@ -1425,7 +1444,7 @@ function resetGauge (f, d) { const fury = (psv(f, '광란') && f.maxhp) ? (1 - M
 // 시전 1틱 진행: 카운트다운 후 착탄. upkeep 자동진행 + 플레이어 '시전 진행'(턴넘기기) 공용
 function advanceCast (self, foe, ds, df) {
   self.cast--
-  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; const chain = self.castBoltChain; self.castBolt = null; self.castBoltChain = false; launchBolt(self, foe, ds, df, bn, chain); bearGuard(foe, df, b - foe.hp); return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames, parried: resolveParry(foe, df) } } const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); bearGuard(foe, df, b - foe.hp); return { type: 'castfire', dmg: b - foe.hp, spell: (sp && sp.name) || self.castName || '화염구', parried: resolveParry(foe, df) } }
+  if (self.cast === 0) { const b = foe.hp; if (self.castBolt) { const bn = self.castBolt; const chain = self.castBoltChain; self.castBolt = null; self.castBoltChain = false; launchBolt(self, foe, ds, df, bn, chain); bearGuard(foe, df, b - foe.hp); return { type: 'castfire', dmg: b - foe.hp, spell: bn, bolt: true, boltHits: self.boltHits, boltNames: self.boltNames, parried: resolveParry(foe, df) } } const sp = self.castSpec; self.castSpec = null; if (sp) runDamage(sp, self, foe, ds, df); const extra = (sp && sp.onLand) ? sp.onLand(self, foe, ds, df) : ''; bearGuard(foe, df, b - foe.hp); return { type: 'castfire', dmg: b - foe.hp, spell: (sp && sp.name) || self.castName || '화염구', extra, parried: resolveParry(foe, df) } }
   return { type: 'cast', spell: self.castName || '화염구', left: self.cast, total: self.castTotal }
 }
 function upkeep (self, foe, ds, df, interactive) {
@@ -1436,7 +1455,7 @@ function upkeep (self, foe, ds, df, interactive) {
   if (self.enchantTurns > 0) { self.enchantTurns--; if (self.enchantTurns === 0) self.enchant = null } // 스블 인챈트 만료
   for (let i = 0; i < self.cd.length; i++) { if (!ccLocked(self, foe, i)) self.cd[i] = Math.max(0, self.cd[i] - 1) } // 전 스킬 슬롯 쿨 감소(3스킬 대응). 상대에게 건 CC가 남아 있으면 그 스킬 쿨은 정지
   if (self.form) druidUpkeep(self, foe, ds, df) // 드루이드: 비활성 형상 쿨·기력 회복·재생 틱·형상 능력치 갱신
-  if (self.starDot > 0 || self.meteorDot > 0) starDotTick(self, ds) // 별빛쇄도·별똥별(마나부엉이) 지속 피해
+  if (self.moonDot > 0) moonDotTick(self, ds) // 월광(마나부엉이) 지속 피해
   if (self.tRegen && self.healBlock === 0) self.hp = Math.min(ds.maxhp, self.hp + hcut(self, Math.round(ds.base.체력 * 0.3)))
   if (self.autoSpell > 0) self.autoSpell--
   if (self.graze100 > 0) self.graze100--
@@ -1525,7 +1544,7 @@ function execDefend (self, ds) { const before = self.hp; const parryWpn = ds.무
 // 순수버프 스킬(턴만 소모, 공격/방어 없음) — AI 생존여유 게이트 대상. 재생의광기 등 '공격 겸용'은 제외
 const BUFF_SKILLS = new Set(['인스턴트캐스팅', '볼트마법조합', '방패들기', '마법반사', '오토스펠'])
 // 마법 스킬: 침묵 시 사용 불가(물리 스킬은 침묵 무시). 원소·역장·시전·마법 유틸·마법 버프가 대상 (물리 타격·물리 버프·물리 덫은 제외)
-const MAGIC_SKILLS = new Set(['화염구', '메테오', '인스턴트캐스팅', '서리구', '충격파', '파이어볼트', '라이트닝볼트', '콜드볼트', '볼트마법조합', '오토스펠', '디스펠', '마법의완전이해', '룬각인', '역장폭발', '약점봉인', '마나소각', '시전파괴', '마법반사', '안식', '성스러운빛', '달빛섬광', '별빛섬광', '별빛쇄도', '별똥별'])
+const MAGIC_SKILLS = new Set(['화염구', '메테오', '인스턴트캐스팅', '서리구', '충격파', '파이어볼트', '라이트닝볼트', '콜드볼트', '볼트마법조합', '오토스펠', '디스펠', '마법의완전이해', '룬각인', '역장폭발', '약점봉인', '마나소각', '시전파괴', '마법반사', '안식', '성스러운빛', '달빛섬광', '별빛섬광', '월광', '별똥별', '천체 정렬'])
 const silenced = (s, name) => s.silence > 0 && MAGIC_SKILLS.has(name)
 // 침묵 AI 가치: 상대의 마법 스킬 비율(0~1). 순수 물리 상대에겐 침묵이 무의미하므로 0 → 침묵 점수 소멸(딜만 남음)
 const _magicShare = {}
@@ -1689,7 +1708,7 @@ function playerOptions (state) {
   const casting = A.cast > 0 && !A.castUninterruptible // 끊기 가능 시전 중: 진행/취소만 노출(끊기불가는 자동진행)
   const stunSk = stunned ? stunSkill(A, B, dA, dB) : null // 기절 중 유일하게 쓸 수 있는 스킬 이름
   // 인캐(instCast) 중 즉발 여부 힌트: 화염구=즉시 / 메테오=즉발불가(인캐 낭비 방지 안내)
-  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_SPECS[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1, swap: skdef.choose === 'form', cost: skdef.cost ? `${RES_LABEL[skdef.res]}${skdef.cost}` : null } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
+  const one = (slot) => { const skdef = sks[slot]; const nm = skdef.combo ? skdef.stageName(A) : skdef.name; let u = playerCanUse(state, slot); if (stunned) u = (skdef.name === stunSk) ? { usable: true } : { usable: false, reason: '기절' }; const inst = A.instCast > 0 ? ((nm === '화염구' || nm === '서리구') ? '즉시' : nm === '메테오' ? '즉발불가' : null) : null; let base = skillCd(skdef); if (A.chainBolt > 0 && BOLT_SPECS[nm]) base = '시전'; return { name: nm, base, usable: u.usable, reason: u.reason, inst, comboLvl: skdef.combo ? skdef.stageLevel(A) : -1, swap: skdef.choose === 'form', hi: (skdef.side && A.form === '마나부엉이' && owlEnh(A, skdef.side)) ? (A.align > 0 ? '✨' : skdef.side === 'moon' ? '🌑' : '☀️') : null, cost: skdef.cost ? `${RES_LABEL[skdef.res]}${skdef.cost}` : null } } // 볼트마법조합 중엔 콜드도 시전 / 모핑 콤보는 단계별 이름·레벨
   return { canDefend: !stunned && A.taunt === 0 && A.noDefend === 0, skills: sks.map((_, i) => one(i)), passives: A.form === '전투곰' ? [BEAR_PASSIVE] : (PASSIVES[meName] || []), stunned, taunted: A.taunt > 0, casting, castName: casting ? (A.castName || '시전') : null, castLeft: A.cast, castTotal: A.castTotal }
 }
 
@@ -1845,7 +1864,7 @@ function narrateLine (ev, meName, oppName) {
     case 'shift': { const F = DRUID_FORMS[ev.to]; return ev.to === '인간' ? `🧝 ${ae} **${A}**${iga(A)} 형상을 풀고 인간의 모습으로 돌아왔다. (HP ${ev.selfHp}/${ev.selfMax})` : `${F.emoji} ${ae} **${A}**${iga(A)} **${ev.to}** 형상으로 변신했다!${ev.rage ? ` 😤분노 ${ev.rage}` : ''} (HP ${ev.selfHp}/${ev.selfMax})` }
     case 'bearguard': { const rg = ev.rage ? ' 😤분노 30 소모' : ''; return ev.fail ? `🐻 ${ae} **${A}**의 광포한 재생력!${rg} 체력 **${ev.heal}**을 먼저 회복했지만 일격을 버티지 못했다…` : `🐻 ${ae} **${A}**의 광포한 재생력!${rg} 큰 타격에 즉시 체력 **${ev.heal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})` }
     case 'druregen': return `🌿 ${ae} **${A}**${eun(A)} 재생의 힘으로 체력 **${ev.heal}** 회복 (HP ${ev.selfHp}/${ev.selfMax})`
-    case 'stardot': { const bits = []; if (ev.star > 0) bits.push(`별빛쇄도 ${ev.star}턴`); if (ev.meteor > 0) bits.push(`별똥별 ${ev.meteor}턴`); return `🌟 ${ae} **${A}**${iga(A)} 쏟아지는 별빛에 **${ev.dmg}** 피해!${ev.absorbed > 0 ? ` 🔷*마나실드 ${ev.absorbed} 흡수*` : ''}${bits.length ? ` (${bits.join(' · ')} 남음)` : ''}` }
+    case 'moondot': return `🌙 ${ae} **${A}**${iga(A)} 월광에 타들어 **${ev.dmg}** 피해!${ev.absorbed > 0 ? ` 🔷*마나실드 ${ev.absorbed} 흡수*` : ''}${ev.left > 0 ? ` (월광 ${ev.left}턴 남음)` : ''}`
     case 'trapspring': return `🪤 ${ae} **${A}**${iga(A)} 사냥꾼덫을 밟았다! 발이 묶이고(둔화) 🩸출혈 시작!`
     case 'bleed': return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${ev.left > 0 ? ` (출혈 ${ev.left}턴 남음)` : ''}`
     case 'gash': { const gp = []; if (ev.cut > 0) gp.push(`절개${ev.cut}`); if (ev.lac > 0) gp.push(`열상${ev.lac}`); return `🩸 ${ae} **${A}**${eun(A)} 출혈로 **${ev.dmg}** 피해!${gp.length ? ` (${gp.join('·')})` : ''}` }
@@ -1857,9 +1876,9 @@ function narrateLine (ev, meName, oppName) {
     case 'cast': return `🔮 ${ae} **${A}**${iga(A)} ${ev.spell || '화염구'}${eul(ev.spell || '화염구')} 시전하고 있다… ${ev.total ? `**[${ev.total - ev.left}/${ev.total}]**` : ''}`
     case 'castfire': {
       const sp = ev.spell || '화염구'
-      if (ev.dmg <= 0) return `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!`
+      if (ev.dmg <= 0) return `🍀 ${te} **${T}**${iga(T)} ${ae} **${A}**의 ${sp}${eul(sp)} 천운으로 흘려냈다!${ev.extra ? ' ' + ev.extra : ''}`
       if (ev.bolt && ev.boltHits && ev.boltHits.length) { const combo = ev.boltNames && new Set(ev.boltNames).size > 1 ? '🔗**원소조합!** ' : ''; return `☄️ ${ae} **${A}**의 ${sp} 작렬!${parryTag} ${combo}${te} **${T}**${eun(T)} ✨${boltGroupStr(ev.boltHits, ev.boltNames, ev.dmg)} 총 **${ev.dmg}**의 피해를 입었다.` } // 시전형 볼트: 발당 분해 표시(파이어볼트(1·3·2·1·4))
-      return `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬!${parryTag} ${hurt(ev.dmg)}`
+      return `☄️ ${ae} **${A}**의 ${sp}${iga(sp)} 작렬!${parryTag} ${hurt(ev.dmg)}${ev.extra ? ' ' + ev.extra : ''}`
     }
     case 'castcancel': return `✋ ${ae} **${A}**${iga(A)} ${ev.spell || '시전'}${eul(ev.spell || '시전')} 스스로 취소했다. (다음 시전 -1턴)`
     case 'revive': return ev.rtype === 'undying'
@@ -1929,13 +1948,13 @@ function statusGroups (f) {
   if (f.undead) deb.push(f.deathDoom ? `☠️시체 무적${f.deathMark}(회복 못하면 사망)` : `⚰️시체 무적${f.deathMark}(즉사 해제)`)
   if (f.trap > 0) deb.push(`🪤덫${f.trap}`)
   if (f.bleed > 0) deb.push(`🩸출혈${f.bleed}`)
-  if (f.starDot > 0) deb.push(`🌟별빛쇄도${f.starDot}`)
-  if (f.meteorDot > 0) deb.push(`☄️별똥별${f.meteorDot}`)
+  if (f.moonDot > 0) deb.push(`🌙월광${f.moonDot}`)
   if (f.form) { // 드루이드: 형상·자원·재생
     buf.push(`${DRUID_FORMS[f.form].emoji}${f.form}`)
     if (f.form === '전투곰') buf.push(`😤분노 ${f.druRage}/${RAGE_MAX}`, f.bearGuardCd > 0 ? `🐻광포한재생력 ${f.bearGuardCd}턴 후` : '🐻광포한재생력 준비')
     if (f.form === '표범' || f.form === '치타') buf.push(`⚡기력 ${f.druEnergy}/${ENERGY_MAX}`)
     if (f.form === '표범') buf.push(`🐾콤보 ${f.cp}/${CP_MAX}`)
+    if (f.form === '마나부엉이') { const dots = (n) => '●'.repeat(n || 0) + '○'.repeat(ECL_NEED - (n || 0)); buf.push(`🌙${dots(f.solarCh)} ⭐${dots(f.lunarCh)}`); if (f.ecl) buf.push(f.ecl === 'lunar' ? `🌑월식 ${f.eclLeft}회` : `☀️일식 ${f.eclLeft}회`); if (f.align > 0) buf.push(`✨천체 정렬 ${Math.min(f.align, ALIGN_TURNS)}`) } // 🌙=달 스킬 충전(→일식) · ⭐=별 스킬 충전(→월식)
     if (f.druRegen > 0) buf.push(`🌿재생${f.druRegen}`)
     if (f.catRegen > 0) buf.push(`🐅자연의재생력${f.catRegen}`)
     if (f.crouch > 0) buf.push(`🐾웅크리기${f.crouch}`)
@@ -2029,7 +2048,7 @@ function buildBattleRow (state) {
   ]
   const skillBtns = []
   // 모핑 콤보 색상: 육합권=파랑(기본) → 연환전신장=녹색 → 맹룡과강=빨강(점차 강해짐). 콤보 진행(lvl≥1) 시 🔥
-  o.skills.forEach((sk, i) => { const lvl = sk.comboLvl; const style = lvl === 2 ? ButtonStyle.Danger : lvl === 1 ? ButtonStyle.Success : ButtonStyle.Primary; const pre = (lvl >= 1) ? '🔥' : ''; const btn = new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(pre + skLbl(sk)).setStyle(style).setDisabled(!sk.usable); if (sk.swap) actionBtns.push(btn); else skillBtns.push(btn) }) // 형상변환(드루이드)은 1줄 행동 버튼 옆 — 스킬 줄 5칸 확보
+  o.skills.forEach((sk, i) => { const lvl = sk.comboLvl; const style = lvl === 2 ? ButtonStyle.Danger : (lvl === 1 || sk.hi) ? ButtonStyle.Success : ButtonStyle.Primary; const pre = (lvl >= 1) ? '🔥' : (sk.hi || ''); const btn = new ButtonBuilder().setCustomId(cid('s' + i)).setLabel(pre + skLbl(sk)).setStyle(style).setDisabled(!sk.usable); if (sk.swap) actionBtns.push(btn); else skillBtns.push(btn) }) // 형상변환(드루이드)은 1줄 행동 버튼 옆 — 스킬 줄 5칸 확보 · 일월식 강화 중 계열 스킬=초록+🌑/☀️/✨
   const passiveBtns = o.passives.map((p, i) => new ButtonBuilder().setCustomId(cid('passive' + i)).setLabel(`🔒 ${p.name}(패시브)`).setStyle(ButtonStyle.Secondary).setDisabled(true))
   const rows = [new ActionRowBuilder().addComponents(actionBtns)] // 1줄: 공격·방어·턴넘기기·기권
   if (skillBtns.length) rows.push(new ActionRowBuilder().addComponents(skillBtns.slice(0, 5))) // 2줄: 액티브 스킬

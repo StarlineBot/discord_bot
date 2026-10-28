@@ -800,13 +800,13 @@ const SKILLS = {
 // 운명의카드 효과: 킹=상대 확정20% / 퀸=상대 확정10%+자해10% / 하트=자힐10% / 다이아=방어1.5배 2턴 / 클로버=행운폭주(크리·회피↑) 2턴 / 스페이드=상대 힐5%(꽝)
 // ===== 드루이드: 형상변환 =====
 // 인간형(재생 + 형상 4종)으로 시작. 형상을 고르면 스킬 5개가 통째로 바뀌고, 해제(다른 형상/인간) 전까지 유지. 변신 = 1턴 소모.
-// 형상 능력치는 인간형 파생(druBase, 타이틀 포함)에서 배율만 재적용 → 해제 시 원래대로. 최대체력은 현재 체력 비율 유지.
+// 형상 능력치는 인간형 파생(druBase, 타이틀·무기 배율 포함) 위에 형상 배율을 곱함 → 해제 시 원래대로. 최대체력은 현재 체력 비율 유지.
 // 물공 스탯: 인간·전투곰=힘 / 표범·치타=민첩. 마공(마나부엉이)=지능. 형상마다 쿨 배열이 따로 있고 비활성 형상 쿨도 흐른다.
 const physOf = (v) => 10 + v + step(v, 3) + Math.floor(v / 20) * 8 // derive 물공식(스탯 하나로)
 const DRUID_FORMS = {
   인간: { emoji: '🧝' },
   전투곰: { emoji: '🐻', phys: '힘', atk: 1.5, hp: 2, dodge: 1.5, def: 1.5, noWBlock: true, desc: '공격력×1.5 · 최대체력×2 · 회피×1.5 · 방어×1.5 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 턴당 -5)' },
-  표범: { emoji: '🐆', phys: '민첩', atk: 1.5, dodge: 2.0, crit: 1.2, critMul: 1.5, desc: '공격력×1.5(민첩) · 회피×2 · 치명타 확률×1.2 · 치명타 배율×1.5 · 기력' },
+  표범: { emoji: '🐆', phys: '민첩', atk: 1.5, dodge: 2.0, crit: 1.2, critMul: 1.5, turn: 0.8, desc: '공격력×1.5(민첩) · 회피×2 · 치명타 확률×1.2 · 치명타 배율×1.5 · 턴×0.8 · 기력' },
   치타: { emoji: '🐅', phys: '민첩', dodge: 2.5, hp: 0.8, desc: '회피×2.5 · 최대체력×0.8 · 물공=민첩 · 기력' },
   마나부엉이: { emoji: '🦉', hp: 0.6, shield: true, magicAuto: true, desc: '최대체력×0.6 · 마나실드 · 평타=마법(마공=지능)' }
 }
@@ -819,7 +819,7 @@ const CROUCH_DODGE = 1.2; const CROUCH_TAKEN = 0.8 // 웅크리기(치타): 회�
 const STAR_DOT = 0.05; const METEOR_DOT = 0.07 // 별빛쇄도·별똥별: 턴당 상대 최대체력 %(마방 경감, 마나실드 흡수)
 function initDruid (f, d) {
   f.form = '인간'
-  f.druBase = { 물공: d.물공, 마공: d.마공, maxhp: d.maxhp, 물회: d.물회, 물방: d.물방, 마방: d.마방, 크리: d.크리, 무기막기: d.무기막기, 무기: d.무기 }
+  f.druBase = { 물공: d.물공, 마공: d.마공, maxhp: d.maxhp, 물회: d.물회, 물방: d.물방, 마방: d.마방, 크리: d.크리, 무기막기: d.무기막기, 무기: d.무기, 턴: d.턴 }
   f.formCd = {}; f.formLock = {}
   for (const k of DRUID_ORDER) { f.formCd[k] = k === '인간' ? f.cd : DRUID_SKILLS[k].map(() => 0); f.formLock[k] = {} }
   f.ccLock = f.formLock.인간
@@ -839,6 +839,7 @@ function druidStats (f, ds, form = f.form) {
   ds.무기막기 = F.noWBlock ? 0 : B.무기막기
   ds.마나실드 = F.shield ? f.owlCap : 0
   ds.평타마법 = !!F.magicAuto
+  ds.턴 = Math.max(B.턴 * (F.turn || 1), 2) // 턴배율: 무기 턴배율(장창 1.1) 위에 곱함
 }
 function druidShift (s, f, ds, df, to) {
   const from = s.form

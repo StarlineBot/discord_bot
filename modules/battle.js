@@ -901,13 +901,13 @@ const DRUID_SKILLS = {
   인간: [
     shiftSkill('전투곰'), shiftSkill('표범'), shiftSkill('치타'), shiftSkill('마나부엉이'),
     // 재생: 3턴간 턴당 3% 회복 — 형상을 바꿔도 유지
-    mkSkill(4, { name: '재생', tag: '회복', cd: 5, coef: `3턴간 턴당 체력 ${DRU_REGEN * 100}% 회복(총 ${DRU_REGEN * 300}% · 형상 변신 후에도 유지)`, selfBuff: { druRegen: 3 }, note: '재생', ready: (s, f, ds) => s.cd[4] === 0 && s.druRegen === 0 && s.hp < ds.maxhp, score: (s, f, ds) => healScore(s, ds, DRU_REGEN, 3) })
+    mkSkill(4, { name: '재생', tag: '회복', cd: 5, coef: `3턴간 턴당 체력 ${Math.round(DRU_REGEN * 100)}% 회복(총 ${Math.round(DRU_REGEN * 300)}% · 형상 변신 후에도 유지)`, selfBuff: { druRegen: 3 }, note: '재생', ready: (s, f, ds) => s.cd[4] === 0 && s.druRegen === 0 && s.hp < ds.maxhp, score: (s, f, ds) => healScore(s, ds, DRU_REGEN, 3) })
   ],
   전투곰: [
     druCost('druRage', 20, (() => { const spec = { name: '후려갈기기', tag: '공격', type: '물리.일반', mult: 1.5, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: BEAR_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 1; s.note = '후려갈기기' } }) })()),
     // 포효: 상대 4턴 강제평타(자신 공격력 증가 없음 — 기사 도발과 별개)
     druCost('druRage', 10, mkSkill(1, { name: '포효', tag: '제어', cd: 4, debuff: { taunt: 4 }, note: '포효', ready: (s, f) => s.cd[1] === 0 && f.taunt === 0, score: BEAR_RSV(10, (s, f, ds, df, x) => ctrlVal(x.foeTurn, 2, 'stun')) })),
-    druCost('druRage', 40, mkSkill(2, { name: '광포한 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${BEAR_REGEN * 100}% 회복(총 ${BEAR_REGEN * 500}% · 곰 해제 시 소멸)`, selfBuff: { bearRegen: 5 }, note: '광포한 재생력', ready: (s, f, ds) => s.cd[2] === 0 && s.bearRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, BEAR_REGEN, 5) })),
+    druCost('druRage', 40, mkSkill(2, { name: '광포한 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${Math.round(BEAR_REGEN * 100)}% 회복(총 ${Math.round(BEAR_REGEN * 500)}% · 곰 해제 시 소멸)`, selfBuff: { bearRegen: 5 }, note: '광포한 재생력', ready: (s, f, ds) => s.cd[2] === 0 && s.bearRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, BEAR_REGEN, 5) })),
     druCost('druRage', 25, mkSkill(3, { name: '야생의돌진', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[3] === 0 && f.stun === 0, score: BEAR_RSV(25, stunSc) })),
     FORM_SWAP
   ],
@@ -921,7 +921,7 @@ const DRUID_SKILLS = {
   ],
   치타: [
     druCost('druEnergy', 20, (() => { const spec = { name: '물기', tag: '공격', type: '물리.일반', mult: 1.0, cd: 1 }; return Object.assign({}, spec, { ready: (s) => s.cd[0] === 0, score: CAT_RSV(20, (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x)), exec: (s, f, ds, df) => { runDamage(spec, s, f, ds, df); s.cd[0] = 1; s.note = '물기' } }) })()),
-    druCost('druEnergy', 50, mkSkill(1, { name: '자연의 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${CAT_REGEN * 100}% 회복(총 ${CAT_REGEN * 500}% · 치타 해제 시 소멸)`, selfBuff: { catRegen: 5 }, note: '자연의 재생력', ready: (s, f, ds) => s.cd[1] === 0 && s.catRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, CAT_REGEN, 5) })),
+    druCost('druEnergy', 50, mkSkill(1, { name: '자연의 재생력', tag: '회복', cd: 3, coef: `5턴간 턴당 체력 ${Math.round(CAT_REGEN * 100)}% 회복(총 ${Math.round(CAT_REGEN * 500)}% · 치타 해제 시 소멸)`, selfBuff: { catRegen: 5 }, note: '자연의 재생력', ready: (s, f, ds) => s.cd[1] === 0 && s.catRegen === 0 && s.hp < ds.maxhp * 0.9, score: (s, f, ds) => healScore(s, ds, CAT_REGEN, 5) })),
     druCost('druEnergy', 40, mkSkill(2, { name: '야생의돌진', tag: '제어', cc: { stun: 1 }, cd: 3, note: '기절', ready: (s, f) => s.cd[2] === 0 && f.stun === 0, score: CAT_RSV(40, stunSc) })),
     // 웅크리기: 2턴 회피×1.2 · 받는 피해×0.8. 점수=2턴간 줄어드는 기대 피격량
     druCost('druEnergy', 60, mkSkill(3, { name: '웅크리기', tag: '버프', cd: 3, coef: `2턴간 회피×${CROUCH_DODGE} · 받는 피해×${CROUCH_TAKEN}`, selfBuff: { crouch: 2 }, note: '웅크리기', ready: (s) => s.cd[3] === 0 && s.crouch === 0, score: CAT_RSV(60, (s, f, ds, df, x) => { const d = Math.min(ds.물회, 0.8); return buffVal(x.foeTurn * 2 * (1 - (1 - Math.min(d * CROUCH_DODGE, 0.95)) * CROUCH_TAKEN / (1 - d)), s, ds) }) })),

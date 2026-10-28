@@ -805,7 +805,7 @@ const SKILLS = {
 const physOf = (v) => 10 + v + step(v, 3) + Math.floor(v / 20) * 8 // derive 물공식(스탯 하나로)
 const DRUID_FORMS = {
   인간: { emoji: '🧝' },
-  전투곰: { emoji: '🐻', phys: '힘', atk: 1.5, hp: 2.2, acc: 1.3, dodge: 1.5, pdef: 1.5, mdef: 1.1, noWBlock: true, desc: '공격력×1.5 · 최대체력×2.2 · 명중×1.3 · 회피×1.5 · 물방×1.5 · 마방×1.1 · 무기막기 불가 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5) · 패시브 광포한 재생력' },
+  전투곰: { emoji: '🐻', phys: '힘', atk: 1.5, hp: 2.2, acc: 1.3, dodge: 1.5, pdef: 1.5, mdef: 1.1, desc: '공격력×1.5 · 최대체력×2.2 · 명중×1.3 · 회피×1.5 · 물방×1.5 · 마방×1.1 · 분노(변신 시 25, 평타 적중 15/치명타 30, 공격 스킬 적중 +5, 턴당 -5) · 패시브 광포한 재생력' },
   표범: { emoji: '🐆', phys: '민첩', atk: 1.5, dodge: 2.0, crit: 1.2, critMul: 1.5, turn: 0.8, desc: '공격력×1.5(민첩) · 회피×2 · 치명타 확률×1.2 · 치명타 배율×1.5 · 턴×0.8 · 기력' },
   치타: { emoji: '🐅', phys: '민첩', atk: 0.8, dodge: 2.5, hp: 0.8, turn: 0.8, desc: '공격력×0.8(민첩) · 회피×2.5 · 최대체력×0.8 · 턴×0.8 · 기력' },
   마나부엉이: { emoji: '🦉', hp: 0.6, shield: true, magicAuto: true, desc: '최대체력×0.6 · 마나실드 · 평타=마법(마공=지능)' }
@@ -841,7 +841,7 @@ function druidStats (f, ds, form = f.form) {
   ds.크리 = Math.min(B.크리 * (F.crit || 1), 0.9)
   ds.명중 = B.명중 * (F.acc || 1)
   ds.무기 = F.critMul ? Object.assign({}, B.무기, { 크리배율: B.무기.크리배율 * F.critMul }) : B.무기
-  ds.무기막기 = F.noWBlock ? 0 : B.무기막기
+  ds.무기막기 = form !== '인간' ? 0 : B.무기막기 // 변신 형상은 모두 무기막기 불가(장창을 쓰는 건 인간형뿐)
   ds.마나실드 = F.shield ? f.owlCap : 0
   ds.평타마법 = !!F.magicAuto
   ds.턴 = Math.max(B.턴 * (F.turn || 1), 2) // 턴배율: 무기 턴배율(장창 1.1) 위에 곱함
@@ -904,7 +904,7 @@ function bearGuard (foe, df, dealt) {
 function druReserve (s, ds, res, cost, regenSlot, regenCost, regenKey) { return !(s.hp < ds.maxhp * 0.5 && !(s[regenKey] > 0) && s.cd[regenSlot] <= 1 && s[res] - cost < regenCost) }
 const CAT_RSV = (cost, sc) => (s, f, ds, df, x) => druReserve(s, ds, 'druEnergy', cost, 1, 50, 'catRegen') ? sc(s, f, ds, df, x) : 0
 const healScore = (s, ds, pct, turns) => Math.min(ds.maxhp - s.hp, ds.maxhp * pct * turns) * 0.55 // 회복기 점수(힐과 동일 계수): 잃은 체력 한도 내 총회복량
-function shiftSkill (to) { return { name: `${to}형상`, tag: '버프', shift: to, coef: `${DRUID_FORMS[to].emoji} ${DRUID_FORMS[to].desc} (변신 1턴)`, ready: (s) => s.form !== to && s.cast === 0, score: () => 0, selfEvent: (s, f, ds, df) => druidShift(s, f, ds, df, to) } }
+function shiftSkill (to) { return { name: `${to}형상`, tag: '버프', shift: to, coef: `${DRUID_FORMS[to].emoji} ${DRUID_FORMS[to].desc} · 무기막기 불가 (변신 1턴)`, ready: (s) => s.form !== to && s.cast === 0, score: () => 0, selfEvent: (s, f, ds, df) => druidShift(s, f, ds, df, to) } }
 const FORM_SWAP = { name: '형상변환', tag: '버프', choose: 'form', coef: '전투곰·표범·치타·마나부엉이·인간 중 골라 변신 (변신 1턴)', ready: (s) => s.cast === 0, score: () => 0, selfEvent: (s, f, ds, df) => { let to = s.formChoice || druidPickForm(s, f, ds, df, true); s.formChoice = null; if (!DRUID_FORMS[to] || to === s.form) to = '인간'; return druidShift(s, f, ds, df, to) } }
 function owlCast (ci, spec) { // 마나부엉이 시전 마법: 볼트식(최소 1시전), 착탄 시 runDamage(castSpec)
   return Object.assign({}, spec, { ready: (s, f, ds, df, x) => s.cast === 0 && (!x || x.safe), score: (s, f, ds, df, x) => autoScore(spec, s, f, ds, df, x), exec: (s, f, ds, df) => { const cut = s.castCut > 0 ? 1 : 0; s.castCut = 0; s.cast = Math.max(1, spec.cast - cut); s.castUninterruptible = false; s.castSpec = spec; s.castTotal = s.cast; s.castName = spec.name; s.note = spec.name + ' 시전' } })

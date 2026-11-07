@@ -2,11 +2,14 @@ const { EmbedBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../../modules/getGuildInfo')
 const settings = require('../../modules/guildSettings')
+const { developerId } = require('../../config/bot')
 const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 module.exports = (member) => {
   const guildId = member.guild.id
   const guildInfo = guildModule.getGuildInfo(guildId)
   if (!guildInfo || !settings.get(guildId, 'auditLog', false)) return
+  // 봇 제작자(developerId)의 퇴장은 감사로그에 남기지 않는다
+  if (developerId && member.user.id === developerId) return
   const auditChannelId = settings.get(guildId, 'roleAuditingChannelId', null)
   if (!auditChannelId) return
   const embed = new EmbedBuilder()

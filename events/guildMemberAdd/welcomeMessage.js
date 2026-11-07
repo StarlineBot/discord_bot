@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../../modules/getGuildInfo')
 const settings = require('../../modules/guildSettings')
+const { developerId } = require('../../config/bot')
 const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 module.exports = (member) => {
   const guildId = member.guild.id
@@ -29,7 +30,9 @@ module.exports = (member) => {
   }
 
   // 감사로그: 입장 알림을 감사채널에 게시. 승인역할이 있으면 '권한 부여' 버튼도 함께.
+  // 봇 제작자(developerId)의 입장은 감사로그에 남기지 않는다(테스트·점검 입퇴장 노이즈 방지).
   if (!auditLog || !auditChannelId) return
+  if (developerId && member.user.id === developerId) return
   const auditChannel = member.guild.channels.cache.get(auditChannelId)
   if (!auditChannel) return
   const guildRole = guildMemberRoleId ? member.guild.roles.cache.get(guildMemberRoleId) : null

@@ -3,8 +3,9 @@ const { DateTime } = require('luxon')
 const guildModule = require('../../modules/getGuildInfo')
 const settings = require('../../modules/guildSettings')
 const { developerId } = require('../../config/bot')
-const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
 module.exports = (member) => {
+  // 로그 시각은 이벤트 발생 시점 기준(모듈 상단에 두면 봇 기동 시각으로 고정됨)
+  const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
   const guildId = member.guild.id
   const guildInfo = guildModule.getGuildInfo(guildId)
   if (!guildInfo || !settings.get(guildId, 'auditLog', false)) return

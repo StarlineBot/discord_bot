@@ -20,5 +20,5 @@ module.exports = {
   //   앱이 '[설정백업] <@userId>' + config.json 첨부를 이 채널에 올리면,
   //   봇이 그 유저에게 백업 파일을 DM으로 전달하고 릴레이 메시지는 삭제(채널 정리).
   //   비어 있으면 설정백업 전달 기능 off.
-  configBackupChannelId: '1557380857373663242'
+  configBackupChannelId: '1567711162165104753'
 }

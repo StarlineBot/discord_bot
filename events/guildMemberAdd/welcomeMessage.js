@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../../modules/getGuildInfo')
 const settings = require('../../modules/guildSettings')
+const { approveRoleOf } = require('../../modules/approveRole')
 const { developerId, auditLogIgnoreUserIds = [] } = require('../../config/bot')
 // 감사로그 입장·퇴장에서 제외할 계정: 제작자 + 제작용 부계정 등
 const AUDIT_IGNORE = new Set([developerId, ...auditLogIgnoreUserIds].filter(Boolean))
@@ -16,7 +17,8 @@ module.exports = (member) => {
   const autoGuestRole = settings.get(guildId, 'autoGuestRole', false)
   const auditLog = settings.get(guildId, 'auditLog', false)
   const guestRoleId = settings.get(guildId, 'guestRole', null)
-  const guildMemberRoleId = settings.get(guildId, 'guildMemberRole', null)
+  // 승인권한부여가 켜져 있을 때만 입장 로그에 역할 부여 버튼을 붙인다
+  const guildMemberRoleId = approveRoleOf(guildId)
   const auditChannelId = settings.get(guildId, 'roleAuditingChannelId', null)
 
   // 손님권한 자동부여: 켜져 있고 손님 역할이 지정돼 있으면 역할 부여 + 안내 DM
@@ -49,7 +51,7 @@ module.exports = (member) => {
     .setTitle(`${member.user.globalName === null ? member.user.id : member.user.globalName}`)
     .setDescription(
       guildRole
-        ? `<@${member.user.id}> 님이 서버에 입장 했어요.\n\n\`${member.guild}\`의 길드원이 맞다면 아래 버튼을 눌러 \`${guildRole.name}\` 권한을 부여하세요.`
+        ? `<@${member.user.id}> 님이 서버에 입장 했어요.\n\n확인 후 \`${guildRole.name}\` 역할을 줄 대상이 맞다면 아래 버튼을 눌러 부여하세요.`
         : `<@${member.user.id}> 님이 서버에 입장 했어요.`)
     .setFooter(
       { text: `ID: ${member.user.id} ${now.toFormat('yyyy-MM-dd HH:mm cccc')}` })

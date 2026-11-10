@@ -1,5 +1,5 @@
 const guildModule = require('../../modules/getGuildInfo')
-const settings = require('../../modules/guildSettings')
+const { approveRoleOf } = require('../../modules/approveRole')
 const perm = require('../../modules/perm')
 const holyWater = require('../../modules/holyWater')
 const battle = require('../../modules/battle')
@@ -40,11 +40,12 @@ module.exports = async (interaction, client) => {
       break
     case 'doAddRole':
     default: {
-      // 승인역할(guildMemberRole)은 /섯다라인설정 감사로그에서 지정 → 없으면 안내
-      const guildMemberRoleId = settings.get(guildId, 'guildMemberRole', null)
+      // 승인권한부여(/섯다라인설정 승인권한부여)가 꺼져 있거나 역할 미지정이면 안내
+      // (꺼진 뒤에 예전 입장 로그의 버튼을 눌러도 부여되지 않게)
+      const guildMemberRoleId = approveRoleOf(guildId)
       const guildRole = guildMemberRoleId ? clickMember.guild.roles.cache.get(guildMemberRoleId) : null
       if (!guildRole) {
-        message = '승인 역할이 설정돼 있지 않아~ `/섯다라인설정 감사로그`에서 승인역할을 지정해줘.'
+        message = '승인권한부여가 꺼져 있거나 역할이 지정돼 있지 않아~ `/섯다라인설정 승인권한부여`에서 켜줘.'
         break
       }
       const guild = client.guilds.cache.get(guildId)

@@ -2,8 +2,12 @@ const { EmbedBuilder } = require('discord.js')
 const { DateTime } = require('luxon')
 const guildModule = require('../../modules/getGuildInfo')
 const settings = require('../../modules/guildSettings')
-const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
+const { developerId, auditLogIgnoreUserIds = [] } = require('../../config/bot')
+// 감사로그 입장·퇴장에서 제외할 계정: 제작자 + 제작용 부계정 등
+const AUDIT_IGNORE = new Set([developerId, ...auditLogIgnoreUserIds].filter(Boolean))
 module.exports = (member) => {
+  // 로그 시각은 이벤트 발생 시점 기준(모듈 상단에 두면 봇 기동 시각으로 고정됨)
+  const now = DateTime.now().setZone('Asia/Seoul').setLocale('ko')
   const guildId = member.guild.id
   const guildInfo = guildModule.getGuildInfo(guildId)
   if (!guildInfo) return // config에 등록 안 된 서버는 무시
@@ -29,7 +33,9 @@ module.exports = (member) => {
   }
 
   // 감사로그: 입장 알림을 감사채널에 게시. 승인역할이 있으면 '권한 부여' 버튼도 함께.
+  // 제작자·제작용 계정(AUDIT_IGNORE)의 입장은 감사로그에 남기지 않는다(테스트·점검 입퇴장 노이즈 방지).
   if (!auditLog || !auditChannelId) return
+  if (AUDIT_IGNORE.has(member.user.id)) return
   const auditChannel = member.guild.channels.cache.get(auditChannelId)
   if (!auditChannel) return
   const guildRole = guildMemberRoleId ? member.guild.roles.cache.get(guildMemberRoleId) : null

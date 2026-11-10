@@ -20,5 +20,12 @@ module.exports = {
   //   앱이 '[설정백업] <@userId>' + config.json 첨부를 이 채널에 올리면,
   //   봇이 그 유저에게 백업 파일을 DM으로 전달하고 릴레이 메시지는 삭제(채널 정리).
   //   비어 있으면 설정백업 전달 기능 off.
-  configBackupChannelId: '1557380857373663242'
+  configBackupChannelId: '1567711162165104753',
+  // auditLogIgnoreUserIds: 감사로그 입장·퇴장 로그에서 제외할 유저 ID(제작용 부계정 등).
+  //   developerId는 자동 제외되므로 여기엔 추가 계정만 적는다. 권한(제작자 판정)과는 무관.
+  auditLogIgnoreUserIds: ['1172398669828464641'],
+  // uploadRelayChannelId: 유저 제출함 채널(서버 무관 봇 전역).
+  //   이 채널에 올라온 모든 메시지(글·파일)를 제작자(developerId)에게 DM으로 전달하고 원본은 삭제.
+  //   → 채널은 글쓰기만 열어두면 '본인+관리자만 보는' 제출함처럼 쓸 수 있다. 비어 있으면 off.
+  uploadRelayChannelId: '1569254683418038439'
 }

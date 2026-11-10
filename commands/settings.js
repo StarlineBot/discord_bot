@@ -3,6 +3,7 @@ const guildModule = require('../modules/getGuildInfo')
 const settings = require('../modules/guildSettings')
 const { developerId } = require('../config/bot')
 const perm = require('../modules/perm')
+const { approveRoleOf } = require('../modules/approveRole')
 
 // 설정이 바뀌면 봇 제작자(config/bot.js developerId)에게 "누가 뭘 바꿨는지" DM.
 async function notifyDeveloper (interaction, summary) {
@@ -60,13 +61,22 @@ data.addSubcommand(sub => {
   return sub
 })
 
-// 감사로그: 입장 승인버튼·역할변경·퇴장 로그 on/off + 채널·승인역할 지정
+// 감사로그: 입장·퇴장·역할변경 로그 on/off + 채널 지정
 data.addSubcommand(sub => {
-  sub.setName('감사로그').setDescription('입장 승인·역할변경·퇴장 로그 on/off (켤 땐 채널 지정)')
+  sub.setName('감사로그').setDescription('입장·퇴장·역할변경 로그를 올릴지 on/off (켤 땐 채널 지정)')
   sub.addStringOption(stateOption)
   sub.addChannelOption(o =>
     o.setName('채널').setDescription('로그를 올릴 텍스트 채널 (켤 때 지정)').addChannelTypes(ChannelType.GuildText))
-  sub.addRoleOption(o => o.setName('승인역할').setDescription('입장 승인 버튼으로 부여할 정식 길드원 역할 (선택)'))
+  return sub
+})
+
+// 승인권한부여: 손님권한부여(자동) 다음 단계. 감사로그 입장 로그에 '역할 부여' 버튼을 띄워
+// 운영진이 확인 후 눌러서 정식 역할(길드원·정회원 등)을 준다. 감사로그가 켜져 있어야 버튼이 보임.
+// 설정 키: approveRoleEnabled(on/off) + guildMemberRole(역할, 키 이름은 하위호환 위해 유지)
+data.addSubcommand(sub => {
+  sub.setName('승인권한부여').setDescription('입장 로그에 역할 부여 버튼을 띄워, 운영진이 확인 후 정식 역할을 주게 할지 on/off')
+  sub.addStringOption(stateOption)
+  sub.addRoleOption(o => o.setName('역할').setDescription('확인 후 부여할 정식 역할 (예: 길드원·정회원, 켤 때 지정)'))
   return sub
 })
 
@@ -170,14 +180,12 @@ module.exports = {
       const on = interaction.options.getString('상태') === 'on'
       if (!on) {
         settings.set(guildId, 'auditLog', false)
-        await interaction.reply({ content: '✅ **감사로그**를 **껐어**~ (입장 승인·역할변경·퇴장 로그 중지)', ephemeral: true })
+        await interaction.reply({ content: '✅ **감사로그**를 **껐어**~ (입장·퇴장·역할변경 로그 중지, 승인 버튼도 안 떠)', ephemeral: true })
         await notifyDeveloper(interaction, '감사로그 → **끄기**')
         return
       }
       const channel = interaction.options.getChannel('채널')
       if (channel) settings.set(guildId, 'roleAuditingChannelId', channel.id)
-      const approveRole = interaction.options.getRole('승인역할')
-      if (approveRole) settings.set(guildId, 'guildMemberRole', approveRole.id)
 
       const effectiveCh = settings.get(guildId, 'roleAuditingChannelId', null)
       if (!effectiveCh) {
@@ -188,12 +196,39 @@ module.exports = {
         return
       }
       settings.set(guildId, 'auditLog', true)
-      const effectiveRole = settings.get(guildId, 'guildMemberRole', null)
-      const roleNote = effectiveRole
-        ? `\n입장 승인 역할: <@&${effectiveRole}> (입장 로그에 부여 버튼 표시)`
-        : '\n※ 승인역할 미지정 → 입장 로그만 뜨고 부여 버튼은 없어.'
+      const approveRole = approveRoleOf(guildId)
+      const roleNote = approveRole
+        ? `\n승인권한부여 켜짐: 입장 로그에 <@&${approveRole}> 부여 버튼이 같이 떠.`
+        : '\n※ 승인권한부여 꺼짐 → 입장 로그만 뜨고 부여 버튼은 없어. (`/섯다라인설정 승인권한부여`)'
       await interaction.reply({ content: `✅ **감사로그**를 **켰어**~ 로그 채널: <#${effectiveCh}>${roleNote}`, ephemeral: true })
-      await notifyDeveloper(interaction, `감사로그 → **켜기** (채널 <#${effectiveCh}>${effectiveRole ? `, 승인역할 <@&${effectiveRole}>` : ''})`)
+      await notifyDeveloper(interaction, `감사로그 → **켜기** (채널 <#${effectiveCh}>)`)
+      return
+    }
+
+    if (sub === '승인권한부여') {
+      const on = interaction.options.getString('상태') === 'on'
+      if (!on) {
+        settings.set(guildId, 'approveRoleEnabled', false)
+        await interaction.reply({ content: '✅ **승인권한부여**를 **껐어**~ 입장 로그에 역할 부여 버튼이 더 이상 안 떠. (지정한 역할은 기억해둘게)', ephemeral: true })
+        await notifyDeveloper(interaction, '승인권한부여 → **끄기**')
+        return
+      }
+      const role = interaction.options.getRole('역할')
+      if (role) settings.set(guildId, 'guildMemberRole', role.id)
+      const effective = settings.get(guildId, 'guildMemberRole', null)
+      if (!effective) {
+        await interaction.reply({
+          content: '⚠️ 켜려면 확인 후 부여할 역할을 지정해줘~\n예: `/섯다라인설정 승인권한부여 상태:켜기 역할:@길드원`',
+          ephemeral: true
+        })
+        return
+      }
+      settings.set(guildId, 'approveRoleEnabled', true)
+      const auditNote = settings.get(guildId, 'auditLog', false)
+        ? ''
+        : '\n⚠️ 지금 **감사로그가 꺼져 있어서** 버튼이 안 떠. `/섯다라인설정 감사로그`로 켜줘.'
+      await interaction.reply({ content: `✅ **승인권한부여**를 **켰어**~ 입장 로그에 <@&${effective}> 부여 버튼이 떠. 운영진이 확인 후 눌러주면 돼!${auditNote}`, ephemeral: true })
+      await notifyDeveloper(interaction, `승인권한부여 → **켜기** (역할 <@&${effective}>)`)
       return
     }
 
@@ -281,6 +316,7 @@ module.exports = {
       const dot = (on) => on ? '🟢' : '🔴'
       const guestRole = settings.get(guildId, 'guestRole', null)
       const memberRole = settings.get(guildId, 'guildMemberRole', null)
+      const approveOn = !!approveRoleOf(guildId)
       const autoGuestRole = settings.get(guildId, 'autoGuestRole', false)
       const auditLog = settings.get(guildId, 'auditLog', false)
       const partyOn = settings.get(guildId, 'partyRecruitEnabled', false)
@@ -293,7 +329,8 @@ module.exports = {
         `👑 **관리자 역할** — 봇 관리 명령어를 쓸 수 있는 역할 · ${adminRole ? `<@&${adminRole}>` : '미지정 (서버장·제작자만 관리)'}`,
         `#️⃣ **기본채널** — 섯다라인 명령어 결과를 모아 올릴 채널 · ${generalCh ? `<#${generalCh}>` : '미지정 (명령어 친 채널에 게시)'}`,
         `${dot(autoGuestRole)} **손님권한 자동부여** — 입장한 사람에게 손님 역할 자동 지급 · ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
-        `${dot(auditLog)} **감사로그** — 입장/퇴장·역할변경 로그 · ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}${memberRole ? ` (승인역할 <@&${memberRole}>)` : ''}`,
+        `${dot(approveOn)} **승인권한부여** — 입장 로그의 버튼으로 운영진이 확인 후 정식 역할 지급 · ${approveOn ? '켜짐' : '꺼짐'}${memberRole ? ` (역할 <@&${memberRole}>)` : ''}`,
+        `${dot(auditLog)} **감사로그** — 입장/퇴장·역할변경 로그 · ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}`,
         `${dot(partyOn)} **파티모집(자동관리)** — 파티모집 글 자동작성·오래된 글 정리·출발 10분전 알림 · ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
         `${dot(boardOn)} **인게임파티모집현황** — 인게임 내 거뿔 파티모집 실시간 게시 · ${boardOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('bugleHornChannelId'))}`,
         `${dot(weeklyOn)} **주간랭킹** — 디스코드 내 사람들의 매주 채팅·음성 순위 · ${weeklyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('weeklyMemberChannelId'))}`,

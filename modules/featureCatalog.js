@@ -138,4 +138,10 @@ function gameServerOf (guildId) {
   return GAME_SERVERS.includes(v) ? v : DEFAULT_GAME_SERVER
 }
 
-module.exports = { SECTIONS, GROUPS, FEATURES, SECTION_NOTES, desc, get, GAME_SERVERS, DEFAULT_GAME_SERVER, gameServerOf }
+// 사용자에게 보여줄 서버 표기: 직접 지정했으면 '류트', 미지정이면 '하프 (기본값)'
+function gameServerLabel (guildId) {
+  const v = settings.get(guildId, 'gameServer', null)
+  return GAME_SERVERS.includes(v) ? v : `${DEFAULT_GAME_SERVER} (기본값)`
+}
+
+module.exports = { SECTIONS, GROUPS, FEATURES, SECTION_NOTES, desc, get, GAME_SERVERS, DEFAULT_GAME_SERVER, gameServerOf, gameServerLabel }

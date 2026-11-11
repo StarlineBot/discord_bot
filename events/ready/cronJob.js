@@ -447,7 +447,7 @@ module.exports = async (client) => {
             .setTitle(`${isOld ? '⏰ ' : ''}${b.character_name}  ·  📢 채널 ${channel}`)
             .setColor(color)
             .setDescription(body)
-            .setFooter({ text: `${headcount}${headcount ? '  ·  ' : ''}${getDate(new Date(b.date_send))}${agePart}` })
+            .setFooter({ text: `🌐 ${server}서버  ·  ${headcount}${headcount ? '  ·  ' : ''}${getDate(new Date(b.date_send))}${agePart}` })
         })
       }
       // 내용 서명(서버 포함): 변경 없으면 편집 스킵(불필요한 Discord 호출/rate limit 방지), 서버를 바꾸면 즉시 갱신

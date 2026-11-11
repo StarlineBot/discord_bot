@@ -1,7 +1,14 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const alertStore = require('../modules/partyAlerts')
 const settings = require('../modules/guildSettings')
-const { gameServerOf } = require('../modules/featureCatalog')
+const { gameServerLabel } = require('../modules/featureCatalog')
+
+// 키워드 매칭 기준 게임서버 안내 한 줄(미지정이면 하프 기본값 + 바꾸는 법)
+function serverLine (guildId) {
+  const label = gameServerLabel(guildId)
+  const hint = label.includes('기본값') ? ' · 관리자가 `/섯다라인설정 게임서버`로 바꿀 수 있어요' : ''
+  return `🌐 기준 서버: **${label}**${hint}`
+}
 
 // 키워드 DM은 이 서버에서 인게임파티모집현황(bugleBoardEnabled)이 켜져 있어야만 동작한다(events/ready/cronJob.js).
 // 꺼진 서버에서 등록하면 알림이 영영 안 오고 이유도 알 수 없으므로 등록·목록 응답에 경고를 붙인다.
@@ -17,10 +24,10 @@ function windowLabel (start, end) {
 
 const data = new SlashCommandBuilder()
   .setName('파티알림')
-  .setDescription('등록한 키워드가 거뿔에 뜨면 DM으로 알려줘~')
+  .setDescription('등록한 키워드가 우리 서버 거뿔에 뜨면 DM으로 알려줘~ (게임서버 설정 기준, 기본 하프)')
 
 data.addSubcommand(sub => {
-  sub.setName('등록').setDescription('알림 키워드를 추가해~ (인당 최대 5개)')
+  sub.setName('등록').setDescription('알림 키워드를 추가해~ (인당 최대 5개, 이 디스코드 서버의 게임서버 거뿔 기준)')
   sub.addStringOption(o => o.setName('키워드').setDescription('모집 제목에 포함될 단어 (예: 글렌, 글라스)').setRequired(true))
   return sub
 })
@@ -73,7 +80,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle(`🔔 파티 알림 등록: ${keyword}`)
         .setColor('#00B894')
-        .setDescription(`**${gameServerOf(guildId)}서버** 거뿔 파티모집 제목에 **'${keyword}'** 가 포함되면 DM으로 알려줄게~${offWarning(guildId)}`)
+        .setDescription(`거뿔 파티모집 제목에 **'${keyword}'** 가 포함되면 DM으로 알려줄게~\n${serverLine(guildId)}${offWarning(guildId)}`)
         .setFooter({ text: '같은 파티는 1회만 · 5분 이상 조용했다 다시 모집하면 새로 알림' })
       await interaction.reply({ embeds: [embed], ephemeral: true })
       return
@@ -89,7 +96,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle(`🔔 내 파티 알림 키워드 (${mine.length}/${alertStore.MAX_PER_USER})`)
         .setColor('#00B894')
-        .setDescription(mine.map(k => `• **${k.keyword}**`).join('\n') + `\n\n🌐 기준: **${gameServerOf(guildId)}서버** 거뿔` + offWarning(guildId))
+        .setDescription(mine.map(k => `• **${k.keyword}**`).join('\n') + `\n\n${serverLine(guildId)}` + offWarning(guildId))
         .setFooter({ text: `⏰ 알림 시간대: ${w ? windowLabel(w.start, w.end) : '24시간 (제한 없음)'}` })
       await interaction.reply({ embeds: [embed], ephemeral: true })
       return

@@ -247,7 +247,7 @@ module.exports = {
       return
     }
     if (sub === '인게임파티모집현황') {
-      await setChannelFeature(interaction, guildInfo, { sub, label: '인게임파티모집현황', flag: 'bugleBoardEnabled', key: 'bugleHornChannelId', note: `(게임서버: **${catalog.gameServerOf(guildId)}** · /파티알림 키워드 DM도 이 설정을 따라가)` })
+      await setChannelFeature(interaction, guildInfo, { sub, label: '인게임파티모집현황', flag: 'bugleBoardEnabled', key: 'bugleHornChannelId', note: `(게임서버: **${catalog.gameServerLabel(guildId)}** · /파티알림 키워드 DM도 이 설정을 따라가)` })
       return
     }
 

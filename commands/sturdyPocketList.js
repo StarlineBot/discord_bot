@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { text } = require('@kokr/text')
 const { resolveGeneralChannel } = require('../modules/generalChannel')
 const { getDate } = require('../modules/common')
+const { gameServerOf } = require('../modules/featureCatalog')
 const axios = require('axios')
 const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 const basicErrorMessage = '오늘은 섯다라인 휴업중 🫥'
@@ -79,6 +80,7 @@ module.exports = {
     const writer = { name: interaction.member.nickname == null ? interaction.member.user.globalName : interaction.member.nickname, iconURL: interaction.member.user.displayAvatarURL() }
 
     const generalChannel = resolveGeneralChannel(interaction)
+    const server = gameServerOf(interaction.guildId) // 이 디스코드 서버의 게임서버(미지정 시 하프)
     const subcommand = interaction.options._subcommand
     const channel = typeof interaction.options._hoistedOptions.find(option => option.name === 'channel') === typeof undefined
       ? ''
@@ -91,7 +93,7 @@ module.exports = {
       : interaction.options._hoistedOptions.find(option => option.name === 'pocket').value
 
     try {
-      const replyContent = { content: `튼튼한 주머니 목록을 <#${generalChannel.id}>에 작성중이야~`, ephemeral: true }
+      const replyContent = { content: `**${server}서버** 튼튼한 주머니 목록을 <#${generalChannel.id}>에 작성중이야~`, ephemeral: true }
       interaction.reply(replyContent)
 
       await generalChannel.sendTyping()
@@ -105,7 +107,7 @@ module.exports = {
                 autoArchiveDuration: 60,
                 type: 'GUILD_PUBLIC_THREAD'
               }).then(async (getThread) => {
-                const getBody = await getApiRequest(channel, getSeller)
+                const getBody = await getApiRequest(channel, getSeller, server)
                 const nextUpdateDate = new Date(getBody.data.date_shop_next_update)
                 const itemList = getBody.data.shop.find(getShop => getShop.tab_name === '주머니').item
                 const embeds = []
@@ -149,7 +151,7 @@ module.exports = {
                 autoArchiveDuration: 60,
                 type: 'GUILD_PUBLIC_THREAD'
               }).then(async (getThread) => {
-                const getBody = await getApiRequest(getChannel, seller)
+                const getBody = await getApiRequest(getChannel, seller, server)
                 const nextUpdateDate = new Date(getBody.data.date_shop_next_update)
                 const itemList = getBody.data.shop.find(getShop => getShop.tab_name === '주머니').item
                 const embeds = []
@@ -194,7 +196,7 @@ module.exports = {
                 type: 'GUILD_PUBLIC_THREAD'
               }).then(async (getThread) => {
                 for (const getSeller of sellers) {
-                  const getBody = await getApiRequest(getChannel, getSeller)
+                  const getBody = await getApiRequest(getChannel, getSeller, server)
                   const nextUpdateDate = new Date(getBody.data.date_shop_next_update)
                   const itemList = getBody.data.shop.find(getShop => getShop.tab_name === '주머니').item
                   const pockets = pocket.split(',')
@@ -240,7 +242,7 @@ module.exports = {
               autoArchiveDuration: 60,
               type: 'GUILD_PUBLIC_THREAD'
             }).then(async (getThread) => {
-              const getBody = await getApiRequest(channel, seller)
+              const getBody = await getApiRequest(channel, seller, server)
               const nextUpdateDate = new Date(getBody.data.date_shop_next_update)
               const itemList = getBody.data.shop.find(getShop => getShop.tab_name === '주머니').item
               const embeds = []
@@ -288,10 +290,11 @@ const splitResultList = function (embeds = []) {
   return resultEmbedList
 }
 
-const getApiRequest = async function (channel, seller) {
+// server: 실행한 디스코드 서버의 게임서버(/섯다라인설정 게임서버, 미지정 시 하프)
+const getApiRequest = async function (channel, seller, server) {
   return await axios({
     method: 'GET',
-    url: mainUrl + `/mabinogi/v1/npcshop/list?server_name=하프&channel=${channel}&npc_name=${seller}`,
+    url: mainUrl + `/mabinogi/v1/npcshop/list?server_name=${server}&channel=${channel}&npc_name=${seller}`,
     headers: {
       'x-nxopen-api-key': nexonApiKey
     }

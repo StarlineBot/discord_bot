@@ -5,6 +5,7 @@ const path = require('node:path')
 // 커맨드 목록은 commands 폴더를 순회해 각 커맨드의 설명에서 자동 생성한다(하드코딩 X).
 // → 새 커맨드를 추가하면 여기에 저절로 반영됨(목록 드리프트 방지).
 // 커스터마이즈(모듈 export): `hidden:true` 숨김 / `help:'...'` 소개 전용 문구 / `category:'...'` 분류 override.
+// 목록에서 자동 제외: 비활성 명령(`deleted:true`, Discord에서 지워진 명령) / 베타 명령(`beta:true` 또는 설명에 [BETA])
 
 // 카테고리 분류·순서(이 순서대로 출력). 커맨드 이름을 그룹에 배치한다.
 // 커맨드가 mod.category를 직접 선언하면 그게 우선. 어디에도 없으면 '기타'로.
@@ -31,6 +32,8 @@ function loadCommands () {
     try {
       const mod = require(path.join(dir, file))
       if (!mod || !mod.data || !mod.data.name || mod.hidden) continue
+      if (mod.deleted) continue // 비활성 명령: Discord에서 지워져 쳐도 없음
+      if (mod.beta || /\[beta\]/i.test(mod.data.description || '')) continue // 베타 명령은 소개하지 않음
       map.set(mod.data.name, {
         name: mod.data.name,
         desc: mod.help || mod.data.description || '',

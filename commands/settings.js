@@ -1,9 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js')
 const guildModule = require('../modules/getGuildInfo')
 const settings = require('../modules/guildSettings')
 const { developerId } = require('../config/bot')
 const perm = require('../modules/perm')
 const { approveRoleOf } = require('../modules/approveRole')
+const catalog = require('../modules/featureCatalog')
+const { buildSettingsView } = require('../modules/settingsView')
 
 // 설정이 바뀌면 봇 제작자(config/bot.js developerId)에게 "누가 뭘 바꿨는지" DM.
 async function notifyDeveloper (interaction, summary) {
@@ -17,7 +19,7 @@ async function notifyDeveloper (interaction, summary) {
 
 // "토글 + 채널" 형태 기능 공용 처리 (파티모집/인게임파티모집현황/주간랭킹)
 // key = 설정 키(config guildInfo 폴백 키와 동일), flag = on/off 키
-async function setChannelFeature (interaction, guildInfo, { sub, label, flag, key }) {
+async function setChannelFeature (interaction, guildInfo, { sub, label, flag, key, note }) {
   const guildId = interaction.member.guild.id
   const on = interaction.options.getString('상태') === 'on'
   if (!on) {
@@ -34,7 +36,7 @@ async function setChannelFeature (interaction, guildInfo, { sub, label, flag, ke
     return
   }
   settings.set(guildId, flag, true)
-  await interaction.reply({ content: `✅ **${label}** 기능을 **켰어**~ 채널: <#${eff}>`, ephemeral: true })
+  await interaction.reply({ content: `✅ **${label}** 기능을 **켰어**~ 채널: <#${eff}>${note ? `\n${note}` : ''}`, ephemeral: true })
   await notifyDeveloper(interaction, `${label} → **켜기** (채널 <#${eff}>)`)
 }
 
@@ -55,7 +57,7 @@ const data = new SlashCommandBuilder()
 
 // 손님권한부여: 입장 시 손님 역할 자동부여 on/off (켤 때 손님 역할 지정)
 data.addSubcommand(sub => {
-  sub.setName('손님권한부여').setDescription('입장한 멤버에게 손님 역할을 자동으로 줄지 on/off')
+  sub.setName('손님권한부여').setDescription(catalog.desc('손님권한부여'))
   sub.addStringOption(stateOption)
   sub.addRoleOption(o => o.setName('역할').setDescription('자동 부여할 손님 역할 (켤 때 지정)'))
   return sub
@@ -63,7 +65,7 @@ data.addSubcommand(sub => {
 
 // 감사로그: 입장·퇴장·역할변경 로그 on/off + 채널 지정
 data.addSubcommand(sub => {
-  sub.setName('감사로그').setDescription('입장·퇴장·역할변경 로그를 올릴지 on/off (켤 땐 채널 지정)')
+  sub.setName('감사로그').setDescription(catalog.desc('감사로그'))
   sub.addStringOption(stateOption)
   sub.addChannelOption(o =>
     o.setName('채널').setDescription('로그를 올릴 텍스트 채널 (켤 때 지정)').addChannelTypes(ChannelType.GuildText))
@@ -74,23 +76,23 @@ data.addSubcommand(sub => {
 // 운영진이 확인 후 눌러서 정식 역할(길드원·정회원 등)을 준다. 감사로그가 켜져 있어야 버튼이 보임.
 // 설정 키: approveRoleEnabled(on/off) + guildMemberRole(역할, 키 이름은 하위호환 위해 유지)
 data.addSubcommand(sub => {
-  sub.setName('승인권한부여').setDescription('입장 로그에 역할 부여 버튼을 띄워, 운영진이 확인 후 정식 역할을 주게 할지 on/off')
+  sub.setName('승인권한부여').setDescription(catalog.desc('승인권한부여'))
   sub.addStringOption(stateOption)
   sub.addRoleOption(o => o.setName('역할').setDescription('확인 후 부여할 정식 역할 (예: 길드원·정회원, 켤 때 지정)'))
   return sub
 })
 
-// 파티모집: 디스코드 파티모집 자동관리(스레드 정리·출발 알림) on/off + 채널
+// 파티모집: 길드원이 /파티모집으로 올린 디스코드 모집글 관리(오래된 글 정리·출발 10분 전 DM) on/off + 채널
 data.addSubcommand(sub => {
-  sub.setName('파티모집').setDescription('디스코드 파티모집 자동관리(스레드 정리·출발 알림) on/off')
+  sub.setName('파티모집').setDescription(catalog.desc('파티모집'))
   sub.addStringOption(stateOption)
   sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '디스코드 파티모집 채널 (켤 때 지정)'))
   return sub
 })
 
-// 인게임파티모집현황: 거뿔 파티보드 게시 on/off + 채널 (파티 키워드 알림도 이게 on일 때만 동작)
+// 인게임파티모집현황: 게임 안 거뿔 파티모집 외침 실시간 게시 on/off + 채널 (/파티알림 키워드 DM도 이게 on일 때만 동작)
 data.addSubcommand(sub => {
-  sub.setName('인게임파티모집현황').setDescription('거뿔 파티모집 보드 게시 on/off (파티 키워드 알림도 켜짐)')
+  sub.setName('인게임파티모집현황').setDescription(catalog.desc('인게임파티모집현황'))
   sub.addStringOption(stateOption)
   sub.addChannelOption(channelOption([ChannelType.GuildText], '파티보드를 올릴 채널 (켤 때 지정)'))
   return sub
@@ -98,15 +100,23 @@ data.addSubcommand(sub => {
 
 // 주간랭킹: 주간 활동/보이스 랭킹 게시 on/off + 채널
 data.addSubcommand(sub => {
-  sub.setName('주간랭킹').setDescription('주간 활동/보이스 랭킹 게시 on/off')
+  sub.setName('주간랭킹').setDescription(catalog.desc('주간랭킹'))
   sub.addStringOption(stateOption)
   sub.addChannelOption(channelOption([ChannelType.GuildText], '랭킹을 올릴 채널 (켤 때 지정)'))
   return sub
 })
 
+// 게임서버: 거뿔 조회 기준 게임 서버(인게임파티모집현황·/파티알림). 미설정 시 하프(기존 동작 유지).
+data.addSubcommand(sub => {
+  sub.setName('게임서버').setDescription(catalog.desc('게임서버'))
+  sub.addStringOption(o => o.setName('서버').setDescription('우리 길드의 마비노기 서버').setRequired(true)
+    .addChoices(...catalog.GAME_SERVERS.map(n => ({ name: n, value: n }))))
+  return sub
+})
+
 // 오늘의미션: 매일 아침 오늘/내일 미션·베테랑 게시 on/off + 채널
 data.addSubcommand(sub => {
-  sub.setName('오늘의미션').setDescription('매일 아침 오늘/내일 미션·베테랑 게시 on/off')
+  sub.setName('오늘의미션').setDescription(catalog.desc('오늘의미션'))
   sub.addStringOption(stateOption)
   sub.addChannelOption(channelOption([ChannelType.GuildText], '미션을 올릴 채널 (켤 때 지정)'))
   return sub
@@ -114,7 +124,7 @@ data.addSubcommand(sub => {
 
 // 자동삭제: 지정 채널의 메시지를 N분 뒤 자동삭제 on/off (핀 메시지 제외). 채널마다 개별 설정.
 data.addSubcommand(sub => {
-  sub.setName('자동삭제').setDescription('지정 채널의 메시지를 일정 시간 뒤 자동삭제 on/off (핀 제외)')
+  sub.setName('자동삭제').setDescription(catalog.desc('자동삭제'))
   sub.addStringOption(stateOption)
   sub.addChannelOption(channelOption([ChannelType.GuildText], '자동삭제할 채널 (켜기/끄기 모두 지정)'))
   sub.addIntegerOption(o =>
@@ -124,14 +134,14 @@ data.addSubcommand(sub => {
 
 // 관리자역할: 봇 관리 명령어(설정·랭킹·메시지삭제)를 쓸 수 있는 역할 지정 (서버장·제작자만)
 data.addSubcommand(sub => {
-  sub.setName('관리자역할').setDescription('봇 관리 명령어를 쓸 수 있는 역할 지정 (서버장·제작자만)')
+  sub.setName('관리자역할').setDescription(catalog.desc('관리자역할'))
   sub.addRoleOption(o => o.setName('역할').setDescription('관리자 역할').setRequired(true))
   return sub
 })
 
 // 기본채널: 명령어 결과(오미/날씨/경매장 등)를 올릴 채널. 미설정 시 명령어 친 채널에 게시.
 data.addSubcommand(sub => {
-  sub.setName('기본채널').setDescription('명령어 결과를 모아 올릴 채널 지정 (미설정 시 명령어 친 채널)')
+  sub.setName('기본채널').setDescription(catalog.desc('기본채널'))
   sub.addChannelOption(channelOption([ChannelType.GuildText], '결과를 올릴 채널'))
   return sub
 })
@@ -156,8 +166,8 @@ module.exports = {
       const on = interaction.options.getString('상태') === 'on'
       if (!on) {
         settings.set(guildId, 'autoGuestRole', false)
-        await interaction.reply({ content: '✅ **손님권한 자동부여**를 **껐어**~', ephemeral: true })
-        await notifyDeveloper(interaction, '손님권한 자동부여 → **끄기**')
+        await interaction.reply({ content: '✅ **손님권한부여**를 **껐어**~', ephemeral: true })
+        await notifyDeveloper(interaction, '손님권한부여 → **끄기**')
         return
       }
       const role = interaction.options.getRole('역할')
@@ -171,8 +181,8 @@ module.exports = {
         return
       }
       settings.set(guildId, 'autoGuestRole', true)
-      await interaction.reply({ content: `✅ **손님권한 자동부여**를 **켰어**~ 손님 역할: <@&${effective}>`, ephemeral: true })
-      await notifyDeveloper(interaction, `손님권한 자동부여 → **켜기** (손님역할 <@&${effective}>)`)
+      await interaction.reply({ content: `✅ **손님권한부여**를 **켰어**~ 손님 역할: <@&${effective}>`, ephemeral: true })
+      await notifyDeveloper(interaction, `손님권한부여 → **켜기** (손님역할 <@&${effective}>)`)
       return
     }
 
@@ -233,11 +243,20 @@ module.exports = {
     }
 
     if (sub === '파티모집') {
-      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집(자동관리)', flag: 'partyRecruitEnabled', key: 'partyChannelId' })
+      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집', flag: 'partyRecruitEnabled', key: 'partyChannelId' })
       return
     }
     if (sub === '인게임파티모집현황') {
-      await setChannelFeature(interaction, guildInfo, { sub, label: '인게임파티모집현황', flag: 'bugleBoardEnabled', key: 'bugleHornChannelId' })
+      await setChannelFeature(interaction, guildInfo, { sub, label: '인게임파티모집현황', flag: 'bugleBoardEnabled', key: 'bugleHornChannelId', note: `(게임서버: **${catalog.gameServerLabel(guildId)}** · /파티알림 키워드 DM도 이 설정을 따라가)` })
+      return
+    }
+
+    if (sub === '게임서버') {
+      const server = interaction.options.getString('서버')
+      const prev = catalog.gameServerOf(guildId)
+      settings.set(guildId, 'gameServer', server)
+      await interaction.reply({ content: `✅ 게임서버를 **${server}**(으)로 지정했어~ 인게임파티모집현황·/파티알림이 이 서버 거뿔을 기준으로 동작해.${prev !== server ? ` (이전: ${prev})` : ''}`, ephemeral: true })
+      await notifyDeveloper(interaction, `게임서버 → **${server}** (이전 ${prev})`)
       return
     }
     if (sub === '주간랭킹') {
@@ -245,7 +264,7 @@ module.exports = {
       return
     }
     if (sub === '오늘의미션') {
-      await setChannelFeature(interaction, guildInfo, { sub, label: '오늘의미션 게시', flag: 'dailyMissionEnabled', key: 'todayMissionChannelId' })
+      await setChannelFeature(interaction, guildInfo, { sub, label: '오늘의미션', flag: 'dailyMissionEnabled', key: 'todayMissionChannelId' })
       return
     }
 
@@ -310,45 +329,7 @@ module.exports = {
     }
 
     if (sub === '목록') {
-      const gi = guildInfo
-      const chOf = (skey) => settings.get(guildId, skey, null) || (gi && gi[skey])
-      const fmtCh = (v) => v ? ` (채널 <#${v}>)` : ''
-      const dot = (on) => on ? '🟢' : '🔴'
-      const guestRole = settings.get(guildId, 'guestRole', null)
-      const memberRole = settings.get(guildId, 'guildMemberRole', null)
-      const approveOn = !!approveRoleOf(guildId)
-      const autoGuestRole = settings.get(guildId, 'autoGuestRole', false)
-      const auditLog = settings.get(guildId, 'auditLog', false)
-      const partyOn = settings.get(guildId, 'partyRecruitEnabled', false)
-      const boardOn = settings.get(guildId, 'bugleBoardEnabled', false)
-      const weeklyOn = settings.get(guildId, 'weeklyEnabled', false)
-      const missionOn = settings.get(guildId, 'dailyMissionEnabled', false)
-      const adminRole = settings.get(guildId, 'adminRole', null) || (gi && gi.adminRole)
-      const generalCh = settings.get(guildId, 'generalChannelId', null) || (gi && gi.generalChannelId)
-      const lines = [
-        `👑 **관리자 역할** — 봇 관리 명령어를 쓸 수 있는 역할 · ${adminRole ? `<@&${adminRole}>` : '미지정 (서버장·제작자만 관리)'}`,
-        `#️⃣ **기본채널** — 섯다라인 명령어 결과를 모아 올릴 채널 · ${generalCh ? `<#${generalCh}>` : '미지정 (명령어 친 채널에 게시)'}`,
-        `${dot(autoGuestRole)} **손님권한 자동부여** — 입장한 사람에게 손님 역할 자동 지급 · ${autoGuestRole ? '켜짐' : '꺼짐'}${guestRole ? ` (역할 <@&${guestRole}>)` : ''}`,
-        `${dot(approveOn)} **승인권한부여** — 입장 로그의 버튼으로 운영진이 확인 후 정식 역할 지급 · ${approveOn ? '켜짐' : '꺼짐'}${memberRole ? ` (역할 <@&${memberRole}>)` : ''}`,
-        `${dot(auditLog)} **감사로그** — 입장/퇴장·역할변경 로그 · ${auditLog ? '켜짐' : '꺼짐'}${fmtCh(settings.get(guildId, 'roleAuditingChannelId', null))}`,
-        `${dot(partyOn)} **파티모집(자동관리)** — 파티모집 글 자동작성·오래된 글 정리·출발 10분전 알림 · ${partyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('partyChannelId'))}`,
-        `${dot(boardOn)} **인게임파티모집현황** — 인게임 내 거뿔 파티모집 실시간 게시 · ${boardOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('bugleHornChannelId'))}`,
-        `${dot(weeklyOn)} **주간랭킹** — 디스코드 내 사람들의 매주 채팅·음성 순위 · ${weeklyOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('weeklyMemberChannelId'))}`,
-        `${dot(missionOn)} **오늘의미션 게시** — 매일 아침 오늘/내일 미션·베테랑 게시 · ${missionOn ? '켜짐' : '꺼짐'}${fmtCh(chOf('todayMissionChannelId'))}`,
-        (() => {
-          const autoDel = settings.get(guildId, 'autoDeleteChannels', {})
-          const entries = Object.entries(autoDel)
-          const desc = '지정 채널 메시지를 설정 시간 뒤 자동 삭제'
-          return entries.length
-            ? `${dot(true)} **자동삭제** — ${desc} · ${entries.map(([cid, m]) => `<#${cid}> ${m}분`).join(' · ')}`
-            : `${dot(false)} **자동삭제** — ${desc} · 꺼짐`
-        })()
-      ]
-      const embed = new EmbedBuilder()
-        .setTitle(`⚙️ ${interaction.guild.name} 설정`)
-        .setColor('#5865F2')
-        .setDescription(lines.join('\n'))
-      await interaction.reply({ embeds: [embed], ephemeral: true })
+      await interaction.reply({ ...buildSettingsView(interaction.guild), ephemeral: true })
     }
   }
 }

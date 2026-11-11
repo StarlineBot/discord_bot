@@ -72,3 +72,18 @@ jobs:
             npx --yes pm2 delete discord-bot || true       # 항목만 정리(데몬 kill 아님) → 같은 이름 start 충돌 방지
             npx --yes pm2 start npm --name discord-bot -- start
             npx --yes pm2 save
+
+  # 애드온 서버(addon_server/, Python) 테스트 — 봇 배포(build)와 별개 작업이라 실패해도 봇 배포는 막지 않는다.
+  # 서버 배포는 자동이 아님(README: VM에서 git pull + systemctl restart addon-server).
+  addon-server:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: addon_server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"   # 최저 지원 버전(VM 버전 미확인)
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q

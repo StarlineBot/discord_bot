@@ -66,6 +66,9 @@ DB 없음. 영속 상태는 전부 `static/json/*.json` 파일(gitignore). 각 �
 ### 모드메일
 `modules/modmail.js` + `events/messageCreate/modmail.js` — 유저가 봇에 DM하면 `config/bot.js`의 `inquiryForumChannelId` 포럼에 유저별 포스트를 만들고, 포스트 답글을 유저 DM으로 relay한다.
 
+### 애드온 서버 (`addon_server/`, Python — 봇과 별개)
+섯다라인 애드온(PC 앱)의 디스코드 로그인 + 설정 동기화 API(FastAPI + SQLite, systemd `addon-server`, 127.0.0.1:8000 ← Caddy). **봇 코드와 독립**이며 JS lint/jest 대상이 아니다. 테스트: `cd addon_server && python -m pytest -q`. 설치·배포·앱 연동 규격은 `addon_server/README.md`. 봇의 CI 자동 배포는 서버를 재시작하지 않는다(서버는 VM에서 수동 `systemctl restart addon-server`).
+
 ## 배포 / CI
 
 `.github/workflows/ci.yml`: main 브랜치 push/PR에서 `npm ci → lint → test` 실행. **main에 push될 때만** `appleboy/ssh-action`으로 GCP VM에 SSH 접속해 `git reset --hard origin/main` 후 `npm install --omit=dev`, pm2로 `discord-bot` 프로세스를 재시작(`ecosystem.config.js`). 즉 **main에 머지되면 곧바로 운영 봇이 교체된다**. lint/test가 깨지면 배포도 막힌다. (`appspec.yml` + `scripts/*-deploy.sh`는 AWS CodeDeploy용 레거시 경로.)

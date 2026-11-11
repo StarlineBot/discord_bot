@@ -1,0 +1,7 @@
+# /etc/caddy/Caddyfile — 테스트용 'ok' 응답 대신 아래로 바꾸고: sudo systemctl reload caddy
+starline-bot.duckdns.org {
+	reverse_proxy 127.0.0.1:8000
+	request_body {
+		max_size 3MB
+	}
+}

@@ -1,0 +1,8 @@
+# 비밀값·데이터는 절대 커밋하지 않는다
+.env
+data/
+backups/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

@@ -1,0 +1,28 @@
+# /etc/systemd/system/addon-server.service
+# 섯다라인 애드온 서버(로그인·설정 동기화). 봇(pm2)과 별도 프로세스.
+# User·경로는 VM 계정에 맞게(기본: wjdalstlr21, ~/project/discord_bot/addon_server)
+[Unit]
+Description=Starline addon server (login + settings sync)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=wjdalstlr21
+WorkingDirectory=/home/wjdalstlr21/project/discord_bot/addon_server
+ExecStart=/home/wjdalstlr21/project/discord_bot/addon_server/.venv/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Environment=PYTHONUNBUFFERED=1
+Restart=always
+RestartSec=3
+UMask=0077
+# 메모리: 목표 100MB 이하. 넘으면 늦추고(High), 그래도 넘으면 이 서비스만 종료(Max) → 봇 보호
+MemoryHigh=110M
+MemoryMax=160M
+# 보호: 홈은 읽기 전용, 데이터·백업 폴더만 쓰기
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/wjdalstlr21/project/discord_bot/addon_server/data /home/wjdalstlr21/project/discord_bot/addon_server/backups
+
+[Install]
+WantedBy=multi-user.target

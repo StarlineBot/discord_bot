@@ -1,0 +1,10 @@
+# /etc/systemd/system/addon-backup.service — addon-backup.timer가 하루 1번 실행
+[Unit]
+Description=Starline addon server daily backup
+
+[Service]
+Type=oneshot
+User=wjdalstlr21
+WorkingDirectory=/home/wjdalstlr21/project/discord_bot/addon_server
+ExecStart=/home/wjdalstlr21/project/discord_bot/addon_server/.venv/bin/python scripts/backup.py
+UMask=0077

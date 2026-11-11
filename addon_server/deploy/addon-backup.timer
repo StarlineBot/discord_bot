@@ -1,0 +1,10 @@
+# /etc/systemd/system/addon-backup.timer — 매일 새벽 4시 30분(KST) 백업, 꺼져 있었으면 켜질 때 한 번
+[Unit]
+Description=Starline addon server daily backup timer
+
+[Timer]
+OnCalendar=*-*-* 04:30:00 Asia/Seoul
+Persistent=true
+
+[Install]
+WantedBy=timers.target

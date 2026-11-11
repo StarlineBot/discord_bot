@@ -88,14 +88,6 @@ const FEATURES = [
     example: '/섯다라인설정 게임서버 서버:하프'
   },
   {
-    sub: '오늘의미션',
-    emoji: '📅',
-    section: 'ingame',
-    desc: '매일 아침 오늘·내일 미션과 베테랑 던전을 자동 게시할지 on/off',
-    oneLine: '매일 아침 오늘·내일 미션과 베테랑 던전 자동 게시',
-    example: '/섯다라인설정 오늘의미션 상태:켜기 채널:#공지'
-  },
-  {
     sub: '파티모집',
     emoji: '🧑‍🤝‍🧑',
     section: 'ingame',
@@ -109,14 +101,19 @@ const FEATURES = [
     section: 'ingame',
     desc: '게임 안 거뿔의 파티모집 외침을 채널에 실시간 게시 on/off (켜면 /파티알림 DM도 동작)',
     oneLine: '**게임 안 거뿔**의 파티모집 외침을 채널에 실시간 게시 (켜면 /파티알림 키워드 DM도 동작)',
-    example: '/섯다라인설정 인게임파티모집현황 상태:켜기 채널:#거뿔'
+    example: '/섯다라인설정 인게임파티모집현황 상태:켜기 채널:#거뿔',
+    // 바로 아래에 붙는 안내(파티모집과 나란히 비교)
+    afterNote: '💡 **파티모집**과 **인게임파티모집현황**은 서로 다른 기능이에요 — 디스코드에 올린 모집글 vs 게임 안 거뿔 모집'
+  },
+  {
+    sub: '오늘의미션',
+    emoji: '📅',
+    section: 'ingame',
+    desc: '매일 아침 오늘·내일 미션과 베테랑 던전을 자동 게시할지 on/off',
+    oneLine: '매일 아침 오늘·내일 미션과 베테랑 던전 자동 게시',
+    example: '/섯다라인설정 오늘의미션 상태:켜기 채널:#공지'
   }
 ]
-
-// 섹션 끝에 붙는 안내 한 줄
-const SECTION_NOTES = {
-  ingame: '💡 **파티모집**과 **인게임파티모집현황**은 서로 다른 기능이에요 — 디스코드에 올린 모집글 vs 게임 안 거뿔 모집'
-}
 
 const bySub = new Map(FEATURES.map(f => [f.sub, f]))
 
@@ -144,4 +141,4 @@ function gameServerLabel (guildId) {
   return GAME_SERVERS.includes(v) ? v : `${DEFAULT_GAME_SERVER} (기본값)`
 }
 
-module.exports = { SECTIONS, GROUPS, FEATURES, SECTION_NOTES, desc, get, GAME_SERVERS, DEFAULT_GAME_SERVER, gameServerOf, gameServerLabel }
+module.exports = { SECTIONS, GROUPS, FEATURES, desc, get, GAME_SERVERS, DEFAULT_GAME_SERVER, gameServerOf, gameServerLabel }

@@ -78,8 +78,8 @@ function sectionLines (section, guildId) {
     if (f.group && f.group !== lastGroup) lines.push(`**${catalog.GROUPS[f.group]}**`)
     lastGroup = f.group || null
     lines.push(featureLine(f, guildId))
+    if (f.afterNote) lines.push(f.afterNote)
   }
-  if (catalog.SECTION_NOTES[section]) lines.push(catalog.SECTION_NOTES[section])
   return lines
 }
 

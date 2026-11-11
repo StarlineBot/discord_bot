@@ -19,6 +19,7 @@ const { getCategoryItems, resolveLeafCategories, matchFavorite } = require('../.
 const { embedFor } = require('../../modules/auctionEmbeds')
 const partyAlerts = require('../../modules/partyAlerts')
 const settings = require('../../modules/guildSettings')
+const catalog = require('../../modules/featureCatalog')
 const weeklySchedule = require('../../modules/weeklySchedule')
 
 const botId = process.env.BOT_ID
@@ -330,7 +331,8 @@ module.exports = async (client) => {
   console.log('partyScheduleJob start!')
   partyScheduleJob.start()
 
-  // 인게임파티모집현황(거뿔보드): 켠 길드마다 거뿔(#) 최근 5개를 한 메시지에 계속 갱신(edit-in-place)
+  // 인게임파티모집현황(거뿔보드): 켠 길드마다 '자기 게임서버' 거뿔(#) 최근 5개를 한 메시지에 계속 갱신(edit-in-place)
+  // 게임서버(/섯다라인설정 게임서버, 미설정 하프)별로 묶어 서버당 1회만 조회 → API 호출 수 = 사용 중인 서버 수
   const partyRecruitBoardJob = new cron.CronJob('*/10 * * * * *', async function () {
     // 인게임파티모집현황 켜진 길드 수집(설정 우선 → config 폴백)
     const boardGuilds = []
@@ -339,58 +341,61 @@ module.exports = async (client) => {
       const gi = guildModule.getGuildInfo(guild.id)
       const chId = settings.get(guild.id, 'bugleHornChannelId', null) || (gi && gi.bugleHornChannelId)
       const channel = chId && client.channels.cache.get(chId)
-      if (channel) boardGuilds.push({ guildId: guild.id, channel })
+      if (channel) boardGuilds.push({ guildId: guild.id, channel, server: catalog.gameServerOf(guild.id) })
     }
-    // 키워드 알림은 인게임파티모집현황이 on인 길드에서만 → 필요 여부 판단
+    // 키워드 알림은 인게임파티모집현황이 on인 길드에서만 → 그 길드들의 서버도 조회 대상
     const alertData = partyAlerts.read()
-    const needKeywords = alertData.keywords.some(kw =>
+    const activeKeywords = alertData.keywords.filter(kw =>
       client.guilds.cache.has(kw.guildId) && settings.get(kw.guildId, 'bugleBoardEnabled', false))
-    if (boardGuilds.length === 0 && !needKeywords) return // 켠 길드·키워드 없음 → 거뿔 API 호출 스킵
+    const servers = new Set([...boardGuilds.map(g => g.server), ...activeKeywords.map(kw => catalog.gameServerOf(kw.guildId))])
+    if (servers.size === 0) return // 켠 길드·키워드 없음 → 거뿔 API 호출 스킵
 
-    let hornBugleList
-    try {
-      const getBody = await axios.get(
-        nexonApiMainUrl + '/mabinogi/v1/horn-bugle-world/history?server_name=하프',
-        { headers: { 'x-nxopen-api-key': nexonApiKey } }
-      )
-      hornBugleList = getBody.data.horn_bugle_world_history || []
-    } catch (error) {
-      console.error('거뿔 조회 에러:', error.message)
-      return
+    // 서버별 거뿔 조회 → 파티모집(#)만 최신순. 한 서버 조회가 실패해도 다른 서버는 계속.
+    const recruitByServer = {}
+    for (const server of servers) {
+      try {
+        const getBody = await axios.get(nexonApiMainUrl + '/mabinogi/v1/horn-bugle-world/history', {
+          params: { server_name: server },
+          headers: { 'x-nxopen-api-key': nexonApiKey }
+        })
+        recruitByServer[server] = (getBody.data.horn_bugle_world_history || [])
+          .filter(b => b.message && b.message.startsWith(b.character_name + ' : #'))
+          .sort((a, b) => new Date(b.date_send) - new Date(a.date_send))
+      } catch (error) {
+        console.error(`거뿔 조회 에러(${server}):`, error.message)
+      }
     }
 
-    // 파티모집(#)만 → 중복 제거(캐릭명+내용) → 최신순 상위 5
-    const recruit = hornBugleList
-      .filter(b => b.message && b.message.startsWith(b.character_name + ' : #'))
-      .sort((a, b) => new Date(b.date_send) - new Date(a.date_send))
-
-    // 키워드 알림: 인게임파티모집현황이 on인 길드에서만 (사람+채널+내용 서명, 5분 슬라이딩 TTL → 파티당 1회)
-    if (needKeywords) {
+    // 키워드 알림: 인게임파티모집현황이 on인 길드에서만, 그 길드 게임서버의 거뿔과 매칭
+    // (사람+채널+내용 서명, 5분 슬라이딩 TTL → 파티당 1회. 서명에 서버를 넣어 다른 서버의 같은 문구는 별개로)
+    if (activeKeywords.length) {
       try {
         const nowMs = Date.now()
         const kstHour = DateTime.now().setZone('Asia/Seoul').hour
-        // 5분 넘은 외침은 스킵(시작 시 과거 히스토리 스팸 방지 + '5분=끝' 일관), 오래된→최신 순 처리
-        const freshRecruit = recruit
-          .filter(b => DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes <= 5)
-          .sort((a, b) => new Date(a.date_send) - new Date(b.date_send))
-        for (const b of freshRecruit) {
-          const parsed = partyAlerts.parseRecruit(b)
-          for (const kw of alertData.keywords) {
-            if (!client.guilds.cache.has(kw.guildId)) continue
-            if (!settings.get(kw.guildId, 'bugleBoardEnabled', false)) continue // 인게임파티모집현황 on일 때만
-            if (!parsed.content.includes(kw.keyword)) continue
-            if (!partyAlerts.isAlertableNow(alertData, kw.userId, kstHour)) continue // 알림 시간대 밖 → seen 표시 없이 스킵
-            if (!partyAlerts.shouldAlert(alertData, kw.userId, parsed.signature, nowMs)) continue
-            const embed = new EmbedBuilder()
-              .setTitle(`🔔 파티모집 알림 · '${kw.keyword}'`)
-              .setColor('#00B894')
-              .setDescription(parsed.content || '(내용 없음)')
-              .addFields(
-                { name: '모집자', value: parsed.characterName, inline: true },
-                { name: '채널', value: `채널 ${parsed.channelNum}`, inline: true }
-              )
-              .setFooter({ text: `${getDate(new Date(b.date_send))} · 하프서버 거뿔` })
-            client.users.fetch(kw.userId).then(user => user.send({ embeds: [embed] })).catch(() => {})
+        for (const [server, recruit] of Object.entries(recruitByServer)) {
+          const kws = activeKeywords.filter(kw => catalog.gameServerOf(kw.guildId) === server)
+          if (!kws.length) continue
+          // 5분 넘은 외침은 스킵(시작 시 과거 히스토리 스팸 방지 + '5분=끝' 일관), 오래된→최신 순 처리
+          const freshRecruit = recruit
+            .filter(b => DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes <= 5)
+            .sort((a, b) => new Date(a.date_send) - new Date(b.date_send))
+          for (const b of freshRecruit) {
+            const parsed = partyAlerts.parseRecruit(b)
+            for (const kw of kws) {
+              if (!parsed.content.includes(kw.keyword)) continue
+              if (!partyAlerts.isAlertableNow(alertData, kw.userId, kstHour)) continue // 알림 시간대 밖 → seen 표시 없이 스킵
+              if (!partyAlerts.shouldAlert(alertData, kw.userId, `${server}|${parsed.signature}`, nowMs)) continue
+              const embed = new EmbedBuilder()
+                .setTitle(`🔔 파티모집 알림 · '${kw.keyword}'`)
+                .setColor('#00B894')
+                .setDescription(parsed.content || '(내용 없음)')
+                .addFields(
+                  { name: '모집자', value: parsed.characterName, inline: true },
+                  { name: '채널', value: `채널 ${parsed.channelNum}`, inline: true }
+                )
+                .setFooter({ text: `${getDate(new Date(b.date_send))} · ${server}서버 거뿔` })
+              client.users.fetch(kw.userId).then(user => user.send({ embeds: [embed] })).catch(() => {})
+            }
           }
         }
         partyAlerts.write(alertData)
@@ -401,60 +406,66 @@ module.exports = async (client) => {
 
     if (boardGuilds.length === 0) return // 보드 켠 길드 없음 → 게시 스킵(키워드만 처리하고 끝)
 
-    // 사람당 최신 1건만(같은 사람이 인원 채우며 반복 외치는 것 제외) → 서로 다른 5명
-    const seen = new Set()
-    const top5 = []
-    for (const b of recruit) {
-      const key = b.character_name
-      if (seen.has(key)) continue
-      seen.add(key)
-      top5.push(b)
-      if (top5.length >= 5) break
+    // 서버별 보드(임베드+서명) 생성 — 같은 서버 길드끼리는 같은 내용
+    const buildBoard = (server, recruit) => {
+      // 사람당 최신 1건만(같은 사람이 인원 채우며 반복 외치는 것 제외) → 서로 다른 5명
+      const seen = new Set()
+      const top5 = []
+      for (const b of recruit) {
+        const key = b.character_name
+        if (seen.has(key)) continue
+        seen.add(key)
+        top5.push(b)
+        if (top5.length >= 5) break
+      }
+
+      // 카드형: 모집마다 임베드 1장(사람·채널 = 제목으로 크게, 내용 = 설명, 인원·시각 = 푸터)
+      let embeds
+      if (top5.length === 0) {
+        embeds = [new EmbedBuilder().setTitle(`📢 ${server} 파티모집 현황`).setColor('#B2BEC3').setDescription('현재 모집 중인 파티가 없어요~').setTimestamp()]
+      } else {
+        embeds = top5.map(b => {
+          const raw = b.message.replace(b.character_name + ' : ', '') // "#[채널7] 내용 [1/4명]"
+          const chMatch = raw.match(/#\[채널(\d+)\]/)
+          const hcMatch = raw.match(/\[(\d+)\/(\d+)명\](완)?/)
+          const channel = chMatch ? chMatch[1] : '?'
+          const done = hcMatch ? (hcMatch[3] === '완' || hcMatch[1] === hcMatch[2]) : false
+          const headcount = hcMatch ? `👥 ${hcMatch[1]}/${hcMatch[2]}명${done ? ' ✅완료' : ''}` : ''
+          let body = raw
+          if (chMatch) body = body.replace(chMatch[0], '')
+          if (hcMatch) body = body.replace(hcMatch[0], '')
+          body = body.trim() || '(내용 없음)'
+          // 파티모집은 수동이라 5분 안 올라오면 끝난 것으로 봄. 10분+는 '오래됨' 강조. instant 비교라 서버 TZ 무관
+          const ageMin = Math.floor(DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes)
+          const isOld = ageMin >= 10
+          let color = done ? '#B2BEC3' : '#00B894'
+          if (isOld && !done) color = '#E67E22'
+          let agePart = ''
+          if (isOld) agePart = `  ·  ⏰ ${ageMin}분 전 (오래됨)` // 10분+ 강조
+          else if (ageMin >= 5) agePart = `  ·  ${ageMin}분 전` // 5분+ 경과 표시
+          return new EmbedBuilder()
+            .setTitle(`${isOld ? '⏰ ' : ''}${b.character_name}  ·  📢 채널 ${channel}`)
+            .setColor(color)
+            .setDescription(body)
+            .setFooter({ text: `${headcount}${headcount ? '  ·  ' : ''}${getDate(new Date(b.date_send))}${agePart}` })
+        })
+      }
+      // 내용 서명(서버 포함): 변경 없으면 편집 스킵(불필요한 Discord 호출/rate limit 방지), 서버를 바꾸면 즉시 갱신
+      const signature = server + '##' + top5.map(b => b.character_name + '|' + b.date_send + '|' + b.message).join('||')
+      return { embeds, signature }
     }
+    const boardByServer = {}
 
-    // 카드형: 모집마다 임베드 1장(사람·채널 = 제목으로 크게, 내용 = 설명, 인원·시각 = 푸터)
-    let embeds
-    if (top5.length === 0) {
-      embeds = [new EmbedBuilder().setTitle('📢 파티모집 현황').setColor('#B2BEC3').setDescription('현재 모집 중인 파티가 없어요~').setTimestamp()]
-    } else {
-      embeds = top5.map(b => {
-        const raw = b.message.replace(b.character_name + ' : ', '') // "#[채널7] 내용 [1/4명]"
-        const chMatch = raw.match(/#\[채널(\d+)\]/)
-        const hcMatch = raw.match(/\[(\d+)\/(\d+)명\](완)?/)
-        const channel = chMatch ? chMatch[1] : '?'
-        const done = hcMatch ? (hcMatch[3] === '완' || hcMatch[1] === hcMatch[2]) : false
-        const headcount = hcMatch ? `👥 ${hcMatch[1]}/${hcMatch[2]}명${done ? ' ✅완료' : ''}` : ''
-        let body = raw
-        if (chMatch) body = body.replace(chMatch[0], '')
-        if (hcMatch) body = body.replace(hcMatch[0], '')
-        body = body.trim() || '(내용 없음)'
-        // 파티모집은 수동이라 5분 안 올라오면 끝난 것으로 봄. 10분+는 '오래됨' 강조. instant 비교라 서버 TZ 무관
-        const ageMin = Math.floor(DateTime.now().diff(DateTime.fromISO(b.date_send), 'minutes').minutes)
-        const isOld = ageMin >= 10
-        let color = done ? '#B2BEC3' : '#00B894'
-        if (isOld && !done) color = '#E67E22'
-        let agePart = ''
-        if (isOld) agePart = `  ·  ⏰ ${ageMin}분 전 (오래됨)` // 10분+ 강조
-        else if (ageMin >= 5) agePart = `  ·  ${ageMin}분 전` // 5분+ 경과 표시
-        return new EmbedBuilder()
-          .setTitle(`${isOld ? '⏰ ' : ''}${b.character_name}  ·  📢 채널 ${channel}`)
-          .setColor(color)
-          .setDescription(body)
-          .setFooter({ text: `${headcount}${headcount ? '  ·  ' : ''}${getDate(new Date(b.date_send))}${agePart}` })
-      })
-    }
-
-    // 내용 서명: 변경 없으면 편집 스킵(불필요한 Discord 호출/rate limit 방지)
-    const signature = top5.map(b => b.character_name + '|' + b.date_send + '|' + b.message).join('||')
-
-    // 길드별 상태로 edit-in-place (거뿔 내용은 하프서버 공통 → 임베드 동일, 서버마다 메시지 1개 유지)
+    // 길드별 상태로 edit-in-place (서버마다 메시지 1개 유지)
     let state = {}
     if (fs.existsSync(partyRecruitStatePath)) {
       try { state = JSON.parse(fs.readFileSync(partyRecruitStatePath)) } catch (e) { state = {} }
     }
     if (state.messageId) state = {} // 구 flat 포맷 → guildId 키 구조로 초기화
     let changed = false
-    for (const { guildId, channel } of boardGuilds) {
+    for (const { guildId, channel, server } of boardGuilds) {
+      if (!recruitByServer[server]) continue // 이 서버 조회 실패 → 이번 주기는 기존 보드 유지
+      const { embeds, signature } = boardByServer[server] || (boardByServer[server] = buildBoard(server, recruitByServer[server]))
       try {
         const st = state[guildId]
         let msg = null

@@ -1,5 +1,14 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const alertStore = require('../modules/partyAlerts')
+const settings = require('../modules/guildSettings')
+const { gameServerOf } = require('../modules/featureCatalog')
+
+// 키워드 DM은 이 서버에서 인게임파티모집현황(bugleBoardEnabled)이 켜져 있어야만 동작한다(events/ready/cronJob.js).
+// 꺼진 서버에서 등록하면 알림이 영영 안 오고 이유도 알 수 없으므로 등록·목록 응답에 경고를 붙인다.
+function offWarning (guildId) {
+  if (settings.get(guildId, 'bugleBoardEnabled', false)) return ''
+  return '\n\n⚠️ 이 서버는 **인게임파티모집현황**이 꺼져 있어서 키워드 알림이 오지 않아요. 관리자에게 `/섯다라인설정 인게임파티모집현황`을 켜 달라고 요청해 주세요.'
+}
 
 function windowLabel (start, end) {
   if (start === end) return '24시간 (항상)'
@@ -64,7 +73,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle(`🔔 파티 알림 등록: ${keyword}`)
         .setColor('#00B894')
-        .setDescription(`거뿔 파티모집 제목에 **'${keyword}'** 가 포함되면 DM으로 알려줄게~`)
+        .setDescription(`**${gameServerOf(guildId)}서버** 거뿔 파티모집 제목에 **'${keyword}'** 가 포함되면 DM으로 알려줄게~${offWarning(guildId)}`)
         .setFooter({ text: '같은 파티는 1회만 · 5분 이상 조용했다 다시 모집하면 새로 알림' })
       await interaction.reply({ embeds: [embed], ephemeral: true })
       return
@@ -80,7 +89,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle(`🔔 내 파티 알림 키워드 (${mine.length}/${alertStore.MAX_PER_USER})`)
         .setColor('#00B894')
-        .setDescription(mine.map(k => `• **${k.keyword}**`).join('\n'))
+        .setDescription(mine.map(k => `• **${k.keyword}**`).join('\n') + `\n\n🌐 기준: **${gameServerOf(guildId)}서버** 거뿔` + offWarning(guildId))
         .setFooter({ text: `⏰ 알림 시간대: ${w ? windowLabel(w.start, w.end) : '24시간 (제한 없음)'}` })
       await interaction.reply({ embeds: [embed], ephemeral: true })
       return

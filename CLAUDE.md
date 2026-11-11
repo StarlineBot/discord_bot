@@ -29,6 +29,8 @@ node docs/battle-sim/game-balance-sim.js [반복수]
 
 새 명령을 추가하려면 `commands/`에 파일을 하나 만들면 되고, 별도 등록 코드는 없다.
 
+**주의 — Discord 재등록 조건**: djs-commander(0.0.50)는 명령어의 **최상위 설명** 또는 **최상위 옵션(하위 명령) 개수**가 바뀔 때만 Discord에 다시 등록한다. 하위 명령·옵션 설명만 바꾸면 배포해도 Discord엔 옛 설명이 남는다 → 최상위 설명을 같이 바꾸거나 하위 명령 추가와 함께 배포할 것.
+
 ### 버튼 상호작용 라우팅 (중요한 관례)
 버튼은 `customId`로 핸들러를 구분한다. **두 가지 방식이 공존**하므로 주의:
 - JSON customId — `events/interactionCreate/buttonReaction.js`가 `JSON.parse(customId)` 성공 시 `action` 필드로 분기(`bulkDelete`, `holyWater`, `duel` 등). 일부 기능은 여기서 자기 모듈로 위임(`holyWater.handleButton`, `battle.handleButton`).
@@ -43,6 +45,8 @@ node docs/battle-sim/game-balance-sim.js [반복수]
 3. **`modules/guildSettings.js`** → `static/json/guildSettings.json` — `/섯다라인설정` 등 명령으로 바뀌는 서버별 토글/채널값(`get/set(guildId, key, fallback)`). 역시 gitignore.
 
 길드 신원 조회는 `modules/getGuildInfo.js`(registry 래핑), 명령 결과를 올릴 기본 채널 결정은 `modules/generalChannel.js`의 `resolveGeneralChannel(interaction)`(설정 채널 → 폴백 → 실행 채널 순, 항상 채널 반환). 새 명령에서 "어디에 결과를 올릴지"는 반드시 이 함수를 쓴다.
+
+`/섯다라인설정`의 기능 이름·설명·섹션은 `modules/featureCatalog.js`(단일 출처)에서만 정의한다. 하위 명령 설명(`catalog.desc`)과 `/섯다라인설정 목록` 화면(`modules/settingsView.js`)이 이걸 읽으므로, 설정 기능을 추가하면 카탈로그에 한 줄 추가하고 `settingsView.js`의 `stateOf`에 상태 표시를 추가한다. 게임 서버(거뿔 조회 기준)는 `catalog.gameServerOf(guildId)`(미설정 시 하프).
 
 ### 상태 저장
 DB 없음. 영속 상태는 전부 `static/json/*.json` 파일(gitignore). 각 모듈이 `readAll/writeAll` 패턴으로 직접 읽고 쓴다(`guildSettings`, `guildRegistry`, 파티모집 보드 `partyRecruitBoard.json`, 랭킹 `RankingUtil` 등). 파일이 없을 때 `{}`로 폴백하는 관례를 지킨다.

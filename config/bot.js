@@ -27,5 +27,8 @@ module.exports = {
   // uploadRelayChannelId: 유저 제출함 채널(서버 무관 봇 전역).
   //   이 채널에 올라온 모든 메시지(글·파일)를 제작자(developerId)에게 DM으로 전달하고 원본은 삭제.
   //   → 채널은 글쓰기만 열어두면 '본인+관리자만 보는' 제출함처럼 쓸 수 있다. 비어 있으면 off.
-  uploadRelayChannelId: '1569254683418038439'
+  uploadRelayChannelId: '1569254683418038439',
+  // addonServerUrl: 같은 VM의 애드온 서버(addon_server) 내부 주소. 제작자 '!현황 애드온'이 여기서 사용자 현황을 읽는다.
+  //   서버는 VM 내부에서 직접 온 요청에만 /internal/* 를 연다(외부·Caddy 경유는 거절).
+  addonServerUrl: 'http://127.0.0.1:8000'
 }

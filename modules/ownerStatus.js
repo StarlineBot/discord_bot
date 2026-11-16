@@ -102,6 +102,7 @@ function addonSummary (users) {
       const on = onFeatures(s)
       line += ` · 동기화 ${s.rev}회 · 마지막 ${kst(s.updated)} ${ago(s.updated)}`
       line += `\n${INDENT}${s.device || '?'} · ${s.resolution || '?'} · 켠 기능 ${on.length}개`
+      line += `\n${INDENT}🟢 ${on.length ? on.join(', ') : '켠 기능 없음'}`
     } else {
       line += ' · 동기화 없음'
     }

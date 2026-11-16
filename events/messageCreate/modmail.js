@@ -47,6 +47,7 @@ async function handleInbound (message, client) {
   const threadId = modmail.getThreadByUser(userId)
   let thread = threadId ? await forum.threads.fetch(threadId).catch(() => null) : null
   if (thread && thread.archived) thread = null // 보관된 문의는 새 포스트로
+  if (thread && thread.parentId !== forum.id) thread = null // 문의 포럼을 바꾼 경우 옛 포럼 포스트는 버리고 새 포럼에 생성
 
   const content = buildInboundContent(message)
   if (!thread) {

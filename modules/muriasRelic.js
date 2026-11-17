@@ -114,4 +114,58 @@ function pickRandom (arr) {
   return arr[randInt(0, arr.length - 1)]
 }
 
-module.exports = { groupBySkill, rollGroup, appraise, grade, pickRandom, jobOf, parseRelicListing }
+// ── /경매장 유물 검색 ──
+// 옵션 식별 키: 수치(숫자·%·초)와 공백을 지운 '(최대' 앞부분.
+//   매물 "케미컬 카니발 대미지 60% 증가 (최대 300%)" 와 검색 목록 "케미컬 카니발 대미지 증가 (최대 300%)" 가 같은 키가 된다.
+//   ('4막'·'4개'처럼 이름 속 숫자도 양쪽에서 똑같이 지워지므로 일치)
+function relicKey (text) {
+  return String(text || '').split('(최대')[0].replace(/[\d.]+\s*(%|초)?/g, '').replace(/\s+/g, '')
+}
+
+// 매물 레벨(1~10): 현재 수치 ÷ 최대치 × 10 (실매물 670건 전부 정수로 떨어짐 확인)
+function relicLevel (parsed) {
+  if (!parsed || !parsed.max) return 0
+  return Math.max(1, Math.min(10, Math.round(parsed.value / parsed.max * 10)))
+}
+
+// 검색 옵션 목록(경매장 상세검색 30종) + 직업명
+const RELIC_OPTIONS = (require('./auctionSearchOptions.json').muriasRelicOptionNames || [])
+  .map(o => ({ id: String(o.value), label: o.label, short: o.summarizeText || '', job: jobOf(o.label), key: relicKey(o.label) }))
+
+// 입력(자동완성 id 또는 직접 친 글자) → 해당 옵션들. 글자는 옵션명·줄임말·직업명 포함 검색.
+function findRelicOptions (input) {
+  const q = String(input || '').trim()
+  if (!q) return []
+  const byId = RELIC_OPTIONS.find(o => o.id === q)
+  if (byId) return [byId]
+  const nq = q.replace(/\s+/g, '')
+  return RELIC_OPTIONS.filter(o => o.label.replace(/\s+/g, '').includes(nq) || o.short === q || o.job.replace(/\s+/g, '').includes(nq))
+}
+
+// 유물 카테고리 매물 → 조건에 맞는 무리아스의 유물(가격 오름차순). 각 항목에 relic(파싱+level) 첨부.
+function filterRelics (items, { options = [], minLevel = 1 } = {}) {
+  const keys = new Set(options.map(o => o.key))
+  const out = []
+  for (const it of items) {
+    if (it.item_display_name !== '무리아스의 유물') continue
+    const p = parseRelicListing(it)
+    if (!p) continue
+    const level = relicLevel(p)
+    if (keys.size && !keys.has(relicKey(p.raw))) continue
+    if (level < (minLevel || 1)) continue
+    out.push({ ...it, relic: { ...p, level } })
+  }
+  return out.sort((a, b) => a.auction_price_per_unit - b.auction_price_per_unit)
+}
+
+// 레벨별 최저가(높은 레벨부터) — 한 옵션만 골랐을 때 시세 한눈에
+function lowestByLevel (relics) {
+  const m = {}
+  for (const r of relics) {
+    const lv = r.relic.level
+    if (!m[lv] || r.auction_price_per_unit < m[lv]) m[lv] = r.auction_price_per_unit
+  }
+  return Object.entries(m).map(([lv, price]) => ({ level: Number(lv), price })).sort((a, b) => b.level - a.level)
+}
+
+module.exports = { groupBySkill, rollGroup, appraise, grade, pickRandom, jobOf, parseRelicListing, relicKey, relicLevel, RELIC_OPTIONS, findRelicOptions, filterRelics, lowestByLevel }

@@ -21,6 +21,7 @@ const partyAlerts = require('../../modules/partyAlerts')
 const settings = require('../../modules/guildSettings')
 const catalog = require('../../modules/featureCatalog')
 const weeklySchedule = require('../../modules/weeklySchedule')
+const { sweepChannel } = require('../../modules/autoDelete')
 
 const botId = process.env.BOT_ID
 // 봇 로그·헬스체크 모니터 채널 (오미·거뿔보드는 이제 per-guild라 싱글턴 채널 없음)
@@ -222,27 +223,15 @@ module.exports = async (client) => {
   console.log('weeklyScheduleRolloverJob start!')
   weeklyScheduleRolloverJob.start()
 
-  // 자동삭제: 설정된 채널의 (N분 지난 · 핀 아닌) 메시지를 30초마다 스윕 삭제.
-  // 봇에 그 채널 '메시지 관리' 권한 필요. 14일 지난 메시지는 bulkDelete 제외(TTL 최대 24h라 무관).
+  // 자동삭제: 설정된 채널의 (N분 지난 · 핀 아닌) 메시지를 30초마다 스윕 삭제(modules/autoDelete.js).
+  // 봇에 그 채널 '메시지 관리' 권한 필요. 14일 지난 메시지(켜기 전부터 있던 것)는 디스코드 제한으로 한 번에 못 지워
+  // 스윕마다 몇 개씩 하나씩 지운다.
   const autoDeleteJob = new cron.CronJob('*/30 * * * * *', async function () {
     for (const guild of client.guilds.cache.values()) {
       const map = settings.get(guild.id, 'autoDeleteChannels', {})
-      const channelIds = Object.keys(map)
-      if (channelIds.length === 0) continue
-      for (const channelId of channelIds) {
-        const ttlMin = map[channelId]
-        const channel = guild.channels.cache.get(channelId)
-        if (!channel || typeof channel.bulkDelete !== 'function') continue
+      for (const [channelId, ttlMin] of Object.entries(map)) {
         try {
-          const cutoff = Date.now() - ttlMin * 60000
-          const messages = await channel.messages.fetch({ limit: 100 })
-          const expired = messages.filter(m => !m.pinned && m.createdTimestamp < cutoff)
-          if (expired.size === 0) continue
-          if (expired.size === 1) {
-            await expired.first().delete().catch(() => {})
-          } else {
-            await channel.bulkDelete(expired, true) // true: 14일 지난 건 자동 제외
-          }
+          await sweepChannel(guild.channels.cache.get(channelId), ttlMin)
         } catch (error) {
           console.error(`자동삭제 스윕 에러(${channelId}):`, error.message)
         }

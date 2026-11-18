@@ -298,7 +298,7 @@ module.exports = {
       }
       map[channel.id] = minutes
       settings.set(guildId, 'autoDeleteChannels', map)
-      await interaction.reply({ content: `✅ <#${channel.id}> 메시지를 **${minutes}분** 뒤 자동삭제하도록 켰어~ (핀 메시지 제외, 최대 30초 오차)`, ephemeral: true })
+      await interaction.reply({ content: `✅ <#${channel.id}> 메시지를 **${minutes}분** 뒤 자동삭제하도록 켰어~ (핀 메시지 제외, 최대 30초 오차)\n켜기 전부터 있던 메시지도 지워져. 14일 지난 메시지는 디스코드 제한 때문에 30초마다 몇 개씩 천천히 지워져~`, ephemeral: true })
       await notifyDeveloper(interaction, `자동삭제 켜기 → <#${channel.id}> ${minutes}분`)
       return
     }

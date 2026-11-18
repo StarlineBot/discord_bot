@@ -68,3 +68,17 @@ test('채널이 없거나 텍스트 채널이 아니면 아무것도 안 함', a
   expect(await sweepChannel(undefined, 5)).toEqual({ bulk: 0, single: 0 })
   expect(await sweepChannel({ id: 'x' }, 5)).toEqual({ bulk: 0, single: 0 })
 })
+
+test('지울 수 없는 오래된 메시지는 건너뛰고 다음 스윕엔 그 뒤 메시지를 지운다', async () => {
+  const ages = Array.from({ length: OLD_PER_SWEEP + 3 }, (_, i) => (15 + i) * DAY)
+  const ch = fakeChannel(ages)
+  const msgs = await ch.messages.fetch()
+  msgs.get('0').delete = jest.fn(async () => { throw new Error('Cannot execute action on a system message') })
+  await sweepChannel(ch, 5, { now: NOW })
+  expect(ch.deleted).toEqual(Array.from({ length: OLD_PER_SWEEP - 1 }, (_, i) => i + 1))
+  // 실제처럼 지워진 메시지는 다음 조회에서 빠짐
+  for (const id of ch.deleted) msgs.delete(String(id))
+  const done = await sweepChannel(ch, 5, { now: NOW })
+  expect(msgs.get('0').delete).toHaveBeenCalledTimes(1) // 실패한 건 재시도 안 함
+  expect(done).toEqual({ bulk: 0, single: 3 })
+})

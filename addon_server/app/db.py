@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS settings (
   device     TEXT,
   resolution TEXT,
   size       INTEGER NOT NULL,
-  features   TEXT NOT NULL DEFAULT '{}'      -- {"blackbox": true, ...} 받은 설정의 기능 사용 값
+  features   TEXT NOT NULL DEFAULT '{}'      -- 기능 사용 값: 새 앱 {"blackbox": "2026-11-18"}(마지막 사용일) / 옛 앱 {"blackbox": true}
 );
 """
 

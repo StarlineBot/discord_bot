@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import zipfile
+from datetime import date
 from pathlib import PurePosixPath
 
 CONFIG_NAME = "config.json"
@@ -31,11 +33,49 @@ def _bad_name(name: str) -> bool:
     return ".." in PurePosixPath(name).parts
 
 
-def extract_features(cfg: dict) -> dict[str, bool]:
-    """기능 사용 값: 각 기능 섹션의 enabled(예: {"blackbox": {"enabled": true}}) + 최상위 '...Enabled' 불값."""
-    out: dict[str, bool] = {}
+USAGE_KEY = "featureUsage"
+MAX_USAGE = 64
+USAGE_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+LEGACY_HIDDEN = frozenset({"autofindV2"})  # 옛 앱(0.52.0 이하)이 남긴 옛 키 — 표시에서 뺀다
+
+
+def _usage_date(value) -> str | None:
+    """'YYYY-MM-DD'이고 실제 있는 날짜면 그대로, 아니면 None."""
+    if not isinstance(value, str) or not USAGE_DATE_RE.match(value):
+        return None
+    try:
+        date.fromisoformat(value)
+    except ValueError:
+        return None
+    return value
+
+
+def extract_features(cfg: dict) -> dict[str, bool | str]:
+    """기능 사용 값.
+
+    - 새 앱: 최상위 featureUsage {"<키>": "YYYY-MM-DD"}(기능별 마지막 실제 동작 날짜, 앱 현지 날짜)가 있으면
+      그것만 쓴다 → {"<키>": "YYYY-MM-DD"} (최대 64개, 키 64자, 형식이 틀린 값은 버림).
+      명세: StarlineBot/mabinogi_addon docs/account-management-spec.md 3.4.2절.
+    - 옛 앱(featureUsage 없음): 각 기능 섹션의 enabled(예: {"blackbox": {"enabled": true}}) + 최상위 '...Enabled' 불값.
+      옛 키 autofindV2는 뺀다.
+    """
+    usage = cfg.get(USAGE_KEY)
+    if isinstance(usage, dict):
+        out_usage: dict[str, bool | str] = {}
+        for key, value in usage.items():
+            if not isinstance(key, str) or not key or len(key) > 64:
+                continue
+            day = _usage_date(value)
+            if day is None:
+                continue
+            out_usage[key] = day
+            if len(out_usage) >= MAX_USAGE:
+                break
+        return out_usage
+
+    out: dict[str, bool | str] = {}
     for key, value in cfg.items():
-        if not isinstance(key, str) or len(key) > 64:
+        if not isinstance(key, str) or len(key) > 64 or key in LEGACY_HIDDEN:
             continue
         if isinstance(value, dict) and isinstance(value.get("enabled"), bool):
             out[key] = value["enabled"]
@@ -46,7 +86,7 @@ def extract_features(cfg: dict) -> dict[str, bool]:
     return out
 
 
-def inspect_bundle(data: bytes) -> dict[str, bool]:
+def inspect_bundle(data: bytes) -> dict[str, bool | str]:
     """올바른 설정 묶음이면 기능 사용 값을, 아니면 BundleError."""
     try:
         zf = zipfile.ZipFile(io.BytesIO(data))

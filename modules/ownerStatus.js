@@ -88,9 +88,38 @@ async function fetchAddonUsers () {
   return r.data.users || []
 }
 
-function onFeatures (s) {
-  return s ? Object.entries(s.features || {}).filter(([, v]) => v).map(([k]) => k) : []
+// 기능 사용 값(addon_server settings.features) 해석 — 값이 두 종류 섞여 올 수 있다.
+//  - 날짜 'YYYY-MM-DD'(새 앱 featureUsage, 기능별 마지막 실제 동작일):
+//      서버가 받은 시각(settings.updated, KST 날짜) 기준 최근 7일(받은 날 포함 = 0~6일 전)이면 🟢, 아니면 표시 안 함.
+//      미래 날짜(앱 PC 시계·시차)는 받은 날로 본다.
+//  - bool(옛 앱 enabled·...Enabled): true면 🟢, false면 🔴.
+//  옛 키 autofindV2는 서버가 새로 받을 땐 빼지만, 그 전에 저장된 행에 남아 있을 수 있어 여기서도 뺀다.
+const RECENT_DAYS = 7
+const HIDDEN_KEYS = new Set(['autofindV2'])
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+function featureView (s) {
+  const view = { on: [], off: [] }
+  if (!s) return view
+  const ref = (s.updated ? DateTime.fromISO(s.updated) : DateTime.now()).setZone('Asia/Seoul').startOf('day')
+  for (const [key, v] of Object.entries(s.features || {})) {
+    if (HIDDEN_KEYS.has(key)) continue
+    if (typeof v === 'boolean') {
+      (v ? view.on : view.off).push({ key })
+    } else if (typeof v === 'string' && DATE_RE.test(v)) {
+      const day = DateTime.fromISO(v, { zone: 'Asia/Seoul' })
+      if (!day.isValid) continue
+      const daysAgo = Math.max(0, Math.round(ref.diff(day.startOf('day'), 'days').days)) // 미래 → 0(받은 날)
+      if (daysAgo < RECENT_DAYS) view.on.push({ key, date: v, daysAgo })
+    }
+  }
+  // 최근에 쓴 것부터(날짜 없는 옛 bool은 뒤, 같은 조건은 이름순)
+  view.on.sort((a, b) => (a.daysAgo ?? 99) - (b.daysAgo ?? 99) || a.key.localeCompare(b.key))
+  return view
 }
+
+const onFeatures = (s) => featureView(s).on.map(f => f.key)
+const featureLabel = (f) => f.date ? `${f.key}(${f.date.slice(5)})` : f.key
 
 function addonSummary (users) {
   let total = 0
@@ -124,13 +153,13 @@ function addonDetail (u) {
     `처음 로그인 ${kst(u.created)} · 마지막 접속 ${kst(u.last_seen)} ${ago(u.last_seen)} · 로그아웃 ${kst(u.logged_out)}`
   ]
   if (s) {
-    const feats = Object.entries(s.features || {})
-    const on = feats.filter(([, v]) => v).map(([k]) => k)
-    const off = feats.filter(([, v]) => !v).map(([k]) => k)
+    const { on, off } = featureView(s)
+    const isUsage = on.some(f => f.date)
     lines.push(`동기화 ${s.rev}회 · 마지막 ${kst(s.updated)} ${ago(s.updated)}`)
     lines.push(`PC ${s.device || '?'} · 해상도 ${s.resolution || '?'} · ${Math.round(s.size / 1024)}KB`)
-    lines.push(`🟢 켠 기능(${on.length}): ${on.join(', ') || '없음'}`)
-    lines.push(`🔴 끈 기능(${off.length}): ${off.join(', ') || '없음'}`)
+    // 새 앱(날짜) = 최근 7일 안에 실제로 쓴 기능(괄호는 마지막 사용일) / 옛 앱(bool) = 켜 둔 기능
+    lines.push(`🟢 ${isUsage ? '최근 7일 쓴 기능' : '켠 기능'}(${on.length}): ${on.map(featureLabel).join(', ') || '없음'}`)
+    if (off.length) lines.push(`🔴 끈 기능(${off.length}): ${off.map(f => f.key).join(', ')}`)
   } else {
     lines.push('동기화한 설정 없음')
   }
@@ -160,4 +189,4 @@ const HELP = [
   '`!현황 애드온 <이름 일부>` 그 사용자 자세히'
 ].join('\n')
 
-module.exports = { botStatus, addonStatus, HELP }
+module.exports = { botStatus, addonStatus, HELP, featureView }

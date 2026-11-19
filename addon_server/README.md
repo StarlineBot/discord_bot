@@ -81,7 +81,7 @@
 ### 1.4 DB (봇이 읽기 전용으로 열 수 있음 — 다음 단계 `/애드온 사용자`)
 `data/addon.sqlite3`. 시각은 모두 UTC ISO8601(`2026-11-11T01:02:03Z`)입니다.
 - `users(discord_id PK, name, created, last_seen, logged_out, tier, status)`
-- `settings(discord_id PK, rev, updated, device, resolution, size, features JSON)`
+- `settings(discord_id PK, rev, updated, device, resolution, size, features JSON, app)` — `app`은 묶음 `sync.json`의 앱 버전(없거나 형식이 틀리면 NULL). 나중에 추가된 컬럼은 `db.py`의 `MIGRATIONS`가 서버 시작 때 `ALTER TABLE`로 붙인다.
 
 ---
 

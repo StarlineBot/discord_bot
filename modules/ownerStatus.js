@@ -120,6 +120,8 @@ function featureView (s) {
 
 const onFeatures = (s) => featureView(s).on.map(f => f.key)
 const featureLabel = (f) => f.date ? `${f.key}(${f.date.slice(5)})` : f.key
+// 앱 버전(sync.json "app"). 없으면 '?' — 버전 저장 전 업로드 또는 버전을 안 보내는 옛 앱
+const appLabel = (s) => s && s.app ? `v${s.app}` : '앱 버전 ?'
 
 function addonSummary (users) {
   let total = 0
@@ -130,7 +132,7 @@ function addonSummary (users) {
       total += s.rev
       const on = onFeatures(s)
       line += ` · 동기화 ${s.rev}회 · 마지막 ${kst(s.updated)} ${ago(s.updated)}`
-      line += `\n${INDENT}${s.device || '?'} · ${s.resolution || '?'} · 켠 기능 ${on.length}개`
+      line += `\n${INDENT}${appLabel(s)} · ${s.device || '?'} · ${s.resolution || '?'} · 켠 기능 ${on.length}개`
       line += `\n${INDENT}🟢 ${on.length ? on.join(', ') : '켠 기능 없음'}`
     } else {
       line += ' · 동기화 없음'
@@ -156,7 +158,7 @@ function addonDetail (u) {
     const { on, off } = featureView(s)
     const isUsage = on.some(f => f.date)
     lines.push(`동기화 ${s.rev}회 · 마지막 ${kst(s.updated)} ${ago(s.updated)}`)
-    lines.push(`PC ${s.device || '?'} · 해상도 ${s.resolution || '?'} · ${Math.round(s.size / 1024)}KB`)
+    lines.push(`${appLabel(s)} · PC ${s.device || '?'} · 해상도 ${s.resolution || '?'} · ${Math.round(s.size / 1024)}KB`)
     // 새 앱(날짜) = 최근 7일 안에 실제로 쓴 기능(괄호는 마지막 사용일) / 옛 앱(bool) = 켜 둔 기능
     lines.push(`🟢 ${isUsage ? '최근 7일 쓴 기능' : '켠 기능'}(${on.length}): ${on.map(featureLabel).join(', ') || '없음'}`)
     if (off.length) lines.push(`🔴 끈 기능(${off.length}): ${off.map(f => f.key).join(', ')}`)

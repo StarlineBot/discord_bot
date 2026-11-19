@@ -1,7 +1,8 @@
 """설정 묶음(ZIP) 검사 + 기능 사용 값 추출.
 
 앱의 config.export_bundle 형식: ZIP 안에 config.json(설정) + userdata/…(직접 집은 아이콘 등).
-서버는 묶음을 풀지 않고 그대로 보관한다. 여기서는 형식·크기·경로만 확인하고 config.json만 읽는다.
+서버는 묶음을 풀지 않고 그대로 보관한다. 여기서는 형식·크기·경로만 확인하고 config.json과 sync.json만 읽는다.
+sync.json = 앱 cloud_sync.build_blob이 넣는 동기화 정보 {"resolution", "device", "app"(앱 버전), "created"}.
 """
 from __future__ import annotations
 
@@ -9,10 +10,15 @@ import io
 import json
 import re
 import zipfile
+from dataclasses import dataclass, field
 from datetime import date
 from pathlib import PurePosixPath
 
 CONFIG_NAME = "config.json"
+META_NAME = "sync.json"
+MAX_META_BYTES = 16 * 1024          # sync.json은 몇십 바이트 — 크면 무시
+MAX_APP_LEN = 32
+APP_RE = re.compile(r"^[0-9A-Za-z][0-9A-Za-z.+_\-]*$")  # 예: 0.52.2, 0.53.0-beta.1
 MAX_MEMBERS = 4096                  # 앱 BundleLimits.max_files 와 같음
 MAX_UNCOMPRESSED = 64 * 1024 * 1024  # 앱 BundleLimits.max_source_bytes 와 같음(압축 폭탄 방지)
 MAX_CONFIG_BYTES = 1024 * 1024      # 앱 BundleLimits.max_config_bytes 와 같음
@@ -86,8 +92,36 @@ def extract_features(cfg: dict) -> dict[str, bool | str]:
     return out
 
 
-def inspect_bundle(data: bytes) -> dict[str, bool | str]:
-    """올바른 설정 묶음이면 기능 사용 값을, 아니면 BundleError."""
+@dataclass
+class BundleInfo:
+    features: dict = field(default_factory=dict)  # extract_features 결과
+    app: str | None = None                        # sync.json의 앱 버전(없거나 형식이 틀리면 None)
+
+
+def _read_app_version(zf: zipfile.ZipFile) -> str | None:
+    """sync.json의 "app" 값. 파일이 없거나·크거나·JSON이 아니거나·형식이 틀리면 None(업로드는 거절하지 않음)."""
+    try:
+        info = zf.getinfo(META_NAME)
+        if info.file_size > MAX_META_BYTES:
+            return None
+        with zf.open(info) as f:
+            raw = f.read(MAX_META_BYTES + 1)
+        if len(raw) > MAX_META_BYTES:
+            return None
+        meta = json.loads(raw.decode("utf-8"))
+    except (KeyError, zipfile.BadZipFile, RuntimeError, OSError, EOFError, UnicodeDecodeError, ValueError):
+        return None
+    app = meta.get("app") if isinstance(meta, dict) else None
+    if not isinstance(app, str):
+        return None
+    app = app.strip()
+    if not app or len(app) > MAX_APP_LEN or not APP_RE.match(app):
+        return None
+    return app
+
+
+def inspect_bundle(data: bytes) -> BundleInfo:
+    """올바른 설정 묶음이면 기능 사용 값·앱 버전을, 아니면 BundleError."""
     try:
         zf = zipfile.ZipFile(io.BytesIO(data))
     except zipfile.BadZipFile as e:
@@ -116,6 +150,7 @@ def inspect_bundle(data: bytes) -> dict[str, bool | str]:
             raise BundleError("config.json을 읽을 수 없어요") from e
         if len(raw) > MAX_CONFIG_BYTES:
             raise BundleError("config.json이 너무 커요", status=413)
+        app = _read_app_version(zf)
     try:
         cfg = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, ValueError) as e:
@@ -124,4 +159,4 @@ def inspect_bundle(data: bytes) -> dict[str, bool | str]:
         raise BundleError("config.json 형식이 올바르지 않아요")
     if SECRET_KEYS & cfg.keys():
         raise BundleError("설정에 비밀값(API 키·웹훅)이 들어 있어요 — 앱에서 빼고 올려야 해요")
-    return extract_features(cfg)
+    return BundleInfo(features=extract_features(cfg), app=app)

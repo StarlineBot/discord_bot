@@ -43,3 +43,28 @@ test('설정 없음/빈 값', () => {
   expect(featureView(null)).toEqual({ on: [], off: [] })
   expect(featureView({ updated: UPDATED, features: {} })).toEqual({ on: [], off: [] })
 })
+
+test('!현황 애드온: 사용자 줄에 앱 버전 표시(없으면 ?)', async () => {
+  const axios = require('axios')
+  const { addonStatus } = require('../modules/ownerStatus')
+  const user = (name, app) => ({
+    discord_id: name,
+    name,
+    tier: 'user',
+    status: 'active',
+    created: UPDATED,
+    last_seen: UPDATED,
+    settings: { rev: 1, updated: UPDATED, device: 'PC', resolution: '2560x1440', size: 1024, features: {}, app }
+  })
+  const orig = axios.get
+  axios.get = async () => ({ data: { users: [user('새앱', '0.52.2'), user('옛앱', null)] } })
+  try {
+    const summary = (await addonStatus('')).embeds[0].data.description
+    expect(summary).toContain('v0.52.2 · PC · 2560x1440')
+    expect(summary).toContain('앱 버전 ? · PC · 2560x1440')
+    const detail = (await addonStatus('새앱')).embeds[0].data.description
+    expect(detail).toContain('v0.52.2 · PC PC · 해상도 2560x1440')
+  } finally {
+    axios.get = orig
+  }
+})

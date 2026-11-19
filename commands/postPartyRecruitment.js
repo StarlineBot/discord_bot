@@ -4,6 +4,7 @@ const guildModule = require('../modules/getGuildInfo')
 const settings = require('../modules/guildSettings')
 const { startLoading } = require('../modules/loading')
 const { extractField } = require('../modules/common')
+const { isForum, NOT_FORUM_HINT } = require('../modules/partyChannel')
 const botId = process.env.BOT_ID
 
 // 파티모집 채널(포럼) 해석 — 설정 우선, 옛 config 폴백
@@ -46,6 +47,7 @@ function readCreatorId (content) {
 async function editParty (interaction, forum) {
   await startLoading(interaction, '✏️ 파티 정보를 수정하는 중...')
   if (!forum) { await interaction.editReply('파티모집 채널을 찾을 수 없어 😢'); return }
+  if (!isForum(forum)) { await interaction.editReply(`<#${forum.id}>은(는) 포럼 채널이 아니라 쓸 수 없어 😢\n${NOT_FORUM_HINT}`); return }
 
   const threadId = interaction.options.getString('파티')
   const thread = await interaction.client.channels.fetch(threadId).catch(() => null)
@@ -256,6 +258,10 @@ module.exports = {
 
     if (!partyChannel) {
       await interaction.editReply('파티모집 채널을 찾을 수 없어 😢')
+      return
+    }
+    if (!isForum(partyChannel)) {
+      await interaction.editReply(`<#${partyChannel.id}>은(는) 포럼 채널이 아니라 모집글을 올릴 수 없어 😢\n${NOT_FORUM_HINT}`)
       return
     }
 

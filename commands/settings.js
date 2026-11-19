@@ -6,6 +6,7 @@ const perm = require('../modules/perm')
 const { approveRoleOf } = require('../modules/approveRole')
 const catalog = require('../modules/featureCatalog')
 const { buildSettingsView } = require('../modules/settingsView')
+const partyChannelMod = require('../modules/partyChannel')
 
 // 설정이 바뀌면 봇 제작자(config/bot.js developerId)에게 "누가 뭘 바꿨는지" DM.
 async function notifyDeveloper (interaction, summary) {
@@ -19,7 +20,8 @@ async function notifyDeveloper (interaction, summary) {
 
 // "토글 + 채널" 형태 기능 공용 처리 (파티모집/인게임파티모집현황/주간랭킹)
 // key = 설정 키(config guildInfo 폴백 키와 동일), flag = on/off 키
-async function setChannelFeature (interaction, guildInfo, { sub, label, flag, key, note }) {
+// forumOnly: 포럼 채널만 허용(파티모집). 예전에 저장된 텍스트 채널로 그냥 켜는 것도 막는다.
+async function setChannelFeature (interaction, guildInfo, { sub, label, flag, key, note, forumOnly }) {
   const guildId = interaction.member.guild.id
   const on = interaction.options.getString('상태') === 'on'
   if (!on) {
@@ -34,6 +36,13 @@ async function setChannelFeature (interaction, guildInfo, { sub, label, flag, ke
   if (!eff) {
     await interaction.reply({ content: `⚠️ 켜려면 채널을 지정해줘~\n예: \`/섯다라인설정 ${sub} 상태:켜기 채널:#채널\``, ephemeral: true })
     return
+  }
+  if (forumOnly) {
+    const effChannel = interaction.guild.channels.cache.get(eff)
+    if (effChannel && !partyChannelMod.isForum(effChannel)) {
+      await interaction.reply({ content: `⚠️ <#${eff}>은(는) 포럼 채널이 아니야~ ${label}은 포럼 채널에서만 동작해.\n예: \`/섯다라인설정 ${sub} 상태:켜기 채널:#포럼채널\``, ephemeral: true })
+      return
+    }
   }
   settings.set(guildId, flag, true)
   await interaction.reply({ content: `✅ **${label}** 기능을 **켰어**~ 채널: <#${eff}>${note ? `\n${note}` : ''}`, ephemeral: true })
@@ -52,7 +61,8 @@ const channelOption = (types, desc) => (o) => {
 
 const data = new SlashCommandBuilder()
   .setName('섯다라인설정')
-  .setDescription('서버별 봇 설정을 관리해~ (관리자 전용, 기본은 전부 꺼짐)')
+  // 최상위 설명을 바꿔야 djs-commander가 Discord에 재등록한다(하위 옵션만 바뀌면 반영 안 됨)
+  .setDescription('서버별 봇 기능을 켜고 끄는 설정이야~ (관리자 전용, 기본은 전부 꺼짐)')
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 
 // 손님권한부여: 입장 시 손님 역할 자동부여 on/off (켤 때 손님 역할 지정)
@@ -86,7 +96,7 @@ data.addSubcommand(sub => {
 data.addSubcommand(sub => {
   sub.setName('파티모집').setDescription(catalog.desc('파티모집'))
   sub.addStringOption(stateOption)
-  sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '디스코드 파티모집 채널 (켤 때 지정)'))
+  sub.addChannelOption(channelOption([ChannelType.GuildForum], '디스코드 파티모집 포럼 채널 (켤 때 지정, 포럼만 가능)'))
   return sub
 })
 
@@ -243,7 +253,7 @@ module.exports = {
     }
 
     if (sub === '파티모집') {
-      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집', flag: 'partyRecruitEnabled', key: 'partyChannelId' })
+      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집', flag: 'partyRecruitEnabled', key: 'partyChannelId', forumOnly: true })
       return
     }
     if (sub === '인게임파티모집현황') {

@@ -4,6 +4,7 @@ const guildModule = require('./getGuildInfo')
 const partyAlerts = require('./partyAlerts')
 const { approveRoleOf } = require('./approveRole')
 const catalog = require('./featureCatalog')
+const partyChannelMod = require('./partyChannel')
 
 // /섯다라인설정 목록 화면(서버 관리 / 인게임 연동 임베드 2장).
 // 줄 형식: `상태 이름 · 값 — 설명`. 이름 = 하위 명령 이름(그대로 복사해 명령으로 쓸 수 있게).
@@ -15,7 +16,8 @@ const ch = (id) => id ? `<#${id}>` : null
 const role = (id) => id ? `<@&${id}>` : null
 
 // 각 기능의 현재 상태: { on: true|false|null(값 전용 설정), value: 표시값|null, warn: 경고|null }
-function stateOf (sub, guildId) {
+// guild(선택): 채널 종류 검사처럼 디스코드 캐시가 필요한 경고용
+function stateOf (sub, guildId, guild = null) {
   const gi = guildModule.getGuildInfo(guildId)
   const get = (k, f = null) => settings.get(guildId, k, f)
   const chOf = (k) => get(k) || (gi && gi[k]) || null
@@ -46,8 +48,10 @@ function stateOf (sub, guildId) {
     }
     case '오늘의미션':
       return { on: get('dailyMissionEnabled', false), value: ch(chOf('todayMissionChannelId')) }
-    case '파티모집':
-      return { on: get('partyRecruitEnabled', false), value: ch(chOf('partyChannelId')) }
+    case '파티모집': {
+      const warn = guild && partyChannelMod.isWrongType(guild) ? '⚠️ 포럼 채널이 아니라 동작하지 않아요 — 포럼 채널로 다시 지정해 주세요' : null
+      return { on: get('partyRecruitEnabled', false), value: ch(chOf('partyChannelId')), warn }
+    }
     case '인게임파티모집현황': {
       const on = get('bugleBoardEnabled', false)
       let warn = null
@@ -62,8 +66,8 @@ function stateOf (sub, guildId) {
   }
 }
 
-function featureLine (f, guildId) {
-  const st = stateOf(f.sub, guildId)
+function featureLine (f, guild) {
+  const st = stateOf(f.sub, guild.id, guild)
   const mark = st.on === null ? f.emoji : dot(st.on)
   let line = `${mark} **${f.sub}**${st.value ? ` · ${st.value}` : ''} — ${f.oneLine}`
   if (st.warn) line += `\n\u3000${st.warn}` // 전각 공백으로 들여쓰기
@@ -71,13 +75,13 @@ function featureLine (f, guildId) {
 }
 
 // 섹션별 줄 목록(그룹 헤더 포함)
-function sectionLines (section, guildId) {
+function sectionLines (section, guild) {
   const lines = []
   let lastGroup = null
   for (const f of catalog.FEATURES.filter(x => x.section === section)) {
     if (f.group && f.group !== lastGroup) lines.push(`**${catalog.GROUPS[f.group]}**`)
     lastGroup = f.group || null
-    lines.push(featureLine(f, guildId))
+    lines.push(featureLine(f, guild))
     if (f.afterNote) lines.push(f.afterNote)
   }
   return lines
@@ -90,7 +94,7 @@ function buildSettingsView (guild) {
       .setTitle(s.title)
       .setColor(s.color)
       // 필드 값(1024자)은 자동삭제 채널이 많으면 넘칠 수 있어 description(4096자)에 줄을 쓴다
-      .setDescription(sectionLines(key, guild.id).join('\n').slice(0, 4096)))
+      .setDescription(sectionLines(key, guild).join('\n').slice(0, 4096)))
   embeds[embeds.length - 1].setFooter({ text: '바꾸려면 /섯다라인설정 <항목이름>' })
   return { content: `⚙️ **${guild.name}** 설정`, embeds }
 }

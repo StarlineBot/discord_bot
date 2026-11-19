@@ -4,6 +4,7 @@ const { DateTime } = require('luxon')
 const settings = require('./guildSettings')
 const catalog = require('./featureCatalog')
 const { stateOf, buildSettingsView } = require('./settingsView')
+const partyChannelMod = require('./partyChannel')
 const { addonServerUrl } = require('../config/bot')
 
 // 제작자 전용 '!현황' 명령의 화면 생성(봇 서버별 설정 / 애드온 사용자 현황).
@@ -36,7 +37,8 @@ function ago (iso) {
 
 // ── 봇 ──
 function guildUsage (guild) {
-  const on = catalog.FEATURES.filter(f => stateOf(f.sub, guild.id).on === true).map(f => f.sub)
+  const on = catalog.FEATURES.filter(f => stateOf(f.sub, guild.id).on === true)
+    .map(f => f.sub === '파티모집' && partyChannelMod.isWrongType(guild) ? '파티모집⚠️텍스트채널' : f.sub)
   const set = []
   if (settings.get(guild.id, 'adminRole', null)) set.push('관리자역할')
   if (settings.get(guild.id, 'generalChannelId', null)) set.push('기본채널')

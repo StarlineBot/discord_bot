@@ -36,7 +36,7 @@ test('설정 목록: 텍스트 채널이면 파티모집 줄 아래 경고', () 
   expect(stateOf('파티모집', 'B', g).warn).toContain('포럼 채널이 아니라')
   expect(stateOf('파티모집', 'B').warn).toBeNull() // guild 없이 부르면 검사 안 함(기존 호출 호환)
   const ingame = buildSettingsView(g).embeds[1].data.description
-  expect(ingame).toMatch(/파티모집\*\* · <#T>.*\n　⚠️ 포럼 채널이 아니라/)
+  expect(ingame).toMatch(/파티모집\*\* · <#T>.*\n\u3000⚠️ 포럼 채널이 아니라/)
 })
 
 test('/섯다라인설정 파티모집: 채널 옵션은 포럼만, 옛 텍스트 채널로 켜기는 거절', async () => {

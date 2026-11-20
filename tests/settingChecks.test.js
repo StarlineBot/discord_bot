@@ -128,10 +128,10 @@ test('목록: 나중에 깨진 설정(역할 순서·권한·채널 삭제)을 �
   const g = makeGuild({ roles: [{ id: 'HIGH', position: 12 }], channels: [{ id: 'C', perms: [P.ViewChannel] }] })
   store.G = { autoGuestRole: true, guestRole: 'HIGH', weeklyEnabled: true, weeklyMemberChannelId: 'C', dailyMissionEnabled: true, todayMissionChannelId: 'GONE', adminRole: G }
   const [admin, ingame] = buildSettingsView(g).embeds.map(e => e.data.description)
-  expect(admin).toMatch(/손님권한부여.*\n　⚠️ <@&HIGH>이\(가\) 봇 역할/)
-  expect(admin).toMatch(/주간랭킹.*\n　⚠️ 봇이 <#C>에서 \*\*메시지 보내기/)
-  expect(admin).toMatch(/관리자역할.*\n　⚠️ `@everyone`/)
-  expect(ingame).toMatch(/오늘의미션.*\n　⚠️ 지정한 채널\(<#GONE>\)을 찾을 수 없어요/)
+  expect(admin).toMatch(/손님권한부여.*\n\u3000⚠️ <@&HIGH>이\(가\) 봇 역할/)
+  expect(admin).toMatch(/주간랭킹.*\n\u3000⚠️ 봇이 <#C>에서 \*\*메시지 보내기/)
+  expect(admin).toMatch(/관리자역할.*\n\u3000⚠️ `@everyone`/)
+  expect(ingame).toMatch(/오늘의미션.*\n\u3000⚠️ 지정한 채널\(<#GONE>\)을 찾을 수 없어요/)
 })
 
 test('봇 정보를 캐시에서 못 찾으면 검사를 건너뜀(잘못 막지 않게)', () => {

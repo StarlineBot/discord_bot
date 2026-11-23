@@ -89,6 +89,16 @@ test('날짜(KST)가 바뀌면 전날 사용자 목록은 지우고 숫자만 �
   expect(data['2026-11-24'].g1['요리']._ids).toHaveLength(1)
 })
 
+test('날이 바뀐 뒤 명령이 없어도 1분 저장(flush) 때 전날 목록을 지운다', () => {
+  const u = make()
+  u.record(ix({ user: 'u1' }), 'ok', 1)
+  u.flush()
+  expect(readFile('2026-11')['2026-11-23'].g1['요리']._ids).toHaveLength(1)
+  at('2026-11-24T00:01:00') // 자정 지나고 아무도 명령을 안 씀
+  u.flush()
+  expect(readFile('2026-11')['2026-11-23'].g1['요리']).toEqual({ ok: 1, err: 0, users: 1, msAvg: 1, msMax: 1 })
+})
+
 test('재시작 후 날이 바뀌어 있어도 읽을 때 전날 목록을 정리한다', () => {
   const first = make()
   first.record(ix({ user: 'u9' }), 'ok', 1)

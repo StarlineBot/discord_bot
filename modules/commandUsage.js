@@ -66,6 +66,14 @@ function createUsage ({
 
   function flush () {
     try {
+      // 날이 바뀐 뒤 명령이 하나도 안 들어와도 전날 사용자 해시 목록이 파일에 남지 않게(1분마다 flush가 정리)
+      if (cache) {
+        const today = now().setZone(ZONE).toFormat('yyyy-MM-dd')
+        if (lastDay !== today) {
+          if (pruneIds(cache.data, today)) cache.dirty = true
+          lastDay = today
+        }
+      }
       if (cache && cache.dirty) {
         writeMonth(cache.month, cache.data)
         cache.dirty = false

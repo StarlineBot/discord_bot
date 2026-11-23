@@ -89,7 +89,15 @@ async function botStatus (client, query) {
 // ── 애드온 ──
 async function fetchAddonUsers () {
   const r = await axios.get(`${addonServerUrl}/internal/users`, { timeout: 5000 })
-  return r.data.users || []
+  return { users: r.data.users || [], guests: r.data.guests || [] }
+}
+
+// 비로그인(명세 3.4.3): 최근 7일 안에 올린 설치만 보여 준다(같은 설치가 로그인하면 7일 뒤 자연히 빠짐)
+const GUEST_DAYS = 7
+const guestLabel = (g) => `guest-${g.install_id.slice(0, 8)}`
+const recentGuests = (guests) => {
+  const since = DateTime.now().minus({ days: GUEST_DAYS })
+  return guests.filter(g => g.updated && DateTime.fromISO(g.updated) >= since)
 }
 
 // 기능 사용 값(addon_server settings.features) 해석 — 값이 두 종류 섞여 올 수 있다.
@@ -127,7 +135,7 @@ const featureLabel = (f) => f.date ? `${f.key}(${f.date.slice(5)})` : f.key
 // 앱 버전(sync.json "app"). 없으면 '?' — 버전 저장 전 업로드 또는 버전을 안 보내는 옛 앱
 const appLabel = (s) => s && s.app ? `v${s.app}` : '앱 버전 ?'
 
-function addonSummary (users) {
+function addonSummary (users, guests = []) {
   let total = 0
   const lines = users.map(u => {
     const s = u.settings
@@ -143,12 +151,21 @@ function addonSummary (users) {
     }
     return line
   })
+  // 로그인 사용자 아래에 비로그인 줄(로그인 줄과 같은 형식: 접속 시각·앱 버전·해상도·켠 기능)
+  const recent = recentGuests(guests)
+  for (const g of recent) {
+    const on = onFeatures(g)
+    lines.push(`**${guestLabel(g)}** · 비로그인\n${INDENT}접속 ${kst(g.updated)} ${ago(g.updated)}` +
+      `\n${INDENT}${appLabel(g)} · ${g.resolution || '?'} · 켠 기능 ${on.length}개` +
+      `\n${INDENT}🟢 ${on.length ? on.join(', ') : '켠 기능 없음'}`)
+  }
+  lines.unshift(`👤 비로그인 ${recent.length}명(최근 ${GUEST_DAYS}일)`)
   const { shown, rest } = fitLines(lines)
   const synced = users.filter(u => u.settings).length
   return {
     embeds: [new EmbedBuilder().setTitle('📱 애드온 사용 현황').setColor(0x00B894)
-      .setDescription(shown.join('\n') || '아직 로그인한 사용자가 없어요')
-      .setFooter({ text: `로그인 ${users.length}명 · 동기화 ${synced}명 · 총 동기화 ${total}회${rest ? ` · 외 ${rest}명` : ''} · 시각 KST · 자세히: !현황 애드온 <이름>` })]
+      .setDescription(shown.join('\n'))
+      .setFooter({ text: `로그인 ${users.length}명 · 동기화 ${synced}명 · 총 동기화 ${total}회 · 비로그인 ${recent.length}명${rest ? ` · 외 ${rest}줄` : ''} · 시각 KST · 자세히: !현황 애드온 <이름|guest-앞8자>` })]
   }
 }
 
@@ -172,15 +189,33 @@ function addonDetail (u) {
   return { embeds: [new EmbedBuilder().setTitle('👤 애드온 사용자').setColor(0x00B894).setDescription(lines.join('\n'))] }
 }
 
+function guestDetail (g) {
+  const { on } = featureView(g)
+  const isUsage = on.some(f => f.date)
+  const lines = [
+    `**${guestLabel(g)}** · 비로그인 (설치 \`${g.install_id}\`)`,
+    `마지막 올림 ${kst(g.updated)} ${ago(g.updated)}`,
+    `${appLabel(g)} · 해상도 ${g.resolution || '?'} · ${Math.round((g.size || 0) / 1024)}KB`,
+    `🟢 ${isUsage ? '최근 7일 쓴 기능' : '켠 기능'}(${on.length}): ${on.map(featureLabel).join(', ') || '없음'}`
+  ]
+  return { embeds: [new EmbedBuilder().setTitle('👤 애드온 비로그인 사용자').setColor(0x00B894).setDescription(lines.join('\n'))] }
+}
+
 async function addonStatus (query) {
-  let users
+  let users, guests
   try {
-    users = await fetchAddonUsers()
+    ({ users, guests } = await fetchAddonUsers())
   } catch (e) {
     return { content: `애드온 서버에 연결할 수 없어요 (${e.code || e.message}). VM에서 \`systemctl status addon-server\`를 확인해 주세요.` }
   }
-  if (!query) return addonSummary(users)
+  if (!query) return addonSummary(users, guests)
   const q = query.toLowerCase()
+  if (q.startsWith('guest-')) {
+    const prefix = q.slice(6)
+    const hits = prefix ? guests.filter(g => g.install_id.startsWith(prefix)) : []
+    if (hits.length === 1) return guestDetail(hits[0])
+    return { content: hits.length ? '여러 설치가 맞아요 — 더 길게 적어주세요' : `'${query}'에 맞는 비로그인 사용자가 없어요` }
+  }
   const found = users.filter(u => u.discord_id === query || u.name.toLowerCase().includes(q))
   if (found.length === 0) return { content: `'${query}'에 맞는 애드온 사용자가 없어요` }
   if (found.length > 1) return { content: `여러 명이 맞아요 — 더 길게 적어주세요:\n${found.slice(0, 15).map(u => `· ${u.name}`).join('\n')}` }

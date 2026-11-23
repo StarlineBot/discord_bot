@@ -68,3 +68,41 @@ test('!현황 애드온: 사용자 줄에 앱 버전 표시(없으면 ?)', async
     axios.get = orig
   }
 })
+
+test('!현황 애드온: 맨 위 비로그인 N명(최근 7일), 로그인 아래 guest 줄, guest-앞8자로 상세', async () => {
+  const axios = require('axios')
+  const { DateTime } = require('luxon')
+  const { addonStatus } = require('../modules/ownerStatus')
+  const now = DateTime.now().toUTC()
+  const iso = (d) => now.minus({ days: d }).toISO({ suppressMilliseconds: true })
+  const today = now.setZone('Asia/Seoul').toISODate()
+  const login = {
+    discord_id: '1',
+    name: '로그인',
+    tier: 'user',
+    status: 'active',
+    created: iso(1),
+    last_seen: iso(0),
+    settings: { rev: 3, updated: iso(0), device: 'PC', resolution: '1920x1080', size: 1024, features: {}, app: '0.56.0' }
+  }
+  const guests = [
+    { install_id: 'abcdef0123456789abcdef0123456789', updated: iso(1), resolution: '2560x1440', size: 2048, app: '0.56.0', features: { buff: today } },
+    { install_id: '11112222333344445555666677778888', updated: iso(10), resolution: null, size: 10, app: null, features: {} }
+  ]
+  const orig = axios.get
+  axios.get = async () => ({ data: { users: [login], guests } })
+  try {
+    const desc = (await addonStatus('')).embeds[0].data.description
+    const lines = desc.split('\n')
+    expect(lines[0]).toBe('👤 비로그인 1명(최근 7일)') // 10일 전 설치는 빠짐
+    expect(desc.indexOf('**로그인**')).toBeLessThan(desc.indexOf('**guest-abcdef01**'))
+    expect(desc).toContain('v0.56.0 · 2560x1440 · 켠 기능 1개')
+    expect(desc).toContain('🟢 buff')
+    expect(desc).not.toContain('guest-11112222')
+    const detail = (await addonStatus('guest-abcdef01')).embeds[0].data.description
+    expect(detail).toContain('최근 7일 쓴 기능(1): buff')
+    expect((await addonStatus('guest-ffff')).content).toContain('없어요')
+  } finally {
+    axios.get = orig
+  }
+})

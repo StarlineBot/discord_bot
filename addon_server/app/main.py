@@ -30,6 +30,10 @@ from .tokens import TokenError, TokenSigner
 log = logging.getLogger("addon_server")
 
 STATE_RE = re.compile(r"^[A-Za-z0-9_\-]{8,128}$")
+INSTALL_RE = re.compile(r"^[0-9a-f]{16,32}$")
+GUEST_INSTALL_WINDOW = 600   # 비로그인: 설치당 10분에 1회(앱은 켤 때 + 1시간마다)
+GUEST_RATE_PER_MIN = 300     # 비로그인: 전체 분당
+GUEST_MAX_ROWS = 100_000     # 비로그인 행 상한(넘으면 오래된 것부터 삭제) — 묶음을 저장하지 않아 한 행이 수백 바이트
 RESOLUTION_RE = re.compile(r"^\d{2,5}x\d{2,5}$")
 LOGIN_TTL = 600          # 로그인 시작~콜백 허용 시간(초)
 MAX_PENDING_LOGINS = 2000
@@ -48,6 +52,13 @@ def _local_redirect(port: int, **params: str) -> RedirectResponse:
     return RedirectResponse(f"http://localhost:{port}/callback?" + urlencode(params), status_code=302)
 
 
+class _HideGuestAccess(logging.Filter):
+    """uvicorn 접근 로그에서 /guest/ 요청을 뺀다(비로그인 경로는 IP를 남기지 않음 — 명세 3.4.3)."""
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args if isinstance(record.args, tuple) else ()
+        return not (len(args) >= 3 and str(args[2]).startswith("/guest/"))
+
+
 def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = None) -> FastAPI:
     settings = settings or load_settings()
     if not settings.token_signing_key:
@@ -62,9 +73,15 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
     auth_limiter = RateLimiter(AUTH_RATE_PER_MIN)
     user_limiter = RateLimiter(settings.rate_limit_per_min)
     upload_locks: dict[str, asyncio.Lock] = {}
+    guest_install_limiter = RateLimiter(1, window=GUEST_INSTALL_WINDOW)
+    guest_total_limiter = RateLimiter(GUEST_RATE_PER_MIN)
+    access_log = logging.getLogger("uvicorn.access")
+    if not any(isinstance(f, _HideGuestAccess) for f in access_log.filters):
+        access_log.addFilter(_HideGuestAccess())
 
     app = FastAPI(title="섯다라인 애드온 서버", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.settings, app.state.db, app.state.signer = settings, db, signer
+    app.state.guest_install_limiter, app.state.guest_total_limiter = guest_install_limiter, guest_total_limiter
 
     def tier_of(discord_id: str) -> str:
         return "creator" if discord_id in settings.creator_ids else "user"
@@ -117,7 +134,11 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
                 "rev": r["rev"], "updated": r["updated"], "device": r["device"], "resolution": r["resolution"],
                 "size": r["size"], "app": r["app"], "features": json.loads(r["features"] or "{}")}
             users.append(item)
-        return {"users": users}
+        with db.connect() as conn:
+            grows = conn.execute("SELECT * FROM guests ORDER BY updated DESC").fetchall()
+        guests = [{"install_id": g["install_id"], "updated": g["updated"], "resolution": g["resolution"],
+                   "size": g["size"], "app": g["app"], "features": json.loads(g["features"] or "{}")} for g in grows]
+        return {"users": users, "guests": guests}
 
     @app.get("/health")
     def health():
@@ -246,5 +267,38 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
                 return JSONResponse({"detail": "다른 곳에서 먼저 저장했어요", "rev": current}, status_code=409)
         saved = db.get_settings(uid)
         return {"rev": new_rev, "updated": saved["updated"], "size": len(body)}
+
+    # ── 비로그인 설정 올리기(명세 3.4.3) — 토큰 없음, 묶음은 검사만 하고 정보만 저장, IP 저장 안 함 ──
+    async def read_bundle(request: Request) -> bytes:
+        limit = settings.max_settings_bytes
+        declared = request.headers.get("content-length")
+        if declared and declared.isdigit() and int(declared) > limit:
+            raise HTTPException(413, f"설정 묶음은 {limit // (1024 * 1024)}MB까지예요")
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > limit:
+                raise HTTPException(413, f"설정 묶음은 {limit // (1024 * 1024)}MB까지예요")
+        if not body:
+            raise HTTPException(422, "설정 묶음이 비어 있어요")
+        return bytes(body)
+
+    @app.put("/guest/settings", status_code=204)
+    async def put_guest_settings(request: Request, resolution: str = ""):
+        install_id = (request.headers.get("x-install-id") or "").strip()
+        if not INSTALL_RE.match(install_id):
+            raise HTTPException(400, "X-Install-Id 형식이 올바르지 않아요")
+        if not guest_total_limiter.hit("all"):
+            raise HTTPException(429, "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.")
+        if not guest_install_limiter.hit("install:" + install_id):
+            raise HTTPException(429, "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.")
+        body = await read_bundle(request)
+        try:
+            info = inspect_bundle(body)
+        except BundleError as e:
+            raise HTTPException(e.status, str(e)) from e
+        db.save_guest(install_id, resolution=resolution if RESOLUTION_RE.match(resolution or "") else None,
+                      size=len(body), features=info.features, app=info.app, max_rows=GUEST_MAX_ROWS)
+        return Response(status_code=204)
 
     return app

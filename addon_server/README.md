@@ -77,10 +77,17 @@
 | 그 밖의 경로 | |
 |---|---|
 | `GET /health` | `{"ok": true}` — 인증 없음, 운영 확인용 |
+| `PUT /guest/settings?resolution=<2560x1440>` | **비로그인 설정 올리기**(명세 3.4.3, 사용 현황 보기용) — 토큰 없음, 헤더 `X-Install-Id: <16~32자 소문자 hex>`, 본문 ZIP. 성공 `204` |
+
+`PUT /guest/settings`:
+- 묶음 검사는 `PUT /settings`와 같음(400 = `X-Install-Id` 형식 틀림, 413·422 같음). 요청 제한: 설치당 10분에 1회, 전체 분당 300회(넘으면 429 — 앱은 다음 차례에 다시).
+- **묶음(ZIP)은 검사만 하고 저장하지 않습니다**(받아 가는 주소가 없음). `guests` 테이블에 설치별로 해상도·크기·`features`·앱 버전만 덮어씁니다. 10만 행을 넘으면 오래된 것부터 지웁니다.
+- **IP를 저장하지 않습니다**: DB에 칸이 없고, uvicorn 접근 로그에서 `/guest/` 요청은 뺍니다(`_HideGuestAccess`). Caddy는 `log` 설정이 없어 접근 로그를 남기지 않습니다.
 
 ### 1.4 DB (봇이 읽기 전용으로 열 수 있음 — 다음 단계 `/애드온 사용자`)
 `data/addon.sqlite3`. 시각은 모두 UTC ISO8601(`2026-11-11T01:02:03Z`)입니다.
 - `users(discord_id PK, name, created, last_seen, logged_out, tier, status)`
+- `guests(install_id PK, updated, resolution, size, features JSON, app)` — 비로그인(3.4.3). 묶음·IP·PC 이름 없음.
 - `settings(discord_id PK, rev, updated, device, resolution, size, features JSON, app)` — `app`은 묶음 `sync.json`의 앱 버전(없거나 형식이 틀리면 NULL). 나중에 추가된 컬럼은 `db.py`의 `MIGRATIONS`가 서버 시작 때 `ALTER TABLE`로 붙인다.
 
 ---

@@ -31,6 +31,17 @@ CREATE TABLE IF NOT EXISTS settings (
   features   TEXT NOT NULL DEFAULT '{}',     -- 기능 사용 값: 새 앱 {"blackbox": "2026-11-18"}(마지막 사용일) / 옛 앱 {"blackbox": true}
   app        TEXT                            -- 올린 앱 버전(sync.json "app"), 모르면 NULL
 );
+-- 비로그인 설정 올리기(명세 3.4.3, 사용 현황 보기용). 묶음(ZIP)은 검사만 하고 저장하지 않는다(받아 가는 주소가 없음).
+-- IP·PC 이름도 저장하지 않는다. install_id = 앱 설치마다 무작위 hex.
+CREATE TABLE IF NOT EXISTS guests (
+  install_id TEXT PRIMARY KEY,
+  updated    TEXT NOT NULL,
+  resolution TEXT,
+  size       INTEGER NOT NULL,
+  features   TEXT NOT NULL DEFAULT '{}',
+  app        TEXT
+);
+CREATE INDEX IF NOT EXISTS guests_updated ON guests(updated);
 """
 
 # 기존 DB에 나중에 추가된 컬럼: (테이블, 컬럼, 정의). 시작할 때 없으면 ALTER TABLE ADD COLUMN.
@@ -130,6 +141,31 @@ class Database:
                 (discord_id, new_rev, ts, device, resolution, size, feats, app),
             )
             return new_rev
+
+    # ── guests(비로그인) ──
+    def save_guest(self, install_id: str, *, resolution: str | None, size: int, features: dict,
+                   app: str | None, max_rows: int) -> None:
+        """덮어쓰기(rev·충돌 없음). 행이 max_rows를 넘으면 오래된 것부터 지운다."""
+        feats = json.dumps(features, ensure_ascii=False, sort_keys=True)
+        with self.connect() as conn:
+            conn.execute(
+                """INSERT INTO guests(install_id, updated, resolution, size, features, app)
+                   VALUES(?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(install_id) DO UPDATE SET updated=excluded.updated, resolution=excluded.resolution,
+                     size=excluded.size, features=excluded.features, app=excluded.app""",
+                (install_id, now_iso(), resolution, size, feats, app),
+            )
+            conn.execute("""DELETE FROM guests WHERE install_id IN (
+                              SELECT install_id FROM guests ORDER BY updated DESC LIMIT -1 OFFSET ?)""", (max_rows,))
+
+    def get_guest(self, install_id: str) -> dict | None:
+        with self.connect() as conn:
+            row = conn.execute("SELECT * FROM guests WHERE install_id=?", (install_id,)).fetchone()
+            if not row:
+                return None
+            out = dict(row)
+            out["features"] = json.loads(out["features"] or "{}")
+            return out
 
     def backup_to(self, dest: Path) -> None:
         """온라인 백업(sqlite3 backup API = .backup 명령과 동일)."""

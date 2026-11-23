@@ -48,6 +48,8 @@ node docs/battle-sim/game-balance-sim.js [반복수]
 
 `/섯다라인설정`의 기능 이름·설명·섹션은 `modules/featureCatalog.js`(단일 출처)에서만 정의한다. 하위 명령 설명(`catalog.desc`)과 `/섯다라인설정 목록` 화면(`modules/settingsView.js`)이 이걸 읽으므로, 설정 기능을 추가하면 카탈로그에 한 줄 추가하고 `settingsView.js`의 `stateOf`에 상태 표시를 추가한다. 게임 서버(거뿔 조회 기준)는 `catalog.gameServerOf(guildId)`(미설정 시 하프).
 
+설정 값 검사는 `modules/settingChecks.js`(단일 출처): 봇 역할 순서·관리형 역할·`@everyone`, 기능별 필요한 채널 권한(`FEATURE_PERMS`), 사라진 채널, 자동삭제 겹침 등. `/섯다라인설정`은 막을 것은 거절(이전 설정 유지)·충돌은 경고하고, `/섯다라인설정 목록`(`settingsView.stateOf`에 guild 전달 시)도 같은 검사로 ⚠️를 띄운다. 새 채널/역할 설정을 추가하면 여기에 권한·검사를 함께 추가한다. 파티모집은 포럼 전용(`modules/partyChannel.js`).
+
 ### 상태 저장
 DB 없음. 영속 상태는 전부 `static/json/*.json` 파일(gitignore). 각 모듈이 `readAll/writeAll` 패턴으로 직접 읽고 쓴다(`guildSettings`, `guildRegistry`, 파티모집 보드 `partyRecruitBoard.json`, 랭킹 `RankingUtil` 등). 파일이 없을 때 `{}`로 폴백하는 관례를 지킨다.
 

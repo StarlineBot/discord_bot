@@ -69,7 +69,10 @@
 그 밖에:
 - `device`는 64자까지, `resolution`은 `숫자x숫자` 형식만 저장합니다(아니면 비워 둠). 한글 PC 이름도 됩니다(URL 인코딩).
 - 묶음 형식은 앱 `config.export_bundle`과 같습니다(`config.json` + `userdata/…`). 서버는 묶음을 풀지 않고 그대로 보관합니다.
-- `features`(봇 보기용): config.json에서 `{"<기능>": {"enabled": true/false}}` 형태의 값과 최상위 `...Enabled` 불값만 골라 DB에 저장합니다.
+- `features`(봇 보기용, 명세 3.4.2절):
+  - 새 앱: config.json 최상위 `featureUsage: {"<기능>": "YYYY-MM-DD"}`(기능별 마지막 실제 동작 날짜)가 있으면 **그것만** 저장합니다(최대 64개, 키 64자, 형식이 틀린 값은 버림).
+  - 옛 앱(0.52.0 이하, `featureUsage` 없음): `{"<기능>": {"enabled": true/false}}` 값과 최상위 `...Enabled` 불값을 저장합니다(옛 키 `autofindV2`는 뺌).
+  - 봇 `!현황 애드온`은 날짜 값이면 서버가 받은 날(KST) 포함 최근 7일 안일 때만 🟢(미래 날짜는 받은 날로 봄), 불값이면 true일 때 🟢로 표시합니다.
 
 | 그 밖의 경로 | |
 |---|---|
@@ -78,7 +81,7 @@
 ### 1.4 DB (봇이 읽기 전용으로 열 수 있음 — 다음 단계 `/애드온 사용자`)
 `data/addon.sqlite3`. 시각은 모두 UTC ISO8601(`2026-11-11T01:02:03Z`)입니다.
 - `users(discord_id PK, name, created, last_seen, logged_out, tier, status)`
-- `settings(discord_id PK, rev, updated, device, resolution, size, features JSON)`
+- `settings(discord_id PK, rev, updated, device, resolution, size, features JSON, app)` — `app`은 묶음 `sync.json`의 앱 버전(없거나 형식이 틀리면 NULL). 나중에 추가된 컬럼은 `db.py`의 `MIGRATIONS`가 서버 시작 때 `ALTER TABLE`로 붙인다.
 
 ---
 

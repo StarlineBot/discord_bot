@@ -1,6 +1,6 @@
 const { ChannelType } = require('discord.js')
 const modmail = require('../../modules/modmail')
-const { inquiryForumChannelId } = require('../../config/bot')
+const { inquiryForumChannelId, developerId } = require('../../config/bot')
 
 // 1:1 문의(모드메일) 양방향 처리.
 //  - 유저가 봇에 DM(inbound)   → 문의 포럼에 유저별 포스트 생성/이어붙임
@@ -15,6 +15,8 @@ module.exports = async (message, client) => {
 
     // A) inbound: 유저 → 봇 DM
     if (!message.guildId) {
+      // 제작자의 '!현황' 명령은 문의가 아님(events/messageCreate/ownerStatus.js가 처리)
+      if (message.author.id === developerId && (message.content || '').trim().startsWith('!현황')) return
       await handleInbound(message, client)
       return
     }
@@ -45,6 +47,7 @@ async function handleInbound (message, client) {
   const threadId = modmail.getThreadByUser(userId)
   let thread = threadId ? await forum.threads.fetch(threadId).catch(() => null) : null
   if (thread && thread.archived) thread = null // 보관된 문의는 새 포스트로
+  if (thread && thread.parentId !== forum.id) thread = null // 문의 포럼을 바꾼 경우 옛 포럼 포스트는 버리고 새 포럼에 생성
 
   const content = buildInboundContent(message)
   if (!thread) {

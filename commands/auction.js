@@ -1,9 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js')
-const { getCategoryItems, filterItems, filterEchostones, filterEnchants } = require('../modules/auction')
+const { getCategoryItems, filterItems, filterEchostones, filterEnchants, koreanGold } = require('../modules/auction')
 const { resolveGeneralChannel } = require('../modules/generalChannel')
 const { startLoading } = require('../modules/loading')
 const categoryData = require('../modules/auctionCategories.json')
 const searchOptions = require('../modules/auctionSearchOptions.json')
+const { RELIC_OPTIONS, findRelicOptions, filterRelics, lowestByLevel } = require('../modules/muriasRelic')
 
 const devChannelId = require('../modules/getGuildInfo').getMonitorChannelId()
 const basicErrorMessage = '경매장 조회 중 문제가 생겼어 😢'
@@ -82,7 +83,15 @@ data.addSubcommand(sub => {
   return sub
 })
 
-const { buildEquipEmbed, buildEchostoneEmbed, buildEnchantEmbed } = require('../modules/auctionEmbeds')
+// 유물: 무리아스의 유물을 스킬 옵션·최소 레벨로 조회
+data.addSubcommand(sub => {
+  sub.setName('유물').setDescription('무리아스의 유물을 스킬 옵션·레벨로 조회해~')
+  sub.addStringOption(o => o.setName('옵션').setDescription('스킬 옵션 (자동완성 · 직업명/줄임말로도 검색, 비우면 전체)').setAutocomplete(true))
+  sub.addIntegerOption(o => o.setName('최소레벨').setDescription('옵션 최소 레벨 1~10 (수치 = 최대치 × 레벨/10)').setMinValue(1).setMaxValue(10))
+  return sub
+})
+
+const { buildEquipEmbed, buildEchostoneEmbed, buildEnchantEmbed, buildRelicEmbed } = require('../modules/auctionEmbeds')
 
 async function post (interaction, header, embeds) {
   const botChannel = resolveGeneralChannel(interaction)
@@ -107,6 +116,12 @@ module.exports = {
   data,
   autocomplete: async (interaction) => {
     const focused = interaction.options.getFocused(true)
+    if (focused.name === '옵션') {
+      const q = (focused.value || '').trim()
+      const hits = q ? findRelicOptions(q) : RELIC_OPTIONS
+      await interaction.respond(hits.slice(0, 25).map(o => ({ name: `${o.label} · ${o.job}`.slice(0, 100), value: o.id })))
+      return
+    }
     if (!/^세공\d?$/.test(focused.name) && focused.name !== '각성능력') return
     const q = focused.value || ''
     const hits = (q ? metalwareNames.filter(n => n.includes(q)) : metalwareNames).slice(0, 25)
@@ -135,6 +150,29 @@ module.exports = {
         if (opt('각성능력')) cond.push(`각성 ${opt('각성능력')}${optI('각성레벨') ? ' ' + optI('각성레벨') + '레벨+' : ''}`)
         const header = `🔍 ${cond.join(' · ')}\n전체 ${items.length}건 중 매칭 **${results.length}건**` + (results.length > MAX_EMBEDS ? ` (가격순 ${MAX_EMBEDS}건)` : '')
         await post(interaction, results.length ? header : `${header}\n\n조건에 맞는 매물이 없어~ 😢`, results.slice(0, MAX_EMBEDS).map(buildEchostoneEmbed))
+        return
+      }
+
+      if (sub === '유물') {
+        const input = interaction.options.getString('옵션')
+        const minLevel = interaction.options.getInteger('최소레벨') || 1
+        const options = input ? findRelicOptions(input) : []
+        if (input && !options.length) {
+          await interaction.editReply(`'${input}'에 맞는 유물 옵션이 없어~ 자동완성에서 골라줘 😅`)
+          return
+        }
+        const items = await getCategoryItems('유물')
+        const results = filterRelics(items, { options, minLevel })
+        const relicCount = items.filter(it => it.item_display_name === '무리아스의 유물').length
+        const cond = ['유물']
+        if (options.length === 1) cond.push(`${options[0].label.split(' (최대')[0]} (${options[0].job})`)
+        else if (options.length) cond.push(`'${input}' 옵션 ${options.length}종`)
+        if (minLevel > 1) cond.push(`Lv.${minLevel}+`)
+        let header = `🔍 ${cond.join(' · ')}\n유물 ${relicCount}건 중 매칭 **${results.length}건**` + (results.length > MAX_EMBEDS ? ` (가격순 ${MAX_EMBEDS}건)` : '')
+        if (options.length === 1 && results.length) {
+          header += '\n📊 레벨별 최저가: ' + lowestByLevel(results).map(x => `Lv.${x.level} ${koreanGold(x.price)}`).join(' · ')
+        }
+        await post(interaction, results.length ? header : `${header}\n\n조건에 맞는 매물이 없어~ 😢`, results.slice(0, MAX_EMBEDS).map(buildRelicEmbed))
         return
       }
 

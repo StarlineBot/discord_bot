@@ -28,9 +28,15 @@ CREATE TABLE IF NOT EXISTS settings (
   device     TEXT,
   resolution TEXT,
   size       INTEGER NOT NULL,
-  features   TEXT NOT NULL DEFAULT '{}'      -- {"blackbox": true, ...} 받은 설정의 기능 사용 값
+  features   TEXT NOT NULL DEFAULT '{}',     -- 기능 사용 값: 새 앱 {"blackbox": "2026-11-18"}(마지막 사용일) / 옛 앱 {"blackbox": true}
+  app        TEXT                            -- 올린 앱 버전(sync.json "app"), 모르면 NULL
 );
 """
+
+# 기존 DB에 나중에 추가된 컬럼: (테이블, 컬럼, 정의). 시작할 때 없으면 ALTER TABLE ADD COLUMN.
+MIGRATIONS = [
+    ("settings", "app", "TEXT"),
+]
 
 
 def now_iso() -> str:
@@ -44,6 +50,14 @@ class Database:
         with self.connect() as conn:
             conn.execute("PRAGMA journal_mode=WAL")
             conn.executescript(SCHEMA)
+            self._migrate(conn)
+
+    @staticmethod
+    def _migrate(conn) -> None:
+        for table, column, decl in MIGRATIONS:
+            cols = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+            if column not in cols:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
 
     @contextmanager
     def connect(self):
@@ -96,7 +110,7 @@ class Database:
             return out
 
     def save_settings(self, discord_id: str, expected_rev: int, *, device: str | None,
-                      resolution: str | None, size: int, features: dict) -> int | None:
+                      resolution: str | None, size: int, features: dict, app: str | None = None) -> int | None:
         """expected_rev가 현재 rev와 같을 때만 저장하고 새 rev를 돌려준다. 다르면 None(충돌)."""
         ts = now_iso()
         feats = json.dumps(features, ensure_ascii=False, sort_keys=True)
@@ -108,12 +122,12 @@ class Database:
                 return None
             new_rev = current + 1
             conn.execute(
-                """INSERT INTO settings(discord_id, rev, updated, device, resolution, size, features)
-                   VALUES(?, ?, ?, ?, ?, ?, ?)
+                """INSERT INTO settings(discord_id, rev, updated, device, resolution, size, features, app)
+                   VALUES(?, ?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT(discord_id) DO UPDATE SET rev=excluded.rev, updated=excluded.updated,
                      device=excluded.device, resolution=excluded.resolution, size=excluded.size,
-                     features=excluded.features""",
-                (discord_id, new_rev, ts, device, resolution, size, feats),
+                     features=excluded.features, app=excluded.app""",
+                (discord_id, new_rev, ts, device, resolution, size, feats, app),
             )
             return new_rev
 

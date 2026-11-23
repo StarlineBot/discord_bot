@@ -50,3 +50,19 @@ def test_backup_and_restore(client, settings, tmp_path):
     with sqlite3.connect(settings.db_path) as conn:
         assert conn.execute("SELECT rev FROM settings WHERE discord_id='111'").fetchone()[0] == 1
         assert conn.execute("SELECT name FROM users WHERE discord_id='111'").fetchone()[0] == "유저"
+
+
+def test_internal_users_local_only(settings):
+    from conftest import make_bundle
+    app = create_app(settings, discord=FakeDiscord())
+    outside = TestClient(app)  # TestClient 기본 주소 'testclient' = 외부
+    token, _ = login(outside)
+    outside.put("/settings", content=make_bundle(), headers={**auth(token), "If-Match": "0"}, params={"device": "PC"})
+    assert outside.get("/internal/users").status_code == 403
+    local = TestClient(app, client=("127.0.0.1", 50000))
+    body = local.get("/internal/users").json()
+    u = body["users"][0]
+    assert u["discord_id"] == "111" and u["name"] == "유저" and u["settings"]["rev"] == 1
+    assert u["settings"]["device"] == "PC" and u["settings"]["features"]["blackbox"] is True
+    # Caddy를 거친 요청(X-Forwarded-For)은 내부 주소처럼 보여도 거절
+    assert local.get("/internal/users", headers={"X-Forwarded-For": "1.2.3.4"}).status_code == 403

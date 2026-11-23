@@ -15,7 +15,7 @@ module.exports = {
   // inquiryForumChannelId: 1:1 DM 문의가 모이는 포럼 채널(서버 무관 봇 전역, 모드메일).
   //   유저가 봇에 DM → 이 포럼에 유저별 문의 포스트 생성. 포스트에 답글 쓰면 봇이 그 유저에게 DM relay.
   //   비어 있으면 문의 기능 off.
-  inquiryForumChannelId: '1555444707192995880',
+  inquiryForumChannelId: '1567710183101300786',
   // configBackupChannelId: 애드온(앱)이 '설정 백업'을 올리는 릴레이 채널(서버 무관 봇 전역).
   //   앱이 '[설정백업] <@userId>' + config.json 첨부를 이 채널에 올리면,
   //   봇이 그 유저에게 백업 파일을 DM으로 전달하고 릴레이 메시지는 삭제(채널 정리).
@@ -27,5 +27,8 @@ module.exports = {
   // uploadRelayChannelId: 유저 제출함 채널(서버 무관 봇 전역).
   //   이 채널에 올라온 모든 메시지(글·파일)를 제작자(developerId)에게 DM으로 전달하고 원본은 삭제.
   //   → 채널은 글쓰기만 열어두면 '본인+관리자만 보는' 제출함처럼 쓸 수 있다. 비어 있으면 off.
-  uploadRelayChannelId: '1569254683418038439'
+  uploadRelayChannelId: '1569254683418038439',
+  // addonServerUrl: 같은 VM의 애드온 서버(addon_server) 내부 주소. 제작자 '!현황 애드온'이 여기서 사용자 현황을 읽는다.
+  //   서버는 VM 내부에서 직접 온 요청에만 /internal/* 를 연다(외부·Caddy 경유는 거절).
+  addonServerUrl: 'http://127.0.0.1:8000'
 }

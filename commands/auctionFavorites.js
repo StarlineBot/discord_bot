@@ -3,6 +3,7 @@ const favStore = require('../modules/auctionFavorites')
 const { koreanGold, favoriteCategories, getCategoryItems, resolveLeafCategories, matchFavorite } = require('../modules/auction')
 const { embedFor } = require('../modules/auctionEmbeds')
 const searchOptions = require('../modules/auctionSearchOptions.json')
+const { RELIC_OPTIONS, findRelicOptions } = require('../modules/muriasRelic')
 
 const METALWARE_SLOTS = 3
 const metalwareNames = (searchOptions.metalwareOptionNames || []).map(o => o.label).filter(n => n && n.length <= 100)
@@ -45,6 +46,11 @@ function readMetalwares (interaction) {
 function favSummary (f) {
   const parts = [`\`${f.category}\``]
   if (f.affix) parts.push(f.affix)
+  if (f.category === '유물') {
+    const o = findRelicOptions(f.relicOption)[0]
+    parts.push(o ? `${o.label.split(' (최대')[0]} (${o.job})` : '옵션 ?')
+    if (f.minLevel > 1) parts.push(`Lv.${f.minLevel}+`)
+  }
   if (f.keyword) parts.push(`키워드 '${f.keyword}'`)
   if (f.minGrade) parts.push(`등급 ${f.minGrade}+`)
   if (f.innateStat) parts.push(`고유 ${f.innateStat}${f.minInnateValue ? ` ${f.minInnateValue}+` : ''}`)
@@ -150,6 +156,16 @@ data.addSubcommand(sub => {
   return sub
 })
 
+// 유물 전용 등록: /경매장 유물과 동일한 스킬 옵션·최소 레벨 조건
+data.addSubcommand(sub => {
+  sub.setName('유물').setDescription('무리아스의 유물 알림을 스킬 옵션·레벨로 추가해~ (인당 최대 5개)')
+  sub.addStringOption(o => o.setName('이름').setDescription('알림 별칭 (예: 케미컬9)').setRequired(true))
+  sub.addStringOption(o => o.setName('옵션').setDescription('스킬 옵션 (자동완성 · 직업명/줄임말로도 검색)').setRequired(true).setAutocomplete(true))
+  sub.addIntegerOption(o => o.setName('최소레벨').setDescription('옵션 최소 레벨 1~10').setMinValue(1).setMaxValue(10))
+  sub.addStringOption(o => o.setName('최대가격').setDescription('이 금액 이하만 알림 (예: 5억, 3000만)'))
+  return sub
+})
+
 data.addSubcommand(sub =>
   sub.setName('목록').setDescription('내 알림 목록을 봐~'))
 
@@ -165,6 +181,11 @@ module.exports = {
     const focused = interaction.options.getFocused(true)
     const q = focused.value || ''
     let pool = []
+    if (focused.name === '옵션') {
+      const hits = q.trim() ? findRelicOptions(q) : RELIC_OPTIONS
+      await interaction.respond(hits.slice(0, 25).map(o => ({ name: `${o.label} · ${o.job}`.slice(0, 100), value: o.id })))
+      return
+    }
     if (/^세공\d?$/.test(focused.name) || focused.name === '각성능력') {
       pool = metalwareNames
     } else if (focused.name === '카테고리') {
@@ -212,6 +233,27 @@ module.exports = {
         category: '인챈트',
         keyword: interaction.options.getString('키워드'),
         affix: interaction.options.getString('종류') || null, // 접두/접미
+        maxPrice: mp.maxPrice
+      })
+      return
+    }
+
+    if (sub === '유물') {
+      const input = interaction.options.getString('옵션')
+      const options = findRelicOptions(input)
+      if (options.length !== 1) {
+        await interaction.reply({ content: options.length ? `'${input}'에 맞는 옵션이 ${options.length}개야~ 자동완성에서 하나 골라줘` : `'${input}'에 맞는 유물 옵션이 없어~ 자동완성에서 골라줘`, ephemeral: true })
+        return
+      }
+      const mp = await readMaxPrice(interaction)
+      if (mp.error) return
+      await registerFav(interaction, {
+        guildId,
+        userId,
+        label: interaction.options.getString('이름'),
+        category: '유물',
+        relicOption: options[0].id, // 검색 옵션 id(auctionSearchOptions.muriasRelicOptionNames.value)
+        minLevel: interaction.options.getInteger('최소레벨') || 1,
         maxPrice: mp.maxPrice
       })
       return

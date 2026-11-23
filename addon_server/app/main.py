@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import re
@@ -94,6 +95,30 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
         return user
 
     # ── 운영 ──
+    def local_only(request: Request) -> None:
+        """VM 내부(봇 등)에서 직접 온 요청만 허용. Caddy를 거친 외부 요청은 X-Forwarded-For가 붙어 거절된다."""
+        host = request.client.host if request.client else ""
+        if host not in ("127.0.0.1", "::1") or request.headers.get("x-forwarded-for"):
+            raise HTTPException(403, "내부 전용이에요")
+
+    @app.get("/internal/users", dependencies=[Depends(local_only)])
+    def internal_users():
+        """봇 제작자 '!현황 애드온' 용 — 사용자별 로그인·동기화 현황(설정 묶음 내용은 주지 않음)."""
+        with db.connect() as conn:
+            rows = conn.execute(
+                """SELECT u.discord_id, u.name, u.tier, u.status, u.created, u.last_seen, u.logged_out,
+                          s.rev, s.updated, s.device, s.resolution, s.size, s.features, s.app
+                   FROM users u LEFT JOIN settings s USING(discord_id)
+                   ORDER BY COALESCE(s.updated, u.last_seen) DESC""").fetchall()
+        users = []
+        for r in rows:
+            item = {k: r[k] for k in ("discord_id", "name", "tier", "status", "created", "last_seen", "logged_out")}
+            item["settings"] = None if r["rev"] is None else {
+                "rev": r["rev"], "updated": r["updated"], "device": r["device"], "resolution": r["resolution"],
+                "size": r["size"], "app": r["app"], "features": json.loads(r["features"] or "{}")}
+            users.append(item)
+        return {"users": users}
+
     @app.get("/health")
     def health():
         with db.connect() as conn:
@@ -195,7 +220,7 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
         if not body:
             raise HTTPException(422, "설정 묶음이 비어 있어요")
         try:
-            features = inspect_bundle(bytes(body))
+            info = inspect_bundle(bytes(body))
         except BundleError as e:
             raise HTTPException(e.status, str(e)) from e
 
@@ -216,7 +241,7 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
                 os.fsync(f.fileno())
             os.replace(tmp, path)  # 원자적 교체
             new_rev = db.save_settings(uid, expected, device=device, resolution=resolution,
-                                       size=len(body), features=features)
+                                       size=len(body), features=info.features, app=info.app)
             if new_rev is None:  # 이론상 없음(잠금) — 방어
                 return JSONResponse({"detail": "다른 곳에서 먼저 저장했어요", "rev": current}, status_code=409)
         saved = db.get_settings(uid)

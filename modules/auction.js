@@ -3,6 +3,7 @@ const axios = require('axios')
 const mainUrl = 'https://open.api.nexon.com'
 const nexonApiKey = process.env.NEXON_API_KEY
 const categoryData = require('./auctionCategories.json')
+const { findRelicOptions, filterRelics } = require('./muriasRelic')
 // 특수 장비 대분류는 세공 검색 대상(악기·생활 도구)만 (경매장 명령어와 동일)
 const SPECIAL_ALLOWED_SUBS = ['악기', '생활 도구']
 
@@ -144,17 +145,22 @@ function favoriteCategories () {
 function resolveLeafCategories (major) {
   if (major === '에코스톤') return ['에코스톤']
   if (major === '인챈트') return ['인챈트 스크롤']
+  if (major === '유물') return ['유물']
   const cat = categoryData.categories.find(c => c.name === major)
   if (!cat) return []
   if (major === '특수 장비') return cat.subCategories.filter(s => SPECIAL_ALLOWED_SUBS.includes(s))
   return cat.subCategories.filter(s => s !== '에코스톤')
 }
 
-// 알림(즐겨찾기) 한 건에 대한 매물 필터 공통 진입점(장비·에코스톤·인챈트)
+// 알림(즐겨찾기) 한 건에 대한 매물 필터 공통 진입점(장비·에코스톤·인챈트·유물)
 function matchFavorite (items, fav) {
   let matches
   if (fav.category === '인챈트') {
     matches = filterEnchants(items, { keyword: fav.keyword, affix: fav.affix })
+  } else if (fav.category === '유물') {
+    // relicOption: 검색 옵션 id(자동완성 값). 못 찾으면 매칭 0건(엉뚱한 전체 알림 방지)
+    const options = findRelicOptions(fav.relicOption)
+    matches = options.length ? filterRelics(items, { options, minLevel: fav.minLevel || 1 }) : []
   } else if (fav.category === '에코스톤') {
     matches = filterEchostones(items, {
       keyword: fav.keyword,

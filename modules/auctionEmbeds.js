@@ -69,7 +69,18 @@ function buildEnchantEmbed (item) {
 function embedFor (category) {
   if (category === '에코스톤') return buildEchostoneEmbed
   if (category === '인챈트') return buildEnchantEmbed
+  if (category === '유물') return buildRelicEmbed
   return buildEquipEmbed
 }
 
-module.exports = { buildEquipEmbed, buildEchostoneEmbed, buildEnchantEmbed, embedFor, formatExpire }
+// 무리아스의 유물: filterRelics 결과(item.relic 첨부) 기준
+function buildRelicEmbed (item) {
+  const r = item.relic
+  const embed = baseEmbed(item)
+  if (r) {
+    embed.addFields({ name: `🏺 Lv.${r.level} · ${r.job}`, value: truncate(r.raw) })
+  }
+  return embed
+}
+
+module.exports = { buildEquipEmbed, buildEchostoneEmbed, buildEnchantEmbed, buildRelicEmbed, embedFor, formatExpire }

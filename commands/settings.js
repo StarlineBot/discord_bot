@@ -6,6 +6,8 @@ const perm = require('../modules/perm')
 const { approveRoleOf } = require('../modules/approveRole')
 const catalog = require('../modules/featureCatalog')
 const { buildSettingsView } = require('../modules/settingsView')
+const partyChannelMod = require('../modules/partyChannel')
+const checks = require('../modules/settingChecks')
 
 // 설정이 바뀌면 봇 제작자(config/bot.js developerId)에게 "누가 뭘 바꿨는지" DM.
 async function notifyDeveloper (interaction, summary) {
@@ -19,7 +21,21 @@ async function notifyDeveloper (interaction, summary) {
 
 // "토글 + 채널" 형태 기능 공용 처리 (파티모집/인게임파티모집현황/주간랭킹)
 // key = 설정 키(config guildInfo 폴백 키와 동일), flag = on/off 키
-async function setChannelFeature (interaction, guildInfo, { sub, label, flag, key, note }) {
+// 경고 목록 → 응답 뒤에 붙일 문구
+const warnText = (warns) => warns.filter(Boolean).map(w => `\n⚠️ ${w}`).join('')
+
+// 저장된(또는 새로 고른) 채널 검사: 사라진 채널·포럼 여부·봇 권한 → 거절 문구 | null
+function channelProblem (interaction, channelId, label, { forumOnly = false } = {}) {
+  const ch = checks.channelOf(interaction.guild, channelId)
+  if (!ch) return `저장된 채널(<#${channelId}>)을 찾을 수 없어~ 삭제됐을 수 있으니 채널을 다시 지정해줘`
+  if (forumOnly && !partyChannelMod.isForum(ch)) return `<#${channelId}>은(는) 포럼 채널이 아니야~ ${label}은 포럼 채널에서만 동작해`
+  return checks.channelBlock(interaction.guild, ch, label)
+}
+
+// "토글 + 채널" 형태 기능 공용 처리 (파티모집/인게임파티모집현황/주간랭킹/오늘의미션)
+// key = 설정 키(config guildInfo 폴백 키와 동일), flag = on/off 키
+// forumOnly: 포럼 채널만 허용(파티모집). 검사를 통과해야 채널·켜짐을 저장한다(거절되면 이전 설정 그대로).
+async function setChannelFeature (interaction, guildInfo, { sub, label, flag, key, note, forumOnly }) {
   const guildId = interaction.member.guild.id
   const on = interaction.options.getString('상태') === 'on'
   if (!on) {
@@ -29,15 +45,35 @@ async function setChannelFeature (interaction, guildInfo, { sub, label, flag, ke
     return
   }
   const channel = interaction.options.getChannel('채널')
-  if (channel) settings.set(guildId, key, channel.id)
-  const eff = settings.get(guildId, key, null) || (guildInfo && guildInfo[key])
+  const eff = (channel && channel.id) || settings.get(guildId, key, null) || (guildInfo && guildInfo[key])
   if (!eff) {
     await interaction.reply({ content: `⚠️ 켜려면 채널을 지정해줘~\n예: \`/섯다라인설정 ${sub} 상태:켜기 채널:#채널\``, ephemeral: true })
     return
   }
+  const problem = channelProblem(interaction, eff, label, { forumOnly })
+  if (problem) {
+    await interaction.reply({ content: `⚠️ ${problem}\n예: \`/섯다라인설정 ${sub} 상태:켜기 채널:#${forumOnly ? '포럼채널' : '채널'}\``, ephemeral: true })
+    return
+  }
+  settings.set(guildId, key, eff)
   settings.set(guildId, flag, true)
-  await interaction.reply({ content: `✅ **${label}** 기능을 **켰어**~ 채널: <#${eff}>${note ? `\n${note}` : ''}`, ephemeral: true })
+  const warns = [
+    ...checks.channelOptionalWarns(interaction.guild, checks.channelOf(interaction.guild, eff), label),
+    checks.channelIsAutoDeleted(guildId, eff)
+  ]
+  await interaction.reply({ content: `✅ **${label}** 기능을 **켰어**~ 채널: <#${eff}>${note ? `\n${note}` : ''}${warnText(warns)}`, ephemeral: true })
   await notifyDeveloper(interaction, `${label} → **켜기** (채널 <#${eff}>)`)
+}
+
+// 봇이 줘야 하는 역할(손님·승인) 확인: 고른 역할 또는 저장된 역할 → { roleId } | { problem }
+function resolveAssignRole (interaction, key) {
+  const picked = interaction.options.getRole('역할')
+  const roleId = (picked && picked.id) || settings.get(interaction.guild.id, key, null)
+  if (!roleId) return {}
+  const role = interaction.guild.roles.cache.get(roleId)
+  if (!role) return { problem: `저장된 역할(<@&${roleId}>)을 찾을 수 없어~ 삭제됐을 수 있으니 역할을 다시 지정해줘` }
+  const problem = checks.roleBlock(interaction.guild, role, { assign: true })
+  return problem ? { problem } : { roleId }
 }
 
 const stateOption = (o) => {
@@ -52,7 +88,8 @@ const channelOption = (types, desc) => (o) => {
 
 const data = new SlashCommandBuilder()
   .setName('섯다라인설정')
-  .setDescription('서버별 봇 설정을 관리해~ (관리자 전용, 기본은 전부 꺼짐)')
+  // 최상위 설명을 바꿔야 djs-commander가 Discord에 재등록한다(하위 옵션만 바뀌면 반영 안 됨)
+  .setDescription('서버별 봇 기능을 켜고 끄는 설정이야~ (관리자 전용, 기본은 전부 꺼짐)')
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 
 // 손님권한부여: 입장 시 손님 역할 자동부여 on/off (켤 때 손님 역할 지정)
@@ -86,7 +123,7 @@ data.addSubcommand(sub => {
 data.addSubcommand(sub => {
   sub.setName('파티모집').setDescription(catalog.desc('파티모집'))
   sub.addStringOption(stateOption)
-  sub.addChannelOption(channelOption([ChannelType.GuildForum, ChannelType.GuildText], '디스코드 파티모집 채널 (켤 때 지정)'))
+  sub.addChannelOption(channelOption([ChannelType.GuildForum], '디스코드 파티모집 포럼 채널 (켤 때 지정, 포럼만 가능)'))
   return sub
 })
 
@@ -170,9 +207,11 @@ module.exports = {
         await notifyDeveloper(interaction, '손님권한부여 → **끄기**')
         return
       }
-      const role = interaction.options.getRole('역할')
-      if (role) settings.set(guildId, 'guestRole', role.id)
-      const effective = settings.get(guildId, 'guestRole', null)
+      const { roleId: effective, problem } = resolveAssignRole(interaction, 'guestRole')
+      if (problem) {
+        await interaction.reply({ content: `⚠️ ${problem}`, ephemeral: true })
+        return
+      }
       if (!effective) {
         await interaction.reply({
           content: '⚠️ 켜려면 손님 역할을 지정해줘~\n예: `/섯다라인설정 손님권한부여 상태:켜기 역할:@손님`',
@@ -180,8 +219,9 @@ module.exports = {
         })
         return
       }
+      settings.set(guildId, 'guestRole', effective)
       settings.set(guildId, 'autoGuestRole', true)
-      await interaction.reply({ content: `✅ **손님권한부여**를 **켰어**~ 손님 역할: <@&${effective}>`, ephemeral: true })
+      await interaction.reply({ content: `✅ **손님권한부여**를 **켰어**~ 손님 역할: <@&${effective}>${warnText([checks.sameRoleWarn(guildId)])}`, ephemeral: true })
       await notifyDeveloper(interaction, `손님권한부여 → **켜기** (손님역할 <@&${effective}>)`)
       return
     }
@@ -195,9 +235,7 @@ module.exports = {
         return
       }
       const channel = interaction.options.getChannel('채널')
-      if (channel) settings.set(guildId, 'roleAuditingChannelId', channel.id)
-
-      const effectiveCh = settings.get(guildId, 'roleAuditingChannelId', null)
+      const effectiveCh = (channel && channel.id) || settings.get(guildId, 'roleAuditingChannelId', null)
       if (!effectiveCh) {
         await interaction.reply({
           content: '⚠️ 켜려면 로그 채널을 지정해줘~\n예: `/섯다라인설정 감사로그 상태:켜기 채널:#로그채널`',
@@ -205,12 +243,22 @@ module.exports = {
         })
         return
       }
+      const problem = channelProblem(interaction, effectiveCh, '감사로그')
+      if (problem) {
+        await interaction.reply({ content: `⚠️ ${problem}`, ephemeral: true })
+        return
+      }
+      settings.set(guildId, 'roleAuditingChannelId', effectiveCh)
       settings.set(guildId, 'auditLog', true)
+      const auditWarns = [
+        checks.publicChannelWarn(interaction.guild, checks.channelOf(interaction.guild, effectiveCh)),
+        checks.channelIsAutoDeleted(guildId, effectiveCh)
+      ]
       const approveRole = approveRoleOf(guildId)
       const roleNote = approveRole
         ? `\n승인권한부여 켜짐: 입장 로그에 <@&${approveRole}> 부여 버튼이 같이 떠.`
         : '\n※ 승인권한부여 꺼짐 → 입장 로그만 뜨고 부여 버튼은 없어. (`/섯다라인설정 승인권한부여`)'
-      await interaction.reply({ content: `✅ **감사로그**를 **켰어**~ 로그 채널: <#${effectiveCh}>${roleNote}`, ephemeral: true })
+      await interaction.reply({ content: `✅ **감사로그**를 **켰어**~ 로그 채널: <#${effectiveCh}>${roleNote}${warnText(auditWarns)}`, ephemeral: true })
       await notifyDeveloper(interaction, `감사로그 → **켜기** (채널 <#${effectiveCh}>)`)
       return
     }
@@ -223,9 +271,11 @@ module.exports = {
         await notifyDeveloper(interaction, '승인권한부여 → **끄기**')
         return
       }
-      const role = interaction.options.getRole('역할')
-      if (role) settings.set(guildId, 'guildMemberRole', role.id)
-      const effective = settings.get(guildId, 'guildMemberRole', null)
+      const { roleId: effective, problem } = resolveAssignRole(interaction, 'guildMemberRole')
+      if (problem) {
+        await interaction.reply({ content: `⚠️ ${problem}`, ephemeral: true })
+        return
+      }
       if (!effective) {
         await interaction.reply({
           content: '⚠️ 켜려면 확인 후 부여할 역할을 지정해줘~\n예: `/섯다라인설정 승인권한부여 상태:켜기 역할:@길드원`',
@@ -233,17 +283,18 @@ module.exports = {
         })
         return
       }
+      settings.set(guildId, 'guildMemberRole', effective)
       settings.set(guildId, 'approveRoleEnabled', true)
       const auditNote = settings.get(guildId, 'auditLog', false)
         ? ''
         : '\n⚠️ 지금 **감사로그가 꺼져 있어서** 버튼이 안 떠. `/섯다라인설정 감사로그`로 켜줘.'
-      await interaction.reply({ content: `✅ **승인권한부여**를 **켰어**~ 입장 로그에 <@&${effective}> 부여 버튼이 떠. 운영진이 확인 후 눌러주면 돼!${auditNote}`, ephemeral: true })
+      await interaction.reply({ content: `✅ **승인권한부여**를 **켰어**~ 입장 로그에 <@&${effective}> 부여 버튼이 떠. 운영진이 확인 후 눌러주면 돼!${auditNote}${warnText([checks.sameRoleWarn(guildId)])}`, ephemeral: true })
       await notifyDeveloper(interaction, `승인권한부여 → **켜기** (역할 <@&${effective}>)`)
       return
     }
 
     if (sub === '파티모집') {
-      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집', flag: 'partyRecruitEnabled', key: 'partyChannelId' })
+      await setChannelFeature(interaction, guildInfo, { sub, label: '파티모집', flag: 'partyRecruitEnabled', key: 'partyChannelId', forumOnly: true })
       return
     }
     if (sub === '인게임파티모집현황') {
@@ -296,9 +347,14 @@ module.exports = {
         })
         return
       }
+      const adProblem = checks.channelBlock(interaction.guild, channel, '자동삭제')
+      if (adProblem) {
+        await interaction.reply({ content: `⚠️ ${adProblem}`, ephemeral: true })
+        return
+      }
       map[channel.id] = minutes
       settings.set(guildId, 'autoDeleteChannels', map)
-      await interaction.reply({ content: `✅ <#${channel.id}> 메시지를 **${minutes}분** 뒤 자동삭제하도록 켰어~ (핀 메시지 제외, 최대 30초 오차)`, ephemeral: true })
+      await interaction.reply({ content: `✅ <#${channel.id}> 메시지를 **${minutes}분** 뒤 자동삭제하도록 켰어~ (핀 메시지 제외, 최대 30초 오차)\n켜기 전부터 있던 메시지도 지워져. 14일 지난 메시지는 디스코드 제한 때문에 30초마다 몇 개씩 천천히 지워져~${warnText(checks.autoDeleteConflictWarns(guildId, channel.id))}`, ephemeral: true })
       await notifyDeveloper(interaction, `자동삭제 켜기 → <#${channel.id}> ${minutes}분`)
       return
     }
@@ -310,6 +366,11 @@ module.exports = {
         return
       }
       const role = interaction.options.getRole('역할')
+      const adminProblem = checks.roleBlock(interaction.guild, role, { assign: false })
+      if (adminProblem) {
+        await interaction.reply({ content: `⚠️ ${adminProblem}`, ephemeral: true })
+        return
+      }
       settings.set(guildId, 'adminRole', role.id)
       await interaction.reply({ content: `✅ 관리자 역할을 <@&${role.id}> 로 지정했어~\n이 역할이면 설정·랭킹·메시지삭제 명령어를 쓸 수 있어.`, ephemeral: true })
       await notifyDeveloper(interaction, `관리자역할 → <@&${role.id}>`)
@@ -322,8 +383,13 @@ module.exports = {
         await interaction.reply({ content: '올릴 채널을 지정해줘~', ephemeral: true })
         return
       }
+      const gcProblem = checks.channelBlock(interaction.guild, channel, '기본채널')
+      if (gcProblem) {
+        await interaction.reply({ content: `⚠️ ${gcProblem}`, ephemeral: true })
+        return
+      }
       settings.set(guildId, 'generalChannelId', channel.id)
-      await interaction.reply({ content: `✅ 명령어 결과를 <#${channel.id}> 에 올리도록 지정했어~`, ephemeral: true })
+      await interaction.reply({ content: `✅ 명령어 결과를 <#${channel.id}> 에 올리도록 지정했어~${warnText([checks.channelIsAutoDeleted(guildId, channel.id)])}`, ephemeral: true })
       await notifyDeveloper(interaction, `기본채널 → <#${channel.id}>`)
       return
     }

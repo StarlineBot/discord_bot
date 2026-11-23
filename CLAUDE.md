@@ -53,6 +53,8 @@ node docs/battle-sim/game-balance-sim.js [반복수]
 ### 상태 저장
 DB 없음. 영속 상태는 전부 `static/json/*.json` 파일(gitignore). 각 모듈이 `readAll/writeAll` 패턴으로 직접 읽고 쓴다(`guildSettings`, `guildRegistry`, 파티모집 보드 `partyRecruitBoard.json`, 랭킹 `RankingUtil` 등). 파일이 없을 때 `{}`로 폴백하는 관례를 지킨다.
 
+명령어 사용량은 `modules/commandUsage.js`가 `static/json/usage/commands-YYYY-MM.json`(월별 합계)에 기록한다. `index.js`가 djs-commander의 각 명령 `run`을 감싸 성공(ok)/예외(err)를 세므로 명령 파일엔 기록 코드가 필요 없다. 제작자 전용 `!현황 명령어 [일수]`로 본다. 사용자 ID는 저장하지 않는다(당일 해시만, `USAGE_SALT`).
+
 ### 스케줄링 (cron)
 `events/ready/cronJob.js`가 봇 기동 시 cron 잡들을 건다. **dev/prod 분기 관례**: production은 실제 스케줄(예: `'0 07 * * *'`), development는 즉시 확인용으로 `'* * * * *'`(매분) 등으로 바꾼다. 시간대는 `luxon`으로 `Asia/Seoul` 고정. cron이 특정 길드만 건드려야 하면 `getDevGuildId()`를 기준으로 쓴다.
 

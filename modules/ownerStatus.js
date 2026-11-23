@@ -6,6 +6,8 @@ const catalog = require('./featureCatalog')
 const { stateOf, buildSettingsView } = require('./settingsView')
 const partyChannelMod = require('./partyChannel')
 const { addonServerUrl } = require('../config/bot')
+const commandUsage = require('./commandUsage')
+const guildRegistry = require('./guildRegistry')
 
 // 제작자 전용 '!현황' 명령의 화면 생성(봇 서버별 설정 / 애드온 사용자 현황).
 // 메시지 처리·권한 확인은 events/messageCreate/ownerStatus.js.
@@ -14,11 +16,11 @@ const TEXT_LIMIT = 5500 // 디스코드: 한 메시지 임베드 글자 합 6000
 const INDENT = '　'
 
 // 글자 합 제한 안에서 넣을 수 있는 줄만, 남은 개수와 함께
-function fitLines (lines) {
+function fitLines (lines, limit = TEXT_LIMIT) {
   const shown = []
   let size = 0
   for (const line of lines) {
-    if (size + line.length + 1 > TEXT_LIMIT) break
+    if (size + line.length + 1 > limit) break
     shown.push(line)
     size += line.length + 1
   }
@@ -185,12 +187,78 @@ async function addonStatus (query) {
   return addonDetail(found[0])
 }
 
+// ── 명령어 사용량 ──
+const DEFAULT_DAYS = 7
+const MAX_DAYS = 366
+const MEDALS = ['🥇', '🥈', '🥉']
+const ERR_MIN_CALLS = 3 // 에러율은 이 횟수 이상 쓴 명령만
+const SLOW_MS = 2000 // 평균 이 시간 이상이면 '느림'
+const LIST_TOP = 5
+
+const sec = (ms) => `${(ms / 1000).toFixed(1)}초`
+
+function parseDays (query) {
+  if (!query) return DEFAULT_DAYS
+  const n = parseInt(query, 10)
+  if (!Number.isFinite(n) || n < 1) return null
+  return Math.min(n, MAX_DAYS)
+}
+
+function guildName (client, guildId) {
+  if (guildId === 'DM') return 'DM'
+  return client?.guilds?.cache?.get(guildId)?.name || guildRegistry.get(guildId)?.name || guildId
+}
+
+// summary(commandUsage.summary 결과) → 임베드. client는 서버 이름 표시용(없어도 됨)
+function buildCommandView (s, client) {
+  const users = (r) => s.userCounting && r.users ? ` · ${r.users}명` : ''
+  const lines = []
+  if (!s.rows.length) {
+    lines.push('기록된 사용이 없어요')
+  } else {
+    s.rows.forEach((r, i) => {
+      lines.push(`${MEDALS[i] || `${i + 1}.`} **${r.key}** ${r.total}회${users(r)}`)
+    })
+  }
+
+  const extra = []
+  const errs = s.rows.filter(r => r.err > 0 && r.total >= ERR_MIN_CALLS)
+    .sort((a, b) => b.err / b.total - a.err / a.total || b.err - a.err).slice(0, LIST_TOP)
+  if (errs.length) extra.push(`⚠️ 에러 많음: ${errs.map(r => `${r.key} err ${r.err}/${r.total} (${Math.round(r.err / r.total * 100)}%)`).join(' · ')}`)
+  const slow = s.rows.filter(r => r.msAvg != null && r.msAvg >= SLOW_MS)
+    .sort((a, b) => b.msAvg - a.msAvg).slice(0, LIST_TOP)
+  if (slow.length) extra.push(`🐢 느림: ${slow.map(r => `${r.key} 평균 ${sec(r.msAvg)}(최대 ${sec(r.msMax)})`).join(' · ')}`)
+  if (s.unused.length) extra.push(`💤 ${s.days}일간 0회: ${s.unused.join(', ')}`)
+  if (s.byGuild.length) extra.push(`🏠 서버별: ${s.byGuild.map(g => `${guildName(client, g.guildId)} ${g.total}회`).join(' · ')}`)
+
+  // 요약 줄(에러·느림·0회·서버별)은 꼭 보이게 남기고, 순위 목록을 남은 자리만큼만 넣는다
+  const extraText = extra.join('\n')
+  const { shown, rest } = fitLines(lines, Math.min(TEXT_LIMIT, 4000) - extraText.length - 20)
+  const body = [shown.join('\n') + (rest ? `\n… 외 ${rest}개` : ''), extraText].filter(Boolean).join('\n\n')
+
+  const total = s.rows.reduce((a, r) => a + r.total, 0)
+  const notes = [`${s.from} ~ ${s.to} KST`, `총 ${total}회`]
+  notes.push(s.userCounting ? '사람 수는 하루 단위 합(여러 날 쓴 사람은 중복)' : '사람 수 집계 꺼짐(USAGE_SALT 없음)')
+  return {
+    embeds: [new EmbedBuilder().setTitle(`📊 명령어 사용량 (최근 ${s.days}일, 제작자 제외)`).setColor(0xF39C12)
+      .setDescription(body.slice(0, 4096) || '기록된 사용이 없어요')
+      .setFooter({ text: `${notes.join(' · ')} · 다른 기간: !현황 명령어 <일수>` })]
+  }
+}
+
+function commandStatus (client, query) {
+  const days = parseDays(query)
+  if (days == null) return { content: '일수는 숫자로 적어주세요 (예: `!현황 명령어 30`)' }
+  return buildCommandView(commandUsage.summary(days), client)
+}
+
 const HELP = [
   '**!현황** — 제작자 전용 (결과는 DM으로)',
   '`!현황 봇` 봇이 들어간 서버와 서버별 켠 기능',
   '`!현황 봇 <서버 이름 일부>` 그 서버 설정 자세히',
   '`!현황 애드온` 애드온 사용자별 접속·동기화',
-  '`!현황 애드온 <이름 일부>` 그 사용자 자세히'
+  '`!현황 애드온 <이름 일부>` 그 사용자 자세히',
+  '`!현황 명령어 [일수]` 슬래시 명령 사용량(기본 최근 7일)'
 ].join('\n')
 
-module.exports = { botStatus, addonStatus, HELP, featureView }
+module.exports = { botStatus, addonStatus, commandStatus, buildCommandView, parseDays, HELP, featureView }

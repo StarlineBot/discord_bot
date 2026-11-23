@@ -1,5 +1,5 @@
 const { developerId } = require('../../config/bot')
-const { botStatus, addonStatus, HELP } = require('../../modules/ownerStatus')
+const { botStatus, addonStatus, commandStatus, HELP } = require('../../modules/ownerStatus')
 
 // 제작자 전용 텍스트 명령 '!현황'. 슬래시 명령으로 등록하지 않아 누구에게도 목록에 안 보인다.
 // 제작자가 아니면 아무 반응도 하지 않는다(명령 존재 자체를 드러내지 않음).
@@ -20,6 +20,7 @@ module.exports = async (message) => {
     let payload
     if (target === '봇') payload = await botStatus(message.client, query)
     else if (target === '애드온') payload = await addonStatus(query)
+    else if (target === '명령어') payload = commandStatus(message.client, query)
     else payload = { content: HELP }
 
     try {

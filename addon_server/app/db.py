@@ -47,7 +47,13 @@ CREATE INDEX IF NOT EXISTS guests_updated ON guests(updated);
 # 기존 DB에 나중에 추가된 컬럼: (테이블, 컬럼, 정의). 시작할 때 없으면 ALTER TABLE ADD COLUMN.
 MIGRATIONS = [
     ("settings", "app", "TEXT"),
+    ("settings", "character", "TEXT"),  # 캐릭터 사용 현황 JSON(명세 3.4.4), 모르면 NULL
+    ("guests", "character", "TEXT"),
 ]
+
+
+def _char_json(character: dict | None) -> str | None:
+    return None if character is None else json.dumps(character, ensure_ascii=False, sort_keys=True)
 
 
 def now_iso() -> str:
@@ -118,10 +124,12 @@ class Database:
                 return None
             out = dict(row)
             out["features"] = json.loads(out["features"] or "{}")
+            out["character"] = json.loads(out["character"]) if out.get("character") else None
             return out
 
     def save_settings(self, discord_id: str, expected_rev: int, *, device: str | None,
-                      resolution: str | None, size: int, features: dict, app: str | None = None) -> int | None:
+                      resolution: str | None, size: int, features: dict, app: str | None = None,
+                      character: dict | None = None) -> int | None:
         """expected_rev가 현재 rev와 같을 때만 저장하고 새 rev를 돌려준다. 다르면 None(충돌)."""
         ts = now_iso()
         feats = json.dumps(features, ensure_ascii=False, sort_keys=True)
@@ -133,27 +141,27 @@ class Database:
                 return None
             new_rev = current + 1
             conn.execute(
-                """INSERT INTO settings(discord_id, rev, updated, device, resolution, size, features, app)
-                   VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                """INSERT INTO settings(discord_id, rev, updated, device, resolution, size, features, app, character)
+                   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT(discord_id) DO UPDATE SET rev=excluded.rev, updated=excluded.updated,
                      device=excluded.device, resolution=excluded.resolution, size=excluded.size,
-                     features=excluded.features, app=excluded.app""",
-                (discord_id, new_rev, ts, device, resolution, size, feats, app),
+                     features=excluded.features, app=excluded.app, character=excluded.character""",
+                (discord_id, new_rev, ts, device, resolution, size, feats, app, _char_json(character)),
             )
             return new_rev
 
     # ── guests(비로그인) ──
     def save_guest(self, install_id: str, *, resolution: str | None, size: int, features: dict,
-                   app: str | None, max_rows: int) -> None:
+                   app: str | None, max_rows: int, character: dict | None = None) -> None:
         """덮어쓰기(rev·충돌 없음). 행이 max_rows를 넘으면 오래된 것부터 지운다."""
         feats = json.dumps(features, ensure_ascii=False, sort_keys=True)
         with self.connect() as conn:
             conn.execute(
-                """INSERT INTO guests(install_id, updated, resolution, size, features, app)
-                   VALUES(?, ?, ?, ?, ?, ?)
+                """INSERT INTO guests(install_id, updated, resolution, size, features, app, character)
+                   VALUES(?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT(install_id) DO UPDATE SET updated=excluded.updated, resolution=excluded.resolution,
-                     size=excluded.size, features=excluded.features, app=excluded.app""",
-                (install_id, now_iso(), resolution, size, feats, app),
+                     size=excluded.size, features=excluded.features, app=excluded.app, character=excluded.character""",
+                (install_id, now_iso(), resolution, size, feats, app, _char_json(character)),
             )
             conn.execute("""DELETE FROM guests WHERE install_id IN (
                               SELECT install_id FROM guests ORDER BY updated DESC LIMIT -1 OFFSET ?)""", (max_rows,))
@@ -165,7 +173,18 @@ class Database:
                 return None
             out = dict(row)
             out["features"] = json.loads(out["features"] or "{}")
+            out["character"] = json.loads(out["character"]) if out.get("character") else None
             return out
+
+    def settings_missing_character(self) -> list[str]:
+        """캐릭터 현황 칸이 비어 있는 로그인 사용자(컬럼 추가 전에 올린 사람) — 보관된 묶음으로 채우기용."""
+        with self.connect() as conn:
+            return [r[0] for r in conn.execute("SELECT discord_id FROM settings WHERE character IS NULL")]
+
+    def set_settings_character(self, discord_id: str, character: dict) -> None:
+        with self.connect() as conn:
+            conn.execute("UPDATE settings SET character=? WHERE discord_id=? AND character IS NULL",
+                         (_char_json(character), discord_id))
 
     def backup_to(self, dest: Path) -> None:
         """온라인 백업(sqlite3 backup API = .backup 명령과 동일)."""

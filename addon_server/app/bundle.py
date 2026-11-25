@@ -96,6 +96,35 @@ def extract_features(cfg: dict) -> dict[str, bool | str]:
 class BundleInfo:
     features: dict = field(default_factory=dict)  # extract_features 결과
     app: str | None = None                        # sync.json의 앱 버전(없거나 형식이 틀리면 None)
+    character: dict = field(default_factory=dict)  # extract_character 결과(캐릭터 사용 현황, 명세 3.4.4)
+
+
+MAX_PACK_LEN = 64
+
+
+def extract_character(cfg: dict) -> dict:
+    """캐릭터 사용 현황(명세 3.4.4) — 고른 캐릭터(voice.pack)·펫 띄우기(character.pet)·그 캐릭터 호감도.
+
+    {"pack": str(빈 값 = 기본 목소리), "pet": bool|없음, "affinity": 0~100|없음}. 형식이 틀린 값은 뺀다.
+    voice 섹션이 아예 없으면(캐릭터 기능 전 앱) 빈 dict.
+    """
+    out: dict = {}
+    voice = cfg.get("voice")
+    if isinstance(voice, dict):
+        pack = voice.get("pack", "")
+        if isinstance(pack, str) and len(pack) <= MAX_PACK_LEN and pack.isprintable():
+            out["pack"] = pack.strip()
+    ch = cfg.get("character")
+    if isinstance(ch, dict):
+        if isinstance(ch.get("pet"), bool):
+            out["pet"] = ch["pet"]
+        aff = ch.get("affinity")
+        pack = out.get("pack")
+        if pack and isinstance(aff, dict) and isinstance(aff.get(pack), dict):
+            v = aff[pack].get("value")
+            if isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 100:
+                out["affinity"] = v
+    return out
 
 
 def _read_app_version(zf: zipfile.ZipFile) -> str | None:
@@ -159,4 +188,4 @@ def inspect_bundle(data: bytes) -> BundleInfo:
         raise BundleError("config.json 형식이 올바르지 않아요")
     if SECRET_KEYS & cfg.keys():
         raise BundleError("설정에 비밀값(API 키·웹훅)이 들어 있어요 — 앱에서 빼고 올려야 해요")
-    return BundleInfo(features=extract_features(cfg), app=app)
+    return BundleInfo(features=extract_features(cfg), app=app, character=extract_character(cfg))

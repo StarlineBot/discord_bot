@@ -35,7 +35,7 @@ def test_saves_info_only_no_token_needed(client, settings):
     g = client.app.state.db.get_guest(IID)
     assert g["features"] == {"buff": "2026-11-23"} and g["app"] == "0.56.0" and g["resolution"] == "2560x1440"
     assert g["size"] > 0
-    assert set(g) == {"install_id", "updated", "resolution", "size", "features", "app"}  # IP·PC 이름·묶음 칸 없음
+    assert set(g) == {"install_id", "updated", "resolution", "size", "features", "app", "character"}  # IP·PC 이름·묶음 칸 없음
     assert not any(settings.settings_dir.iterdir())  # 묶음 파일도 안 남김
 
 

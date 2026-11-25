@@ -95,6 +95,67 @@ async function fetchAddonUsers () {
 // 비로그인(명세 3.4.3): 최근 7일 안에 올린 설치만 보여 준다(같은 설치가 로그인하면 7일 뒤 자연히 빠짐)
 const GUEST_DAYS = 7
 const guestLabel = (g) => `guest-${g.install_id.slice(0, 8)}`
+// ── 캐릭터 사용 현황(애드온 명세 3.4.4) ──
+// 입력: settings/guest의 character {pack(빈 값=기본 목소리), pet, affinity} + features의 pet·character_voice(날짜)
+const PACK_NAMES = {
+  '조용한 여성': '다래',
+  '부드러운 여성': '아리아',
+  '화난 여성': '레나',
+  '차분한 남성': '이안',
+  '장난스러운 남성': 'Starline',
+  '자연스러운 여성': '이름 미정'
+}
+const AFFINITY_BUCKETS = [['0~24', 0, 24], ['25~49', 25, 49], ['50~74', 50, 74], ['75~99', 75, 99], ['100', 100, 100]]
+const hasChar = (s) => !!(s && s.character && typeof s.character.pack === 'string')
+const charName = (pack) => pack === '' ? '기본' : (PACK_NAMES[pack] || pack) // 모르는 팩은 팩 이름 그대로
+// featureUsage 날짜가 최근 7일(서버 받은 날 기준, featureView 규칙)인지
+const usedRecently = (s, key) => featureView(s).on.some(f => f.key === key && f.date)
+// 펫: featureUsage 'pet'이 날짜로 있으면 그걸로, 그 키가 없는 옛 앱은 character.pet === true로 대신
+function petOn (s) {
+  const v = s.features && s.features.pet
+  if (typeof v === 'string') return usedRecently(s, 'pet')
+  return !!(s.character && s.character.pet === true)
+}
+// 목소리 알림: featureUsage 'character_voice'가 최근 7일일 때만(옛 앱은 셈 안 함)
+const voiceOn = (s) => usedRecently(s, 'character_voice')
+const charLabel = (s) => hasChar(s) ? `캐릭터: ${charName(s.character.pack)}${s.character.pack !== '' && petOn(s) ? '(펫)' : ''}` : null
+const withChar = (base, s) => { const c = charLabel(s); return c ? `${base} · ${c}` : base }
+
+function affinityBucket (v) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null
+  const n = Math.floor(v)
+  const b = AFFINITY_BUCKETS.find(([, lo, hi]) => n >= lo && n <= hi)
+  return b ? b[0] : null
+}
+
+// 맨 위 요약 줄(최근 7일 접속한 로그인 + 비로그인). entries: [{ s, guest:bool }]
+function characterSummary (entries) {
+  const withData = entries.filter(e => hasChar(e.s))
+  if (!withData.length) return ['🎭 캐릭터: 자료 없음']
+  const byName = new Map()
+  for (const { s, guest } of withData) {
+    const name = charName(s.character.pack)
+    const c = byName.get(name) || { login: 0, guest: 0 }
+    c[guest ? 'guest' : 'login']++
+    byName.set(name, c)
+  }
+  const chars = [...byName.entries()].sort((a, b) => (b[1].login + b[1].guest) - (a[1].login + a[1].guest) || a[0].localeCompare(b[0]))
+    .map(([name, c]) => `${name} ${c.login + c.guest} (로그인 ${c.login} · 비로그인 ${c.guest})`)
+  const pets = withData.filter(e => e.s.character.pack !== '' && petOn(e.s)).length
+  const voices = withData.filter(e => voiceOn(e.s)).length
+  const buckets = Object.fromEntries(AFFINITY_BUCKETS.map(([k]) => [k, 0]))
+  for (const { s } of withData) {
+    if (s.character.pack === '') continue // 기본 목소리는 호감도 제외
+    const b = affinityBucket(s.character.affinity)
+    if (b) buckets[b]++
+  }
+  return [
+    `🎭 캐릭터: ${chars.join(' · ')}`,
+    `🐾 펫 띄움 ${pets}명 · 🔔 캐릭터 목소리 알림 ${voices}명`,
+    `💗 호감도: ${AFFINITY_BUCKETS.map(([k]) => `${k} ${buckets[k]}`).join(' · ')}`
+  ]
+}
+
 const recentGuests = (guests) => {
   const since = DateTime.now().minus({ days: GUEST_DAYS })
   return guests.filter(g => g.updated && DateTime.fromISO(g.updated) >= since)
@@ -144,7 +205,7 @@ function addonSummary (users, guests = []) {
       total += s.rev
       const on = onFeatures(s)
       line += ` · 동기화 ${s.rev}회 · 마지막 ${kst(s.updated)} ${ago(s.updated)}`
-      line += `\n${INDENT}${appLabel(s)} · ${s.device || '?'} · ${s.resolution || '?'} · 켠 기능 ${on.length}개`
+      line += `\n${INDENT}${withChar(`${appLabel(s)} · ${s.device || '?'} · ${s.resolution || '?'} · 켠 기능 ${on.length}개`, s)}`
       line += `\n${INDENT}🟢 ${on.length ? on.join(', ') : '켠 기능 없음'}`
     } else {
       line += ' · 동기화 없음'
@@ -156,10 +217,13 @@ function addonSummary (users, guests = []) {
   for (const g of recent) {
     const on = onFeatures(g)
     lines.push(`**${guestLabel(g)}** · 비로그인\n${INDENT}접속 ${kst(g.updated)} ${ago(g.updated)}` +
-      `\n${INDENT}${appLabel(g)} · ${g.resolution || '?'} · 켠 기능 ${on.length}개` +
+      `\n${INDENT}${withChar(`${appLabel(g)} · ${g.resolution || '?'} · 켠 기능 ${on.length}개`, g)}` +
       `\n${INDENT}🟢 ${on.length ? on.join(', ') : '켠 기능 없음'}`)
   }
-  lines.unshift(`👤 비로그인 ${recent.length}명(최근 ${GUEST_DAYS}일)`)
+  const since = DateTime.now().minus({ days: GUEST_DAYS })
+  const recentLogin = users.filter(u => u.settings && u.last_seen && DateTime.fromISO(u.last_seen) >= since)
+  lines.unshift(`👤 비로그인 ${recent.length}명(최근 ${GUEST_DAYS}일)`,
+    ...characterSummary([...recentLogin.map(u => ({ s: u.settings, guest: false })), ...recent.map(g => ({ s: g, guest: true }))]))
   const { shown, rest } = fitLines(lines)
   const synced = users.filter(u => u.settings).length
   return {
@@ -179,7 +243,7 @@ function addonDetail (u) {
     const { on, off } = featureView(s)
     const isUsage = on.some(f => f.date)
     lines.push(`동기화 ${s.rev}회 · 마지막 ${kst(s.updated)} ${ago(s.updated)}`)
-    lines.push(`${appLabel(s)} · PC ${s.device || '?'} · 해상도 ${s.resolution || '?'} · ${Math.round(s.size / 1024)}KB`)
+    lines.push(withChar(`${appLabel(s)} · PC ${s.device || '?'} · 해상도 ${s.resolution || '?'} · ${Math.round(s.size / 1024)}KB`, s))
     // 새 앱(날짜) = 최근 7일 안에 실제로 쓴 기능(괄호는 마지막 사용일) / 옛 앱(bool) = 켜 둔 기능
     lines.push(`🟢 ${isUsage ? '최근 7일 쓴 기능' : '켠 기능'}(${on.length}): ${on.map(featureLabel).join(', ') || '없음'}`)
     if (off.length) lines.push(`🔴 끈 기능(${off.length}): ${off.map(f => f.key).join(', ')}`)
@@ -195,7 +259,7 @@ function guestDetail (g) {
   const lines = [
     `**${guestLabel(g)}** · 비로그인 (설치 \`${g.install_id}\`)`,
     `마지막 올림 ${kst(g.updated)} ${ago(g.updated)}`,
-    `${appLabel(g)} · 해상도 ${g.resolution || '?'} · ${Math.round((g.size || 0) / 1024)}KB`,
+    withChar(`${appLabel(g)} · 해상도 ${g.resolution || '?'} · ${Math.round((g.size || 0) / 1024)}KB`, g),
     `🟢 ${isUsage ? '최근 7일 쓴 기능' : '켠 기능'}(${on.length}): ${on.map(featureLabel).join(', ') || '없음'}`
   ]
   return { embeds: [new EmbedBuilder().setTitle('👤 애드온 비로그인 사용자').setColor(0x00B894).setDescription(lines.join('\n'))] }
@@ -296,4 +360,4 @@ const HELP = [
   '`!현황 명령어 [일수]` 슬래시 명령 사용량(기본 최근 7일)'
 ].join('\n')
 
-module.exports = { botStatus, addonStatus, commandStatus, buildCommandView, parseDays, HELP, featureView }
+module.exports = { botStatus, addonStatus, commandStatus, buildCommandView, parseDays, HELP, featureView, characterSummary, charLabel, affinityBucket }

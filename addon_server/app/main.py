@@ -124,7 +124,7 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
         with db.connect() as conn:
             rows = conn.execute(
                 """SELECT u.discord_id, u.name, u.tier, u.status, u.created, u.last_seen, u.logged_out,
-                          s.rev, s.updated, s.device, s.resolution, s.size, s.features, s.app
+                          s.rev, s.updated, s.device, s.resolution, s.size, s.features, s.app, s.character
                    FROM users u LEFT JOIN settings s USING(discord_id)
                    ORDER BY COALESCE(s.updated, u.last_seen) DESC""").fetchall()
         users = []
@@ -132,12 +132,14 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
             item = {k: r[k] for k in ("discord_id", "name", "tier", "status", "created", "last_seen", "logged_out")}
             item["settings"] = None if r["rev"] is None else {
                 "rev": r["rev"], "updated": r["updated"], "device": r["device"], "resolution": r["resolution"],
-                "size": r["size"], "app": r["app"], "features": json.loads(r["features"] or "{}")}
+                "size": r["size"], "app": r["app"],
+                "character": json.loads(r["character"]) if r["character"] else None, "features": json.loads(r["features"] or "{}")}
             users.append(item)
         with db.connect() as conn:
             grows = conn.execute("SELECT * FROM guests ORDER BY updated DESC").fetchall()
         guests = [{"install_id": g["install_id"], "updated": g["updated"], "resolution": g["resolution"],
-                   "size": g["size"], "app": g["app"], "features": json.loads(g["features"] or "{}")} for g in grows]
+                   "size": g["size"], "app": g["app"], "features": json.loads(g["features"] or "{}"),
+                   "character": json.loads(g["character"]) if g["character"] else None} for g in grows]
         return {"users": users, "guests": guests}
 
     @app.get("/health")
@@ -199,6 +201,16 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
     # ── 설정 동기화 ──
     def settings_file(discord_id: str) -> Path:
         return settings.settings_dir / f"{discord_id}.zip"
+
+    # 캐릭터 현황 칸 채우기(명세 3.4.4): 칸이 생기기 전에 올린 로그인 사용자는 보관된 묶음에서 한 번 읽어 채운다.
+    # (비로그인은 묶음을 저장하지 않으므로 다음 올림 때 채워짐.) 실패해도 서버 시작은 막지 않는다.
+    for uid in db.settings_missing_character():
+        try:
+            path = settings_file(uid)
+            if path.is_file():
+                db.set_settings_character(uid, inspect_bundle(path.read_bytes()).character)
+        except Exception as e:  # noqa: BLE001
+            log.warning("캐릭터 현황 채우기 실패(%s): %s", uid, e)
 
     @app.get("/settings")
     def get_settings(user: dict = Depends(current_user)):
@@ -262,7 +274,8 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
                 os.fsync(f.fileno())
             os.replace(tmp, path)  # 원자적 교체
             new_rev = db.save_settings(uid, expected, device=device, resolution=resolution,
-                                       size=len(body), features=info.features, app=info.app)
+                                       size=len(body), features=info.features, app=info.app,
+                                       character=info.character)
             if new_rev is None:  # 이론상 없음(잠금) — 방어
                 return JSONResponse({"detail": "다른 곳에서 먼저 저장했어요", "rev": current}, status_code=409)
         saved = db.get_settings(uid)
@@ -298,7 +311,8 @@ def create_app(settings: Settings | None = None, discord: DiscordOAuth | None = 
         except BundleError as e:
             raise HTTPException(e.status, str(e)) from e
         db.save_guest(install_id, resolution=resolution if RESOLUTION_RE.match(resolution or "") else None,
-                      size=len(body), features=info.features, app=info.app, max_rows=GUEST_MAX_ROWS)
+                      size=len(body), features=info.features, app=info.app, max_rows=GUEST_MAX_ROWS,
+                      character=info.character)
         return Response(status_code=204)
 
     return app

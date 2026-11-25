@@ -72,6 +72,7 @@
 - `features`(봇 보기용, 명세 3.4.2절):
   - 새 앱: config.json 최상위 `featureUsage: {"<기능>": "YYYY-MM-DD"}`(기능별 마지막 실제 동작 날짜)가 있으면 **그것만** 저장합니다(최대 64개, 키 64자, 형식이 틀린 값은 버림).
   - 옛 앱(0.52.0 이하, `featureUsage` 없음): `{"<기능>": {"enabled": true/false}}` 값과 최상위 `...Enabled` 불값을 저장합니다(옛 키 `autofindV2`는 뺌).
+- `character`(봇 보기용, 명세 3.4.4 캐릭터 사용 현황): config.json의 `voice.pack`(고른 캐릭터, 빈 값 = 기본 목소리)·`character.pet`·`character.affinity.<고른 팩>.value`(0~100)만 `{pack, pet, affinity}`로 저장(형식 틀린 값은 뺌). 로그인·비로그인 둘 다. 칸이 생기기 전에 올린 로그인 사용자는 서버 시작 때 보관된 묶음에서 한 번 채우고, 비로그인은 다음 올림 때 채워진다.
   - 봇 `!현황 애드온`은 날짜 값이면 서버가 받은 날(KST) 포함 최근 7일 안일 때만 🟢(미래 날짜는 받은 날로 봄), 불값이면 true일 때 🟢로 표시합니다.
 
 | 그 밖의 경로 | |
@@ -87,8 +88,8 @@
 ### 1.4 DB (봇이 읽기 전용으로 열 수 있음 — 다음 단계 `/애드온 사용자`)
 `data/addon.sqlite3`. 시각은 모두 UTC ISO8601(`2026-11-11T01:02:03Z`)입니다.
 - `users(discord_id PK, name, created, last_seen, logged_out, tier, status)`
-- `guests(install_id PK, updated, resolution, size, features JSON, app)` — 비로그인(3.4.3). 묶음·IP·PC 이름 없음.
-- `settings(discord_id PK, rev, updated, device, resolution, size, features JSON, app)` — `app`은 묶음 `sync.json`의 앱 버전(없거나 형식이 틀리면 NULL). 나중에 추가된 컬럼은 `db.py`의 `MIGRATIONS`가 서버 시작 때 `ALTER TABLE`로 붙인다.
+- `guests(install_id PK, updated, resolution, size, features JSON, app, character JSON)` — 비로그인(3.4.3). 묶음·IP·PC 이름 없음.
+- `settings(discord_id PK, rev, updated, device, resolution, size, features JSON, app, character JSON)` — `app`은 묶음 `sync.json`의 앱 버전(없거나 형식이 틀리면 NULL). 나중에 추가된 컬럼은 `db.py`의 `MIGRATIONS`가 서버 시작 때 `ALTER TABLE`로 붙인다.
 
 ---
 

@@ -1,5 +1,317 @@
 const cookings = [
   {
+    originName: "",
+    localName: "고기양념",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "소금(10%) 후추(10%) 마늘(80%)",
+    thumbnail: "",
+    status: [],
+    index: 627,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "구운 콩물",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "구운 콩가루(75%) 물이 든 병(25%)",
+    thumbnail: "",
+    status: [],
+    index: 628,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "껍질 벗긴 콩물",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "껍질 벗긴 콩가루(75%) 물이 든 병(25%)",
+    thumbnail: "",
+    status: [],
+    index: 629,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "드래곤의 살덩어리",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "드래곤의 살점(33%) 드래곤의 살점(34%) 드래곤의 살점(33%)",
+    thumbnail: "",
+    status: [],
+    index: 630,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "딸기 향 시럽",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "딸기(25%) 설탕(65%) 물이 든 병(10%)",
+    thumbnail: "",
+    status: [],
+    index: 631,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "라브의 밥",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "베이컨(50%) 밥(25%) 고기 조각(25%)",
+    thumbnail: "",
+    status: [],
+    index: 632,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "레몬즙",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "레몬(85%) 물이 든 병(5%) 나무열매(10%)",
+    thumbnail: "",
+    status: [],
+    index: 633,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "마요네즈",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "달걀(75%) 올리브유(20%)",
+    thumbnail: "",
+    status: [],
+    index: 634,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "매운 전골",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "커다란 고기덩어리(40%) 양배추(40%) 고춧가루(20%)",
+    thumbnail: "",
+    status: [],
+    index: 635,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "물에 불린 콩",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "콩(70%) 물이 든 병(25%) 소금(5%)",
+    thumbnail: "",
+    status: [],
+    index: 636,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "물에 불린 콩물",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "물에 불린 콩가루(75%) 물이 든 병(25%)",
+    thumbnail: "",
+    status: [],
+    index: 637,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "볼살바토르의 특제 클럽 샌드위치",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "식빵(50%) 양배추(30%) 볼살바토르의 땅콩버터잼(20%)",
+    thumbnail: "",
+    status: [],
+    index: 638,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "볼살바토르의 특제 토마토 바질 샐러드",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "볼살바토르의 토마토(50%) 바질(30%) 삶은감자(20%)",
+    thumbnail: "",
+    status: [],
+    index: 639,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "빵가루",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "식빵(100%)",
+    thumbnail: "",
+    status: [],
+    index: 640,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "야채 모둠",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "당근(30%) 양파(35%) 샐러리(35%)",
+    thumbnail: "",
+    status: [],
+    index: 641,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "연어 샐러드",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "연어(80%) 샐러리(15%)",
+    thumbnail: "",
+    status: [],
+    index: 642,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "오렌지 향 시럽",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "오렌지(25%) 설탕(65%) 물이 든 병(10%)",
+    thumbnail: "",
+    status: [],
+    index: 643,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "자파리 빵을 흉내낸 빵",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "재료 초콜릿(15%) 치즈 조각(15%) 빵(70%)",
+    thumbnail: "",
+    status: [],
+    index: 644,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "참치 양파 무침",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "참다랑어(60%) 양파(30%)",
+    thumbnail: "",
+    status: [],
+    index: 645,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "초장",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "식초(45%) 고추장(44%) 마늘(11%)",
+    thumbnail: "",
+    status: [],
+    index: 646,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "카레 페이스트",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "감자(15%) 고기 조각(15%) 카레가루(70%)",
+    thumbnail: "",
+    status: [],
+    index: 647,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "카카오 초콜릿 케익",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "카카오(33%) 밀가루 빵 반죽(34%) 설탕(33%)",
+    thumbnail: "",
+    status: [],
+    index: 648,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "크라켄 탕탕이",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "크라켄 다리살(80%) 마늘(20%)",
+    thumbnail: "",
+    status: [],
+    index: 649,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "크라켄 한상 차림",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "크라켄 매운탕(50%) 크라켄 볶음 모둠(50%)",
+    thumbnail: "",
+    status: [],
+    index: 650,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "크리스마스 케이크",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "케이크 만들기 키트(100%)",
+    thumbnail: "",
+    status: [],
+    index: 651,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "포도 향 시럽",
+    originCookingType: "Mixing",
+    localCookingType: "혼합",
+    originRecipe: "",
+    localRecipe: "포도(25%) 설탕(65%) 물이 든 병(10%)",
+    thumbnail: "",
+    status: [],
+    index: 652,
+    isCatering: true
+  },
+  {
     originName: "BnR",
     localName: "BnR",
     originCookingType: "Mixing",
@@ -1997,6 +2309,126 @@ const cookings = [
       }
     ],
     index: 402,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "구운 콩",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "콩(90%) 올리브유(5%) 소금(5%)",
+    thumbnail: "",
+    status: [],
+    index: 653,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "멧돼지 버섯 꼬치",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "개암버섯(45%) 커다란 고기덩어리(45%) 소금(10%)",
+    thumbnail: "",
+    status: [],
+    index: 654,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "볶은 커피",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "쿠르클레 커피 열매(90%) 물이 든 병(10%)",
+    thumbnail: "",
+    status: [],
+    index: 655,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "볼살바토르의 특제 옥수수 구이",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "볼살바토르의 옥수수(95%) 버터(5%)",
+    thumbnail: "",
+    status: [],
+    index: 656,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "스쿠압틴산 빨판 꼬치",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "크라켄 빨판(70%) 소금(15%) 후추(15%)",
+    thumbnail: "",
+    status: [],
+    index: 657,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "참치 베이컨 말이",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "참다랑어(60%) 베이컨(35%) 후추(5%)",
+    thumbnail: "",
+    status: [],
+    index: 658,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "크라켄 호롱구이",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "크라켄 다리살(80%) 고춧가루(20%)",
+    thumbnail: "",
+    status: [],
+    index: 659,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "크레이프",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "밀가루 빵 반죽(83%) 달걀(9%) 우유(8%)",
+    thumbnail: "",
+    status: [],
+    index: 660,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "토르티야",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "옥수수 빵 반죽(100%)",
+    thumbnail: "",
+    status: [],
+    index: 661,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "포춘쿠키",
+    originCookingType: "Baking",
+    localCookingType: "굽기",
+    originRecipe: "",
+    localRecipe: "밀가루(50%) 달걀(15%) 버터(35%)",
+    thumbnail: "",
+    status: [],
+    index: 662,
     isCatering: true
   },
   {
@@ -4023,6 +4455,30 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "단호박 퓌레",
+    originCookingType: "Simmering",
+    localCookingType: "삶기",
+    originRecipe: "",
+    localRecipe: "단호박(90%) 물이 든 병(10%)",
+    thumbnail: "",
+    status: [],
+    index: 663,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "볼살바토르의 특제 삶은 고구마",
+    originCookingType: "Simmering",
+    localCookingType: "삶기",
+    originRecipe: "",
+    localRecipe: "볼살바토르의 고구마(85%) 물이 든 병(15%)",
+    thumbnail: "",
+    status: [],
+    index: 664,
+    isCatering: true
+  },
+  {
     originName: "Simmered Sweet Potato",
     localName: "삶은 고구마",
     originCookingType: "Simmering",
@@ -4208,6 +4664,30 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "크라켄 뽈뽀",
+    originCookingType: "Simmering",
+    localCookingType: "삶기",
+    originRecipe: "",
+    localRecipe: "크라켄 다리살(80%) 후추(20%)",
+    thumbnail: "",
+    status: [],
+    index: 665,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "팥소",
+    originCookingType: "Simmering",
+    localCookingType: "삶기",
+    originRecipe: "",
+    localRecipe: "팥(85%) 물이 든 병(15%)",
+    thumbnail: "",
+    status: [],
+    index: 666,
+    isCatering: true
+  },
+  {
     originName: "Ray Gill Filet",
     localName: "가오리 아가미 퓌레",
     originCookingType: "Boiling",
@@ -4247,6 +4727,18 @@ const cookings = [
       }
     ],
     index: 74,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "개다래 차",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "개다래 열매(10%) 물이 든 병(85%)",
+    thumbnail: "",
+    status: [],
+    index: 672,
     isCatering: true
   },
   {
@@ -4629,6 +5121,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "리파이 차",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "리파이 뿌리(30%) 물이 든 병(55%) 신선한 벌꿀(15%)",
+    thumbnail: "",
+    status: [],
+    index: 673,
+    isCatering: true
+  },
+  {
     originName: "Magic Bean Tofu",
     localName: "마법 콩 두부",
     originCookingType: "Boiling",
@@ -4693,6 +5197,18 @@ const cookings = [
       }
     ],
     index: 322,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "물엿",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "물이 든 병(27%) 설탕(33%) 쌀(40%)",
+    thumbnail: "",
+    status: [],
+    index: 674,
     isCatering: true
   },
   {
@@ -5263,6 +5779,30 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "우스터 소스",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "야채 모둠(55%) 물이 든 병(45%) 앤초비(20%)",
+    thumbnail: "",
+    status: [],
+    index: 675,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "육수",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "쇠고기(60%) 물이 든 병(40%)",
+    thumbnail: "",
+    status: [],
+    index: 676,
+    isCatering: true
+  },
+  {
     originName: "Taitinn Carp Stew",
     localName: "은붕어 스튜",
     originCookingType: "Boiling",
@@ -5488,6 +6028,30 @@ const cookings = [
   },
   {
     originName: "",
+    localName: "크라켄 매운탕",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "크라켄 탕탕이(35%) 자숙 크라켄(35%) 크라켄 호롱구이(30%)",
+    thumbnail: "",
+    status: [],
+    index: 677,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "크림 소스",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "생크림(60%) 우유(30%)",
+    thumbnail: "",
+    status: [],
+    index: 678,
+    isCatering: true
+  },
+  {
+    originName: "",
     localName: "킹 크랩찜",
     originCookingType: "",
     localCookingType: "끓이기",
@@ -5534,6 +6098,18 @@ const cookings = [
       }
     ],
     index: 298,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "토마토 소스",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "토마토(70%) 고기 조각(20%)",
+    thumbnail: "",
+    status: [],
+    index: 679,
     isCatering: true
   },
   {
@@ -5617,6 +6193,18 @@ const cookings = [
       }
     ],
     index: 485,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "해물 소스",
+    originCookingType: "Boiling",
+    localCookingType: "끓이기",
+    originRecipe: "",
+    localRecipe: "새우(60%) 마늘(20%)",
+    thumbnail: "",
+    status: [],
+    index: 680,
     isCatering: true
   },
   {
@@ -5705,6 +6293,18 @@ const cookings = [
       }
     ],
     index: 146,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "누들",
+    originCookingType: "Noodle Making",
+    localCookingType: "면 만들기",
+    originRecipe: "",
+    localRecipe: "밀가루(40%) 달걀(20%) 물이 든 병(40%)",
+    thumbnail: "",
+    status: [],
+    index: 681,
     isCatering: true
   },
   {
@@ -5826,6 +6426,18 @@ const cookings = [
       }
     ],
     index: 280,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "소면",
+    originCookingType: "Noodle Making",
+    localCookingType: "면 만들기",
+    originRecipe: "",
+    localRecipe: "밀가루(45%) 소금(5%) 물이 든 병(50%)",
+    thumbnail: "",
+    status: [],
+    index: 682,
     isCatering: true
   },
   {
@@ -6188,6 +6800,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "열빙어 튀김",
+    originCookingType: "Deep-frying",
+    localCookingType: "튀기기",
+    originRecipe: "",
+    localRecipe: "열빙어(60%) 튀김옷(30%)",
+    thumbnail: "",
+    status: [],
+    index: 683,
+    isCatering: true
+  },
+  {
     originName: "Corn Chip",
     localName: "콘칩",
     originCookingType: "Deep-frying",
@@ -6218,6 +6842,18 @@ const cookings = [
       }
     ],
     index: 89,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "타바스코 프라이드 크라켄",
+    originCookingType: "Deep-frying",
+    localCookingType: "튀기기",
+    originRecipe: "",
+    localRecipe: "크라켄 다리살(75%) 튀김옷(15%) 레몬(10%)",
+    thumbnail: "",
+    status: [],
+    index: 684,
     isCatering: true
   },
   {
@@ -6289,6 +6925,18 @@ const cookings = [
       }
     ],
     index: 93,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "개다래 도미 볶음",
+    originCookingType: "Stir-frying",
+    localCookingType: "볶기",
+    originRecipe: "",
+    localRecipe: "개다래 도미(50%) 라인산 진(35%)",
+    thumbnail: "",
+    status: [],
+    index: 685,
     isCatering: true
   },
   {
@@ -6634,6 +7282,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "크라켄 볶음 모둠",
+    originCookingType: "Stir-frying",
+    localCookingType: "볶기",
+    originRecipe: "",
+    localRecipe: "크라켄 뽈뽀(35%) 타바스코 프라이드 크라켄(35%) 크라켄 먹물 파스타(30%)",
+    thumbnail: "",
+    status: [],
+    index: 686,
+    isCatering: true
+  },
+  {
     originName: "Tomato Egg Stir-Fry",
     localName: "토마토 달걀 볶음",
     originCookingType: "Stir-frying",
@@ -6677,6 +7337,18 @@ const cookings = [
       }
     ],
     index: 317,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "파스타 재료 모둠",
+    originCookingType: "Stir-frying",
+    localCookingType: "볶기",
+    originRecipe: "",
+    localRecipe: "양파(45%) 마늘(15%) 베이컨(40%)",
+    thumbnail: "",
+    status: [],
+    index: 687,
     isCatering: true
   },
   {
@@ -6759,6 +7431,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "롱 파스타",
+    originCookingType: "Pasta Making",
+    localCookingType: "파스타 만들기",
+    originRecipe: "",
+    localRecipe: "파스타 반죽(20%) 물이 든 병(80%)",
+    thumbnail: "",
+    status: [],
+    index: 688,
+    isCatering: true
+  },
+  {
     originName: "Spaghetti alle Vongole",
     localName: "봉골레",
     originCookingType: "Pasta Making",
@@ -6801,6 +7485,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "쇼트 파스타",
+    originCookingType: "Pasta Making",
+    localCookingType: "파스타 만들기",
+    originRecipe: "",
+    localRecipe: "파스타 반죽(20%) 물이 든 병(80%) 달걀(5%)",
+    thumbnail: "",
+    status: [],
+    index: 689,
+    isCatering: true
+  },
+  {
     originName: "Amatriciana",
     localName: "아마트리치아나",
     originCookingType: "Pasta Making",
@@ -6840,6 +7536,18 @@ const cookings = [
       }
     ],
     index: 301,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "크라켄 먹물 파스타",
+    originCookingType: "Pasta Making",
+    localCookingType: "파스타 만들기",
+    originRecipe: "",
+    localRecipe: "크라켄 먹물(75%) 마늘(15%) 올리브유(10%)",
+    thumbnail: "",
+    status: [],
+    index: 690,
     isCatering: true
   },
   {
@@ -6927,6 +7635,18 @@ const cookings = [
       }
     ],
     index: 515,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "파스타 반죽",
+    originCookingType: "Pasta Making",
+    localCookingType: "파스타 만들기",
+    originRecipe: "",
+    localRecipe: "밀가루(60%) 달걀(30%)",
+    thumbnail: "",
+    status: [],
+    index: 691,
     isCatering: true
   },
   {
@@ -7046,6 +7766,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "민트 시럽",
+    originCookingType: "Jam Making",
+    localCookingType: "잼 만들기",
+    originRecipe: "",
+    localRecipe: "박하(65%) 물이 든 병(20%) 설탕(15%)",
+    thumbnail: "",
+    status: [],
+    index: 692,
+    isCatering: true
+  },
+  {
     originName: "Blueberry Jam",
     localName: "블루베리잼",
     originCookingType: "Jam Making",
@@ -7064,6 +7796,18 @@ const cookings = [
       }
     ],
     index: 8,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "사과잼",
+    originCookingType: "Jam Making",
+    localCookingType: "잼 만들기",
+    originRecipe: "",
+    localRecipe: "사과(65%) 설탕(30%) 소금(5%)",
+    thumbnail: "",
+    status: [],
+    index: 693,
     isCatering: true
   },
   {
@@ -7138,6 +7882,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "포도잼",
+    originCookingType: "Jam Making",
+    localCookingType: "잼 만들기",
+    originRecipe: "",
+    localRecipe: "포도(50%) 설탕(45%)",
+    thumbnail: "",
+    status: [],
+    index: 694,
+    isCatering: true
+  },
+  {
     originName: "Halloween Ghost Jelly",
     localName: "할로윈 유령 젤리",
     originCookingType: "Jam Making",
@@ -7207,6 +7963,18 @@ const cookings = [
       }
     ],
     index: 259,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "호박잼",
+    originCookingType: "Jam Making",
+    localCookingType: "잼 만들기",
+    originRecipe: "",
+    localRecipe: "청둥호박(70%) 설탕(30%)",
+    thumbnail: "",
+    status: [],
+    index: 695,
     isCatering: true
   },
   {
@@ -7399,6 +8167,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "타르트 틀",
+    originCookingType: "Pie Making",
+    localCookingType: "파이 만들기",
+    originRecipe: "",
+    localRecipe: "밀가루(60%) 버터(30%) 달걀(10%)",
+    thumbnail: "",
+    status: [],
+    index: 696,
+    isCatering: true
+  },
+  {
     originName: "Truffle Pie",
     localName: "트뤼프 파이",
     originCookingType: "Pie Making",
@@ -7458,6 +8238,18 @@ const cookings = [
       }
     ],
     index: 254,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "파이 틀",
+    originCookingType: "Pie Making",
+    localCookingType: "파이 만들기",
+    originRecipe: "",
+    localRecipe: "밀가루(70%) 우유(20%) 달걀(10%)",
+    thumbnail: "",
+    status: [],
+    index: 697,
     isCatering: true
   },
   {
@@ -7659,6 +8451,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "버섯 조개 찜",
+    originCookingType: "Steaming",
+    localCookingType: "찌기",
+    originRecipe: "",
+    localRecipe: "개암버섯(45%) 조개(45%) 소금(10%)",
+    thumbnail: "",
+    status: [],
+    index: 698,
+    isCatering: true
+  },
+  {
     originName: "Steamed Mushroom",
     localName: "버섯찜",
     originCookingType: "Steaming",
@@ -7843,6 +8647,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "자숙 크라켄",
+    originCookingType: "Steaming",
+    localCookingType: "찌기",
+    originRecipe: "",
+    localRecipe: "크라켄 다리살(80%) 레몬즙(20%)",
+    thumbnail: "",
+    status: [],
+    index: 699,
+    isCatering: true
+  },
+  {
     originName: "Steamed Dumplings",
     localName: "찐만두",
     originCookingType: "Steaming",
@@ -7899,6 +8715,18 @@ const cookings = [
       }
     ],
     index: 120,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "담백한 피자 도우",
+    originCookingType: "Pizza Making",
+    localCookingType: "피자 만들기",
+    originRecipe: "",
+    localRecipe: "밀가루 빵 반죽(100%)",
+    thumbnail: "",
+    status: [],
+    index: 700,
     isCatering: true
   },
   {
@@ -8123,6 +8951,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "토마토 소스 피자 도우",
+    originCookingType: "Pizza Making",
+    localCookingType: "피자 만들기",
+    originRecipe: "",
+    localRecipe: "밀가루 빵 반죽(88%) 토마토 소스(12%)",
+    thumbnail: "",
+    status: [],
+    index: 701,
+    isCatering: true
+  },
+  {
     originName: "Pepperoni Pizza",
     localName: "페퍼로니 피자",
     originCookingType: "Pizza Making",
@@ -8212,6 +9052,18 @@ const cookings = [
       }
     ],
     index: 83,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "고추장",
+    originCookingType: "Fermenting",
+    localCookingType: "발효",
+    originRecipe: "",
+    localRecipe: "물이 든 병(69%) 엿기름(12%) 고춧가루(19%)",
+    thumbnail: "",
+    status: [],
+    index: 702,
     isCatering: true
   },
   {
@@ -8319,6 +9171,18 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "딸기 찹살떡",
+    originCookingType: "Fermenting",
+    localCookingType: "발효",
+    originRecipe: "",
+    localRecipe: "하얀 떡(65%) 딸기(25%) 팥소(10%)",
+    thumbnail: "",
+    status: [],
+    index: 703,
+    isCatering: true
+  },
+  {
     originName: "Honey Yogurt",
     localName: "벌꿀 요거트",
     originCookingType: "Fermenting",
@@ -8394,6 +9258,42 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "살라미",
+    originCookingType: "Fermenting",
+    localCookingType: "발효",
+    originRecipe: "",
+    localRecipe: "고기 조각(80%) 소금(10%) 고기양념(10%)",
+    thumbnail: "",
+    status: [],
+    index: 704,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "식초",
+    originCookingType: "Fermenting",
+    localCookingType: "발효",
+    originRecipe: "",
+    localRecipe: "물이 든 병(70%) 설탕(15%) 사과(15%)",
+    thumbnail: "",
+    status: [],
+    index: 705,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "앤초비",
+    originCookingType: "Fermenting",
+    localCookingType: "발효",
+    originRecipe: "",
+    localRecipe: "청어(85%) 소금(9%) 올리브유(6%)",
+    thumbnail: "",
+    status: [],
+    index: 706,
+    isCatering: true
+  },
+  {
     originName: "Pickled Cucumbers",
     localName: "오이 피클",
     originCookingType: "Fermenting",
@@ -8416,6 +9316,18 @@ const cookings = [
       }
     ],
     index: 209,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "와인 식초",
+    originCookingType: "Fermenting",
+    localCookingType: "발효",
+    originRecipe: "",
+    localRecipe: "물이 든 병(70%) 이멘 마하산 와인(20%) 포도(10%)",
+    thumbnail: "",
+    status: [],
+    index: 707,
     isCatering: true
   },
   {
@@ -8733,6 +9645,18 @@ const cookings = [
       }
     ],
     index: 544,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "스쿠압틴산 빨판 다이어트 수비드",
+    originCookingType: "Sous Vide",
+    localCookingType: "수비드",
+    originRecipe: "",
+    localRecipe: "크라켄 빨판(70%) 레몬즙(15%) 후추(15%)",
+    thumbnail: "",
+    status: [],
+    index: 708,
     isCatering: true
   },
   {
@@ -11745,7 +12669,67 @@ const cookings = [
     ],
     index: 624,
     isCatering: true
-  }
+  },
+  {
+    originName: "",
+    localName: "밀가루 빵 반죽",
+    originCookingType: "Kneading",
+    localCookingType: "반죽",
+    originRecipe: "",
+    localRecipe: "밀가루(75%) 이스트(14%) 물이 든 병(26%)",
+    thumbnail: "",
+    status: [],
+    index: 667,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "새우 조련 미끼",
+    originCookingType: "Kneading",
+    localCookingType: "반죽",
+    originRecipe: "",
+    localRecipe: "새우(30%) 설탕(38%) 마늘(32%)",
+    thumbnail: "",
+    status: [],
+    index: 668,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "옥수수 빵 반죽",
+    originCookingType: "Kneading",
+    localCookingType: "반죽",
+    originRecipe: "",
+    localRecipe: "옥수수 가루(35%) 밀가루(35%) 물이 든 병(30%)",
+    thumbnail: "",
+    status: [],
+    index: 669,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "은붕어 조련 미끼",
+    originCookingType: "Kneading",
+    localCookingType: "반죽",
+    originRecipe: "",
+    localRecipe: "은붕어(35%) 물엿(33%) 마늘(32%)",
+    thumbnail: "",
+    status: [],
+    index: 670,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "튀김옷",
+    originCookingType: "Kneading",
+    localCookingType: "반죽",
+    originRecipe: "",
+    localRecipe: "튀김가루(15%) 달걀(25%) 물이 든 병(60%)",
+    thumbnail: "",
+    status: [],
+    index: 671,
+    isCatering: true
+  },
 ]
 
 module.exports = {

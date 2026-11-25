@@ -102,7 +102,7 @@ const getEmbed = function (writer, cooking) {
     .setAuthor(writer)
     .setTitle(`${cooking.localName}`)
     .setColor('#FFE400')
-    .setThumbnail(cooking.thumbnail)
+    .setThumbnail(cooking.thumbnail || null) // 썸네일 자료가 없는 요리(빈 값)는 생략 — 빈 문자열은 discord.js가 거절
     .setTimestamp()
   for (const subStatus of cooking.status) {
     subStatus.inline = true

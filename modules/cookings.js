@@ -6980,6 +6980,30 @@ const cookings = [
     isCatering: true
   },
   {
+    originName: "",
+    localName: "딸기잼",
+    originCookingType: "Jam Making",
+    localCookingType: "잼 만들기",
+    originRecipe: "",
+    localRecipe: "딸기(60%) 설탕(35%) 레몬즙(5%)",
+    thumbnail: "https://raw.githubusercontent.com/StarlineBot/discord_bot/main/static/img/cooking-thumbs/strawberry-jam.png",
+    status: [],
+    index: 625,
+    isCatering: true
+  },
+  {
+    originName: "",
+    localName: "땅콩버터잼",
+    originCookingType: "Jam Making",
+    localCookingType: "잼 만들기",
+    originRecipe: "",
+    localRecipe: "땅콩(65%) 올리브유(30%)",
+    thumbnail: "https://raw.githubusercontent.com/StarlineBot/discord_bot/main/static/img/cooking-thumbs/peanut-butter-jam.png",
+    status: [],
+    index: 626,
+    isCatering: true
+  },
+  {
     originName: "Lemon Jam",
     localName: "레몬잼",
     originCookingType: "Jam Making",
